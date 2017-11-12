@@ -1,0 +1,54 @@
+// default is int32
+x :: int
+x = 1
+
+// 'a means any type a
+// In one type declaration the same identifier(e.g. a) is the same type
+add :: 'a -> 'a -> 'a
+// inter scope can override outer scope, so that x is not 1, is argument of add
+add x y = x + y
+// e.g. 3 = add 1 2
+
+len :: list 'a -> uint
+len list = match list {
+  [] => 0
+  [head|tail] => 1 + len tail
+}
+
+fib :: int -> int
+fib n = match {
+  n <= 2 => 1,
+  _      => fib (n-1) + fib (n-2),
+}
+
+// = right hand side can contain an expression, or a block, block would contain a list of statement, might have return statement
+// each block would start a new scope
+main =
+  // println :: str -> ()
+  println "Hello, World"
+  |> input = io::stdin
+  |> user_say = match input {
+      "y" => "user say yes"
+      "n" => "user say no"
+    }
+  |> println user_say
+
+#[expr(binary)]
+|> :: 'a -> 'b -> 'c
+|> l r =
+  match l {
+    () => r,
+    _  => r l, // keep calling r by l result
+  }
+
+#[expr(binary)]
++ :: str -> 'a -> str
++ s a = s + to_string a
+
+#[expr(binary)]
++ :: 'a -> list 'a -> list 'a
+// e.g. [1, 2, 3] = 1 + [2, 3]
+
+#[expr(binary)]
++ :: str -> str -> str
+// e.g. "foo bar" = "foo" + "bar"

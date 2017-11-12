@@ -1,0 +1,20 @@
+sudo: true
+
+language: rust
+
+go:
+  - 1.10.x
+  - 1.11.x
+  - master
+
+matrix:
+  allow_failures:
+    - go: master
+  fast_finish: true
+
+before_script:
+  - go get -t ./...
+script:
+  - go test -coverprofile=coverage.txt -v ./...
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
