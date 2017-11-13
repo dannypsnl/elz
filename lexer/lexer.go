@@ -61,6 +61,32 @@ func (i Item) String() string {
 	return fmt.Sprintf("%q", i.Val)
 }
 
-type Lexer struct{}
+type Lexer struct {
+	name  string
+	input string
+	start int
+	pos   int
+	width int
+	items chan Item
+}
+
+func Lex(name, input string) *Lexer {
+	l := &Lexer{
+		name:  name,
+		input: input,
+		items: make(chan Item),
+	}
+	go l.run()
+	return l
+}
+
+func (lex *Lexer) run() {
+	for state := lexWhiteSpace; state != nil; {
+		state = state(lex)
+	}
+	close(lex.items)
+}
 
 type stateFn func(*Lexer) stateFn
+
+func lexWhiteSpace(l *Lexer) stateFn {}
