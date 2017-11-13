@@ -2,9 +2,9 @@ package lexer
 
 import (
 	"fmt"
-	_ "strings"
-	_ "unicode"
-	_ "unicode/utf8"
+	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 type ItemType int
@@ -15,9 +15,12 @@ const EOF = -1
 const (
 	ItemError ItemType = iota
 
-	ItemIdentifier // ex. name
-	ItemNumber     // ex. 1.24 0.12 .23
-	ItemString     // ex. "I am a string"
+	ItemIdent  // ex. name
+	ItemNumber // ex. 1.24 0.12 .23
+	ItemFloat
+	ItemInt
+	ItemComplex
+	ItemString // ex. "I am a string"
 
 	// Here are keywords
 	ItemKwMatch  // match xxx { ... }
@@ -64,12 +67,17 @@ func (i Item) String() string {
 }
 
 type Lexer struct {
-	name  string
-	input string
-	start int
-	pos   int
-	width int
-	items chan Item
+	name    string
+	input   string
+	state   stateFn
+	pos     Pos
+	start   Pos
+	width   Pos
+	lastPos Pos
+	items   chan Item
+
+	parenDepth int
+	vectDepth  int
 }
 
 func Lex(name, input string) *Lexer {
@@ -82,9 +90,19 @@ func Lex(name, input string) *Lexer {
 	return l
 }
 
+func (l *Lexer) NextItem() Item {
+	item := <-l.items
+	l.lastPos = item.Pos
+	return item
+}
+func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
+	l.items <- Item{ItemError, l.start, fmt.Sprintf(format, args...)}
+	return nil
+}
+
 func (lex *Lexer) run() {
-	for state := lexWhiteSpace; state != nil; {
-		state = state(lex)
+	for lex.state = lexWhiteSpace; lex.state != nil; {
+		lex.state = lex.state(lex)
 	}
 	close(lex.items)
 }
@@ -120,23 +138,121 @@ func (l *Lexer) emit(t ItemType) {
 	l.start = l.pos
 }
 
+// accept consumes the next rune if it's from the valid set.
+func (l *Lexer) accept(valid string) bool {
+	if strings.IndexRune(valid, l.next()) >= 0 {
+		return true
+	}
+	l.backup()
+	return false
+}
+
+// acceptRun consumes a run of runes from the valid set.
+func (l *Lexer) acceptRun(valid string) {
+	for strings.IndexRune(valid, l.next()) >= 0 {
+	}
+	l.backup()
+}
+
 // ignore drop not yet emitted parts
 func (l *Lexer) ignore() {
 	l.start = l.pos
+}
+
+func (l *Lexer) scanNumber() bool {
+	// Optional leading sign.
+	l.accept("+-")
+	// Is it hex?
+	digits := "0123456789"
+	if l.accept("0") && l.accept("xX") {
+		digits = "0123456789abcdefABCDEF"
+	}
+	l.acceptRun(digits)
+	if l.accept(".") {
+		l.acceptRun(digits)
+	}
+	if l.accept("eE") {
+		l.accept("+-")
+		l.acceptRun("0123456789")
+	}
+	// Is it imaginary?
+	l.accept("i")
+	// Next thing mustn't be alphanumeric.
+	if r := l.peek(); isAlphaNumeric(r) {
+		l.next()
+		return false
+	}
+	return true
+}
+
+// isSpace reports whether r is a space character.
+func isSpace(r rune) bool {
+	return r == ' ' || r == '\t'
 }
 
 // stateFn is a function need get info from Lexer and return next stateFn
 type stateFn func(*Lexer) stateFn
 
 func lexWhiteSpace(l *Lexer) stateFn {
-	for {
-		if l.next() == EOF {
-			break
+	for r := l.next(); isSpace(r) || r == '\n'; l.next() {
+		r = l.peek()
+	}
+	l.backup()
+	l.ignore()
+
+	switch r := l.next(); {
+	case r == EOF:
+		l.emit(ItemEOF)
+		return nil
+	case ('0' <= r && r <= '9') || r == '+' || r == '-':
+		l.backup()
+		return lexNumber
+	case isAlphaNumeric(r):
+		return lexIdent
+	default:
+		panic(fmt.Sprintf("don't know what to do with: %q", r))
+	}
+}
+
+func lexNumber(l *Lexer) stateFn {
+	if !l.scanNumber() {
+		return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
+	}
+
+	if l.start+1 == l.pos {
+		return lexIdent
+	}
+
+	if sign := l.peek(); sign == '+' || sign == '-' {
+		// Complex: 1+2i. No spaces, must end in 'i'.
+		if !l.scanNumber() || l.input[l.pos-1] != 'i' {
+			return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
 		}
+		l.emit(ItemComplex)
+	} else if strings.ContainsRune(l.input[l.start:l.pos], '.') {
+		l.emit(ItemFloat)
+	} else {
+		l.emit(ItemInt)
 	}
-	if l.pos > l.start {
-		l.emit(ItemError)
+
+	return lexWhiteSpace
+}
+
+func lexIdent(l *Lexer) stateFn {
+	for r := l.next(); isAlphaNumeric(r); r = l.next() {
 	}
-	l.emit(ItemEOF)
-	return nil
+	l.backup()
+
+	l.emit(ItemIdent)
+	return lexWhiteSpace
+}
+
+// isEndOfLine reports whether r is an end-of-line character.
+func isEndOfLine(r rune) bool {
+	return r == '\r' || r == '\n'
+}
+
+// isAlphaNumeric reports whether r is a valid rune for an identifier.
+func isAlphaNumeric(r rune) bool {
+	return r == '>' || r == '<' || r == '=' || r == '-' || r == '+' || r == '*' || r == '&' || r == '_' || r == '/' || unicode.IsLetter(r) || unicode.IsDigit(r)
 }
