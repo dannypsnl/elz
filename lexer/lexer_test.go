@@ -14,4 +14,7 @@ func TestLexer(t *testing.T) {
 	if strings.Compare(lexer.name, "lex") != 0 {
 		t.Error("Lexer name is wrong!")
 	}
+	if results[0].Type != ItemInt {
+		t.Error("First token should be a Int Literal!")
+	}
 }
