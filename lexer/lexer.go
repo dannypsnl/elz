@@ -17,9 +17,6 @@ const (
 
 	ItemIdent  // ex. name
 	ItemNumber // ex. 1.24 0.12 .23
-	ItemFloat
-	ItemInt
-	ItemComplex
 	ItemString // ex. "I am a string"
 
 	// Here are keywords
@@ -223,16 +220,10 @@ func lexNumber(l *Lexer) stateFn {
 		return lexIdent
 	}
 
-	if sign := l.peek(); sign == '+' || sign == '-' {
-		// Complex: 1+2i. No spaces, must end in 'i'.
-		if !l.scanNumber() || l.input[l.pos-1] != 'i' {
-			return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
-		}
-		l.emit(ItemComplex)
-	} else if strings.ContainsRune(l.input[l.start:l.pos], '.') {
-		l.emit(ItemFloat)
+	if strings.ContainsRune(l.input[l.start:l.pos], '.') {
+		l.emit(ItemNumber)
 	} else {
-		l.emit(ItemInt)
+		l.emit(ItemNumber)
 	}
 
 	return lexWhiteSpace
