@@ -2,9 +2,13 @@ package lexer
 
 import (
 	"fmt"
+	_ "strings"
+	_ "unicode"
+	_ "unicode/utf8"
 )
 
 type ItemType int
+type Pos int
 
 const (
 	ItemError ItemType = iota
@@ -40,6 +44,7 @@ const (
 
 type Item struct {
 	Type ItemType
+	Pos  Pos
 	Val  string
 }
 
@@ -58,4 +63,4 @@ func (i Item) String() string {
 
 type Lexer struct{}
 
-type stateFn func(l *Lexer) stateFn
+type stateFn func(*Lexer) stateFn
