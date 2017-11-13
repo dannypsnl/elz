@@ -7,7 +7,7 @@ import (
 
 func TestLexer(t *testing.T) {
 	var results []Item
-	lexer := Lex("lex", "+123 - name -12.3 世界 + \"string \\\\\"\n let mut fn */")
+	lexer := Lex("lex", "+123 name -12.3 世界 \"string \\\\\"\n let mut fn +-*/")
 	for item := lexer.NextItem(); item.Type != ItemEOF; item = lexer.NextItem() {
 		results = append(results, item)
 	}
@@ -16,15 +16,15 @@ func TestLexer(t *testing.T) {
 	}
 	expected := []Item{
 		Item{ItemNumber, 0, "+123"},
-		Item{ItemMinus, 0, "-"},
 		Item{ItemIdent, 0, "name"},
 		Item{ItemNumber, 0, "-12.3"},
 		Item{ItemIdent, 0, "世界"},
-		Item{ItemPlus, 0, "+"},
 		Item{ItemString, 0, "\"string \\\\\""},
 		Item{ItemKwLet, 0, "let"},
 		Item{ItemKwMut, 0, "mut"},
 		Item{ItemKwFn, 0, "fn"},
+		Item{ItemPlus, 0, "+"},
+		Item{ItemMinus, 0, "-"},
 		Item{ItemMul, 0, "*"},
 		Item{ItemDiv, 0, "/"},
 	}
