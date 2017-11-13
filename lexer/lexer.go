@@ -201,6 +201,8 @@ func lexWhiteSpace(l *Lexer) stateFn {
 	case r == EOF:
 		l.emit(ItemEOF)
 		return nil
+	case r == '"':
+		return lexString
 	case ('0' <= r && r <= '9') || r == '+' || r == '-':
 		l.backup()
 		return lexNumber
@@ -209,6 +211,19 @@ func lexWhiteSpace(l *Lexer) stateFn {
 	default:
 		panic(fmt.Sprintf("don't know what to do with: %q", r))
 	}
+}
+
+func lexString(l *Lexer) stateFn {
+	for r := l.next(); r != '"'; r = l.next() {
+		if r == '\\' {
+			r = l.next()
+		}
+		if r == EOF {
+			return l.errorf("unterminated quoted string")
+		}
+	}
+	l.emit(ItemString)
+	return lexWhiteSpace
 }
 
 func lexNumber(l *Lexer) stateFn {
