@@ -1,5 +1,9 @@
 package lexer
 
+import (
+	"fmt"
+)
+
 type ItemType int
 
 const (
@@ -35,7 +39,7 @@ const (
 )
 
 type Item struct {
-	Type itemType
+	Type ItemType
 	Val  string
 }
 
@@ -46,7 +50,7 @@ func (i Item) String() string {
 	case ItemError:
 		return i.Val
 	}
-	if len(i.val) > 10 {
+	if len(i.Val) > 10 {
 		return fmt.Sprintf("%.10q...", i.Val)
 	}
 	return fmt.Sprintf("%q", i.Val)
