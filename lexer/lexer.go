@@ -131,7 +131,16 @@ func (l *Lexer) backup() {
 // emit passes an Item back to the client.
 func (l *Lexer) emit(t ItemType) {
 	// Item {ItemType, Pos, Val}
-	l.items <- Item{t, l.start, l.input[l.start:l.pos]}
+	st := l.start
+	value := l.input[l.start:l.pos]
+	switch value {
+	case "let":
+		l.items <- Item{ItemKwLet, st, value}
+	case "mut":
+		l.items <- Item{ItemKwMut, st, value}
+	default:
+		l.items <- Item{t, st, value}
+	}
 	l.start = l.pos
 }
 
