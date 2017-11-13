@@ -138,6 +138,24 @@ func (l *Lexer) emit(t ItemType) {
 		l.items <- Item{ItemKwLet, st, value}
 	case "mut":
 		l.items <- Item{ItemKwMut, st, value}
+	case "match":
+		l.items <- Item{ItemKwMatch, st, value}
+	case "loop":
+		l.items <- Item{ItemKwLoop, st, value}
+	case "break":
+		l.items <- Item{ItemKwBreak, st, value}
+	case "return":
+		l.items <- Item{ItemKwReturn, st, value}
+	case "fn":
+		l.items <- Item{ItemKwFn, st, value}
+	case "type":
+		l.items <- Item{ItemKwType, st, value}
+	case "impl":
+		l.items <- Item{ItemKwImpl, st, value}
+	case "trait":
+		l.items <- Item{ItemKwTrait, st, value}
+	case "act":
+		l.items <- Item{ItemKwAct, st, value}
 	default:
 		l.items <- Item{t, st, value}
 	}

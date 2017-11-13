@@ -7,7 +7,7 @@ import (
 
 func TestLexer(t *testing.T) {
 	var results []Item
-	lexer := Lex("lex", "+123 - name -12.3 世界 + \"string \\\\\"\n let mut")
+	lexer := Lex("lex", "+123 - name -12.3 世界 + \"string \\\\\"\n let mut fn")
 	for item := lexer.NextItem(); item.Type != ItemEOF; item = lexer.NextItem() {
 		results = append(results, item)
 	}
@@ -24,6 +24,7 @@ func TestLexer(t *testing.T) {
 		Item{ItemString, 0, "\"string \\\\\""},
 		Item{ItemKwLet, 0, "let"},
 		Item{ItemKwMut, 0, "mut"},
+		Item{ItemKwFn, 0, "fn"},
 	}
 	for i, result := range results {
 		if result.Type != expected[i].Type {
