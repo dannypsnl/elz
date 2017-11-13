@@ -230,6 +230,12 @@ func lexWhiteSpace(l *Lexer) stateFn {
 		return nil
 	case r == '"':
 		return lexString
+	case r == '*':
+		l.emit(ItemMul)
+		return lexWhiteSpace
+	case r == '/':
+		l.emit(ItemDiv)
+		return lexWhiteSpace
 	case ('0' <= r && r <= '9') || r == '+' || r == '-':
 		l.backup()
 		return lexNumber
@@ -300,5 +306,5 @@ func isEndOfLine(r rune) bool {
 
 // isAlphaNumeric reports whether r is a valid rune for an identifier.
 func isAlphaNumeric(r rune) bool {
-	return r == '>' || r == '<' || r == '=' || r == '-' || r == '+' || r == '*' || r == '&' || r == '_' || r == '/' || unicode.IsLetter(r) || unicode.IsDigit(r)
+	return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r)
 }
