@@ -7,7 +7,7 @@ import (
 
 func TestLexer(t *testing.T) {
 	var results []Item
-	lexer := Lex("lex", "+123 name -12.3 世界")
+	lexer := Lex("lex", "+123 - name -12.3 世界 +")
 	for item := lexer.NextItem(); item.Type != ItemEOF; item = lexer.NextItem() {
 		results = append(results, item)
 	}
@@ -16,16 +16,18 @@ func TestLexer(t *testing.T) {
 	}
 	expected := []Item{
 		Item{ItemNumber, 0, "+123"},
+		Item{ItemMinus, 0, "-"},
 		Item{ItemIdent, 0, "name"},
 		Item{ItemNumber, 0, "-12.3"},
 		Item{ItemIdent, 0, "世界"},
+		Item{ItemPlus, 0, "+"},
 	}
 	for i, result := range results {
 		if result.Type != expected[i].Type {
-			t.Errorf("expected: %q, actual: %q", expected[i].Type, result.Type)
+			t.Errorf("Token %d, expected: %v, actual: %v", i+1, expected[i].Type, result.Type)
 		}
 		if result.Val != expected[i].Val {
-			t.Errorf("expected: %q, actual: %q", expected[i].Val, result.Val)
+			t.Errorf("Token %d, expected: %s, actual: %s", i+1, expected[i].Val, result.Val)
 		}
 	}
 }

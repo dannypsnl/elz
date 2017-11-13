@@ -212,6 +212,23 @@ func lexWhiteSpace(l *Lexer) stateFn {
 }
 
 func lexNumber(l *Lexer) stateFn {
+	r := l.peek()
+	if r == '+' || r == '-' {
+		l.next()
+		r2 := l.peek()
+		if isSpace(r2) || r2 == '\n' || r2 == EOF {
+			if r == '+' {
+				l.emit(ItemPlus)
+				return lexWhiteSpace
+			} else if r == '-' {
+				l.emit(ItemMinus)
+				return lexWhiteSpace
+			}
+		}
+	}
+	l.backup()
+	r = l.peek()
+
 	if !l.scanNumber() {
 		return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
 	}
@@ -220,11 +237,7 @@ func lexNumber(l *Lexer) stateFn {
 		return lexIdent
 	}
 
-	if strings.ContainsRune(l.input[l.start:l.pos], '.') {
-		l.emit(ItemNumber)
-	} else {
-		l.emit(ItemNumber)
-	}
+	l.emit(ItemNumber)
 
 	return lexWhiteSpace
 }
