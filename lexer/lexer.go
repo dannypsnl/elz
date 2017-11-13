@@ -31,9 +31,9 @@ const (
 	ItemKwAct    // act functionCall
 
 	// Here are operator
-	ItemLeftParam  // (
-	ItemRightParam // )
-	ItemAdd        // +
+	ItemLeftParen  // (
+	ItemRightParen // )
+	ItemPlus       // +
 	ItemMinus      // -
 	ItemMul        // *
 	ItemDiv        // /
@@ -85,6 +85,12 @@ func (lex *Lexer) run() {
 		state = state(lex)
 	}
 	close(lex.items)
+}
+
+func (l *Lexer) emit(t ItemType) {
+	// Item {ItemType, Pos, Val}
+	l.items <- Item{t, l.start, l.input[l.start:l.pos]}
+	l.start = l.pos
 }
 
 type stateFn func(*Lexer) stateFn
