@@ -7,7 +7,7 @@ import (
 
 func TestLexer(t *testing.T) {
 	var results []Item
-	lexer := Lex("lex", "+123 name -12.3 ")
+	lexer := Lex("lex", "+123 name -12.3 世界")
 	for item := lexer.NextItem(); item.Type != ItemEOF; item = lexer.NextItem() {
 		results = append(results, item)
 	}
@@ -18,6 +18,7 @@ func TestLexer(t *testing.T) {
 		Item{ItemNumber, 0, "+123"},
 		Item{ItemIdent, 0, "name"},
 		Item{ItemNumber, 0, "-12.3"},
+		Item{ItemIdent, 0, "世界"},
 	}
 	for i, result := range results {
 		if result.Type != expected[i].Type {
