@@ -31,6 +31,8 @@ func startParse(l *lexer.Lexer, tree []Ast, lookingFor rune) {
 			tree = append(tree, parseDefineVar(l))
 		case lexer.ItemError:
 			fmt.Println(token.Val)
+		default:
+			panic("Seems a bug!")
 		}
 	}
 }
