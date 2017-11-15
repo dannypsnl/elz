@@ -7,47 +7,36 @@ import (
 
 type Ast interface{}
 
-type ErrorTree struct {
-	errorMsg string
+type Error struct {
+	msg string
 }
 
-type DefineVar struct {
-	immutable  bool
-	ident      string
-	expression Expr
+type parser struct {
+	lex       *lexer.Lexer
+	cur_token lexer.Item
+	tree      []Ast
 }
 
-type Expr struct {
+func (p *parser) Next() { p.cur_token = p.lex.NextItem() }
+
+func Parse(filename, source_code string) *parser {
+	return &parser{
+		lex:       lexer.Lex(filename, source_code),
+		cur_token: lexer.Item{lexer.ItemForInit, 0, ""},
+	}
 }
 
-func Parse(filename, source_code string) []Ast {
-	return startParse(lexer.Lex(filename, source_code), make([]Ast, 0), ' ')
-}
-
-func startParse(l *lexer.Lexer, tree []Ast, lookingFor rune) {
-	for token := l.NextItem(); token.Type != lexer.ItemEOF; {
-		switch t := token.Type; t {
-		// First, we handle keyword[let], it's a statement call DefineVar, so we will get a Ast[DefineVar].
+func (p *parser) parseProgram() []Ast {
+	for p.Next(); p.cur_token.Type != lexer.ItemEOF; p.Next() {
+		switch p.cur_token.Type {
 		case lexer.ItemKwLet:
-			tree = append(tree, parseDefineVar(l))
-		// If meet keyword[fn], it's a statement call DefineFn, so we will get a Ast[DefineFn]
 		case lexer.ItemKwFn:
-			tree = append(tree, parseDefineFn(l))
-		// If we meet a error item, that mean we didn't receive this token, it could be a bug that we didn't consider. Please report.
-		case lexer.ItemError:
-			fmt.Println(token.Val)
+		case lexer.ItemKwType:
+		case lexer.ItemKwTrait:
+		case lexer.ItemKwImport:
 		default:
-			panic("Seems a bug!")
+			p.tree = append(p.tree, Error{fmt.Sprintf("Pos %d, token '%s' is not allow at top level\n", p.cur_token.Pos, p.cur_token.Val)})
 		}
 	}
-}
-
-func parseDefineVar(l *lexer.Lexer) *DefineVar {
-	tk := l.NextItem()
-	switch t := tk.Type; t {
-	case lexer.ItemKwMut:
-	case lexer.ItemIdent:
-	default:
-		return ErrorTree{"Keyword let expected mut or identifier."}
-	}
+	return p.tree
 }

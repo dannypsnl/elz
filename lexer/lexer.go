@@ -31,6 +31,7 @@ const (
 	ItemKwImpl   // impl type { methods }
 	ItemKwTrait  // trait xxx { methodTypes }
 	ItemKwAct    // act functionCall
+	ItemKwImport // import module
 
 	// Here are operator
 	ItemLeftParen  // (
@@ -42,6 +43,7 @@ const (
 	ItemDot        // .
 
 	ItemEOF
+	ItemForInit // This ItemType is for parser initial it's current token
 )
 
 type Item struct {
@@ -155,6 +157,8 @@ func (l *Lexer) emit(t ItemType) {
 	case "trait":
 		l.items <- Item{ItemKwTrait, st, value}
 	case "act":
+		l.items <- Item{ItemKwAct, st, value}
+	case "import":
 		l.items <- Item{ItemKwAct, st, value}
 	default:
 		l.items <- Item{t, st, value}
