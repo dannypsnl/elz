@@ -7,7 +7,7 @@ import (
 
 func TestLexer(t *testing.T) {
 	var results []Item
-	lexer := Lex("lex", "+123 name -12.3 世界 \"string \\\\\"\n let mut fn +-*/ +n")
+	lexer := Lex("lex", "+123 name -12.3 世界 \"string \\\\\"\n let mut fn +-*/ +n let a:num= 1 ")
 	for item := lexer.NextItem(); item.Type != ItemEOF; item = lexer.NextItem() {
 		results = append(results, item)
 	}
@@ -15,9 +15,11 @@ func TestLexer(t *testing.T) {
 		t.Error("Lexer name is wrong!")
 	}
 	expected := []Item{
-		Item{ItemNumber, 0, "+123"},
+		Item{ItemPlus, 0, "+"},
+		Item{ItemNumber, 0, "123"},
 		Item{ItemIdent, 0, "name"},
-		Item{ItemNumber, 0, "-12.3"},
+		Item{ItemMinus, 0, "-"},
+		Item{ItemNumber, 0, "12.3"},
 		Item{ItemIdent, 0, "世界"},
 		Item{ItemString, 0, "\"string \\\\\""},
 		Item{ItemKwLet, 0, "let"},
@@ -29,6 +31,12 @@ func TestLexer(t *testing.T) {
 		Item{ItemDiv, 0, "/"},
 		Item{ItemPlus, 0, "+"},
 		Item{ItemIdent, 0, "n"},
+		Item{ItemKwLet, 0, "let"},
+		Item{ItemIdent, 0, "a"},
+		Item{ItemColon, 0, ":"},
+		Item{ItemIdent, 0, "num"},
+		Item{ItemAssign, 0, "="},
+		Item{ItemNumber, 0, "1"},
 	}
 	for i, result := range results {
 		if result.Type != expected[i].Type {

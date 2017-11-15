@@ -34,6 +34,8 @@ const (
 	ItemKwImport // import module
 
 	// Here are operator
+	ItemAssign     // =
+	ItemColon      // :
 	ItemLeftParen  // (
 	ItemRightParen // )
 	ItemPlus       // +
@@ -159,7 +161,7 @@ func (l *Lexer) emit(t ItemType) {
 	case "act":
 		l.items <- Item{ItemKwAct, st, value}
 	case "import":
-		l.items <- Item{ItemKwAct, st, value}
+		l.items <- Item{ItemKwImport, st, value}
 	default:
 		l.items <- Item{t, st, value}
 	}
@@ -188,8 +190,6 @@ func (l *Lexer) ignore() {
 }
 
 func (l *Lexer) scanNumber() bool {
-	// Optional leading sign.
-	l.accept("+-")
 	// Is it hex?
 	digits := "0123456789"
 	if l.accept("0") && l.accept("xX") {
@@ -240,7 +240,19 @@ func lexWhiteSpace(l *Lexer) stateFn {
 	case r == '/':
 		l.emit(ItemDiv)
 		return lexWhiteSpace
-	case ('0' <= r && r <= '9') || r == '+' || r == '-':
+	case r == ':':
+		l.emit(ItemColon)
+		return lexWhiteSpace
+	case r == '=':
+		l.emit(ItemAssign)
+		return lexWhiteSpace
+	case r == '-':
+		l.emit(ItemMinus)
+		return lexWhiteSpace
+	case r == '+':
+		l.emit(ItemPlus)
+		return lexWhiteSpace
+	case ('0' <= r && r <= '9'):
 		l.backup()
 		return lexNumber
 	case isAlphaNumeric(r):
@@ -264,29 +276,8 @@ func lexString(l *Lexer) stateFn {
 }
 
 func lexNumber(l *Lexer) stateFn {
-	r := l.peek()
-	if r == '+' || r == '-' {
-		l.next()
-		r2 := l.peek()
-		if !('0' <= r2 && r2 <= '9' || r2 == '.') {
-			if r == '+' {
-				l.emit(ItemPlus)
-				return lexWhiteSpace
-			} else if r == '-' {
-				l.emit(ItemMinus)
-				return lexWhiteSpace
-			}
-		}
-	}
-	l.backup()
-	r = l.peek()
-
 	if !l.scanNumber() {
 		return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
-	}
-
-	if l.start+1 == l.pos {
-		return lexIdent
 	}
 
 	l.emit(ItemNumber)
