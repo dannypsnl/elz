@@ -264,7 +264,7 @@ func lexNumber(l *Lexer) stateFn {
 	if r == '+' || r == '-' {
 		l.next()
 		r2 := l.peek()
-		if !isAlphaNumeric(r2) {
+		if !('0' <= r2 && r2 <= '9' || r2 == '.') {
 			if r == '+' {
 				l.emit(ItemPlus)
 				return lexWhiteSpace
