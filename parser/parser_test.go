@@ -4,6 +4,7 @@ import (
 	_ "fmt"
 	"testing"
 
+	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/lexer"
 )
 
@@ -12,24 +13,24 @@ func TestParser(t *testing.T) {
 	let about:num = 1
 	`)
 	asts := parser.parseProgram()
-	if (asts[0] != Error{
+	if (asts[0] != ast.Error{
 		"At(0), token 'ident' is not allow at top level\n",
 	}) {
 		t.Error(`error`)
 	}
 
-	vd := &VarDefination{
-		immutable: true,
-		export:    false,
-		name:      "about",
-		varType:   "num",
-		expression: lexer.Item{
+	vd := &ast.VarDefination{
+		Immutable: true,
+		Export:    false,
+		Name:      "about",
+		VarType:   "num",
+		Expression: lexer.Item{
 			lexer.ItemNumber,
 			23,
 			"1",
 		},
 	}
-	if asts[1].(*VarDefination).immutable != vd.immutable {
+	if asts[1].(*ast.VarDefination).Immutable != vd.Immutable {
 		t.Error(`error`)
 	}
 }
