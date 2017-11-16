@@ -1,9 +1,5 @@
 package ast
 
-import (
-	"github.com/elz-lang/elz/lexer"
-)
-
 type Ast interface{}
 type Expr interface{}
 type Stat interface{}
