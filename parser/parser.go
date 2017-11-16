@@ -26,7 +26,7 @@ func (p *parser) parseProgram() []ast.Ast {
 	for p.Next(); p.cur_token.Type != lexer.ItemEOF; p.Next() {
 		switch p.cur_token.Type {
 		case lexer.ItemKwLet:
-			p.parserVarDefination()
+			p.parserVarDefination(p.Next().Type != lexer.ItemKwMut)
 		case lexer.ItemKwFn:
 		case lexer.ItemKwType:
 		case lexer.ItemKwTrait:
@@ -38,22 +38,20 @@ func (p *parser) parseProgram() []ast.Ast {
 	return p.tree
 }
 
-func (p *parser) parserVarDefination() {
-	immutable := true
+func (p *parser) parserVarDefination(immutable bool) {
 	export := false
 	Type := ""
-	tk := p.Next()
+	tk := p.cur_token
 	// Because we allow let mut `ident`, let `ident`, but others are error
 	if tk.Type == lexer.ItemPlus {
 		tk = p.Next()
 		export = true
 	}
-	if tk.Type != lexer.ItemKwMut && tk.Type != lexer.ItemIdent {
+	if tk.Type != lexer.ItemIdent {
+		fmt.Println("at here")
 		p.tree = append(p.tree, ast.Error{fmt.Sprintf("At(%d), Expected a keyword[mut] or a identifier, but is '%s'\n", p.cur_token.Pos, p.cur_token.Val)})
-	} else if tk.Type == lexer.ItemKwMut {
-		immutable = false
-		tk = p.Next()
 	}
+
 	name := tk.Val // identifier's value
 	if res := p.parseType(); res {
 		Type = p.cur_token.Val

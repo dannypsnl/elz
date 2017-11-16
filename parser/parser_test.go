@@ -10,7 +10,7 @@ import (
 
 func TestParser(t *testing.T) {
 	parser := Parse("main.elz", `ident
-	let about:num = 1
+	let +about:num = 1
 	`)
 	asts := parser.parseProgram()
 	if (asts[0] != ast.Error{
@@ -21,7 +21,7 @@ func TestParser(t *testing.T) {
 
 	vd := &ast.VarDefination{
 		Immutable: true,
-		Export:    false,
+		Export:    true,
 		Name:      "about",
 		VarType:   "num",
 		Expression: lexer.Item{
