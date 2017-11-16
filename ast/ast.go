@@ -5,6 +5,10 @@ import (
 )
 
 type Ast interface{}
+type Expr interface{}
+type Stat interface{}
+
+type StatList []Stat
 
 type Error struct {
 	Msg string
@@ -15,5 +19,18 @@ type VarDefination struct {
 	Export     bool
 	Name       string
 	VarType    string
-	Expression lexer.Item
+	Expression Expr
+}
+
+type Param struct {
+	Name string
+	Type string
+}
+type ParamList []Param
+
+type FnDefination struct {
+	Export bool
+	Name   string
+	Params ParamList
+	Body   StatList
 }
