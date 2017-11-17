@@ -18,4 +18,4 @@ $ elz source.elz  # elz will compile it to llvm ir.
 $ elz -c source.elz # -c can  help you compile it to object file. If it contain main function, then that will be a executable.
 ```
 ## Contributing
-Not yet!
+Watch [contributing.md](https://github.com/elz-lang/elz/blob/master/contributing.md)<br>
