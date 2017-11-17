@@ -63,7 +63,7 @@ func (p *parser) parserVarDefination(immutable bool) {
 			Export:     export,
 			Name:       name,
 			VarType:    Type,
-			Expression: p.Next(),
+			Expression: p.parseExpr(),
 		})
 	} else {
 		p.tree = append(p.tree, ast.Error{fmt.Sprintf("At(%d), Expected a assign symbol, but is '%s'\n", p.cur_token.Pos, p.cur_token.Val)})
@@ -81,5 +81,15 @@ func (p *parser) parseType() bool {
 		}
 		p.tree = append(p.tree, ast.Error{fmt.Sprintf("At(%d), Expected a identifier, but is '%s'\n", p.cur_token.Pos, p.cur_token.Val)})
 		return false
+	}
+}
+
+func (p *parser) parseExpr() ast.Expr {
+	// FIXME: This impl is incomplete
+	switch t := p.Next().Type; t {
+	case lexer.ItemNumber:
+		return &ast.Number{p.cur_token.Val}
+	default:
+		panic("We should not impl complete Expr")
 	}
 }

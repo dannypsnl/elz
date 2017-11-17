@@ -10,6 +10,10 @@ type Error struct {
 	Msg string
 }
 
+type Number struct {
+	Val string
+}
+
 type VarDefination struct {
 	Immutable  bool
 	Export     bool

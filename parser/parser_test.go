@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/elz-lang/elz/ast"
-	"github.com/elz-lang/elz/lexer"
 )
 
 func TestParser(t *testing.T) {
@@ -20,15 +19,11 @@ func TestParser(t *testing.T) {
 	}
 
 	vd := &ast.VarDefination{
-		Immutable: true,
-		Export:    true,
-		Name:      "about",
-		VarType:   "num",
-		Expression: lexer.Item{
-			lexer.ItemNumber,
-			23,
-			"1",
-		},
+		Immutable:  true,
+		Export:     true,
+		Name:       "about",
+		VarType:    "num",
+		Expression: &ast.Number{"1"},
 	}
 	if asts[1].(*ast.VarDefination).Immutable != vd.Immutable {
 		t.Error(`error`)
