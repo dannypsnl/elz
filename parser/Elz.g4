@@ -72,10 +72,11 @@ traitDefine:
     '}'
     ;
 
-expr: factor
+expr: '(' expr ')'
     | expr op='^' expr
     | expr op=('*'|'/') expr
     | expr op=('+'|'-') expr
+    | factor
     ;
 factor: NUM
     | fnCall
