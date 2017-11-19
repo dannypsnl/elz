@@ -41,6 +41,9 @@ type ElzListener interface {
 	// EnterExportor is called when entering the exportor production.
 	EnterExportor(c *ExportorContext)
 
+	// EnterDefine is called when entering the define production.
+	EnterDefine(c *DefineContext)
+
 	// EnterVarDefine is called when entering the varDefine production.
 	EnterVarDefine(c *VarDefineContext)
 
@@ -109,6 +112,9 @@ type ElzListener interface {
 
 	// ExitExportor is called when exiting the exportor production.
 	ExitExportor(c *ExportorContext)
+
+	// ExitDefine is called when exiting the define production.
+	ExitDefine(c *DefineContext)
 
 	// ExitVarDefine is called when exiting the varDefine production.
 	ExitVarDefine(c *VarDefineContext)

@@ -49,8 +49,9 @@ fnCall:
 
 typePass : ID;
 exportor: '+';
+define: exportor ID (':' typePass)? '=' expr;
 varDefine:
-    'let' mut='mut'? ID (':' typePass)? '=' expr
+    'let' mut='mut'? define (',' define)*
     ;
 paramList: param (',' param)*;
 param: ID ':' typePass;

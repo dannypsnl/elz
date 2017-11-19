@@ -87,6 +87,12 @@ func (s *BaseElzListener) EnterExportor(ctx *ExportorContext) {}
 // ExitExportor is called when production exportor is exited.
 func (s *BaseElzListener) ExitExportor(ctx *ExportorContext) {}
 
+// EnterDefine is called when production define is entered.
+func (s *BaseElzListener) EnterDefine(ctx *DefineContext) {}
+
+// ExitDefine is called when production define is exited.
+func (s *BaseElzListener) ExitDefine(ctx *DefineContext) {}
+
 // EnterVarDefine is called when production varDefine is entered.
 func (s *BaseElzListener) EnterVarDefine(ctx *VarDefineContext) {}
 
