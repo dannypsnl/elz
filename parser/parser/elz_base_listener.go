@@ -57,6 +57,18 @@ func (s *BaseElzListener) EnterStat(ctx *StatContext) {}
 // ExitStat is called when production stat is exited.
 func (s *BaseElzListener) ExitStat(ctx *StatContext) {}
 
+// EnterExprStat is called when production exprStat is entered.
+func (s *BaseElzListener) EnterExprStat(ctx *ExprStatContext) {}
+
+// ExitExprStat is called when production exprStat is exited.
+func (s *BaseElzListener) ExitExprStat(ctx *ExprStatContext) {}
+
+// EnterMatch is called when production match is entered.
+func (s *BaseElzListener) EnterMatch(ctx *MatchContext) {}
+
+// ExitMatch is called when production match is exited.
+func (s *BaseElzListener) ExitMatch(ctx *MatchContext) {}
+
 // EnterAssign is called when production assign is entered.
 func (s *BaseElzListener) EnterAssign(ctx *AssignContext) {}
 

@@ -26,6 +26,12 @@ type ElzListener interface {
 	// EnterStat is called when entering the stat production.
 	EnterStat(c *StatContext)
 
+	// EnterExprStat is called when entering the exprStat production.
+	EnterExprStat(c *ExprStatContext)
+
+	// EnterMatch is called when entering the match production.
+	EnterMatch(c *MatchContext)
+
 	// EnterAssign is called when entering the assign production.
 	EnterAssign(c *AssignContext)
 
@@ -97,6 +103,12 @@ type ElzListener interface {
 
 	// ExitStat is called when exiting the stat production.
 	ExitStat(c *StatContext)
+
+	// ExitExprStat is called when exiting the exprStat production.
+	ExitExprStat(c *ExprStatContext)
+
+	// ExitMatch is called when exiting the match production.
+	ExitMatch(c *MatchContext)
 
 	// ExitAssign is called when exiting the assign production.
 	ExitAssign(c *AssignContext)

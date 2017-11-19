@@ -36,6 +36,17 @@ statList: stat+;
 stat: varDefine
     | assign
     | fnCall
+    | exprStat
+    ;
+
+exprStat: match;
+
+match:
+    'match' expr '{'
+        expr '=>' stat
+        (',' expr '=>' stat)*
+        ','?
+    '}'
     ;
 
 assign:
@@ -77,6 +88,7 @@ expr: '(' expr ')'
     | expr op='^' expr
     | expr op=('*'|'/') expr
     | expr op=('+'|'-') expr
+    | exprStat
     | factor
     ;
 factor: NUM
