@@ -7,7 +7,8 @@ import (
 
 func TestLexer(t *testing.T) {
 	var results []Item
-	lexer := Lex("lex", "+123 name -12.3 世界 \"string \\\\\"\n let mut fn +-*/ +n let a:num= 1 ")
+	lexer := Lex("lex", `+123 name -12.3 世界 "string \\"
+	let mut fn +-*/ +n let a:num= 1 `)
 	for item := lexer.NextItem(); item.Type != ItemEOF; item = lexer.NextItem() {
 		results = append(results, item)
 	}
