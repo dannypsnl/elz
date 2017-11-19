@@ -39,9 +39,9 @@ stat: varDefine
     | exprStat
     ;
 
-exprStat: match;
+exprStat: matchRule;
 
-match:
+matchRule:
     'match' expr '{'
         expr '=>' stat
         (',' expr '=>' stat)*
