@@ -18,7 +18,7 @@ StartDigit: [0-9.];
 fragment
 Digit: [0-9];
 
-String: '"' .*? '"';
+STRING: '"' .*? '"';
 
 prog: topStatList?;
 
@@ -35,11 +35,12 @@ importStat: 'import' ID;
 statList: stat+;
 stat: varDefine
     | assign
-    | fnCall
     | exprStat
     ;
 
-exprStat: matchRule;
+exprStat: matchRule
+    | fnCall
+    ;
 
 matchRule:
     'match' expr '{'
@@ -88,11 +89,10 @@ expr: '(' expr ')'
     | expr op='^' expr
     | expr op=('*'|'/') expr
     | expr op=('+'|'-') expr
-    | exprStat
     | factor
     ;
-factor: NUM
-    | fnCall
+factor: exprStat
+    | NUM
     | ID
-    | String
+    | STRING
     ;

@@ -114,14 +114,14 @@ var lexerLiteralNames = []string{
 
 var lexerSymbolicNames = []string{
 	"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-	"", "", "", "", "WS", "COMMENT", "ID", "NUM", "String",
+	"", "", "", "", "WS", "COMMENT", "ID", "NUM", "STRING",
 }
 
 var lexerRuleNames = []string{
 	"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "T__6", "T__7", "T__8",
 	"T__9", "T__10", "T__11", "T__12", "T__13", "T__14", "T__15", "T__16",
 	"T__17", "T__18", "T__19", "T__20", "WS", "COMMENT", "ID", "StartLetter",
-	"Letter", "NUM", "StartDigit", "Digit", "String",
+	"Letter", "NUM", "StartDigit", "Digit", "STRING",
 }
 
 type ElzLexer struct {
@@ -184,5 +184,5 @@ const (
 	ElzLexerCOMMENT = 23
 	ElzLexerID      = 24
 	ElzLexerNUM     = 25
-	ElzLexerString  = 26
+	ElzLexerSTRING  = 26
 )
