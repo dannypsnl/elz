@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	fmt.Println("vim-go")
+	// TODO: Use CharStream & a function wrap this all, here should handle other mession.
 	input, _ := antlr.NewFileStream(os.Args[1])
 	lexer := parser.NewElzLexer(input)
 	stream := antlr.NewCommonTokenStream(lexer, 0)
