@@ -14,6 +14,19 @@ type Number struct {
 	Val string
 }
 
+type UnaryExpr struct {
+	E    Expr
+	Op   string
+	Type string
+}
+
+type BinaryExpr struct {
+	LeftE  Expr
+	RightE Expr
+	Op     string
+	Type   string
+}
+
 type VarDefination struct {
 	Immutable  bool
 	Export     bool
@@ -26,11 +39,19 @@ type Param struct {
 	Name string
 	Type string
 }
-type ParamList []Param
-
 type FnDefination struct {
 	Export bool
 	Name   string
-	Params ParamList
+	Params []Param
 	Body   StatList
+}
+
+type Argu struct {
+	Val  string
+	Type string
+}
+type FnCall struct {
+	Name string
+	Args []Argu
+	Type string
 }
