@@ -75,7 +75,7 @@ fnDefine:
 attrList: attr+;
 attr: ID ':' typePass;
 typeDefine:
-    'typePass' exportor? ID '(' attrList ')'
+    'type' exportor? ID '(' attrList ')'
     ;
 tmethodList: tmethod+;
 tmethod: exportor? ID '(' paramList? ')' ('->' typePass)?;
