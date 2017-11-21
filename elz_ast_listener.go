@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	_ "github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/parser"
 )
@@ -28,5 +29,10 @@ func (s *ElzListener) EnterExportor(*parser.ExportorContext) {
 func (s *ElzListener) EnterVarDefine(ctx *parser.VarDefineContext) {
 	if ctx.GetMut() != nil {
 		s.immutable = false
+	}
+}
+func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
+	if !s.immutable {
+		s.immutable = true
 	}
 }
