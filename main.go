@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	_ "fmt"
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 	"github.com/elz-lang/elz/parser"
 	"os"
