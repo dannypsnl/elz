@@ -9,11 +9,13 @@ import (
 type ElzListener struct {
 	*parser.BaseElzListener
 	exportThis bool
+	immutable  bool
 }
 
 func NewElzListener() *ElzListener {
 	return &ElzListener{
 		exportThis: false,
+		immutable:  true,
 	}
 }
 
@@ -24,5 +26,7 @@ func (s *ElzListener) EnterExportor(*parser.ExportorContext) {
 	s.exportThis = true
 }
 func (s *ElzListener) EnterVarDefine(ctx *parser.VarDefineContext) {
-	fmt.Println("mmutable:", ctx.GetMut())
+	if ctx.GetMut() != nil {
+		s.immutable = false
+	}
 }
