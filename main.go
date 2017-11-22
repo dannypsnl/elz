@@ -1,8 +1,9 @@
 package main
 
 import (
-	_ "fmt"
+	"fmt"
 	"github.com/antlr/antlr4/runtime/Go/antlr"
+	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/parser"
 	"os"
 )
@@ -16,5 +17,11 @@ func main() {
 	//p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 	p.BuildParseTrees = true
 	tree := p.Prog()
-	antlr.ParseTreeWalkerDefault.Walk(NewElzListener(), tree)
+	eal := NewElzListener()
+	antlr.ParseTreeWalkerDefault.Walk(eal, tree)
+
+	for _, ast := range eal.AstList {
+		ast.Codegen()
+	}
+	fmt.Println(ast.Module)
 }

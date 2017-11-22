@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 
-	_ "github.com/elz-lang/elz/ast"
+	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/parser"
 )
 
 type ElzListener struct {
 	*parser.BaseElzListener
+	AstList    []ast.Ast
 	exportThis bool
 	immutable  bool
 }
@@ -30,6 +31,20 @@ func (s *ElzListener) EnterVarDefine(ctx *parser.VarDefineContext) {
 	if ctx.GetMut() != nil {
 		s.immutable = false
 	}
+}
+func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
+	// FIXME: We need to get Expression's type, not give it a default value.
+	typ := "f32"
+	if ctx.TypePass() != nil {
+		typ = ctx.TypePass().GetText()
+	}
+	s.AstList = append(s.AstList, &ast.VarDefination{
+		Immutable:  s.immutable,
+		Export:     s.exportThis,
+		Name:       ctx.ID().GetText(),
+		VarType:    typ,
+		Expression: &ast.Number{"1"},
+	})
 }
 func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 	if !s.immutable {
