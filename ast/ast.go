@@ -23,6 +23,9 @@ type Error struct {
 	Msg string
 }
 
+func (e Error) Codegen() {
+}
+
 type VarDefination struct {
 	Immutable  bool
 	Export     bool
