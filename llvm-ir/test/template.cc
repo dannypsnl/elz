@@ -5,11 +5,14 @@ public:
 
 template <> class Test<double> {
 public:
-  char *element;
+  const char *element;
 };
 
+const char *c = "hello llvm";
+
 Test<int> t{1};
-Test<double> t2{};
+Test<float> t1{1};
+Test<double> t2{c};
 
 template <typename T> void foo(T) {}
 void foo(int) {}
