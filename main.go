@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/antlr/antlr4/runtime/Go/antlr"
-	"github.com/elz-lang/elz/ast"
-	"github.com/elz-lang/elz/parser"
 	"os"
+
+	"github.com/antlr/antlr4/runtime/Go/antlr"
+	"github.com/elz-lang/elz/parser"
+	"github.com/llir/llvm/ir"
 )
 
 func main() {
@@ -20,8 +21,10 @@ func main() {
 	eal := NewElzListener()
 	antlr.ParseTreeWalkerDefault.Walk(eal, tree)
 
+	// Module is temprary variable
+	module := ir.NewModule()
 	for _, ast := range eal.AstList {
-		ast.Codegen()
+		ast.Codegen(module)
 	}
-	fmt.Println(ast.Module)
+	fmt.Println(module)
 }

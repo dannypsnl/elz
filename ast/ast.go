@@ -2,10 +2,12 @@ package ast
 
 import (
 	"fmt"
+
+	"github.com/llir/llvm/ir"
 )
 
 type Ast interface {
-	Codegen()
+	Codegen(*ir.Module)
 }
 
 type Stat interface{}
@@ -16,7 +18,7 @@ type Error struct {
 	Msg string
 }
 
-func (e Error) Codegen() {
+func (e Error) Codegen(*ir.Module) {
 	// FIXME: position is hard coding
 	fmt.Printf("At(0,0), error: %s\n", e.Msg)
 }
@@ -29,8 +31,8 @@ type VarDefination struct {
 	Expression Expr
 }
 
-func (v *VarDefination) Codegen() {
-	Module.NewGlobalDef(v.Name, v.Expression.Codegen())
+func (v *VarDefination) Codegen(module *ir.Module) {
+	module.NewGlobalDef(v.Name, v.Expression.Codegen())
 }
 
 type Param struct {
