@@ -32,7 +32,7 @@ type VarDefination struct {
 }
 
 func (v *VarDefination) Codegen(module *ir.Module) {
-	module.NewGlobalDef(v.Name, v.Expression.Codegen())
+	module.NewGlobalDef(v.Name, v.Expression.Codegen(module))
 }
 
 type Param struct {

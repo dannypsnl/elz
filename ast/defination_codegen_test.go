@@ -19,7 +19,7 @@ func TestVarDefine(t *testing.T) {
 		},
 	}
 	v.Codegen(m)
-	expected := `@acb = global float fsub (float 0.0, float 1.2)
+	expected := `@acb = global double fsub (double 0.0, double 1.2)
 `
 	if m.String() != expected {
 		t.Errorf("expected: '%s', actual: '%s'", expected, m.String())

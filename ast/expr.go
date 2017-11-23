@@ -1,9 +1,12 @@
 package ast
 
-import "github.com/llir/llvm/ir/constant"
+import (
+	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
+)
 
 type Expr interface {
-	Codegen() constant.Constant
+	Codegen(*ir.Module) constant.Constant
 	Type() string
 }
 
@@ -11,8 +14,8 @@ type Number struct {
 	Val string
 }
 
-func (n *Number) Codegen() constant.Constant {
-	return constant.NewFloatFromString(n.Val, f32)
+func (n *Number) Codegen(*ir.Module) constant.Constant {
+	return constant.NewFloatFromString(n.Val, f64)
 }
 func (n *Number) Type() string {
 	return "num"
@@ -23,8 +26,8 @@ type UnaryExpr struct {
 	Op string
 }
 
-func (u *UnaryExpr) Codegen() constant.Constant {
-	return constant.NewFSub(constant.NewFloatFromString("0", f32), u.E.Codegen())
+func (u *UnaryExpr) Codegen(m *ir.Module) constant.Constant {
+	return constant.NewFSub(constant.NewFloatFromString("0", f64), u.E.Codegen(m))
 }
 
 func (u *UnaryExpr) Type() string {
@@ -37,16 +40,16 @@ type BinaryExpr struct {
 	Op     string
 }
 
-func (b *BinaryExpr) Codegen() constant.Constant {
+func (b *BinaryExpr) Codegen(m *ir.Module) constant.Constant {
 	switch b.Op {
 	case "+":
-		return constant.NewFAdd(b.LeftE.Codegen(), b.RightE.Codegen())
+		return constant.NewFAdd(b.LeftE.Codegen(m), b.RightE.Codegen(m))
 	case "-":
-		return constant.NewFSub(b.LeftE.Codegen(), b.RightE.Codegen())
+		return constant.NewFSub(b.LeftE.Codegen(m), b.RightE.Codegen(m))
 	case "*":
-		return constant.NewFMul(b.LeftE.Codegen(), b.RightE.Codegen())
+		return constant.NewFMul(b.LeftE.Codegen(m), b.RightE.Codegen(m))
 	case "/":
-		return constant.NewFDiv(b.LeftE.Codegen(), b.RightE.Codegen())
+		return constant.NewFDiv(b.LeftE.Codegen(m), b.RightE.Codegen(m))
 	default:
 		panic(`Unsupport op`)
 	}

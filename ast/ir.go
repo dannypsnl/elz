@@ -4,4 +4,4 @@ import (
 	"github.com/llir/llvm/ir/types"
 )
 
-var f32 = types.Float
+var f64 = types.Double
