@@ -41,6 +41,7 @@ type BinaryExpr struct {
 }
 
 func (b *BinaryExpr) Codegen(m *ir.Module) constant.Constant {
+	// FIXME: Only when that is num type node, we will use Instruction, else have to find out function can deal with it, or return Error Node.
 	switch b.Op {
 	case "+":
 		return constant.NewFAdd(b.LeftE.Codegen(m), b.RightE.Codegen(m))
