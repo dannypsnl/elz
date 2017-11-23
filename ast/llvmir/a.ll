@@ -1,6 +1,8 @@
-define i32 @main() {
+@nest = global double fmul (double 4.33, double fadd (double 2.1, double 1.2))
+
+define double @nestedinstruction() {
 entry:
-	%0 = fmul double 4.33, 2.1
-	ret i32 0
+	%0 = load double, double* @nest
+	ret double %0
 }
 
