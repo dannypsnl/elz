@@ -13,13 +13,18 @@ func TestVarDefine(t *testing.T) {
 		Export:    false,
 		Name:      "acb",
 		VarType:   "num",
-		Expression: &UnaryExpr{
-			E:  &Number{"1.2"},
-			Op: "-",
+		Expression: &BinaryExpr{
+			LeftE: &BinaryExpr{
+				&Number{"2.4"},
+				&Number{"3.1"},
+				"*",
+			},
+			RightE: &Number{"3.3"},
+			Op:     "+",
 		},
 	}
 	v.Codegen(m)
-	expected := `@acb = global double fsub (double 0.0, double 1.2)
+	expected := `@acb = global double fadd (double fmul (double 2.4, double 3.1), double 3.3)
 `
 	if m.String() != expected {
 		t.Errorf("expected: '%s', actual: '%s'", expected, m.String())
