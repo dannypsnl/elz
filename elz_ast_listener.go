@@ -43,7 +43,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		Export:     s.exportThis,
 		Name:       ctx.ID().GetText(),
 		VarType:    typ,
-		Expression: &ast.Number{"1"},
+		Expression: &ast.Number{Val: "1"},
 	})
 }
 func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
