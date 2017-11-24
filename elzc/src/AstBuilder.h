@@ -1,3 +1,5 @@
+#include "ElzBaseListener.h" // parser/ElzBaseListener.h
+
 namespace elz {
-class AstBuilder {};
+class AstBuilder : public ElzBaseListener {};
 } // namespace elz
