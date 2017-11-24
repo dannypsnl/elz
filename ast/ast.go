@@ -45,13 +45,3 @@ type FnDefination struct {
 	Params []Param
 	Body   StatList
 }
-
-type Argu struct {
-	Val  string
-	Type string
-}
-type FnCall struct {
-	Name string
-	Args []Argu
-	Type string
-}

@@ -63,3 +63,25 @@ func (b *BinaryExpr) Type() string {
 		panic(`Type error`)
 	}
 }
+
+type Argu struct {
+	E Expr
+}
+
+func (a *Argu) Codegen(m *ir.Module) constant.Constant {
+	return a.E.Codegen(m)
+}
+
+func (a *Argu) Type() string {
+	return a.E.Type()
+}
+
+type FnCall struct {
+	Name    string
+	Args    []Argu
+	RetType string
+}
+
+func (fc *FnCall) Type() string {
+	return fc.RetType
+}
