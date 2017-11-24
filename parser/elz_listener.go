@@ -50,6 +50,9 @@ type ElzListener interface {
 	// EnterTypePass is called when entering the typePass production.
 	EnterTypePass(c *TypePassContext)
 
+	// EnterTypeList is called when entering the typeList production.
+	EnterTypeList(c *TypeListContext)
+
 	// EnterMethodList is called when entering the methodList production.
 	EnterMethodList(c *MethodListContext)
 
@@ -88,9 +91,6 @@ type ElzListener interface {
 
 	// EnterTmethodList is called when entering the tmethodList production.
 	EnterTmethodList(c *TmethodListContext)
-
-	// EnterTypeList is called when entering the typeList production.
-	EnterTypeList(c *TypeListContext)
 
 	// EnterTmethod is called when entering the tmethod production.
 	EnterTmethod(c *TmethodContext)
@@ -146,6 +146,9 @@ type ElzListener interface {
 	// ExitTypePass is called when exiting the typePass production.
 	ExitTypePass(c *TypePassContext)
 
+	// ExitTypeList is called when exiting the typeList production.
+	ExitTypeList(c *TypeListContext)
+
 	// ExitMethodList is called when exiting the methodList production.
 	ExitMethodList(c *MethodListContext)
 
@@ -184,9 +187,6 @@ type ElzListener interface {
 
 	// ExitTmethodList is called when exiting the tmethodList production.
 	ExitTmethodList(c *TmethodListContext)
-
-	// ExitTypeList is called when exiting the typeList production.
-	ExitTypeList(c *TypeListContext)
 
 	// ExitTmethod is called when exiting the tmethod production.
 	ExitTmethod(c *TmethodContext)

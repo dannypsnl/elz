@@ -73,6 +73,7 @@ fnCall:
     ;
 
 typePass : ID;
+typeList: typePass (',' typePass)*;
 
 methodList: method+;
 method:
@@ -81,7 +82,7 @@ method:
     '}'
     ;
 implBlock:
-    'impl' ID (':' typePass (',' typePass)*)? '{'
+    'impl' ID (':' typeList)? '{'
         methodList?
     '}'
     ;
@@ -103,7 +104,6 @@ typeDefine:
     'type' exportor? ID '(' attrList ')'
     ;
 tmethodList: tmethod+;
-typeList: typePass (',' typePass)*;
 tmethod: exportor? ID '(' typeList? ')' ('->' typePass)?;
 traitDefine:
     'trait' exportor ID '{'
@@ -111,13 +111,13 @@ traitDefine:
     '}'
     ;
 
-expr: '(' expr ')'
-    | expr op='^' expr
+expr: '(' expr ')' // FIXME: Waiting for implement
+    | expr op='^' expr // FIXME: We had not support translate it.
     | expr op=('*'|'/') expr
     | expr op=('+'|'-') expr
     | factor
     ;
-factor: exprStat
+factor: exprStat // Important, exprStat have match & functionCall yet!
     | NUM
     | ID
     | STRING
