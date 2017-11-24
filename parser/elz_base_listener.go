@@ -57,6 +57,18 @@ func (s *BaseElzListener) EnterStat(ctx *StatContext) {}
 // ExitStat is called when production stat is exited.
 func (s *BaseElzListener) ExitStat(ctx *StatContext) {}
 
+// EnterReturnStat is called when production returnStat is entered.
+func (s *BaseElzListener) EnterReturnStat(ctx *ReturnStatContext) {}
+
+// ExitReturnStat is called when production returnStat is exited.
+func (s *BaseElzListener) ExitReturnStat(ctx *ReturnStatContext) {}
+
+// EnterLoopStat is called when production loopStat is entered.
+func (s *BaseElzListener) EnterLoopStat(ctx *LoopStatContext) {}
+
+// ExitLoopStat is called when production loopStat is exited.
+func (s *BaseElzListener) ExitLoopStat(ctx *LoopStatContext) {}
+
 // EnterExprStat is called when production exprStat is entered.
 func (s *BaseElzListener) EnterExprStat(ctx *ExprStatContext) {}
 
@@ -92,6 +104,24 @@ func (s *BaseElzListener) EnterTypePass(ctx *TypePassContext) {}
 
 // ExitTypePass is called when production typePass is exited.
 func (s *BaseElzListener) ExitTypePass(ctx *TypePassContext) {}
+
+// EnterMethodList is called when production methodList is entered.
+func (s *BaseElzListener) EnterMethodList(ctx *MethodListContext) {}
+
+// ExitMethodList is called when production methodList is exited.
+func (s *BaseElzListener) ExitMethodList(ctx *MethodListContext) {}
+
+// EnterMethod is called when production method is entered.
+func (s *BaseElzListener) EnterMethod(ctx *MethodContext) {}
+
+// ExitMethod is called when production method is exited.
+func (s *BaseElzListener) ExitMethod(ctx *MethodContext) {}
+
+// EnterImplBlock is called when production implBlock is entered.
+func (s *BaseElzListener) EnterImplBlock(ctx *ImplBlockContext) {}
+
+// ExitImplBlock is called when production implBlock is exited.
+func (s *BaseElzListener) ExitImplBlock(ctx *ImplBlockContext) {}
 
 // EnterExportor is called when production exportor is entered.
 func (s *BaseElzListener) EnterExportor(ctx *ExportorContext) {}
@@ -152,6 +182,12 @@ func (s *BaseElzListener) EnterTmethodList(ctx *TmethodListContext) {}
 
 // ExitTmethodList is called when production tmethodList is exited.
 func (s *BaseElzListener) ExitTmethodList(ctx *TmethodListContext) {}
+
+// EnterTypeList is called when production typeList is entered.
+func (s *BaseElzListener) EnterTypeList(ctx *TypeListContext) {}
+
+// ExitTypeList is called when production typeList is exited.
+func (s *BaseElzListener) ExitTypeList(ctx *TypeListContext) {}
 
 // EnterTmethod is called when production tmethod is entered.
 func (s *BaseElzListener) EnterTmethod(ctx *TmethodContext) {}

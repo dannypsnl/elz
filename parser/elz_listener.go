@@ -26,6 +26,12 @@ type ElzListener interface {
 	// EnterStat is called when entering the stat production.
 	EnterStat(c *StatContext)
 
+	// EnterReturnStat is called when entering the returnStat production.
+	EnterReturnStat(c *ReturnStatContext)
+
+	// EnterLoopStat is called when entering the loopStat production.
+	EnterLoopStat(c *LoopStatContext)
+
 	// EnterExprStat is called when entering the exprStat production.
 	EnterExprStat(c *ExprStatContext)
 
@@ -43,6 +49,15 @@ type ElzListener interface {
 
 	// EnterTypePass is called when entering the typePass production.
 	EnterTypePass(c *TypePassContext)
+
+	// EnterMethodList is called when entering the methodList production.
+	EnterMethodList(c *MethodListContext)
+
+	// EnterMethod is called when entering the method production.
+	EnterMethod(c *MethodContext)
+
+	// EnterImplBlock is called when entering the implBlock production.
+	EnterImplBlock(c *ImplBlockContext)
 
 	// EnterExportor is called when entering the exportor production.
 	EnterExportor(c *ExportorContext)
@@ -74,6 +89,9 @@ type ElzListener interface {
 	// EnterTmethodList is called when entering the tmethodList production.
 	EnterTmethodList(c *TmethodListContext)
 
+	// EnterTypeList is called when entering the typeList production.
+	EnterTypeList(c *TypeListContext)
+
 	// EnterTmethod is called when entering the tmethod production.
 	EnterTmethod(c *TmethodContext)
 
@@ -104,6 +122,12 @@ type ElzListener interface {
 	// ExitStat is called when exiting the stat production.
 	ExitStat(c *StatContext)
 
+	// ExitReturnStat is called when exiting the returnStat production.
+	ExitReturnStat(c *ReturnStatContext)
+
+	// ExitLoopStat is called when exiting the loopStat production.
+	ExitLoopStat(c *LoopStatContext)
+
 	// ExitExprStat is called when exiting the exprStat production.
 	ExitExprStat(c *ExprStatContext)
 
@@ -121,6 +145,15 @@ type ElzListener interface {
 
 	// ExitTypePass is called when exiting the typePass production.
 	ExitTypePass(c *TypePassContext)
+
+	// ExitMethodList is called when exiting the methodList production.
+	ExitMethodList(c *MethodListContext)
+
+	// ExitMethod is called when exiting the method production.
+	ExitMethod(c *MethodContext)
+
+	// ExitImplBlock is called when exiting the implBlock production.
+	ExitImplBlock(c *ImplBlockContext)
 
 	// ExitExportor is called when exiting the exportor production.
 	ExitExportor(c *ExportorContext)
@@ -151,6 +184,9 @@ type ElzListener interface {
 
 	// ExitTmethodList is called when exiting the tmethodList production.
 	ExitTmethodList(c *TmethodListContext)
+
+	// ExitTypeList is called when exiting the typeList production.
+	ExitTypeList(c *TypeListContext)
 
 	// ExitTmethod is called when exiting the tmethod production.
 	ExitTmethod(c *TmethodContext)

@@ -24,18 +24,31 @@ prog: topStatList?;
 
 topStatList: topStat+;
 
-topStat: fnDefine
-    | varDefine
-    | typeDefine
-    | traitDefine
+topStat: fnDefine // fn foo( params ) { stats }
+    | varDefine // let (mut) var: type = expr
+    | typeDefine // type newType ( props )
+    | implBlock // impl type { methods }
+    | traitDefine // trait DB { methods }
     | importStat
     ;
 importStat: 'import' ID;
 
 statList: stat+;
 stat: varDefine
+    | loopStat
+    | returnStat
     | assign
     | exprStat
+    ;
+
+returnStat:
+    'return' expr
+    ;
+
+loopStat:
+    'loop' '{'
+        statList?
+    '}'
     ;
 
 exprStat: matchRule
@@ -60,6 +73,18 @@ fnCall:
     ;
 
 typePass : ID;
+
+methodList: method+;
+method:
+    exportor? ID '(' paramList? ')' ('->' typePass)? '{'
+        statList?
+    '}'
+    ;
+implBlock:
+    'impl' ID (':' typePass (',' typePass)*)? '{'
+        methodList?
+    '}'
+    ;
 exportor: '+';
 define: exportor? ID (':' typePass)? '=' expr;
 varDefine:
@@ -78,7 +103,8 @@ typeDefine:
     'type' exportor? ID '(' attrList ')'
     ;
 tmethodList: tmethod+;
-tmethod: exportor? ID '(' paramList? ')' ('->' typePass)?;
+typeList: typePass (',' typePass)*;
+tmethod: exportor? ID '(' typeList? ')' ('->' typePass)?;
 traitDefine:
     'trait' exportor ID '{'
         tmethodList?
