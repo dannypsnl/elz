@@ -1,0 +1,3 @@
+[submodule "elzc/gtest"]
+	path = elzc/gtest
+	url = git@github.com:google/googletest.git
