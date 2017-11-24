@@ -24,18 +24,31 @@ prog: topStatList?;
 
 topStatList: topStat+;
 
-topStat: fnDefine
-    | varDefine
-    | typeDefine
-    | traitDefine
+topStat: fnDefine // fn foo( params ) { stats }
+    | varDefine // let (mut) var: type = expr
+    | typeDefine // type newType ( props )
+    | implBlock // impl type { methods }
+    | traitDefine // trait DB { methods }
     | importStat
     ;
 importStat: 'import' ID;
 
 statList: stat+;
 stat: varDefine
+    | loopStat
+    | returnStat
     | assign
     | exprStat
+    ;
+
+returnStat:
+    'return' expr
+    ;
+
+loopStat:
+    'loop' '{'
+        statList?
+    '}'
     ;
 
 exprStat: matchRule
@@ -60,6 +73,19 @@ fnCall:
     ;
 
 typePass : ID;
+typeList: typePass (',' typePass)*;
+
+methodList: method+;
+method:
+    exportor? ID '(' paramList? ')' ('->' typePass)? '{'
+        statList?
+    '}'
+    ;
+implBlock:
+    'impl' ID (':' typeList)? '{'
+        methodList?
+    '}'
+    ;
 exportor: '+';
 define: exportor? ID (':' typePass)? '=' expr;
 varDefine:
@@ -78,20 +104,20 @@ typeDefine:
     'type' exportor? ID '(' attrList ')'
     ;
 tmethodList: tmethod+;
-tmethod: exportor? ID '(' paramList? ')' ('->' typePass)?;
+tmethod: exportor? ID '(' typeList? ')' ('->' typePass)?;
 traitDefine:
     'trait' exportor ID '{'
         tmethodList?
     '}'
     ;
 
-expr: '(' expr ')'
-    | expr op='^' expr
+expr: '(' expr ')' // FIXME: Waiting for implement
+    | expr op='^' expr // FIXME: We had not support translate it.
     | expr op=('*'|'/') expr
     | expr op=('+'|'-') expr
     | factor
     ;
-factor: exprStat
+factor: exprStat // Important, exprStat have match & functionCall yet!
     | NUM
     | ID
     | STRING
