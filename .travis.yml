@@ -1,6 +1,9 @@
-language: go
+language: go, cpp
 
+sudo: false
 go_import_path: github.com/elz-lang/elz
+git:
+  submodules: false
 
 # Only the last two Go releases are supported by the Go team with security
 # updates. Any versions older than that should be considered deprecated.
