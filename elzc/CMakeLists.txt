@@ -11,7 +11,7 @@ include_directories(src/parser)
 file(GLOB_RECURSE TEST_CODES src/*_test.cc)
 enable_testing()
 add_library(AllTests ${TEST_CODES})
-#add_executable(tests ${TEST_CODES})
+add_executable(tests ${TEST_CODES})
 target_link_libraries(tests
     AllTests
     elzc_lib # elz compiler without main function
