@@ -1,14 +1,18 @@
 #pragma once
 
+#include "llvm/ADT/APFloat.h"
+#include "llvm/IR/Constants.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
+#include <iostream>
 
 #include <map>
 #include <memory>
 #include <string>
 
+using llvm::ConstantFP;
 using llvm::IRBuilder;
 using llvm::LLVMContext;
 using llvm::Module;
@@ -18,7 +22,8 @@ namespace ast {
 
 static LLVMContext TheContext;
 static IRBuilder<> Builder(TheContext);
-static std::unique_ptr<Module> TheModule;
+static std::unique_ptr<Module> TheModule =
+    llvm::make_unique<Module>("main", TheContext);
 static std::map<std::string, Value *> NamedValues;
 
 class Expr {
@@ -33,7 +38,9 @@ class Number : public Expr {
 public:
   // Maybe should use string val and transport inside?
   Number(double val) : Val{val} {}
-  virtual Value *codegen();
+  virtual Value *codegen() {
+    return ConstantFP::get(TheContext, llvm::APFloat(Val));
+  }
 };
 
 class Variable : public Expr {
@@ -41,7 +48,13 @@ class Variable : public Expr {
 
 public:
   Variable(std::string val) : Val{val} {}
-  virtual Value *codegen();
+  virtual Value *codegen() {
+    Value *V = NamedValues[Val];
+    if (!V) {
+      std::cout << "We don't have a variable call[" << Val << ']' << std::endl;
+    }
+    return V;
+  }
 };
 
 class BinaryExpr : public Expr {};
