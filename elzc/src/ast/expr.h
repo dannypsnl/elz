@@ -9,6 +9,11 @@
 #include <memory>
 #include <string>
 
+using llvm::IRBuilder;
+using llvm::LLVMContext;
+using llvm::Module;
+using llvm::Value;
+
 namespace ast {
 
 static LLVMContext TheContext;
