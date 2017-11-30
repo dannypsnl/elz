@@ -7,6 +7,8 @@
 
 namespace elz {
 class AstBuilder : public ElzBaseListener {
-  void enterVarDefine(ElzParser::DefineContext *ctx) {}
+public:
+  // TODO: Put context at here, and improve it.
+  void enterVarDefine(ElzParser::DefineContext *ctx) { ; }
 };
 } // namespace elz
