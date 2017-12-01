@@ -35,7 +35,7 @@ importStat: 'import' ID;
 
 statList: stat+;
 stat: varDefine
-    | loopStat
+    | loopStat // loop { stats }
     | returnStat
     | assign
     | exprStat
@@ -111,13 +111,13 @@ traitDefine:
     '}'
     ;
 
-expr: '(' expr ')' // FIXME: Waiting for implement
-    | expr op='^' expr // FIXME: We had not support translate it.
-    | expr op=('*'|'/') expr
+expr: expr op='^' expr // TODO: We had not support translate it.
+    | expr op=('*'|'/') expr // operation prec
     | expr op=('+'|'-') expr
     | factor
     ;
-factor: exprStat // Important, exprStat have match & functionCall yet!
+factor: '(' expr ')' // TODO: Waiting for implement
+    | exprStat // Important, exprStat have match & functionCall yet!
     | NUM
     | ID
     | STRING

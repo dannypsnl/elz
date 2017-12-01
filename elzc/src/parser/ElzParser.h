@@ -514,9 +514,9 @@ public:
     antlr4::Token *op = nullptr;;
     ExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    FactorContext *factor();
     std::vector<ExprContext *> expr();
     ExprContext* expr(size_t i);
-    FactorContext *factor();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -529,6 +529,7 @@ public:
   public:
     FactorContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    ExprContext *expr();
     ExprStatContext *exprStat();
     antlr4::tree::TerminalNode *NUM();
     antlr4::tree::TerminalNode *ID();
