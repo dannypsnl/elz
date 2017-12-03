@@ -23,13 +23,7 @@ addons:
       - cmake-data
 # Skip the install step. Don't `go get` dependencies. Only build with the
 # code in vendor/
-install:
-  - cd $GOPATH/src/llvm.org/llvm/bindings/go/llvm/
-  - mkdir workdir && cd workdir
-  - mkdir llvm_build && cd llvm_build
-  - cmake -DCMAKE_BUILD_TYPE=Debug $GOPATH/llvm.org/llvm
-  - cd $GOPATH/src/llvm.org/llvm/bindings/go/
-  - ./build.sh
+install: true
 
 matrix:
   # It's ok if our code fails on unstable development versions of Go.
