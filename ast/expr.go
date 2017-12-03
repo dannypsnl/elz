@@ -1,12 +1,11 @@
 package ast
 
 import (
-	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/constant"
+	"llvm.org/llvm/bindings/go/llvm"
 )
 
 type Expr interface {
-	Codegen(*ir.Module) constant.Constant
+	Codegen(*Context) llvm.Value
 	Type() string
 }
 
@@ -14,8 +13,7 @@ type Number struct {
 	Val string
 }
 
-func (n *Number) Codegen(*ir.Module) constant.Constant {
-	return constant.NewFloatFromString(n.Val, f64)
+func (n *Number) Codegen(*Context) llvm.Value {
 }
 func (n *Number) Type() string {
 	return "num"
@@ -26,8 +24,7 @@ type UnaryExpr struct {
 	Op string
 }
 
-func (u *UnaryExpr) Codegen(m *ir.Module) constant.Constant {
-	return constant.NewFSub(constant.NewFloatFromString("0", f64), u.E.Codegen(m))
+func (u *UnaryExpr) Codegen(ctx *Context) llvm.Value {
 }
 
 func (u *UnaryExpr) Type() string {
@@ -40,20 +37,7 @@ type BinaryExpr struct {
 	Op     string
 }
 
-func (b *BinaryExpr) Codegen(m *ir.Module) constant.Constant {
-	// FIXME: Only when that is num type node, we will use Instruction, else have to find out function can deal with it, or return Error Node.
-	switch b.Op {
-	case "+":
-		return constant.NewFAdd(b.LeftE.Codegen(m), b.RightE.Codegen(m))
-	case "-":
-		return constant.NewFSub(b.LeftE.Codegen(m), b.RightE.Codegen(m))
-	case "*":
-		return constant.NewFMul(b.LeftE.Codegen(m), b.RightE.Codegen(m))
-	case "/":
-		return constant.NewFDiv(b.LeftE.Codegen(m), b.RightE.Codegen(m))
-	default:
-		panic(`Unsupport op`)
-	}
+func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 }
 
 func (b *BinaryExpr) Type() string {
@@ -68,8 +52,7 @@ type Argu struct {
 	E Expr
 }
 
-func (a *Argu) Codegen(m *ir.Module) constant.Constant {
-	return a.E.Codegen(m)
+func (a *Argu) Codegen(ctx *Context) llvm.Value {
 }
 
 func (a *Argu) Type() string {
