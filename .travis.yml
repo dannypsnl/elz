@@ -31,8 +31,8 @@ matrix:
 before_script:
   - sudo add-apt-repository -y ppa:kalakris/cmake # install newer cmake
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test # install newer gcc
-  - sudo $APT_GET update
-  - sudo $APT_GET install mercurial git subversion cmake gcc-4.8 g++-4.8
+  - sudo apt update
+  - sudo apt install mercurial git subversion cmake gcc-4.8 g++-4.8
   - export CXX=g++-4.8 CC=gcc-4.8
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/) # All the .go files, excluding vendor/
   - go get github.com/antlr/antlr4/runtime/Go/antlr
