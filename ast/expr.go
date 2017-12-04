@@ -14,6 +14,7 @@ type Number struct {
 }
 
 func (n *Number) Codegen(*Context) llvm.Value {
+	return llvm.ConstFloatFromString(llvm.FloatType(), n.Val)
 }
 func (n *Number) Type() string {
 	return "num"
@@ -25,6 +26,7 @@ type UnaryExpr struct {
 }
 
 func (u *UnaryExpr) Codegen(ctx *Context) llvm.Value {
+	return llvm.ConstFloatFromString(llvm.FloatType(), "3.14")
 }
 
 func (u *UnaryExpr) Type() string {
@@ -38,6 +40,7 @@ type BinaryExpr struct {
 }
 
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
+	return llvm.ConstFloatFromString(llvm.FloatType(), "3.14")
 }
 
 func (b *BinaryExpr) Type() string {
@@ -53,6 +56,7 @@ type Argu struct {
 }
 
 func (a *Argu) Codegen(ctx *Context) llvm.Value {
+	return llvm.ConstFloatFromString(llvm.FloatType(), "3.14")
 }
 
 func (a *Argu) Type() string {
