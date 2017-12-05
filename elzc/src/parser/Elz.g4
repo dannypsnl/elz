@@ -94,7 +94,8 @@ varDefine:
 paramList: param (',' param)*;
 param: ID ':' typePass;
 fnDefine:
-    'fn' exportor? ID '(' paramList? ')' ('->' typePass)? '{'
+    // because fn also handle operator, so if we use exportor after keyword fn will cause we hard to divide ++ && + +
+    exportor? 'fn' ID '(' paramList? ')' ('->' typePass)? '{'
         statList?
     '}'
     ;
