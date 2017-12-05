@@ -26,7 +26,10 @@ type UnaryExpr struct {
 }
 
 func (u *UnaryExpr) Codegen(ctx *Context) llvm.Value {
-	return llvm.ConstFloatFromString(llvm.FloatType(), "3.14")
+	return llvm.ConstFDiv(
+		llvm.ConstFloatFromString(llvm.FloatType(), "0"),
+		u.E.Codegen(ctx),
+	)
 }
 
 func (u *UnaryExpr) Type() string {
