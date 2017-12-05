@@ -5,9 +5,6 @@ import (
 )
 
 func main() {
-<<<<<<< HEAD
-	fmt.Println("elz compiler...")
-=======
 	// TODO: Use CharStream & a function wrap this all, here should handle other mession.
 	input, _ := antlr.NewFileStream(os.Args[1])
 	lexer := parser.NewElzLexer(input)
@@ -24,5 +21,4 @@ func main() {
 		ast.Codegen(module)
 	}
 	fmt.Println(module)
->>>>>>> @{-1}
 }
