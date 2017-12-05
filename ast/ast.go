@@ -38,6 +38,9 @@ type VarDefination struct {
 }
 
 func (v *VarDefination) Codegen(ctx *Context) {
+	val := llvm.AddGlobal(ctx.Module, llvm.FloatType(), v.Name)
+	val.SetInitializer(v.Expression.Codegen(ctx))
+	ctx.Vars[v.Name] = val
 }
 
 type Param struct {
