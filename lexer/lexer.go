@@ -105,7 +105,7 @@ func (lex *Lexer) run() {
 	for lex.state = lexWhiteSpace; lex.state != nil; {
 		lex.state = lex.state(lex)
 	}
-	close(lex.items)
+	defer close(lex.items)
 }
 
 // next returns the next rune in the input.
