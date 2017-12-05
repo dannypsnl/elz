@@ -15,7 +15,6 @@ func main() {
 	lexer := parser.NewElzLexer(input)
 	stream := antlr.NewCommonTokenStream(lexer, 0)
 	p := parser.NewElzParser(stream)
-	//p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 	p.BuildParseTrees = true
 	tree := p.Prog()
 	eal := NewElzListener()

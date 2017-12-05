@@ -16,8 +16,7 @@ type ElzListener struct {
 
 func NewElzListener() *ElzListener {
 	return &ElzListener{
-		exportThis: false,
-		immutable:  true,
+		immutable: true,
 	}
 }
 
