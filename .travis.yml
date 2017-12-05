@@ -15,6 +15,15 @@ go:
   - 1.9
   - tip
 
+compiler:
+  - gcc
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+    packages:
+      - cmake
+      - cmake-data
 # Skip the install step. Don't `go get` dependencies. Only build with the
 # code in vendor/
 install: true
@@ -33,7 +42,7 @@ matrix:
 before_script:
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/) # All the .go files, excluding vendor/
   - go get github.com/antlr/antlr4/runtime/Go/antlr
-  - go get github.com/llir/llvm/...
+  - go get -d llvm.org/llvm/bindings/go/llvm
 
 # script always run to completion (set +e). All of these code checks are must haves
 # in a modern Go project.
