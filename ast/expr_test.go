@@ -37,3 +37,19 @@ func TestUnaryExpr(t *testing.T) {
 		t.Error(`unary expression fail`)
 	}
 }
+
+func TestBinaryExpr(t *testing.T) {
+	num := &Number{
+		Val: "1.23",
+	}
+	be := &BinaryExpr{
+		RightE: num,
+		LeftE:  num,
+		Op:     "+",
+	}
+	result := be.Codegen(ctx)
+	if !result.IsConstant() {
+		result.Dump()
+		t.Error(`binary expression fail`)
+	}
+}

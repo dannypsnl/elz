@@ -26,10 +26,7 @@ type UnaryExpr struct {
 }
 
 func (u *UnaryExpr) Codegen(ctx *Context) llvm.Value {
-	return llvm.ConstFDiv(
-		llvm.ConstFloatFromString(llvm.FloatType(), "0"),
-		u.E.Codegen(ctx),
-	)
+	return llvm.ConstFNeg(u.E.Codegen(ctx))
 }
 
 func (u *UnaryExpr) Type() string {
@@ -43,7 +40,18 @@ type BinaryExpr struct {
 }
 
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
-	return llvm.ConstFloatFromString(llvm.FloatType(), "3.14")
+	switch b.Op {
+	case "+":
+		return llvm.ConstFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+	case "-":
+		return llvm.ConstFSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+	case "*":
+		return llvm.ConstFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+	case "/":
+		return llvm.ConstFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+	default:
+		panic(`Unsupport this operator`)
+	}
 }
 
 func (b *BinaryExpr) Type() string {
