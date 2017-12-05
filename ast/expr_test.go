@@ -7,9 +7,9 @@ import (
 )
 
 var ctx = &Context{
-	module:  llvm.NewModule("main"),
-	context: llvm.NewContext(),
-	vars:    make(map[string]llvm.Value),
+	Module:  llvm.NewModule("main"),
+	Context: llvm.NewContext(),
+	Vars:    make(map[string]llvm.Value),
 }
 
 func TestNumber(t *testing.T) {

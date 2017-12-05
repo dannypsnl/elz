@@ -2,13 +2,14 @@ package ast
 
 import (
 	"fmt"
+
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
 type Context struct {
-	module  llvm.Module
-	context llvm.Context
-	vars    map[string]llvm.Value
+	Module  llvm.Module
+	Context llvm.Context
+	Vars    map[string]llvm.Value
 }
 
 type Ast interface {

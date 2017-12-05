@@ -2,6 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+
+	"github.com/antlr/antlr4/runtime/Go/antlr"
+	"github.com/elz-lang/elz/ast"
+	"github.com/elz-lang/elz/parser"
+	"llvm.org/llvm/bindings/go/llvm"
 )
 
 func main() {
@@ -16,9 +22,13 @@ func main() {
 	antlr.ParseTreeWalkerDefault.Walk(eal, tree)
 
 	// Module is temprary variable
-	module := ir.NewModule()
-	for _, ast := range eal.AstList {
-		ast.Codegen(module)
+	ctx := &ast.Context{
+		llvm.NewModule("main"),
+		llvm.NewContext(),
+		make(map[string]llvm.Value),
 	}
-	fmt.Println(module)
+	for _, ast := range eal.AstList {
+		ast.Codegen(ctx)
+	}
+	fmt.Println(ctx.Module)
 }

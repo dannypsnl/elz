@@ -13,8 +13,8 @@ func TestItemStringFormat(t *testing.T) {
 		t.Error(`fail, EOF format is not correct`)
 	}
 	it = Item{
-		ItemNumber,
-		"10.34234234842394",
+		Type: ItemNumber,
+		Val:  "10.34234234842394",
 	}
 	expected := "\"10.3423423\"..."
 	if strings.Compare(it.String(), expected) != 0 {
