@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -16,4 +17,5 @@ func TestVarDefination(t *testing.T) {
 	if ctx.Vars["pi"].IsDeclaration() {
 		t.Error(`error`)
 	}
+	fmt.Println(ctx.Module)
 }
