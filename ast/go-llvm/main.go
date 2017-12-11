@@ -19,23 +19,23 @@ func main() {
 	}
 
 	// How to create string
-	aStr := llvm.ConstString("\\a你好, llvm, $@#%^!&!)~!#*(@#+_)(*&GBJNLSfdlbc)", false)
-	gVal := llvm.AddGlobal(ctx.m, aStr.Type(), "string")
+	aStr := llvm.ConstString(`\\a你好, llvm, $@#%^!&!)~!#*(@#+_)(*&GBJNLSfdlbc)`, false)
+	gVal := llvm.AddGlobal(ctx.m, aStr.Type(), "main::string")
 	gVal.SetInitializer(aStr)
 
 	// How to create a function
 	ft := llvm.FunctionType(aStr.Type(), []llvm.Type{aStr.Type()}, false)
-	llvm.AddFunction(ctx.m, "foo_string_string", ft)
+	llvm.AddFunction(ctx.m, "main::foo_string_string", ft)
 
 	ft = llvm.FunctionType(ctx.ctx.FloatType(), []llvm.Type{}, false)
-	llvm.AddFunction(ctx.m, "foo_float", ft)
+	llvm.AddFunction(ctx.m, "main::foo_float", ft)
 
 	// How to create a user define type
 	structTp := llvm.StructType([]llvm.Type{
 		llvm.FloatType(),
 	}, false)
 	insStruct := llvm.ConstNamedStruct(structTp, []llvm.Value{llvm.ConstFloat(llvm.FloatType(), 3.14)})
-	gStruct := llvm.AddGlobal(ctx.m, structTp, "A struct")
+	gStruct := llvm.AddGlobal(ctx.m, structTp, "main::A struct")
 	gStruct.SetInitializer(insStruct)
 
 	fmt.Println(ctx.m)
