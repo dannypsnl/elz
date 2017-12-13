@@ -18,13 +18,21 @@ func main() {
 		builder: llvm.NewBuilder(),
 	}
 
+	// main function
+	ft := llvm.FunctionType(ctx.ctx.Int32Type(), []llvm.Type{}, false)
+	mainFn := llvm.AddFunction(ctx.m, "main", ft)
+	mainBlock := llvm.AddBasicBlock(mainFn, "entry")
+	ctx.builder.SetInsertPointAtEnd(mainBlock)
+	ctx.builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
+	ctx.builder.ClearInsertionPoint()
+
 	// How to create string
 	aStr := llvm.ConstString(`\\a你好, llvm, $@#%^!&!)~!#*(@#+_)(*&GBJNLSfdlbc)`, false)
 	gVal := llvm.AddGlobal(ctx.m, aStr.Type(), "main::string")
 	gVal.SetInitializer(aStr)
 
 	// How to create a function
-	ft := llvm.FunctionType(aStr.Type(), []llvm.Type{aStr.Type()}, false)
+	ft = llvm.FunctionType(aStr.Type(), []llvm.Type{aStr.Type()}, false)
 	llvm.AddFunction(ctx.m, "main::foo_string_string", ft)
 
 	ft = llvm.FunctionType(ctx.ctx.FloatType(), []llvm.Type{}, false)
