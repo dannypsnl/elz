@@ -101,9 +101,6 @@ type ElzListener interface {
 	// EnterExpr is called when entering the expr production.
 	EnterExpr(c *ExprContext)
 
-	// EnterFactor is called when entering the factor production.
-	EnterFactor(c *FactorContext)
-
 	// EnterNum is called when entering the num production.
 	EnterNum(c *NumContext)
 
@@ -205,9 +202,6 @@ type ElzListener interface {
 
 	// ExitExpr is called when exiting the expr production.
 	ExitExpr(c *ExprContext)
-
-	// ExitFactor is called when exiting the factor production.
-	ExitFactor(c *FactorContext)
 
 	// ExitNum is called when exiting the num production.
 	ExitNum(c *NumContext)

@@ -207,12 +207,6 @@ func (s *BaseElzListener) EnterExpr(ctx *ExprContext) {}
 // ExitExpr is called when production expr is exited.
 func (s *BaseElzListener) ExitExpr(ctx *ExprContext) {}
 
-// EnterFactor is called when production factor is entered.
-func (s *BaseElzListener) EnterFactor(ctx *FactorContext) {}
-
-// ExitFactor is called when production factor is exited.
-func (s *BaseElzListener) ExitFactor(ctx *FactorContext) {}
-
 // EnterNum is called when production num is entered.
 func (s *BaseElzListener) EnterNum(ctx *NumContext) {}
 

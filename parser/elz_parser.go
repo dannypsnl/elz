@@ -16,155 +16,154 @@ var _ = reflect.Copy
 var _ = strconv.Itoa
 
 var parserATN = []uint16{
-	3, 24715, 42794, 33075, 47597, 16764, 15335, 30598, 22884, 3, 31, 339,
+	3, 24715, 42794, 33075, 47597, 16764, 15335, 30598, 22884, 3, 31, 335,
 	4, 2, 9, 2, 4, 3, 9, 3, 4, 4, 9, 4, 4, 5, 9, 5, 4, 6, 9, 6, 4, 7, 9, 7,
 	4, 8, 9, 8, 4, 9, 9, 9, 4, 10, 9, 10, 4, 11, 9, 11, 4, 12, 9, 12, 4, 13,
 	9, 13, 4, 14, 9, 14, 4, 15, 9, 15, 4, 16, 9, 16, 4, 17, 9, 17, 4, 18, 9,
 	18, 4, 19, 9, 19, 4, 20, 9, 20, 4, 21, 9, 21, 4, 22, 9, 22, 4, 23, 9, 23,
 	4, 24, 9, 24, 4, 25, 9, 25, 4, 26, 9, 26, 4, 27, 9, 27, 4, 28, 9, 28, 4,
 	29, 9, 29, 4, 30, 9, 30, 4, 31, 9, 31, 4, 32, 9, 32, 4, 33, 9, 33, 4, 34,
-	9, 34, 4, 35, 9, 35, 4, 36, 9, 36, 3, 2, 5, 2, 74, 10, 2, 3, 3, 6, 3, 77,
-	10, 3, 13, 3, 14, 3, 78, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 5, 4, 87,
-	10, 4, 3, 5, 3, 5, 3, 5, 3, 6, 6, 6, 93, 10, 6, 13, 6, 14, 6, 94, 3, 7,
-	3, 7, 3, 7, 3, 7, 3, 7, 5, 7, 102, 10, 7, 3, 8, 3, 8, 3, 8, 3, 9, 3, 9,
-	3, 9, 5, 9, 110, 10, 9, 3, 9, 3, 9, 3, 10, 3, 10, 5, 10, 116, 10, 10, 3,
-	11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11,
-	7, 11, 129, 10, 11, 12, 11, 14, 11, 132, 11, 11, 3, 11, 5, 11, 135, 10,
-	11, 3, 11, 3, 11, 3, 12, 3, 12, 3, 12, 3, 12, 3, 13, 3, 13, 3, 13, 7, 13,
-	146, 10, 13, 12, 13, 14, 13, 149, 11, 13, 3, 14, 3, 14, 3, 14, 5, 14, 154,
-	10, 14, 3, 14, 3, 14, 3, 15, 3, 15, 3, 16, 3, 16, 3, 16, 7, 16, 163, 10,
-	16, 12, 16, 14, 16, 166, 11, 16, 3, 17, 6, 17, 169, 10, 17, 13, 17, 14,
-	17, 170, 3, 18, 5, 18, 174, 10, 18, 3, 18, 3, 18, 3, 18, 5, 18, 179, 10,
-	18, 3, 18, 3, 18, 3, 18, 5, 18, 184, 10, 18, 3, 18, 3, 18, 5, 18, 188,
-	10, 18, 3, 18, 3, 18, 3, 19, 3, 19, 3, 19, 3, 19, 5, 19, 196, 10, 19, 3,
-	19, 3, 19, 5, 19, 200, 10, 19, 3, 19, 3, 19, 3, 20, 3, 20, 3, 21, 5, 21,
-	207, 10, 21, 3, 21, 3, 21, 3, 21, 5, 21, 212, 10, 21, 3, 21, 3, 21, 3,
-	21, 3, 22, 3, 22, 5, 22, 219, 10, 22, 3, 22, 3, 22, 3, 22, 7, 22, 224,
-	10, 22, 12, 22, 14, 22, 227, 11, 22, 3, 23, 3, 23, 3, 23, 7, 23, 232, 10,
-	23, 12, 23, 14, 23, 235, 11, 23, 3, 24, 3, 24, 3, 24, 3, 24, 3, 25, 5,
-	25, 242, 10, 25, 3, 25, 3, 25, 3, 25, 3, 25, 5, 25, 248, 10, 25, 3, 25,
-	3, 25, 3, 25, 5, 25, 253, 10, 25, 3, 25, 3, 25, 5, 25, 257, 10, 25, 3,
-	25, 3, 25, 3, 26, 6, 26, 262, 10, 26, 13, 26, 14, 26, 263, 3, 27, 3, 27,
-	3, 27, 3, 27, 3, 28, 3, 28, 5, 28, 272, 10, 28, 3, 28, 3, 28, 3, 28, 3,
-	28, 3, 28, 3, 29, 6, 29, 280, 10, 29, 13, 29, 14, 29, 281, 3, 30, 5, 30,
-	285, 10, 30, 3, 30, 3, 30, 3, 30, 5, 30, 290, 10, 30, 3, 30, 3, 30, 3,
-	30, 5, 30, 295, 10, 30, 3, 31, 3, 31, 3, 31, 3, 31, 3, 31, 5, 31, 302,
-	10, 31, 3, 31, 3, 31, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32,
-	3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 7, 32, 318, 10, 32, 12, 32, 14, 32,
-	321, 11, 32, 3, 33, 3, 33, 3, 33, 3, 33, 3, 33, 3, 33, 3, 33, 3, 33, 5,
-	33, 331, 10, 33, 3, 34, 3, 34, 3, 35, 3, 35, 3, 36, 3, 36, 3, 36, 2, 3,
-	62, 37, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34,
-	36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70,
-	2, 4, 3, 2, 24, 25, 4, 2, 17, 17, 26, 26, 2, 352, 2, 73, 3, 2, 2, 2, 4,
-	76, 3, 2, 2, 2, 6, 86, 3, 2, 2, 2, 8, 88, 3, 2, 2, 2, 10, 92, 3, 2, 2,
-	2, 12, 101, 3, 2, 2, 2, 14, 103, 3, 2, 2, 2, 16, 106, 3, 2, 2, 2, 18, 115,
-	3, 2, 2, 2, 20, 117, 3, 2, 2, 2, 22, 138, 3, 2, 2, 2, 24, 142, 3, 2, 2,
-	2, 26, 150, 3, 2, 2, 2, 28, 157, 3, 2, 2, 2, 30, 159, 3, 2, 2, 2, 32, 168,
-	3, 2, 2, 2, 34, 173, 3, 2, 2, 2, 36, 191, 3, 2, 2, 2, 38, 203, 3, 2, 2,
-	2, 40, 206, 3, 2, 2, 2, 42, 216, 3, 2, 2, 2, 44, 228, 3, 2, 2, 2, 46, 236,
-	3, 2, 2, 2, 48, 241, 3, 2, 2, 2, 50, 261, 3, 2, 2, 2, 52, 265, 3, 2, 2,
-	2, 54, 269, 3, 2, 2, 2, 56, 279, 3, 2, 2, 2, 58, 284, 3, 2, 2, 2, 60, 296,
-	3, 2, 2, 2, 62, 305, 3, 2, 2, 2, 64, 330, 3, 2, 2, 2, 66, 332, 3, 2, 2,
-	2, 68, 334, 3, 2, 2, 2, 70, 336, 3, 2, 2, 2, 72, 74, 5, 4, 3, 2, 73, 72,
-	3, 2, 2, 2, 73, 74, 3, 2, 2, 2, 74, 3, 3, 2, 2, 2, 75, 77, 5, 6, 4, 2,
-	76, 75, 3, 2, 2, 2, 77, 78, 3, 2, 2, 2, 78, 76, 3, 2, 2, 2, 78, 79, 3,
-	2, 2, 2, 79, 5, 3, 2, 2, 2, 80, 87, 5, 48, 25, 2, 81, 87, 5, 42, 22, 2,
-	82, 87, 5, 54, 28, 2, 83, 87, 5, 36, 19, 2, 84, 87, 5, 60, 31, 2, 85, 87,
-	5, 8, 5, 2, 86, 80, 3, 2, 2, 2, 86, 81, 3, 2, 2, 2, 86, 82, 3, 2, 2, 2,
-	86, 83, 3, 2, 2, 2, 86, 84, 3, 2, 2, 2, 86, 85, 3, 2, 2, 2, 87, 7, 3, 2,
-	2, 2, 88, 89, 7, 3, 2, 2, 89, 90, 7, 29, 2, 2, 90, 9, 3, 2, 2, 2, 91, 93,
-	5, 12, 7, 2, 92, 91, 3, 2, 2, 2, 93, 94, 3, 2, 2, 2, 94, 92, 3, 2, 2, 2,
-	94, 95, 3, 2, 2, 2, 95, 11, 3, 2, 2, 2, 96, 102, 5, 42, 22, 2, 97, 102,
-	5, 16, 9, 2, 98, 102, 5, 14, 8, 2, 99, 102, 5, 22, 12, 2, 100, 102, 5,
-	18, 10, 2, 101, 96, 3, 2, 2, 2, 101, 97, 3, 2, 2, 2, 101, 98, 3, 2, 2,
-	2, 101, 99, 3, 2, 2, 2, 101, 100, 3, 2, 2, 2, 102, 13, 3, 2, 2, 2, 103,
-	104, 7, 4, 2, 2, 104, 105, 5, 62, 32, 2, 105, 15, 3, 2, 2, 2, 106, 107,
-	7, 5, 2, 2, 107, 109, 7, 6, 2, 2, 108, 110, 5, 10, 6, 2, 109, 108, 3, 2,
-	2, 2, 109, 110, 3, 2, 2, 2, 110, 111, 3, 2, 2, 2, 111, 112, 7, 7, 2, 2,
-	112, 17, 3, 2, 2, 2, 113, 116, 5, 20, 11, 2, 114, 116, 5, 26, 14, 2, 115,
-	113, 3, 2, 2, 2, 115, 114, 3, 2, 2, 2, 116, 19, 3, 2, 2, 2, 117, 118, 7,
-	8, 2, 2, 118, 119, 5, 62, 32, 2, 119, 120, 7, 6, 2, 2, 120, 121, 5, 62,
-	32, 2, 121, 122, 7, 9, 2, 2, 122, 130, 5, 12, 7, 2, 123, 124, 7, 10, 2,
-	2, 124, 125, 5, 62, 32, 2, 125, 126, 7, 9, 2, 2, 126, 127, 5, 12, 7, 2,
-	127, 129, 3, 2, 2, 2, 128, 123, 3, 2, 2, 2, 129, 132, 3, 2, 2, 2, 130,
-	128, 3, 2, 2, 2, 130, 131, 3, 2, 2, 2, 131, 134, 3, 2, 2, 2, 132, 130,
-	3, 2, 2, 2, 133, 135, 7, 10, 2, 2, 134, 133, 3, 2, 2, 2, 134, 135, 3, 2,
-	2, 2, 135, 136, 3, 2, 2, 2, 136, 137, 7, 7, 2, 2, 137, 21, 3, 2, 2, 2,
-	138, 139, 7, 29, 2, 2, 139, 140, 7, 11, 2, 2, 140, 141, 5, 62, 32, 2, 141,
-	23, 3, 2, 2, 2, 142, 147, 5, 62, 32, 2, 143, 144, 7, 10, 2, 2, 144, 146,
-	5, 62, 32, 2, 145, 143, 3, 2, 2, 2, 146, 149, 3, 2, 2, 2, 147, 145, 3,
-	2, 2, 2, 147, 148, 3, 2, 2, 2, 148, 25, 3, 2, 2, 2, 149, 147, 3, 2, 2,
-	2, 150, 151, 7, 29, 2, 2, 151, 153, 7, 12, 2, 2, 152, 154, 5, 24, 13, 2,
-	153, 152, 3, 2, 2, 2, 153, 154, 3, 2, 2, 2, 154, 155, 3, 2, 2, 2, 155,
-	156, 7, 13, 2, 2, 156, 27, 3, 2, 2, 2, 157, 158, 7, 29, 2, 2, 158, 29,
-	3, 2, 2, 2, 159, 164, 5, 28, 15, 2, 160, 161, 7, 10, 2, 2, 161, 163, 5,
-	28, 15, 2, 162, 160, 3, 2, 2, 2, 163, 166, 3, 2, 2, 2, 164, 162, 3, 2,
-	2, 2, 164, 165, 3, 2, 2, 2, 165, 31, 3, 2, 2, 2, 166, 164, 3, 2, 2, 2,
-	167, 169, 5, 34, 18, 2, 168, 167, 3, 2, 2, 2, 169, 170, 3, 2, 2, 2, 170,
-	168, 3, 2, 2, 2, 170, 171, 3, 2, 2, 2, 171, 33, 3, 2, 2, 2, 172, 174, 5,
-	38, 20, 2, 173, 172, 3, 2, 2, 2, 173, 174, 3, 2, 2, 2, 174, 175, 3, 2,
-	2, 2, 175, 176, 7, 29, 2, 2, 176, 178, 7, 12, 2, 2, 177, 179, 5, 44, 23,
-	2, 178, 177, 3, 2, 2, 2, 178, 179, 3, 2, 2, 2, 179, 180, 3, 2, 2, 2, 180,
-	183, 7, 13, 2, 2, 181, 182, 7, 14, 2, 2, 182, 184, 5, 28, 15, 2, 183, 181,
-	3, 2, 2, 2, 183, 184, 3, 2, 2, 2, 184, 185, 3, 2, 2, 2, 185, 187, 7, 6,
-	2, 2, 186, 188, 5, 10, 6, 2, 187, 186, 3, 2, 2, 2, 187, 188, 3, 2, 2, 2,
-	188, 189, 3, 2, 2, 2, 189, 190, 7, 7, 2, 2, 190, 35, 3, 2, 2, 2, 191, 192,
-	7, 15, 2, 2, 192, 195, 7, 29, 2, 2, 193, 194, 7, 16, 2, 2, 194, 196, 5,
-	30, 16, 2, 195, 193, 3, 2, 2, 2, 195, 196, 3, 2, 2, 2, 196, 197, 3, 2,
-	2, 2, 197, 199, 7, 6, 2, 2, 198, 200, 5, 32, 17, 2, 199, 198, 3, 2, 2,
-	2, 199, 200, 3, 2, 2, 2, 200, 201, 3, 2, 2, 2, 201, 202, 7, 7, 2, 2, 202,
-	37, 3, 2, 2, 2, 203, 204, 7, 17, 2, 2, 204, 39, 3, 2, 2, 2, 205, 207, 5,
-	38, 20, 2, 206, 205, 3, 2, 2, 2, 206, 207, 3, 2, 2, 2, 207, 208, 3, 2,
-	2, 2, 208, 211, 7, 29, 2, 2, 209, 210, 7, 16, 2, 2, 210, 212, 5, 28, 15,
-	2, 211, 209, 3, 2, 2, 2, 211, 212, 3, 2, 2, 2, 212, 213, 3, 2, 2, 2, 213,
-	214, 7, 11, 2, 2, 214, 215, 5, 62, 32, 2, 215, 41, 3, 2, 2, 2, 216, 218,
-	7, 18, 2, 2, 217, 219, 7, 19, 2, 2, 218, 217, 3, 2, 2, 2, 218, 219, 3,
-	2, 2, 2, 219, 220, 3, 2, 2, 2, 220, 225, 5, 40, 21, 2, 221, 222, 7, 10,
-	2, 2, 222, 224, 5, 40, 21, 2, 223, 221, 3, 2, 2, 2, 224, 227, 3, 2, 2,
-	2, 225, 223, 3, 2, 2, 2, 225, 226, 3, 2, 2, 2, 226, 43, 3, 2, 2, 2, 227,
-	225, 3, 2, 2, 2, 228, 233, 5, 46, 24, 2, 229, 230, 7, 10, 2, 2, 230, 232,
-	5, 46, 24, 2, 231, 229, 3, 2, 2, 2, 232, 235, 3, 2, 2, 2, 233, 231, 3,
-	2, 2, 2, 233, 234, 3, 2, 2, 2, 234, 45, 3, 2, 2, 2, 235, 233, 3, 2, 2,
-	2, 236, 237, 7, 29, 2, 2, 237, 238, 7, 16, 2, 2, 238, 239, 5, 28, 15, 2,
-	239, 47, 3, 2, 2, 2, 240, 242, 5, 38, 20, 2, 241, 240, 3, 2, 2, 2, 241,
-	242, 3, 2, 2, 2, 242, 243, 3, 2, 2, 2, 243, 244, 7, 20, 2, 2, 244, 245,
-	7, 29, 2, 2, 245, 247, 7, 12, 2, 2, 246, 248, 5, 44, 23, 2, 247, 246, 3,
-	2, 2, 2, 247, 248, 3, 2, 2, 2, 248, 249, 3, 2, 2, 2, 249, 252, 7, 13, 2,
-	2, 250, 251, 7, 14, 2, 2, 251, 253, 5, 28, 15, 2, 252, 250, 3, 2, 2, 2,
-	252, 253, 3, 2, 2, 2, 253, 254, 3, 2, 2, 2, 254, 256, 7, 6, 2, 2, 255,
-	257, 5, 10, 6, 2, 256, 255, 3, 2, 2, 2, 256, 257, 3, 2, 2, 2, 257, 258,
-	3, 2, 2, 2, 258, 259, 7, 7, 2, 2, 259, 49, 3, 2, 2, 2, 260, 262, 5, 52,
-	27, 2, 261, 260, 3, 2, 2, 2, 262, 263, 3, 2, 2, 2, 263, 261, 3, 2, 2, 2,
-	263, 264, 3, 2, 2, 2, 264, 51, 3, 2, 2, 2, 265, 266, 7, 29, 2, 2, 266,
-	267, 7, 16, 2, 2, 267, 268, 5, 28, 15, 2, 268, 53, 3, 2, 2, 2, 269, 271,
-	7, 21, 2, 2, 270, 272, 5, 38, 20, 2, 271, 270, 3, 2, 2, 2, 271, 272, 3,
-	2, 2, 2, 272, 273, 3, 2, 2, 2, 273, 274, 7, 29, 2, 2, 274, 275, 7, 12,
-	2, 2, 275, 276, 5, 50, 26, 2, 276, 277, 7, 13, 2, 2, 277, 55, 3, 2, 2,
-	2, 278, 280, 5, 58, 30, 2, 279, 278, 3, 2, 2, 2, 280, 281, 3, 2, 2, 2,
-	281, 279, 3, 2, 2, 2, 281, 282, 3, 2, 2, 2, 282, 57, 3, 2, 2, 2, 283, 285,
-	5, 38, 20, 2, 284, 283, 3, 2, 2, 2, 284, 285, 3, 2, 2, 2, 285, 286, 3,
-	2, 2, 2, 286, 287, 7, 29, 2, 2, 287, 289, 7, 12, 2, 2, 288, 290, 5, 30,
-	16, 2, 289, 288, 3, 2, 2, 2, 289, 290, 3, 2, 2, 2, 290, 291, 3, 2, 2, 2,
-	291, 294, 7, 13, 2, 2, 292, 293, 7, 14, 2, 2, 293, 295, 5, 28, 15, 2, 294,
-	292, 3, 2, 2, 2, 294, 295, 3, 2, 2, 2, 295, 59, 3, 2, 2, 2, 296, 297, 7,
-	22, 2, 2, 297, 298, 5, 38, 20, 2, 298, 299, 7, 29, 2, 2, 299, 301, 7, 6,
-	2, 2, 300, 302, 5, 56, 29, 2, 301, 300, 3, 2, 2, 2, 301, 302, 3, 2, 2,
-	2, 302, 303, 3, 2, 2, 2, 303, 304, 7, 7, 2, 2, 304, 61, 3, 2, 2, 2, 305,
-	306, 8, 32, 1, 2, 306, 307, 5, 64, 33, 2, 307, 319, 3, 2, 2, 2, 308, 309,
-	12, 6, 2, 2, 309, 310, 7, 23, 2, 2, 310, 318, 5, 62, 32, 7, 311, 312, 12,
-	5, 2, 2, 312, 313, 9, 2, 2, 2, 313, 318, 5, 62, 32, 6, 314, 315, 12, 4,
-	2, 2, 315, 316, 9, 3, 2, 2, 316, 318, 5, 62, 32, 5, 317, 308, 3, 2, 2,
-	2, 317, 311, 3, 2, 2, 2, 317, 314, 3, 2, 2, 2, 318, 321, 3, 2, 2, 2, 319,
-	317, 3, 2, 2, 2, 319, 320, 3, 2, 2, 2, 320, 63, 3, 2, 2, 2, 321, 319, 3,
-	2, 2, 2, 322, 323, 7, 12, 2, 2, 323, 324, 5, 62, 32, 2, 324, 325, 7, 13,
-	2, 2, 325, 331, 3, 2, 2, 2, 326, 331, 5, 18, 10, 2, 327, 331, 5, 66, 34,
-	2, 328, 331, 5, 68, 35, 2, 329, 331, 5, 70, 36, 2, 330, 322, 3, 2, 2, 2,
-	330, 326, 3, 2, 2, 2, 330, 327, 3, 2, 2, 2, 330, 328, 3, 2, 2, 2, 330,
-	329, 3, 2, 2, 2, 331, 65, 3, 2, 2, 2, 332, 333, 7, 30, 2, 2, 333, 67, 3,
-	2, 2, 2, 334, 335, 7, 29, 2, 2, 335, 69, 3, 2, 2, 2, 336, 337, 7, 31, 2,
-	2, 337, 71, 3, 2, 2, 2, 40, 73, 78, 86, 94, 101, 109, 115, 130, 134, 147,
-	153, 164, 170, 173, 178, 183, 187, 195, 199, 206, 211, 218, 225, 233, 241,
-	247, 252, 256, 263, 271, 281, 284, 289, 294, 301, 317, 319, 330,
+	9, 34, 4, 35, 9, 35, 3, 2, 5, 2, 72, 10, 2, 3, 3, 6, 3, 75, 10, 3, 13,
+	3, 14, 3, 76, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 5, 4, 85, 10, 4, 3, 5,
+	3, 5, 3, 5, 3, 6, 6, 6, 91, 10, 6, 13, 6, 14, 6, 92, 3, 7, 3, 7, 3, 7,
+	3, 7, 3, 7, 5, 7, 100, 10, 7, 3, 8, 3, 8, 3, 8, 3, 9, 3, 9, 3, 9, 5, 9,
+	108, 10, 9, 3, 9, 3, 9, 3, 10, 3, 10, 5, 10, 114, 10, 10, 3, 11, 3, 11,
+	3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 3, 11, 7, 11, 127,
+	10, 11, 12, 11, 14, 11, 130, 11, 11, 3, 11, 5, 11, 133, 10, 11, 3, 11,
+	3, 11, 3, 12, 3, 12, 3, 12, 3, 12, 3, 13, 3, 13, 3, 13, 7, 13, 144, 10,
+	13, 12, 13, 14, 13, 147, 11, 13, 3, 14, 3, 14, 3, 14, 5, 14, 152, 10, 14,
+	3, 14, 3, 14, 3, 15, 3, 15, 3, 16, 3, 16, 3, 16, 7, 16, 161, 10, 16, 12,
+	16, 14, 16, 164, 11, 16, 3, 17, 6, 17, 167, 10, 17, 13, 17, 14, 17, 168,
+	3, 18, 5, 18, 172, 10, 18, 3, 18, 3, 18, 3, 18, 5, 18, 177, 10, 18, 3,
+	18, 3, 18, 3, 18, 5, 18, 182, 10, 18, 3, 18, 3, 18, 5, 18, 186, 10, 18,
+	3, 18, 3, 18, 3, 19, 3, 19, 3, 19, 3, 19, 5, 19, 194, 10, 19, 3, 19, 3,
+	19, 5, 19, 198, 10, 19, 3, 19, 3, 19, 3, 20, 3, 20, 3, 21, 5, 21, 205,
+	10, 21, 3, 21, 3, 21, 3, 21, 5, 21, 210, 10, 21, 3, 21, 3, 21, 3, 21, 3,
+	22, 3, 22, 5, 22, 217, 10, 22, 3, 22, 3, 22, 3, 22, 7, 22, 222, 10, 22,
+	12, 22, 14, 22, 225, 11, 22, 3, 23, 3, 23, 3, 23, 7, 23, 230, 10, 23, 12,
+	23, 14, 23, 233, 11, 23, 3, 24, 3, 24, 3, 24, 3, 24, 3, 25, 5, 25, 240,
+	10, 25, 3, 25, 3, 25, 3, 25, 3, 25, 5, 25, 246, 10, 25, 3, 25, 3, 25, 3,
+	25, 5, 25, 251, 10, 25, 3, 25, 3, 25, 5, 25, 255, 10, 25, 3, 25, 3, 25,
+	3, 26, 6, 26, 260, 10, 26, 13, 26, 14, 26, 261, 3, 27, 3, 27, 3, 27, 3,
+	27, 3, 28, 3, 28, 5, 28, 270, 10, 28, 3, 28, 3, 28, 3, 28, 3, 28, 3, 28,
+	3, 29, 6, 29, 278, 10, 29, 13, 29, 14, 29, 279, 3, 30, 5, 30, 283, 10,
+	30, 3, 30, 3, 30, 3, 30, 5, 30, 288, 10, 30, 3, 30, 3, 30, 3, 30, 5, 30,
+	293, 10, 30, 3, 31, 3, 31, 3, 31, 3, 31, 3, 31, 5, 31, 300, 10, 31, 3,
+	31, 3, 31, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32,
+	5, 32, 313, 10, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3, 32, 3,
+	32, 3, 32, 7, 32, 324, 10, 32, 12, 32, 14, 32, 327, 11, 32, 3, 33, 3, 33,
+	3, 34, 3, 34, 3, 35, 3, 35, 3, 35, 2, 3, 62, 36, 2, 4, 6, 8, 10, 12, 14,
+	16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50,
+	52, 54, 56, 58, 60, 62, 64, 66, 68, 2, 4, 3, 2, 24, 25, 4, 2, 17, 17, 26,
+	26, 2, 349, 2, 71, 3, 2, 2, 2, 4, 74, 3, 2, 2, 2, 6, 84, 3, 2, 2, 2, 8,
+	86, 3, 2, 2, 2, 10, 90, 3, 2, 2, 2, 12, 99, 3, 2, 2, 2, 14, 101, 3, 2,
+	2, 2, 16, 104, 3, 2, 2, 2, 18, 113, 3, 2, 2, 2, 20, 115, 3, 2, 2, 2, 22,
+	136, 3, 2, 2, 2, 24, 140, 3, 2, 2, 2, 26, 148, 3, 2, 2, 2, 28, 155, 3,
+	2, 2, 2, 30, 157, 3, 2, 2, 2, 32, 166, 3, 2, 2, 2, 34, 171, 3, 2, 2, 2,
+	36, 189, 3, 2, 2, 2, 38, 201, 3, 2, 2, 2, 40, 204, 3, 2, 2, 2, 42, 214,
+	3, 2, 2, 2, 44, 226, 3, 2, 2, 2, 46, 234, 3, 2, 2, 2, 48, 239, 3, 2, 2,
+	2, 50, 259, 3, 2, 2, 2, 52, 263, 3, 2, 2, 2, 54, 267, 3, 2, 2, 2, 56, 277,
+	3, 2, 2, 2, 58, 282, 3, 2, 2, 2, 60, 294, 3, 2, 2, 2, 62, 312, 3, 2, 2,
+	2, 64, 328, 3, 2, 2, 2, 66, 330, 3, 2, 2, 2, 68, 332, 3, 2, 2, 2, 70, 72,
+	5, 4, 3, 2, 71, 70, 3, 2, 2, 2, 71, 72, 3, 2, 2, 2, 72, 3, 3, 2, 2, 2,
+	73, 75, 5, 6, 4, 2, 74, 73, 3, 2, 2, 2, 75, 76, 3, 2, 2, 2, 76, 74, 3,
+	2, 2, 2, 76, 77, 3, 2, 2, 2, 77, 5, 3, 2, 2, 2, 78, 85, 5, 48, 25, 2, 79,
+	85, 5, 42, 22, 2, 80, 85, 5, 54, 28, 2, 81, 85, 5, 36, 19, 2, 82, 85, 5,
+	60, 31, 2, 83, 85, 5, 8, 5, 2, 84, 78, 3, 2, 2, 2, 84, 79, 3, 2, 2, 2,
+	84, 80, 3, 2, 2, 2, 84, 81, 3, 2, 2, 2, 84, 82, 3, 2, 2, 2, 84, 83, 3,
+	2, 2, 2, 85, 7, 3, 2, 2, 2, 86, 87, 7, 3, 2, 2, 87, 88, 7, 29, 2, 2, 88,
+	9, 3, 2, 2, 2, 89, 91, 5, 12, 7, 2, 90, 89, 3, 2, 2, 2, 91, 92, 3, 2, 2,
+	2, 92, 90, 3, 2, 2, 2, 92, 93, 3, 2, 2, 2, 93, 11, 3, 2, 2, 2, 94, 100,
+	5, 42, 22, 2, 95, 100, 5, 16, 9, 2, 96, 100, 5, 14, 8, 2, 97, 100, 5, 22,
+	12, 2, 98, 100, 5, 18, 10, 2, 99, 94, 3, 2, 2, 2, 99, 95, 3, 2, 2, 2, 99,
+	96, 3, 2, 2, 2, 99, 97, 3, 2, 2, 2, 99, 98, 3, 2, 2, 2, 100, 13, 3, 2,
+	2, 2, 101, 102, 7, 4, 2, 2, 102, 103, 5, 62, 32, 2, 103, 15, 3, 2, 2, 2,
+	104, 105, 7, 5, 2, 2, 105, 107, 7, 6, 2, 2, 106, 108, 5, 10, 6, 2, 107,
+	106, 3, 2, 2, 2, 107, 108, 3, 2, 2, 2, 108, 109, 3, 2, 2, 2, 109, 110,
+	7, 7, 2, 2, 110, 17, 3, 2, 2, 2, 111, 114, 5, 20, 11, 2, 112, 114, 5, 26,
+	14, 2, 113, 111, 3, 2, 2, 2, 113, 112, 3, 2, 2, 2, 114, 19, 3, 2, 2, 2,
+	115, 116, 7, 8, 2, 2, 116, 117, 5, 62, 32, 2, 117, 118, 7, 6, 2, 2, 118,
+	119, 5, 62, 32, 2, 119, 120, 7, 9, 2, 2, 120, 128, 5, 12, 7, 2, 121, 122,
+	7, 10, 2, 2, 122, 123, 5, 62, 32, 2, 123, 124, 7, 9, 2, 2, 124, 125, 5,
+	12, 7, 2, 125, 127, 3, 2, 2, 2, 126, 121, 3, 2, 2, 2, 127, 130, 3, 2, 2,
+	2, 128, 126, 3, 2, 2, 2, 128, 129, 3, 2, 2, 2, 129, 132, 3, 2, 2, 2, 130,
+	128, 3, 2, 2, 2, 131, 133, 7, 10, 2, 2, 132, 131, 3, 2, 2, 2, 132, 133,
+	3, 2, 2, 2, 133, 134, 3, 2, 2, 2, 134, 135, 7, 7, 2, 2, 135, 21, 3, 2,
+	2, 2, 136, 137, 7, 29, 2, 2, 137, 138, 7, 11, 2, 2, 138, 139, 5, 62, 32,
+	2, 139, 23, 3, 2, 2, 2, 140, 145, 5, 62, 32, 2, 141, 142, 7, 10, 2, 2,
+	142, 144, 5, 62, 32, 2, 143, 141, 3, 2, 2, 2, 144, 147, 3, 2, 2, 2, 145,
+	143, 3, 2, 2, 2, 145, 146, 3, 2, 2, 2, 146, 25, 3, 2, 2, 2, 147, 145, 3,
+	2, 2, 2, 148, 149, 7, 29, 2, 2, 149, 151, 7, 12, 2, 2, 150, 152, 5, 24,
+	13, 2, 151, 150, 3, 2, 2, 2, 151, 152, 3, 2, 2, 2, 152, 153, 3, 2, 2, 2,
+	153, 154, 7, 13, 2, 2, 154, 27, 3, 2, 2, 2, 155, 156, 7, 29, 2, 2, 156,
+	29, 3, 2, 2, 2, 157, 162, 5, 28, 15, 2, 158, 159, 7, 10, 2, 2, 159, 161,
+	5, 28, 15, 2, 160, 158, 3, 2, 2, 2, 161, 164, 3, 2, 2, 2, 162, 160, 3,
+	2, 2, 2, 162, 163, 3, 2, 2, 2, 163, 31, 3, 2, 2, 2, 164, 162, 3, 2, 2,
+	2, 165, 167, 5, 34, 18, 2, 166, 165, 3, 2, 2, 2, 167, 168, 3, 2, 2, 2,
+	168, 166, 3, 2, 2, 2, 168, 169, 3, 2, 2, 2, 169, 33, 3, 2, 2, 2, 170, 172,
+	5, 38, 20, 2, 171, 170, 3, 2, 2, 2, 171, 172, 3, 2, 2, 2, 172, 173, 3,
+	2, 2, 2, 173, 174, 7, 29, 2, 2, 174, 176, 7, 12, 2, 2, 175, 177, 5, 44,
+	23, 2, 176, 175, 3, 2, 2, 2, 176, 177, 3, 2, 2, 2, 177, 178, 3, 2, 2, 2,
+	178, 181, 7, 13, 2, 2, 179, 180, 7, 14, 2, 2, 180, 182, 5, 28, 15, 2, 181,
+	179, 3, 2, 2, 2, 181, 182, 3, 2, 2, 2, 182, 183, 3, 2, 2, 2, 183, 185,
+	7, 6, 2, 2, 184, 186, 5, 10, 6, 2, 185, 184, 3, 2, 2, 2, 185, 186, 3, 2,
+	2, 2, 186, 187, 3, 2, 2, 2, 187, 188, 7, 7, 2, 2, 188, 35, 3, 2, 2, 2,
+	189, 190, 7, 15, 2, 2, 190, 193, 7, 29, 2, 2, 191, 192, 7, 16, 2, 2, 192,
+	194, 5, 30, 16, 2, 193, 191, 3, 2, 2, 2, 193, 194, 3, 2, 2, 2, 194, 195,
+	3, 2, 2, 2, 195, 197, 7, 6, 2, 2, 196, 198, 5, 32, 17, 2, 197, 196, 3,
+	2, 2, 2, 197, 198, 3, 2, 2, 2, 198, 199, 3, 2, 2, 2, 199, 200, 7, 7, 2,
+	2, 200, 37, 3, 2, 2, 2, 201, 202, 7, 17, 2, 2, 202, 39, 3, 2, 2, 2, 203,
+	205, 5, 38, 20, 2, 204, 203, 3, 2, 2, 2, 204, 205, 3, 2, 2, 2, 205, 206,
+	3, 2, 2, 2, 206, 209, 7, 29, 2, 2, 207, 208, 7, 16, 2, 2, 208, 210, 5,
+	28, 15, 2, 209, 207, 3, 2, 2, 2, 209, 210, 3, 2, 2, 2, 210, 211, 3, 2,
+	2, 2, 211, 212, 7, 11, 2, 2, 212, 213, 5, 62, 32, 2, 213, 41, 3, 2, 2,
+	2, 214, 216, 7, 18, 2, 2, 215, 217, 7, 19, 2, 2, 216, 215, 3, 2, 2, 2,
+	216, 217, 3, 2, 2, 2, 217, 218, 3, 2, 2, 2, 218, 223, 5, 40, 21, 2, 219,
+	220, 7, 10, 2, 2, 220, 222, 5, 40, 21, 2, 221, 219, 3, 2, 2, 2, 222, 225,
+	3, 2, 2, 2, 223, 221, 3, 2, 2, 2, 223, 224, 3, 2, 2, 2, 224, 43, 3, 2,
+	2, 2, 225, 223, 3, 2, 2, 2, 226, 231, 5, 46, 24, 2, 227, 228, 7, 10, 2,
+	2, 228, 230, 5, 46, 24, 2, 229, 227, 3, 2, 2, 2, 230, 233, 3, 2, 2, 2,
+	231, 229, 3, 2, 2, 2, 231, 232, 3, 2, 2, 2, 232, 45, 3, 2, 2, 2, 233, 231,
+	3, 2, 2, 2, 234, 235, 7, 29, 2, 2, 235, 236, 7, 16, 2, 2, 236, 237, 5,
+	28, 15, 2, 237, 47, 3, 2, 2, 2, 238, 240, 5, 38, 20, 2, 239, 238, 3, 2,
+	2, 2, 239, 240, 3, 2, 2, 2, 240, 241, 3, 2, 2, 2, 241, 242, 7, 20, 2, 2,
+	242, 243, 7, 29, 2, 2, 243, 245, 7, 12, 2, 2, 244, 246, 5, 44, 23, 2, 245,
+	244, 3, 2, 2, 2, 245, 246, 3, 2, 2, 2, 246, 247, 3, 2, 2, 2, 247, 250,
+	7, 13, 2, 2, 248, 249, 7, 14, 2, 2, 249, 251, 5, 28, 15, 2, 250, 248, 3,
+	2, 2, 2, 250, 251, 3, 2, 2, 2, 251, 252, 3, 2, 2, 2, 252, 254, 7, 6, 2,
+	2, 253, 255, 5, 10, 6, 2, 254, 253, 3, 2, 2, 2, 254, 255, 3, 2, 2, 2, 255,
+	256, 3, 2, 2, 2, 256, 257, 7, 7, 2, 2, 257, 49, 3, 2, 2, 2, 258, 260, 5,
+	52, 27, 2, 259, 258, 3, 2, 2, 2, 260, 261, 3, 2, 2, 2, 261, 259, 3, 2,
+	2, 2, 261, 262, 3, 2, 2, 2, 262, 51, 3, 2, 2, 2, 263, 264, 7, 29, 2, 2,
+	264, 265, 7, 16, 2, 2, 265, 266, 5, 28, 15, 2, 266, 53, 3, 2, 2, 2, 267,
+	269, 7, 21, 2, 2, 268, 270, 5, 38, 20, 2, 269, 268, 3, 2, 2, 2, 269, 270,
+	3, 2, 2, 2, 270, 271, 3, 2, 2, 2, 271, 272, 7, 29, 2, 2, 272, 273, 7, 12,
+	2, 2, 273, 274, 5, 50, 26, 2, 274, 275, 7, 13, 2, 2, 275, 55, 3, 2, 2,
+	2, 276, 278, 5, 58, 30, 2, 277, 276, 3, 2, 2, 2, 278, 279, 3, 2, 2, 2,
+	279, 277, 3, 2, 2, 2, 279, 280, 3, 2, 2, 2, 280, 57, 3, 2, 2, 2, 281, 283,
+	5, 38, 20, 2, 282, 281, 3, 2, 2, 2, 282, 283, 3, 2, 2, 2, 283, 284, 3,
+	2, 2, 2, 284, 285, 7, 29, 2, 2, 285, 287, 7, 12, 2, 2, 286, 288, 5, 30,
+	16, 2, 287, 286, 3, 2, 2, 2, 287, 288, 3, 2, 2, 2, 288, 289, 3, 2, 2, 2,
+	289, 292, 7, 13, 2, 2, 290, 291, 7, 14, 2, 2, 291, 293, 5, 28, 15, 2, 292,
+	290, 3, 2, 2, 2, 292, 293, 3, 2, 2, 2, 293, 59, 3, 2, 2, 2, 294, 295, 7,
+	22, 2, 2, 295, 296, 5, 38, 20, 2, 296, 297, 7, 29, 2, 2, 297, 299, 7, 6,
+	2, 2, 298, 300, 5, 56, 29, 2, 299, 298, 3, 2, 2, 2, 299, 300, 3, 2, 2,
+	2, 300, 301, 3, 2, 2, 2, 301, 302, 7, 7, 2, 2, 302, 61, 3, 2, 2, 2, 303,
+	304, 8, 32, 1, 2, 304, 305, 7, 12, 2, 2, 305, 306, 5, 62, 32, 2, 306, 307,
+	7, 13, 2, 2, 307, 313, 3, 2, 2, 2, 308, 313, 5, 18, 10, 2, 309, 313, 5,
+	64, 33, 2, 310, 313, 5, 66, 34, 2, 311, 313, 5, 68, 35, 2, 312, 303, 3,
+	2, 2, 2, 312, 308, 3, 2, 2, 2, 312, 309, 3, 2, 2, 2, 312, 310, 3, 2, 2,
+	2, 312, 311, 3, 2, 2, 2, 313, 325, 3, 2, 2, 2, 314, 315, 12, 10, 2, 2,
+	315, 316, 7, 23, 2, 2, 316, 324, 5, 62, 32, 11, 317, 318, 12, 9, 2, 2,
+	318, 319, 9, 2, 2, 2, 319, 324, 5, 62, 32, 10, 320, 321, 12, 8, 2, 2, 321,
+	322, 9, 3, 2, 2, 322, 324, 5, 62, 32, 9, 323, 314, 3, 2, 2, 2, 323, 317,
+	3, 2, 2, 2, 323, 320, 3, 2, 2, 2, 324, 327, 3, 2, 2, 2, 325, 323, 3, 2,
+	2, 2, 325, 326, 3, 2, 2, 2, 326, 63, 3, 2, 2, 2, 327, 325, 3, 2, 2, 2,
+	328, 329, 7, 30, 2, 2, 329, 65, 3, 2, 2, 2, 330, 331, 7, 29, 2, 2, 331,
+	67, 3, 2, 2, 2, 332, 333, 7, 31, 2, 2, 333, 69, 3, 2, 2, 2, 40, 71, 76,
+	84, 92, 99, 107, 113, 128, 132, 145, 151, 162, 168, 171, 176, 181, 185,
+	193, 197, 204, 209, 216, 223, 231, 239, 245, 250, 254, 261, 269, 279, 282,
+	287, 292, 299, 312, 323, 325,
 }
 var deserializer = antlr.NewATNDeserializer(nil)
 var deserializedATN = deserializer.DeserializeFromUInt16(parserATN)
@@ -184,8 +183,7 @@ var ruleNames = []string{
 	"loopStat", "exprStat", "matchRule", "assign", "exprList", "fnCall", "typePass",
 	"typeList", "methodList", "method", "implBlock", "exportor", "define",
 	"varDefine", "paramList", "param", "fnDefine", "attrList", "attr", "typeDefine",
-	"tmethodList", "tmethod", "traitDefine", "expr", "factor", "num", "id",
-	"str",
+	"tmethodList", "tmethod", "traitDefine", "expr", "num", "id", "str",
 }
 var decisionToDFA = make([]*antlr.DFA, len(deserializedATN.DecisionToState))
 
@@ -280,10 +278,9 @@ const (
 	ElzParserRULE_tmethod     = 28
 	ElzParserRULE_traitDefine = 29
 	ElzParserRULE_expr        = 30
-	ElzParserRULE_factor      = 31
-	ElzParserRULE_num         = 32
-	ElzParserRULE_id          = 33
-	ElzParserRULE_str         = 34
+	ElzParserRULE_num         = 31
+	ElzParserRULE_id          = 32
+	ElzParserRULE_str         = 33
 )
 
 // IProgContext is an interface to support dynamic dispatch.
@@ -376,13 +373,13 @@ func (p *ElzParser) Prog() (localctx IProgContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(71)
+	p.SetState(69)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if ((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__0)|(1<<ElzParserT__12)|(1<<ElzParserT__14)|(1<<ElzParserT__15)|(1<<ElzParserT__17)|(1<<ElzParserT__18)|(1<<ElzParserT__19))) != 0 {
 		{
-			p.SetState(70)
+			p.SetState(68)
 			p.TopStatList()
 		}
 
@@ -494,17 +491,17 @@ func (p *ElzParser) TopStatList() (localctx ITopStatListContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(74)
+	p.SetState(72)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	for ok := true; ok; ok = (((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__0)|(1<<ElzParserT__12)|(1<<ElzParserT__14)|(1<<ElzParserT__15)|(1<<ElzParserT__17)|(1<<ElzParserT__18)|(1<<ElzParserT__19))) != 0) {
 		{
-			p.SetState(73)
+			p.SetState(71)
 			p.TopStat()
 		}
 
-		p.SetState(76)
+		p.SetState(74)
 		p.GetErrorHandler().Sync(p)
 		_la = p.GetTokenStream().LA(1)
 	}
@@ -650,49 +647,49 @@ func (p *ElzParser) TopStat() (localctx ITopStatContext) {
 		}
 	}()
 
-	p.SetState(84)
+	p.SetState(82)
 	p.GetErrorHandler().Sync(p)
 
 	switch p.GetTokenStream().LA(1) {
 	case ElzParserT__14, ElzParserT__17:
 		p.EnterOuterAlt(localctx, 1)
 		{
-			p.SetState(78)
+			p.SetState(76)
 			p.FnDefine()
 		}
 
 	case ElzParserT__15:
 		p.EnterOuterAlt(localctx, 2)
 		{
-			p.SetState(79)
+			p.SetState(77)
 			p.VarDefine()
 		}
 
 	case ElzParserT__18:
 		p.EnterOuterAlt(localctx, 3)
 		{
-			p.SetState(80)
+			p.SetState(78)
 			p.TypeDefine()
 		}
 
 	case ElzParserT__12:
 		p.EnterOuterAlt(localctx, 4)
 		{
-			p.SetState(81)
+			p.SetState(79)
 			p.ImplBlock()
 		}
 
 	case ElzParserT__19:
 		p.EnterOuterAlt(localctx, 5)
 		{
-			p.SetState(82)
+			p.SetState(80)
 			p.TraitDefine()
 		}
 
 	case ElzParserT__0:
 		p.EnterOuterAlt(localctx, 6)
 		{
-			p.SetState(83)
+			p.SetState(81)
 			p.ImportStat()
 		}
 
@@ -787,11 +784,11 @@ func (p *ElzParser) ImportStat() (localctx IImportStatContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(86)
+		p.SetState(84)
 		p.Match(ElzParserT__0)
 	}
 	{
-		p.SetState(87)
+		p.SetState(85)
 		p.Match(ElzParserID)
 	}
 
@@ -901,17 +898,17 @@ func (p *ElzParser) StatList() (localctx IStatListContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(90)
+	p.SetState(88)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	for ok := true; ok; ok = (((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__1)|(1<<ElzParserT__2)|(1<<ElzParserT__5)|(1<<ElzParserT__15)|(1<<ElzParserID))) != 0) {
 		{
-			p.SetState(89)
+			p.SetState(87)
 			p.Stat()
 		}
 
-		p.SetState(92)
+		p.SetState(90)
 		p.GetErrorHandler().Sync(p)
 		_la = p.GetTokenStream().LA(1)
 	}
@@ -1047,41 +1044,41 @@ func (p *ElzParser) Stat() (localctx IStatContext) {
 		}
 	}()
 
-	p.SetState(99)
+	p.SetState(97)
 	p.GetErrorHandler().Sync(p)
 	switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 4, p.GetParserRuleContext()) {
 	case 1:
 		p.EnterOuterAlt(localctx, 1)
 		{
-			p.SetState(94)
+			p.SetState(92)
 			p.VarDefine()
 		}
 
 	case 2:
 		p.EnterOuterAlt(localctx, 2)
 		{
-			p.SetState(95)
+			p.SetState(93)
 			p.LoopStat()
 		}
 
 	case 3:
 		p.EnterOuterAlt(localctx, 3)
 		{
-			p.SetState(96)
+			p.SetState(94)
 			p.ReturnStat()
 		}
 
 	case 4:
 		p.EnterOuterAlt(localctx, 4)
 		{
-			p.SetState(97)
+			p.SetState(95)
 			p.Assign()
 		}
 
 	case 5:
 		p.EnterOuterAlt(localctx, 5)
 		{
-			p.SetState(98)
+			p.SetState(96)
 			p.ExprStat()
 		}
 
@@ -1180,11 +1177,11 @@ func (p *ElzParser) ReturnStat() (localctx IReturnStatContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(101)
+		p.SetState(99)
 		p.Match(ElzParserT__1)
 	}
 	{
-		p.SetState(102)
+		p.SetState(100)
 		p.expr(0)
 	}
 
@@ -1282,26 +1279,26 @@ func (p *ElzParser) LoopStat() (localctx ILoopStatContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(104)
+		p.SetState(102)
 		p.Match(ElzParserT__2)
 	}
 	{
-		p.SetState(105)
+		p.SetState(103)
 		p.Match(ElzParserT__3)
 	}
-	p.SetState(107)
+	p.SetState(105)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if ((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__1)|(1<<ElzParserT__2)|(1<<ElzParserT__5)|(1<<ElzParserT__15)|(1<<ElzParserID))) != 0 {
 		{
-			p.SetState(106)
+			p.SetState(104)
 			p.StatList()
 		}
 
 	}
 	{
-		p.SetState(109)
+		p.SetState(107)
 		p.Match(ElzParserT__4)
 	}
 
@@ -1406,21 +1403,21 @@ func (p *ElzParser) ExprStat() (localctx IExprStatContext) {
 		}
 	}()
 
-	p.SetState(113)
+	p.SetState(111)
 	p.GetErrorHandler().Sync(p)
 
 	switch p.GetTokenStream().LA(1) {
 	case ElzParserT__5:
 		p.EnterOuterAlt(localctx, 1)
 		{
-			p.SetState(111)
+			p.SetState(109)
 			p.MatchRule()
 		}
 
 	case ElzParserID:
 		p.EnterOuterAlt(localctx, 2)
 		{
-			p.SetState(112)
+			p.SetState(110)
 			p.FnCall()
 		}
 
@@ -1560,8 +1557,16 @@ func (p *ElzParser) MatchRule() (localctx IMatchRuleContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(115)
+		p.SetState(113)
 		p.Match(ElzParserT__5)
+	}
+	{
+		p.SetState(114)
+		p.expr(0)
+	}
+	{
+		p.SetState(115)
+		p.Match(ElzParserT__3)
 	}
 	{
 		p.SetState(116)
@@ -1569,61 +1574,53 @@ func (p *ElzParser) MatchRule() (localctx IMatchRuleContext) {
 	}
 	{
 		p.SetState(117)
-		p.Match(ElzParserT__3)
-	}
-	{
-		p.SetState(118)
-		p.expr(0)
-	}
-	{
-		p.SetState(119)
 		p.Match(ElzParserT__6)
 	}
 	{
-		p.SetState(120)
+		p.SetState(118)
 		p.Stat()
 	}
-	p.SetState(128)
+	p.SetState(126)
 	p.GetErrorHandler().Sync(p)
 	_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 7, p.GetParserRuleContext())
 
 	for _alt != 2 && _alt != antlr.ATNInvalidAltNumber {
 		if _alt == 1 {
 			{
-				p.SetState(121)
+				p.SetState(119)
 				p.Match(ElzParserT__7)
 			}
 			{
-				p.SetState(122)
+				p.SetState(120)
 				p.expr(0)
 			}
 			{
-				p.SetState(123)
+				p.SetState(121)
 				p.Match(ElzParserT__6)
 			}
 			{
-				p.SetState(124)
+				p.SetState(122)
 				p.Stat()
 			}
 
 		}
-		p.SetState(130)
+		p.SetState(128)
 		p.GetErrorHandler().Sync(p)
 		_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 7, p.GetParserRuleContext())
 	}
-	p.SetState(132)
+	p.SetState(130)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__7 {
 		{
-			p.SetState(131)
+			p.SetState(129)
 			p.Match(ElzParserT__7)
 		}
 
 	}
 	{
-		p.SetState(134)
+		p.SetState(132)
 		p.Match(ElzParserT__4)
 	}
 
@@ -1724,15 +1721,15 @@ func (p *ElzParser) Assign() (localctx IAssignContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(136)
+		p.SetState(134)
 		p.Match(ElzParserID)
 	}
 	{
-		p.SetState(137)
+		p.SetState(135)
 		p.Match(ElzParserT__8)
 	}
 	{
-		p.SetState(138)
+		p.SetState(136)
 		p.expr(0)
 	}
 
@@ -1843,24 +1840,24 @@ func (p *ElzParser) ExprList() (localctx IExprListContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(140)
+		p.SetState(138)
 		p.expr(0)
 	}
-	p.SetState(145)
+	p.SetState(143)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	for _la == ElzParserT__7 {
 		{
-			p.SetState(141)
+			p.SetState(139)
 			p.Match(ElzParserT__7)
 		}
 		{
-			p.SetState(142)
+			p.SetState(140)
 			p.expr(0)
 		}
 
-		p.SetState(147)
+		p.SetState(145)
 		p.GetErrorHandler().Sync(p)
 		_la = p.GetTokenStream().LA(1)
 	}
@@ -1963,26 +1960,26 @@ func (p *ElzParser) FnCall() (localctx IFnCallContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(148)
+		p.SetState(146)
 		p.Match(ElzParserID)
 	}
 	{
-		p.SetState(149)
+		p.SetState(147)
 		p.Match(ElzParserT__9)
 	}
-	p.SetState(151)
+	p.SetState(149)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if ((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__5)|(1<<ElzParserT__9)|(1<<ElzParserID)|(1<<ElzParserNUM)|(1<<ElzParserSTRING))) != 0 {
 		{
-			p.SetState(150)
+			p.SetState(148)
 			p.ExprList()
 		}
 
 	}
 	{
-		p.SetState(153)
+		p.SetState(151)
 		p.Match(ElzParserT__10)
 	}
 
@@ -2073,7 +2070,7 @@ func (p *ElzParser) TypePass() (localctx ITypePassContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(155)
+		p.SetState(153)
 		p.Match(ElzParserID)
 	}
 
@@ -2184,24 +2181,24 @@ func (p *ElzParser) TypeList() (localctx ITypeListContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(157)
+		p.SetState(155)
 		p.TypePass()
 	}
-	p.SetState(162)
+	p.SetState(160)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	for _la == ElzParserT__7 {
 		{
-			p.SetState(158)
+			p.SetState(156)
 			p.Match(ElzParserT__7)
 		}
 		{
-			p.SetState(159)
+			p.SetState(157)
 			p.TypePass()
 		}
 
-		p.SetState(164)
+		p.SetState(162)
 		p.GetErrorHandler().Sync(p)
 		_la = p.GetTokenStream().LA(1)
 	}
@@ -2312,17 +2309,17 @@ func (p *ElzParser) MethodList() (localctx IMethodListContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(166)
+	p.SetState(164)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	for ok := true; ok; ok = _la == ElzParserT__14 || _la == ElzParserID {
 		{
-			p.SetState(165)
+			p.SetState(163)
 			p.Method()
 		}
 
-		p.SetState(168)
+		p.SetState(166)
 		p.GetErrorHandler().Sync(p)
 		_la = p.GetTokenStream().LA(1)
 	}
@@ -2454,72 +2451,72 @@ func (p *ElzParser) Method() (localctx IMethodContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(171)
+	p.SetState(169)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__14 {
 		{
-			p.SetState(170)
+			p.SetState(168)
 			p.Exportor()
 		}
 
 	}
 	{
-		p.SetState(173)
+		p.SetState(171)
 		p.Match(ElzParserID)
 	}
 	{
-		p.SetState(174)
+		p.SetState(172)
 		p.Match(ElzParserT__9)
 	}
-	p.SetState(176)
+	p.SetState(174)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserID {
 		{
-			p.SetState(175)
+			p.SetState(173)
 			p.ParamList()
 		}
 
 	}
 	{
-		p.SetState(178)
+		p.SetState(176)
 		p.Match(ElzParserT__10)
 	}
-	p.SetState(181)
+	p.SetState(179)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__11 {
 		{
-			p.SetState(179)
+			p.SetState(177)
 			p.Match(ElzParserT__11)
 		}
 		{
-			p.SetState(180)
+			p.SetState(178)
 			p.TypePass()
 		}
 
 	}
 	{
-		p.SetState(183)
+		p.SetState(181)
 		p.Match(ElzParserT__3)
 	}
-	p.SetState(185)
+	p.SetState(183)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if ((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__1)|(1<<ElzParserT__2)|(1<<ElzParserT__5)|(1<<ElzParserT__15)|(1<<ElzParserID))) != 0 {
 		{
-			p.SetState(184)
+			p.SetState(182)
 			p.StatList()
 		}
 
 	}
 	{
-		p.SetState(187)
+		p.SetState(185)
 		p.Match(ElzParserT__4)
 	}
 
@@ -2631,45 +2628,45 @@ func (p *ElzParser) ImplBlock() (localctx IImplBlockContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(189)
+		p.SetState(187)
 		p.Match(ElzParserT__12)
 	}
 	{
-		p.SetState(190)
+		p.SetState(188)
 		p.Match(ElzParserID)
 	}
-	p.SetState(193)
+	p.SetState(191)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__13 {
 		{
-			p.SetState(191)
+			p.SetState(189)
 			p.Match(ElzParserT__13)
 		}
 		{
-			p.SetState(192)
+			p.SetState(190)
 			p.TypeList()
 		}
 
 	}
 	{
-		p.SetState(195)
+		p.SetState(193)
 		p.Match(ElzParserT__3)
 	}
-	p.SetState(197)
+	p.SetState(195)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__14 || _la == ElzParserID {
 		{
-			p.SetState(196)
+			p.SetState(194)
 			p.MethodList()
 		}
 
 	}
 	{
-		p.SetState(199)
+		p.SetState(197)
 		p.Match(ElzParserT__4)
 	}
 
@@ -2755,7 +2752,7 @@ func (p *ElzParser) Exportor() (localctx IExportorContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(201)
+		p.SetState(199)
 		p.Match(ElzParserT__14)
 	}
 
@@ -2876,42 +2873,42 @@ func (p *ElzParser) Define() (localctx IDefineContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(204)
+	p.SetState(202)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__14 {
 		{
-			p.SetState(203)
+			p.SetState(201)
 			p.Exportor()
 		}
 
 	}
 	{
-		p.SetState(206)
+		p.SetState(204)
 		p.Match(ElzParserID)
 	}
-	p.SetState(209)
+	p.SetState(207)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__13 {
 		{
-			p.SetState(207)
+			p.SetState(205)
 			p.Match(ElzParserT__13)
 		}
 		{
-			p.SetState(208)
+			p.SetState(206)
 			p.TypePass()
 		}
 
 	}
 	{
-		p.SetState(211)
+		p.SetState(209)
 		p.Match(ElzParserT__8)
 	}
 	{
-		p.SetState(212)
+		p.SetState(210)
 		p.expr(0)
 	}
 
@@ -3035,16 +3032,16 @@ func (p *ElzParser) VarDefine() (localctx IVarDefineContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(214)
+		p.SetState(212)
 		p.Match(ElzParserT__15)
 	}
-	p.SetState(216)
+	p.SetState(214)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__16 {
 		{
-			p.SetState(215)
+			p.SetState(213)
 
 			var _m = p.Match(ElzParserT__16)
 
@@ -3053,26 +3050,26 @@ func (p *ElzParser) VarDefine() (localctx IVarDefineContext) {
 
 	}
 	{
-		p.SetState(218)
+		p.SetState(216)
 		p.Define()
 	}
-	p.SetState(223)
+	p.SetState(221)
 	p.GetErrorHandler().Sync(p)
 	_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 22, p.GetParserRuleContext())
 
 	for _alt != 2 && _alt != antlr.ATNInvalidAltNumber {
 		if _alt == 1 {
 			{
-				p.SetState(219)
+				p.SetState(217)
 				p.Match(ElzParserT__7)
 			}
 			{
-				p.SetState(220)
+				p.SetState(218)
 				p.Define()
 			}
 
 		}
-		p.SetState(225)
+		p.SetState(223)
 		p.GetErrorHandler().Sync(p)
 		_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 22, p.GetParserRuleContext())
 	}
@@ -3184,24 +3181,24 @@ func (p *ElzParser) ParamList() (localctx IParamListContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(226)
+		p.SetState(224)
 		p.Param()
 	}
-	p.SetState(231)
+	p.SetState(229)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	for _la == ElzParserT__7 {
 		{
-			p.SetState(227)
+			p.SetState(225)
 			p.Match(ElzParserT__7)
 		}
 		{
-			p.SetState(228)
+			p.SetState(226)
 			p.Param()
 		}
 
-		p.SetState(233)
+		p.SetState(231)
 		p.GetErrorHandler().Sync(p)
 		_la = p.GetTokenStream().LA(1)
 	}
@@ -3303,15 +3300,15 @@ func (p *ElzParser) Param() (localctx IParamContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(234)
+		p.SetState(232)
 		p.Match(ElzParserID)
 	}
 	{
-		p.SetState(235)
+		p.SetState(233)
 		p.Match(ElzParserT__13)
 	}
 	{
-		p.SetState(236)
+		p.SetState(234)
 		p.TypePass()
 	}
 
@@ -3442,76 +3439,76 @@ func (p *ElzParser) FnDefine() (localctx IFnDefineContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(239)
+	p.SetState(237)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__14 {
 		{
-			p.SetState(238)
+			p.SetState(236)
 			p.Exportor()
 		}
 
 	}
 	{
-		p.SetState(241)
+		p.SetState(239)
 		p.Match(ElzParserT__17)
 	}
 	{
-		p.SetState(242)
+		p.SetState(240)
 		p.Match(ElzParserID)
 	}
 	{
-		p.SetState(243)
+		p.SetState(241)
 		p.Match(ElzParserT__9)
 	}
-	p.SetState(245)
+	p.SetState(243)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserID {
 		{
-			p.SetState(244)
+			p.SetState(242)
 			p.ParamList()
 		}
 
 	}
 	{
-		p.SetState(247)
+		p.SetState(245)
 		p.Match(ElzParserT__10)
 	}
-	p.SetState(250)
+	p.SetState(248)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__11 {
 		{
-			p.SetState(248)
+			p.SetState(246)
 			p.Match(ElzParserT__11)
 		}
 		{
-			p.SetState(249)
+			p.SetState(247)
 			p.TypePass()
 		}
 
 	}
 	{
-		p.SetState(252)
+		p.SetState(250)
 		p.Match(ElzParserT__3)
 	}
-	p.SetState(254)
+	p.SetState(252)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if ((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__1)|(1<<ElzParserT__2)|(1<<ElzParserT__5)|(1<<ElzParserT__15)|(1<<ElzParserID))) != 0 {
 		{
-			p.SetState(253)
+			p.SetState(251)
 			p.StatList()
 		}
 
 	}
 	{
-		p.SetState(256)
+		p.SetState(254)
 		p.Match(ElzParserT__4)
 	}
 
@@ -3621,17 +3618,17 @@ func (p *ElzParser) AttrList() (localctx IAttrListContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(259)
+	p.SetState(257)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	for ok := true; ok; ok = _la == ElzParserID {
 		{
-			p.SetState(258)
+			p.SetState(256)
 			p.Attr()
 		}
 
-		p.SetState(261)
+		p.SetState(259)
 		p.GetErrorHandler().Sync(p)
 		_la = p.GetTokenStream().LA(1)
 	}
@@ -3733,15 +3730,15 @@ func (p *ElzParser) Attr() (localctx IAttrContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(263)
+		p.SetState(261)
 		p.Match(ElzParserID)
 	}
 	{
-		p.SetState(264)
+		p.SetState(262)
 		p.Match(ElzParserT__13)
 	}
 	{
-		p.SetState(265)
+		p.SetState(263)
 		p.TypePass()
 	}
 
@@ -3853,34 +3850,34 @@ func (p *ElzParser) TypeDefine() (localctx ITypeDefineContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(267)
+		p.SetState(265)
 		p.Match(ElzParserT__18)
 	}
-	p.SetState(269)
+	p.SetState(267)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__14 {
 		{
-			p.SetState(268)
+			p.SetState(266)
 			p.Exportor()
 		}
 
 	}
 	{
-		p.SetState(271)
+		p.SetState(269)
 		p.Match(ElzParserID)
 	}
 	{
-		p.SetState(272)
+		p.SetState(270)
 		p.Match(ElzParserT__9)
 	}
 	{
-		p.SetState(273)
+		p.SetState(271)
 		p.AttrList()
 	}
 	{
-		p.SetState(274)
+		p.SetState(272)
 		p.Match(ElzParserT__10)
 	}
 
@@ -3990,17 +3987,17 @@ func (p *ElzParser) TmethodList() (localctx ITmethodListContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(277)
+	p.SetState(275)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	for ok := true; ok; ok = _la == ElzParserT__14 || _la == ElzParserID {
 		{
-			p.SetState(276)
+			p.SetState(274)
 			p.Tmethod()
 		}
 
-		p.SetState(279)
+		p.SetState(277)
 		p.GetErrorHandler().Sync(p)
 		_la = p.GetTokenStream().LA(1)
 	}
@@ -4122,51 +4119,51 @@ func (p *ElzParser) Tmethod() (localctx ITmethodContext) {
 	}()
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(282)
+	p.SetState(280)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__14 {
 		{
-			p.SetState(281)
+			p.SetState(279)
 			p.Exportor()
 		}
 
 	}
 	{
-		p.SetState(284)
+		p.SetState(282)
 		p.Match(ElzParserID)
 	}
 	{
-		p.SetState(285)
+		p.SetState(283)
 		p.Match(ElzParserT__9)
 	}
-	p.SetState(287)
+	p.SetState(285)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserID {
 		{
-			p.SetState(286)
+			p.SetState(284)
 			p.TypeList()
 		}
 
 	}
 	{
-		p.SetState(289)
+		p.SetState(287)
 		p.Match(ElzParserT__10)
 	}
-	p.SetState(292)
+	p.SetState(290)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__11 {
 		{
-			p.SetState(290)
+			p.SetState(288)
 			p.Match(ElzParserT__11)
 		}
 		{
-			p.SetState(291)
+			p.SetState(289)
 			p.TypePass()
 		}
 
@@ -4280,34 +4277,34 @@ func (p *ElzParser) TraitDefine() (localctx ITraitDefineContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(294)
+		p.SetState(292)
 		p.Match(ElzParserT__19)
 	}
 	{
-		p.SetState(295)
+		p.SetState(293)
 		p.Exportor()
 	}
 	{
-		p.SetState(296)
+		p.SetState(294)
 		p.Match(ElzParserID)
 	}
 	{
-		p.SetState(297)
+		p.SetState(295)
 		p.Match(ElzParserT__3)
 	}
-	p.SetState(299)
+	p.SetState(297)
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == ElzParserT__14 || _la == ElzParserID {
 		{
-			p.SetState(298)
+			p.SetState(296)
 			p.TmethodList()
 		}
 
 	}
 	{
-		p.SetState(301)
+		p.SetState(299)
 		p.Match(ElzParserT__4)
 	}
 
@@ -4363,16 +4360,6 @@ func (s *ExprContext) GetOp() antlr.Token { return s.op }
 
 func (s *ExprContext) SetOp(v antlr.Token) { s.op = v }
 
-func (s *ExprContext) Factor() IFactorContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IFactorContext)(nil)).Elem(), 0)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IFactorContext)
-}
-
 func (s *ExprContext) AllExpr() []IExprContext {
 	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
 	var tst = make([]IExprContext, len(ts))
@@ -4394,6 +4381,46 @@ func (s *ExprContext) Expr(i int) IExprContext {
 	}
 
 	return t.(IExprContext)
+}
+
+func (s *ExprContext) ExprStat() IExprStatContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprStatContext)(nil)).Elem(), 0)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprStatContext)
+}
+
+func (s *ExprContext) Num() INumContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*INumContext)(nil)).Elem(), 0)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(INumContext)
+}
+
+func (s *ExprContext) Id() IIdContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IIdContext)(nil)).Elem(), 0)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IIdContext)
+}
+
+func (s *ExprContext) Str() IStrContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IStrContext)(nil)).Elem(), 0)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IStrContext)
 }
 
 func (s *ExprContext) GetRuleContext() antlr.RuleContext {
@@ -4449,15 +4476,52 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
-	{
-		p.SetState(304)
-		p.Factor()
-	}
-
-	p.GetParserRuleContext().SetStop(p.GetTokenStream().LT(-1))
-	p.SetState(317)
+	p.SetState(310)
 	p.GetErrorHandler().Sync(p)
-	_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 36, p.GetParserRuleContext())
+	switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 35, p.GetParserRuleContext()) {
+	case 1:
+		{
+			p.SetState(302)
+			p.Match(ElzParserT__9)
+		}
+		{
+			p.SetState(303)
+			p.expr(0)
+		}
+		{
+			p.SetState(304)
+			p.Match(ElzParserT__10)
+		}
+
+	case 2:
+		{
+			p.SetState(306)
+			p.ExprStat()
+		}
+
+	case 3:
+		{
+			p.SetState(307)
+			p.Num()
+		}
+
+	case 4:
+		{
+			p.SetState(308)
+			p.Id()
+		}
+
+	case 5:
+		{
+			p.SetState(309)
+			p.Str()
+		}
+
+	}
+	p.GetParserRuleContext().SetStop(p.GetTokenStream().LT(-1))
+	p.SetState(323)
+	p.GetErrorHandler().Sync(p)
+	_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 37, p.GetParserRuleContext())
 
 	for _alt != 2 && _alt != antlr.ATNInvalidAltNumber {
 		if _alt == 1 {
@@ -4465,38 +4529,38 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				p.TriggerExitRuleEvent()
 			}
 			_prevctx = localctx
-			p.SetState(315)
+			p.SetState(321)
 			p.GetErrorHandler().Sync(p)
-			switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 35, p.GetParserRuleContext()) {
+			switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 36, p.GetParserRuleContext()) {
 			case 1:
 				localctx = NewExprContext(p, _parentctx, _parentState)
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(306)
+				p.SetState(312)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 4)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 4)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 8)) {
+					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 8)", ""))
 				}
 				{
-					p.SetState(307)
+					p.SetState(313)
 
 					var _m = p.Match(ElzParserT__20)
 
 					localctx.(*ExprContext).op = _m
 				}
 				{
-					p.SetState(308)
-					p.expr(5)
+					p.SetState(314)
+					p.expr(9)
 				}
 
 			case 2:
 				localctx = NewExprContext(p, _parentctx, _parentState)
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(309)
+				p.SetState(315)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 3)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 3)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 7)) {
+					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 7)", ""))
 				}
-				p.SetState(310)
+				p.SetState(316)
 
 				var _lt = p.GetTokenStream().LT(1)
 
@@ -4513,19 +4577,19 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 					p.Consume()
 				}
 				{
-					p.SetState(311)
-					p.expr(4)
+					p.SetState(317)
+					p.expr(8)
 				}
 
 			case 3:
 				localctx = NewExprContext(p, _parentctx, _parentState)
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(312)
+				p.SetState(318)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 2)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 2)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 6)) {
+					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 6)", ""))
 				}
-				p.SetState(313)
+				p.SetState(319)
 
 				var _lt = p.GetTokenStream().LT(1)
 
@@ -4542,195 +4606,16 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 					p.Consume()
 				}
 				{
-					p.SetState(314)
-					p.expr(3)
+					p.SetState(320)
+					p.expr(7)
 				}
 
 			}
 
 		}
-		p.SetState(319)
+		p.SetState(325)
 		p.GetErrorHandler().Sync(p)
-		_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 36, p.GetParserRuleContext())
-	}
-
-	return localctx
-}
-
-// IFactorContext is an interface to support dynamic dispatch.
-type IFactorContext interface {
-	antlr.ParserRuleContext
-
-	// GetParser returns the parser.
-	GetParser() antlr.Parser
-
-	// IsFactorContext differentiates from other interfaces.
-	IsFactorContext()
-}
-
-type FactorContext struct {
-	*antlr.BaseParserRuleContext
-	parser antlr.Parser
-}
-
-func NewEmptyFactorContext() *FactorContext {
-	var p = new(FactorContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
-	p.RuleIndex = ElzParserRULE_factor
-	return p
-}
-
-func (*FactorContext) IsFactorContext() {}
-
-func NewFactorContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FactorContext {
-	var p = new(FactorContext)
-
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
-
-	p.parser = parser
-	p.RuleIndex = ElzParserRULE_factor
-
-	return p
-}
-
-func (s *FactorContext) GetParser() antlr.Parser { return s.parser }
-
-func (s *FactorContext) Expr() IExprContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), 0)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IExprContext)
-}
-
-func (s *FactorContext) ExprStat() IExprStatContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprStatContext)(nil)).Elem(), 0)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IExprStatContext)
-}
-
-func (s *FactorContext) Num() INumContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*INumContext)(nil)).Elem(), 0)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(INumContext)
-}
-
-func (s *FactorContext) Id() IIdContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IIdContext)(nil)).Elem(), 0)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IIdContext)
-}
-
-func (s *FactorContext) Str() IStrContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IStrContext)(nil)).Elem(), 0)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IStrContext)
-}
-
-func (s *FactorContext) GetRuleContext() antlr.RuleContext {
-	return s
-}
-
-func (s *FactorContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
-	return antlr.TreesStringTree(s, ruleNames, recog)
-}
-
-func (s *FactorContext) EnterRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterFactor(s)
-	}
-}
-
-func (s *FactorContext) ExitRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitFactor(s)
-	}
-}
-
-func (p *ElzParser) Factor() (localctx IFactorContext) {
-	localctx = NewFactorContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 62, ElzParserRULE_factor)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
-	p.SetState(328)
-	p.GetErrorHandler().Sync(p)
-	switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 37, p.GetParserRuleContext()) {
-	case 1:
-		p.EnterOuterAlt(localctx, 1)
-		{
-			p.SetState(320)
-			p.Match(ElzParserT__9)
-		}
-		{
-			p.SetState(321)
-			p.expr(0)
-		}
-		{
-			p.SetState(322)
-			p.Match(ElzParserT__10)
-		}
-
-	case 2:
-		p.EnterOuterAlt(localctx, 2)
-		{
-			p.SetState(324)
-			p.ExprStat()
-		}
-
-	case 3:
-		p.EnterOuterAlt(localctx, 3)
-		{
-			p.SetState(325)
-			p.Num()
-		}
-
-	case 4:
-		p.EnterOuterAlt(localctx, 4)
-		{
-			p.SetState(326)
-			p.Id()
-		}
-
-	case 5:
-		p.EnterOuterAlt(localctx, 5)
-		{
-			p.SetState(327)
-			p.Str()
-		}
-
+		_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 37, p.GetParserRuleContext())
 	}
 
 	return localctx
@@ -4800,7 +4685,7 @@ func (s *NumContext) ExitRule(listener antlr.ParseTreeListener) {
 
 func (p *ElzParser) Num() (localctx INumContext) {
 	localctx = NewNumContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 64, ElzParserRULE_num)
+	p.EnterRule(localctx, 62, ElzParserRULE_num)
 
 	defer func() {
 		p.ExitRule()
@@ -4820,7 +4705,7 @@ func (p *ElzParser) Num() (localctx INumContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(330)
+		p.SetState(326)
 		p.Match(ElzParserNUM)
 	}
 
@@ -4891,7 +4776,7 @@ func (s *IdContext) ExitRule(listener antlr.ParseTreeListener) {
 
 func (p *ElzParser) Id() (localctx IIdContext) {
 	localctx = NewIdContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 66, ElzParserRULE_id)
+	p.EnterRule(localctx, 64, ElzParserRULE_id)
 
 	defer func() {
 		p.ExitRule()
@@ -4911,7 +4796,7 @@ func (p *ElzParser) Id() (localctx IIdContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(332)
+		p.SetState(328)
 		p.Match(ElzParserID)
 	}
 
@@ -4982,7 +4867,7 @@ func (s *StrContext) ExitRule(listener antlr.ParseTreeListener) {
 
 func (p *ElzParser) Str() (localctx IStrContext) {
 	localctx = NewStrContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 68, ElzParserRULE_str)
+	p.EnterRule(localctx, 66, ElzParserRULE_str)
 
 	defer func() {
 		p.ExitRule()
@@ -5002,7 +4887,7 @@ func (p *ElzParser) Str() (localctx IStrContext) {
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(334)
+		p.SetState(330)
 		p.Match(ElzParserSTRING)
 	}
 
@@ -5026,13 +4911,13 @@ func (p *ElzParser) Sempred(localctx antlr.RuleContext, ruleIndex, predIndex int
 func (p *ElzParser) Expr_Sempred(localctx antlr.RuleContext, predIndex int) bool {
 	switch predIndex {
 	case 0:
-		return p.Precpred(p.GetParserRuleContext(), 4)
+		return p.Precpred(p.GetParserRuleContext(), 8)
 
 	case 1:
-		return p.Precpred(p.GetParserRuleContext(), 3)
+		return p.Precpred(p.GetParserRuleContext(), 7)
 
 	case 2:
-		return p.Precpred(p.GetParserRuleContext(), 2)
+		return p.Precpred(p.GetParserRuleContext(), 6)
 
 	default:
 		panic("No predicate with index: " + fmt.Sprint(predIndex))
