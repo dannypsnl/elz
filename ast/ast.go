@@ -33,19 +33,19 @@ type VarDefination struct {
 	Immutable  bool
 	Export     bool
 	Name       string
-	VarType    string
+	VarType    llvm.Type
 	Expression Expr
 }
 
 func (v *VarDefination) Codegen(ctx *Context) {
-	val := llvm.AddGlobal(ctx.Module, llvm.FloatType(), v.Name)
+	val := llvm.AddGlobal(ctx.Module, v.VarType, v.Name)
 	val.SetInitializer(v.Expression.Codegen(ctx))
 	ctx.Vars[v.Name] = val
 }
 
 type Param struct {
 	Name string
-	Type string
+	Type llvm.Type
 }
 type FnDefination struct {
 	Export bool

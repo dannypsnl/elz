@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"llvm.org/llvm/bindings/go/llvm"
 	"testing"
 )
 
@@ -10,7 +11,7 @@ func TestVarDefination(t *testing.T) {
 		Immutable:  true,
 		Export:     false,
 		Name:       "pi",
-		VarType:    "num",
+		VarType:    llvm.FloatType(),
 		Expression: &Number{"3.1415926"},
 	}
 	v.Codegen(ctx)
