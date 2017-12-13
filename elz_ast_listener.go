@@ -24,9 +24,11 @@ func (s *ElzListener) EnterProg(ctx *parser.ProgContext) {
 	fmt.Println(`Elz prog`)
 }
 func (s *ElzListener) EnterExportor(*parser.ExportorContext) {
+	fmt.Print(`public `)
 	s.exportThis = true
 }
 func (s *ElzListener) EnterVarDefine(ctx *parser.VarDefineContext) {
+	fmt.Print(`var `)
 	if ctx.GetMut() != nil {
 		s.immutable = false
 	}
@@ -37,6 +39,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	if ctx.TypePass() != nil {
 		typ = ctx.TypePass().GetText()
 	}
+	fmt.Println(ctx.ID().GetText(), `:`, typ)
 	s.AstList = append(s.AstList, &ast.VarDefination{
 		Immutable:  s.immutable,
 		Export:     s.exportThis,
