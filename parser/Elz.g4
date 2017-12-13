@@ -115,7 +115,7 @@ traitDefine:
 expr: expr op='^' expr // TODO: We had not support translate it.
     | expr op=('*'|'/') expr // operation prec
     | expr op=('+'|'-') expr
-    | '(' expr ')' // TODO: Waiting for implement
+    | op='(' expr ')' // TODO: Waiting for implement
     | exprStat // Important, exprStat have match & functionCall yet!
     | num
     | id

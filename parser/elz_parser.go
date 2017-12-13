@@ -4482,7 +4482,10 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 	case 1:
 		{
 			p.SetState(302)
-			p.Match(ElzParserT__9)
+
+			var _m = p.Match(ElzParserT__9)
+
+			localctx.(*ExprContext).op = _m
 		}
 		{
 			p.SetState(303)
