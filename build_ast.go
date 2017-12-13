@@ -5,11 +5,13 @@ import (
 
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/parser"
+	"github.com/golang-collections/collections/stack"
 )
 
 type ElzListener struct {
 	*parser.BaseElzListener
 	AstList    []ast.Ast
+	exprStack  *stack.Stack // Stack Pop nil is nothing in there
 	exportThis bool
 	immutable  bool
 }
@@ -17,6 +19,7 @@ type ElzListener struct {
 func NewElzListener() *ElzListener {
 	return &ElzListener{
 		immutable: true,
+		exprStack: stack.New(),
 	}
 }
 
@@ -48,8 +51,24 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		Expression: &ast.Number{Val: "1"},
 	})
 }
+func (s *ElzListener) ExitExpr(ctx *parser.ExprContext) {
+	exprs := ctx.AllExpr()
+	if len(exprs) != 2 {
+		//s.exprStack.Push()
+	}
+}
 func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 	if !s.immutable {
 		s.immutable = true
 	}
+}
+func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
+	print(ctx.STRING().GetText())
+	s.exprStack.Push(ctx.STRING().GetText())
+}
+func (s *ElzListener) ExitId(ctx *parser.IdContext) {
+	print(ctx.ID().GetText())
+}
+func (s *ElzListener) ExitNum(ctx *parser.NumContext) {
+	print(ctx.NUM().GetText())
 }
