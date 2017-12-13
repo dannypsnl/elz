@@ -91,3 +91,6 @@ type Str struct {
 func (s *Str) Codegen(ctx *Context) llvm.Value {
 	return llvm.ConstString(s.Val, false)
 }
+func (s *Str) Type() llvm.Type {
+	return llvm.ConstString(s.Val, false).Type()
+}
