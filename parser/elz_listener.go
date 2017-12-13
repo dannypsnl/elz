@@ -104,6 +104,15 @@ type ElzListener interface {
 	// EnterFactor is called when entering the factor production.
 	EnterFactor(c *FactorContext)
 
+	// EnterNum is called when entering the num production.
+	EnterNum(c *NumContext)
+
+	// EnterId is called when entering the id production.
+	EnterId(c *IdContext)
+
+	// EnterStr is called when entering the str production.
+	EnterStr(c *StrContext)
+
 	// ExitProg is called when exiting the prog production.
 	ExitProg(c *ProgContext)
 
@@ -199,4 +208,13 @@ type ElzListener interface {
 
 	// ExitFactor is called when exiting the factor production.
 	ExitFactor(c *FactorContext)
+
+	// ExitNum is called when exiting the num production.
+	ExitNum(c *NumContext)
+
+	// ExitId is called when exiting the id production.
+	ExitId(c *IdContext)
+
+	// ExitStr is called when exiting the str production.
+	ExitStr(c *StrContext)
 }

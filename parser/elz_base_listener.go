@@ -212,3 +212,21 @@ func (s *BaseElzListener) EnterFactor(ctx *FactorContext) {}
 
 // ExitFactor is called when production factor is exited.
 func (s *BaseElzListener) ExitFactor(ctx *FactorContext) {}
+
+// EnterNum is called when production num is entered.
+func (s *BaseElzListener) EnterNum(ctx *NumContext) {}
+
+// ExitNum is called when production num is exited.
+func (s *BaseElzListener) ExitNum(ctx *NumContext) {}
+
+// EnterId is called when production id is entered.
+func (s *BaseElzListener) EnterId(ctx *IdContext) {}
+
+// ExitId is called when production id is exited.
+func (s *BaseElzListener) ExitId(ctx *IdContext) {}
+
+// EnterStr is called when production str is entered.
+func (s *BaseElzListener) EnterStr(ctx *StrContext) {}
+
+// ExitStr is called when production str is exited.
+func (s *BaseElzListener) ExitStr(ctx *StrContext) {}

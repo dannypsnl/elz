@@ -119,7 +119,10 @@ expr: expr op='^' expr // TODO: We had not support translate it.
     ;
 factor: '(' expr ')' // TODO: Waiting for implement
     | exprStat // Important, exprStat have match & functionCall yet!
-    | NUM
-    | ID
-    | STRING
+    | num
+    | id
+    | str
     ;
+num: NUM;
+id: ID;
+str: STRING;
