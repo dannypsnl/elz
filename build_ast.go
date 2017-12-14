@@ -6,6 +6,7 @@ import (
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/parser"
 	"github.com/golang-collections/collections/stack"
+	"llvm.org/llvm/bindings/go/llvm"
 )
 
 type ElzListener struct {
@@ -47,7 +48,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		Immutable:  s.immutable,
 		Export:     s.exportThis,
 		Name:       ctx.ID().GetText(),
-		VarType:    typ,
+		VarType:    llvm.FloatType(),
 		Expression: &ast.Number{Val: "1"},
 	})
 }
