@@ -48,8 +48,18 @@ type Param struct {
 	Type llvm.Type
 }
 type FnDefination struct {
-	Export bool
-	Name   string
-	Params []Param
-	Body   StatList
+	Export  bool
+	Name    string
+	Params  []Param
+	Body    StatList
+	RetType llvm.Type
+}
+
+func (f *FnDefination) Codegen(ctx *Context) {
+	var paramsT []llvm.Type
+	for _, v := range f.Params {
+		paramsT = append(paramsT, v.Type)
+	}
+	ft := llvm.FunctionType(f.RetType, paramsT, false)
+	llvm.AddFunction(ctx.Module, f.Name, ft)
 }
