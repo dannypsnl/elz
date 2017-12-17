@@ -6,6 +6,9 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
+// We still need a type system represent. Not focus on llvm's type.
+// Else the high level type will be hard to represent.
+
 type Context struct {
 	Module  llvm.Module
 	Context llvm.Context
