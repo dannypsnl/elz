@@ -8,11 +8,15 @@ import (
 
 func TestVarDefination(t *testing.T) {
 	v := &VarDefination{
-		Immutable:  true,
-		Export:     false,
-		Name:       "pi",
-		VarType:    llvm.FloatType(),
-		Expression: &Number{"3.1415926"},
+		Immutable: true,
+		Export:    false,
+		Name:      "pi",
+		VarType:   llvm.FloatType(),
+		Expression: &BinaryExpr{
+			&Number{"2.1215926"},
+			&Number{"1.02"},
+			"+",
+		},
 	}
 	v.Codegen(ctx)
 	if ctx.Vars["pi"].IsDeclaration() ||
