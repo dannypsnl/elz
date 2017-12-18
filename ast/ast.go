@@ -19,7 +19,9 @@ type Ast interface {
 	Codegen(*Context)
 }
 
-type Stat interface{}
+type Stat interface {
+	Codegen(*Context)
+}
 
 type StatList []Stat
 
@@ -60,7 +62,7 @@ type Param struct {
 type FnDefination struct {
 	Export  bool
 	Name    string
-	Params  []Param
+	Params  []*Param
 	Body    StatList
 	RetType string
 }

@@ -36,5 +36,16 @@ func TestVarDefination(t *testing.T) {
 		ctx.Vars["string1"].Type().String() != "PointerType(ArrayType(IntegerType(8 bits)[10]))" {
 		t.Errorf("var: %s, expected: %s", ctx.Vars["string1"].Type().String(), "PointerType(ArrayType(IntegerType(8 bits)[10]))")
 	}
+	fn := &FnDefination{
+		Export: true,
+		Name:   "foo",
+		Params: []*Param{
+			&Param{"x", "num"},
+			&Param{"y", "num"},
+		},
+		Body:    StatList{v},
+		RetType: "num",
+	}
+	fn.Codegen(ctx)
 	fmt.Println(ctx.Module)
 }
