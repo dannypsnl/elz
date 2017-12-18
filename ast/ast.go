@@ -33,17 +33,24 @@ func (e Error) Codegen(*Context) {
 }
 
 type VarDefination struct {
-	Immutable  bool
-	Export     bool
-	Name       string
-	VarType    llvm.Type
+	Immutable bool
+	Export    bool
+	// let a = 1, a is Name
+	Name string
+	// let a: num = 1, num is VarType, but expression could not have the same type, we have to check it.
+	VarType    string
 	Expression Expr
 }
 
 func (v *VarDefination) Codegen(ctx *Context) {
-	val := llvm.AddGlobal(ctx.Module, v.VarType, v.Name)
-	val.SetInitializer(v.Expression.Codegen(ctx))
-	ctx.Vars[v.Name] = val
+	expr := v.Expression.Codegen(ctx)
+	if v.VarType != "" && v.Expression.Type() == v.VarType {
+		val := llvm.AddGlobal(ctx.Module, expr.Type(), v.Name)
+		val.SetInitializer(expr)
+		ctx.Vars[v.Name] = val
+	} else {
+		panic(`expr type != var type`)
+	}
 }
 
 type Param struct {

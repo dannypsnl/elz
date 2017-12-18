@@ -2,7 +2,7 @@ package ast
 
 import (
 	"fmt"
-	"llvm.org/llvm/bindings/go/llvm"
+	_ "llvm.org/llvm/bindings/go/llvm"
 	"testing"
 )
 
@@ -11,7 +11,7 @@ func TestVarDefination(t *testing.T) {
 		Immutable: true,
 		Export:    false,
 		Name:      "pi",
-		VarType:   llvm.FloatType(),
+		VarType:   "num",
 		Expression: &BinaryExpr{
 			&Number{"2.1215926"},
 			&Number{"1.02"},
@@ -27,14 +27,14 @@ func TestVarDefination(t *testing.T) {
 	v = &VarDefination{
 		Immutable:  true,
 		Export:     false,
-		Name:       "str",
-		VarType:    str.Type(),
+		Name:       "string1",
+		VarType:    "str",
 		Expression: str,
 	}
 	v.Codegen(ctx)
-	if ctx.Vars["str"].IsDeclaration() ||
-		ctx.Vars["str"].Type().String() != "PointerType("+str.Type().String()+")" {
-		t.Error(`error`)
+	if ctx.Vars["string1"].IsDeclaration() ||
+		ctx.Vars["string1"].Type().String() != "PointerType(ArrayType(IntegerType(8 bits)[10]))" {
+		t.Errorf("var: %s, expected: %s", ctx.Vars["string1"].Type().String(), "PointerType(ArrayType(IntegerType(8 bits)[10]))")
 	}
 	fmt.Println(ctx.Module)
 }

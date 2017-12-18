@@ -6,7 +6,7 @@ import (
 
 type Expr interface {
 	Codegen(*Context) llvm.Value
-	Type() llvm.Type
+	Type() string
 }
 
 type Number struct {
@@ -16,8 +16,8 @@ type Number struct {
 func (n *Number) Codegen(*Context) llvm.Value {
 	return llvm.ConstFloatFromString(llvm.FloatType(), n.Val)
 }
-func (n *Number) Type() llvm.Type {
-	return llvm.FloatType()
+func (n *Number) Type() string {
+	return "num"
 }
 
 type UnaryExpr struct {
@@ -29,7 +29,7 @@ func (u *UnaryExpr) Codegen(ctx *Context) llvm.Value {
 	return llvm.ConstFNeg(u.E.Codegen(ctx))
 }
 
-func (u *UnaryExpr) Type() llvm.Type {
+func (u *UnaryExpr) Type() string {
 	return u.E.Type()
 }
 
@@ -54,7 +54,7 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	}
 }
 
-func (b *BinaryExpr) Type() llvm.Type {
+func (b *BinaryExpr) Type() string {
 	if b.LeftE.Type() == b.RightE.Type() {
 		return b.LeftE.Type()
 	} else {
@@ -70,17 +70,17 @@ func (a *Argu) Codegen(ctx *Context) llvm.Value {
 	return llvm.ConstFloatFromString(llvm.FloatType(), "3.14")
 }
 
-func (a *Argu) Type() llvm.Type {
+func (a *Argu) Type() string {
 	return a.E.Type()
 }
 
 type FnCall struct {
 	Name    string
 	Args    []Argu
-	RetType llvm.Type
+	RetType string
 }
 
-func (fc *FnCall) Type() llvm.Type {
+func (fc *FnCall) Type() string {
 	return fc.RetType
 }
 
@@ -91,6 +91,6 @@ type Str struct {
 func (s *Str) Codegen(ctx *Context) llvm.Value {
 	return llvm.ConstString(s.Val, false)
 }
-func (s *Str) Type() llvm.Type {
-	return llvm.ConstString(s.Val, false).Type()
+func (s *Str) Type() string {
+	return "str"
 }
