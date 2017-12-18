@@ -55,21 +55,31 @@ func (v *VarDefination) Codegen(ctx *Context) {
 
 type Param struct {
 	Name string
-	Type llvm.Type
+	Type string
 }
 type FnDefination struct {
 	Export  bool
 	Name    string
 	Params  []Param
 	Body    StatList
-	RetType llvm.Type
+	RetType string
 }
 
 func (f *FnDefination) Codegen(ctx *Context) {
 	var paramsT []llvm.Type
 	for _, v := range f.Params {
-		paramsT = append(paramsT, v.Type)
+		paramsT = append(paramsT, convertToLLVMType(v.Type))
 	}
-	ft := llvm.FunctionType(f.RetType, paramsT, false)
+	retT := convertToLLVMType(f.RetType)
+	ft := llvm.FunctionType(retT, paramsT, false)
 	llvm.AddFunction(ctx.Module, f.Name, ft)
+}
+
+func convertToLLVMType(t string) llvm.Type {
+	switch t {
+	case "num":
+		return llvm.FloatType()
+	default:
+		panic(`not support this type yet`)
+	}
 }
