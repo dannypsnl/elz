@@ -75,12 +75,3 @@ func (f *FnDefination) Codegen(ctx *Context) llvm.Value {
 	ctx.Builder.ClearInsertionPoint()
 	return fn
 }
-
-func convertToLLVMType(t string) llvm.Type {
-	switch t {
-	case "num":
-		return llvm.FloatType()
-	default:
-		panic(`not support this type yet`)
-	}
-}
