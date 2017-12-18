@@ -10,6 +10,7 @@ var ctx = &Context{
 	Module:  llvm.NewModule("main"),
 	Context: llvm.NewContext(),
 	Vars:    make(map[string]llvm.Value),
+	Builder: llvm.NewBuilder(),
 }
 
 func TestNumber(t *testing.T) {

@@ -1,8 +1,6 @@
 package ast
 
 import (
-	"fmt"
-
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
@@ -13,6 +11,7 @@ type Context struct {
 	Module  llvm.Module
 	Context llvm.Context
 	Vars    map[string]llvm.Value
+	Builder llvm.Builder
 }
 
 type Ast interface {
@@ -20,19 +19,10 @@ type Ast interface {
 }
 
 type Stat interface {
-	Codegen(*Context)
+	Codegen(*Context) llvm.Value
 }
 
 type StatList []Stat
-
-type Error struct {
-	Msg string
-}
-
-func (e Error) Codegen(*Context) {
-	// FIXME: position is hard coding
-	fmt.Printf("At(0,0), error: %s\n", e.Msg)
-}
 
 type VarDefination struct {
 	Immutable bool
@@ -44,12 +34,13 @@ type VarDefination struct {
 	Expression Expr
 }
 
-func (v *VarDefination) Codegen(ctx *Context) {
+func (v *VarDefination) Codegen(ctx *Context) llvm.Value {
 	expr := v.Expression.Codegen(ctx)
 	if v.VarType != "" && v.Expression.Type() == v.VarType {
 		val := llvm.AddGlobal(ctx.Module, expr.Type(), v.Name)
 		val.SetInitializer(expr)
 		ctx.Vars[v.Name] = val
+		return val
 	} else {
 		panic(`expr type != var type`)
 	}
@@ -67,14 +58,22 @@ type FnDefination struct {
 	RetType string
 }
 
-func (f *FnDefination) Codegen(ctx *Context) {
+func (f *FnDefination) Codegen(ctx *Context) llvm.Value {
 	var paramsT []llvm.Type
 	for _, v := range f.Params {
 		paramsT = append(paramsT, convertToLLVMType(v.Type))
 	}
 	retT := convertToLLVMType(f.RetType)
 	ft := llvm.FunctionType(retT, paramsT, false)
-	llvm.AddFunction(ctx.Module, f.Name, ft)
+	fn := llvm.AddFunction(ctx.Module, f.Name, ft)
+	fBlock := llvm.AddBasicBlock(fn, "entry")
+	ctx.Builder.SetInsertPointAtEnd(fBlock)
+	//for _, stat := range f.Body {
+	//ctx.Builder.Insert(stat.Codegen(ctx))
+	//}
+	ctx.Builder.CreateRet(llvm.ConstFloat(llvm.FloatType(), 3.14))
+	ctx.Builder.ClearInsertionPoint()
+	return fn
 }
 
 func convertToLLVMType(t string) llvm.Type {
