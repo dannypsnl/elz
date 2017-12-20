@@ -27,16 +27,25 @@ func NewElzListener() *ElzListener {
 func (s *ElzListener) EnterProg(ctx *parser.ProgContext) {
 	fmt.Println(`Elz prog`)
 }
+
 func (s *ElzListener) EnterExportor(*parser.ExportorContext) {
 	fmt.Print(`public `)
 	s.exportThis = true
 }
+
 func (s *ElzListener) EnterVarDefine(ctx *parser.VarDefineContext) {
 	fmt.Print(`var `)
 	if ctx.GetMut() != nil {
 		s.immutable = false
 	}
 }
+
+func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
+	if !s.immutable {
+		s.immutable = true
+	}
+}
+
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	// FIXME: We need to get Expression's type, not give it a default value.
 	typ := "f32"
@@ -53,6 +62,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	})
 	fmt.Println(s.exprStack.Pop())
 }
+
 func (s *ElzListener) ExitExpr(ctx *parser.ExprContext) {
 	exprs := ctx.AllExpr()
 	if len(exprs) != 2 {
@@ -70,11 +80,7 @@ func (s *ElzListener) ExitExpr(ctx *parser.ExprContext) {
 		}
 	}
 }
-func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
-	if !s.immutable {
-		s.immutable = true
-	}
-}
+
 func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
 	s.exprStack.Push(ctx.STRING().GetText())
 }
