@@ -48,12 +48,12 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	// FIXME: We need to get Expression's type, not give it a default value.
-	typ := "f32"
+	expr := s.exprStack.Pop()
+	typ := expr.(ast.Expr).Type()
 	if ctx.TypePass() != nil {
 		typ = ctx.TypePass().GetText()
 	}
 	fmt.Println(ctx.ID().GetText(), `:`, typ)
-	expr := s.exprStack.Pop()
 	s.AstList = append(s.AstList, &ast.VarDefination{
 		Immutable:  s.immutable,
 		Export:     s.exportThis,
