@@ -53,14 +53,15 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		typ = ctx.TypePass().GetText()
 	}
 	fmt.Println(ctx.ID().GetText(), `:`, typ)
+	expr := s.exprStack.Pop()
 	s.AstList = append(s.AstList, &ast.VarDefination{
 		Immutable:  s.immutable,
 		Export:     s.exportThis,
 		Name:       ctx.ID().GetText(),
-		VarType:    "num",
-		Expression: &ast.Number{Val: "1"},
+		VarType:    expr.(ast.Expr).Type(),
+		Expression: expr.(ast.Expr),
 	})
-	fmt.Println(s.exprStack.Pop())
+	fmt.Println(expr)
 }
 
 func (s *ElzListener) ExitExpr(ctx *parser.ExprContext) {
@@ -82,7 +83,7 @@ func (s *ElzListener) ExitExpr(ctx *parser.ExprContext) {
 }
 
 func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
-	s.exprStack.Push(ctx.STRING().GetText())
+	s.exprStack.Push(&ast.Str{Val: ctx.STRING().GetText()})
 }
 func (s *ElzListener) ExitId(ctx *parser.IdContext) {
 	s.exprStack.Push(ctx.ID().GetText())
