@@ -11,10 +11,14 @@ import (
 
 type ElzListener struct {
 	*parser.BaseElzListener
-	AstList    []ast.Ast
-	exprStack  *stack.Stack // Stack Pop nil is nothing in there
+	// AstList contain top level's ast
+	AstList []ast.Ast
+	// exprStack help we implement expression percedence table.
+	exprStack *stack.Stack // Stack Pop nil is nothing in there
+	// exportThis markup the reference Name should be public or not.
 	exportThis bool
-	immutable  bool
+	// variable default immutable.
+	immutable bool
 }
 
 func NewElzListener() *ElzListener {
@@ -49,10 +53,11 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	expr := s.exprStack.Pop()
 	typ := expr.(ast.Expr).Type()
+	fmt.Print(ctx.ID().GetText(), `: `, typ, ` = `)
+	fmt.Println(expr)
 	if ctx.TypePass() != nil {
 		typ = ctx.TypePass().GetText()
 	}
-	fmt.Println(ctx.ID().GetText(), `:`, typ)
 	s.AstList = append(s.AstList, &ast.VarDefination{
 		Immutable:  s.immutable,
 		Export:     s.exportThis,
@@ -60,17 +65,16 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		VarType:    expr.(ast.Expr).Type(),
 		Expression: expr.(ast.Expr),
 	})
-	fmt.Println(expr)
 }
 
 func (s *ElzListener) ExitExpr(ctx *parser.ExprContext) {
 	exprs := ctx.AllExpr()
 	if len(exprs) != 2 {
+		// FIXME: Wait for implementation
 	} else {
 		le := s.exprStack.Pop()
 		re := s.exprStack.Pop()
 		if le != nil && re != nil {
-			//fm := fmt.Sprintln(le, ctx.GetOp().GetText(), re)
 			e := &ast.BinaryExpr{
 				LeftE:  le.(ast.Expr),
 				RightE: re.(ast.Expr),
@@ -89,6 +93,5 @@ func (s *ElzListener) ExitId(ctx *parser.IdContext) {
 	s.exprStack.Push(ctx.ID().GetText())
 }
 func (s *ElzListener) ExitNum(ctx *parser.NumContext) {
-	//s.exprStack.Push(ctx.NUM().GetText())
 	s.exprStack.Push(&ast.Number{Val: "1"})
 }
