@@ -47,7 +47,6 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 }
 
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
-	// FIXME: We need to get Expression's type, not give it a default value.
 	expr := s.exprStack.Pop()
 	typ := expr.(ast.Expr).Type()
 	if ctx.TypePass() != nil {
@@ -86,6 +85,7 @@ func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
 	s.exprStack.Push(&ast.Str{Val: ctx.STRING().GetText()})
 }
 func (s *ElzListener) ExitId(ctx *parser.IdContext) {
+	// FIXME: Identifier still do not have Expr to represented it.
 	s.exprStack.Push(ctx.ID().GetText())
 }
 func (s *ElzListener) ExitNum(ctx *parser.NumContext) {
