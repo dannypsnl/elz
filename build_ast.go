@@ -6,7 +6,7 @@ import (
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/parser"
 	"github.com/golang-collections/collections/stack"
-	"llvm.org/llvm/bindings/go/llvm"
+	_ "llvm.org/llvm/bindings/go/llvm"
 )
 
 type ElzListener struct {
@@ -48,14 +48,21 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		Immutable:  s.immutable,
 		Export:     s.exportThis,
 		Name:       ctx.ID().GetText(),
-		VarType:    llvm.FloatType(),
+		VarType:    "num",
 		Expression: &ast.Number{Val: "1"},
 	})
+	fmt.Println(s.exprStack.Pop())
 }
 func (s *ElzListener) ExitExpr(ctx *parser.ExprContext) {
 	exprs := ctx.AllExpr()
 	if len(exprs) != 2 {
-		//s.exprStack.Push()
+	} else {
+		le := s.exprStack.Pop()
+		re := s.exprStack.Pop()
+		if le != nil && re != nil {
+			fm := fmt.Sprintln(le, ctx.GetOp().GetText(), re)
+			s.exprStack.Push(fm)
+		}
 	}
 }
 func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
@@ -64,12 +71,11 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 	}
 }
 func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
-	print(ctx.STRING().GetText())
 	s.exprStack.Push(ctx.STRING().GetText())
 }
 func (s *ElzListener) ExitId(ctx *parser.IdContext) {
-	print(ctx.ID().GetText())
+	s.exprStack.Push(ctx.ID().GetText())
 }
 func (s *ElzListener) ExitNum(ctx *parser.NumContext) {
-	print(ctx.NUM().GetText())
+	s.exprStack.Push(ctx.NUM().GetText())
 }

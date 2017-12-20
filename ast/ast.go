@@ -15,7 +15,7 @@ type Context struct {
 }
 
 type Ast interface {
-	Codegen(*Context)
+	Codegen(*Context) llvm.Value
 }
 
 type Stat interface {

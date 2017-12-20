@@ -26,6 +26,7 @@ func main() {
 		llvm.NewModule("main"),
 		llvm.NewContext(),
 		make(map[string]llvm.Value),
+		llvm.NewBuilder(),
 	}
 	for _, ast := range eal.AstList {
 		ast.Codegen(ctx)
