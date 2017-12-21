@@ -4559,6 +4559,64 @@ func (s *NumContext) ExitRule(listener antlr.ParseTreeListener) {
 	}
 }
 
+type MulOrDivContext struct {
+	*ExprContext
+	op antlr.Token
+}
+
+func NewMulOrDivContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *MulOrDivContext {
+	var p = new(MulOrDivContext)
+
+	p.ExprContext = NewEmptyExprContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *MulOrDivContext) GetOp() antlr.Token { return s.op }
+
+func (s *MulOrDivContext) SetOp(v antlr.Token) { s.op = v }
+
+func (s *MulOrDivContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *MulOrDivContext) AllExpr() []IExprContext {
+	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
+	var tst = make([]IExprContext, len(ts))
+
+	for i, t := range ts {
+		if t != nil {
+			tst[i] = t.(IExprContext)
+		}
+	}
+
+	return tst
+}
+
+func (s *MulOrDivContext) Expr(i int) IExprContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
+}
+
+func (s *MulOrDivContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.EnterMulOrDiv(s)
+	}
+}
+
+func (s *MulOrDivContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.ExitMulOrDiv(s)
+	}
+}
+
 type PowContext struct {
 	*ExprContext
 	op antlr.Token
@@ -4614,64 +4672,6 @@ func (s *PowContext) EnterRule(listener antlr.ParseTreeListener) {
 func (s *PowContext) ExitRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
 		listenerT.ExitPow(s)
-	}
-}
-
-type MulAndDivContext struct {
-	*ExprContext
-	op antlr.Token
-}
-
-func NewMulAndDivContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *MulAndDivContext {
-	var p = new(MulAndDivContext)
-
-	p.ExprContext = NewEmptyExprContext()
-	p.parser = parser
-	p.CopyFrom(ctx.(*ExprContext))
-
-	return p
-}
-
-func (s *MulAndDivContext) GetOp() antlr.Token { return s.op }
-
-func (s *MulAndDivContext) SetOp(v antlr.Token) { s.op = v }
-
-func (s *MulAndDivContext) GetRuleContext() antlr.RuleContext {
-	return s
-}
-
-func (s *MulAndDivContext) AllExpr() []IExprContext {
-	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
-	var tst = make([]IExprContext, len(ts))
-
-	for i, t := range ts {
-		if t != nil {
-			tst[i] = t.(IExprContext)
-		}
-	}
-
-	return tst
-}
-
-func (s *MulAndDivContext) Expr(i int) IExprContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IExprContext)
-}
-
-func (s *MulAndDivContext) EnterRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterMulAndDiv(s)
-	}
-}
-
-func (s *MulAndDivContext) ExitRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitMulAndDiv(s)
 	}
 }
 
@@ -4835,7 +4835,7 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				}
 
 			case 2:
-				localctx = NewMulAndDivContext(p, NewExprContext(p, _parentctx, _parentState))
+				localctx = NewMulOrDivContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
 				p.SetState(309)
 
@@ -4846,14 +4846,14 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 
 				var _lt = p.GetTokenStream().LT(1)
 
-				localctx.(*MulAndDivContext).op = _lt
+				localctx.(*MulOrDivContext).op = _lt
 
 				_la = p.GetTokenStream().LA(1)
 
 				if !(_la == ElzParserT__21 || _la == ElzParserT__22) {
 					var _ri = p.GetErrorHandler().RecoverInline(p)
 
-					localctx.(*MulAndDivContext).op = _ri
+					localctx.(*MulOrDivContext).op = _ri
 				} else {
 					p.GetErrorHandler().ReportMatch(p)
 					p.Consume()

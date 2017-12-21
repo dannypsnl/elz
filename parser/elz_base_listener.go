@@ -231,17 +231,17 @@ func (s *BaseElzListener) EnterNum(ctx *NumContext) {}
 // ExitNum is called when production Num is exited.
 func (s *BaseElzListener) ExitNum(ctx *NumContext) {}
 
+// EnterMulOrDiv is called when production MulOrDiv is entered.
+func (s *BaseElzListener) EnterMulOrDiv(ctx *MulOrDivContext) {}
+
+// ExitMulOrDiv is called when production MulOrDiv is exited.
+func (s *BaseElzListener) ExitMulOrDiv(ctx *MulOrDivContext) {}
+
 // EnterPow is called when production Pow is entered.
 func (s *BaseElzListener) EnterPow(ctx *PowContext) {}
 
 // ExitPow is called when production Pow is exited.
 func (s *BaseElzListener) ExitPow(ctx *PowContext) {}
-
-// EnterMulAndDiv is called when production MulAndDiv is entered.
-func (s *BaseElzListener) EnterMulAndDiv(ctx *MulAndDivContext) {}
-
-// ExitMulAndDiv is called when production MulAndDiv is exited.
-func (s *BaseElzListener) ExitMulAndDiv(ctx *MulAndDivContext) {}
 
 // EnterId is called when production Id is entered.
 func (s *BaseElzListener) EnterId(ctx *IdContext) {}

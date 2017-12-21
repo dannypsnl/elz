@@ -113,7 +113,7 @@ traitDefine:
     ;
 
 expr: expr op='^' expr # Pow // TODO: We had not support translate it.
-    | expr op=('*'|'/') expr # MulAndDiv // operation prec
+    | expr op=('*'|'/') expr # MulOrDiv // operation prec
     | expr op=('+'|'-') expr # AddOrSub
     | '(' expr ')' # SubExpr // TODO: Waiting for implement
     | exprStat # StatExpr // Important, exprStat have match & functionCall yet!

@@ -113,11 +113,11 @@ type ElzListener interface {
 	// EnterNum is called when entering the Num production.
 	EnterNum(c *NumContext)
 
+	// EnterMulOrDiv is called when entering the MulOrDiv production.
+	EnterMulOrDiv(c *MulOrDivContext)
+
 	// EnterPow is called when entering the Pow production.
 	EnterPow(c *PowContext)
-
-	// EnterMulAndDiv is called when entering the MulAndDiv production.
-	EnterMulAndDiv(c *MulAndDivContext)
 
 	// EnterId is called when entering the Id production.
 	EnterId(c *IdContext)
@@ -227,11 +227,11 @@ type ElzListener interface {
 	// ExitNum is called when exiting the Num production.
 	ExitNum(c *NumContext)
 
+	// ExitMulOrDiv is called when exiting the MulOrDiv production.
+	ExitMulOrDiv(c *MulOrDivContext)
+
 	// ExitPow is called when exiting the Pow production.
 	ExitPow(c *PowContext)
-
-	// ExitMulAndDiv is called when exiting the MulAndDiv production.
-	ExitMulAndDiv(c *MulAndDivContext)
 
 	// ExitId is called when exiting the Id production.
 	ExitId(c *IdContext)
