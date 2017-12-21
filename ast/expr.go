@@ -42,11 +42,11 @@ type BinaryExpr struct {
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	switch b.Op {
 	case "+":
-		return llvm.ConstFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		return ctx.Builder.CreateFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), "addtmp")
 	case "-":
 		return llvm.ConstFSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
 	case "*":
-		return llvm.ConstFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		return ctx.Builder.CreateFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), "multmp")
 	case "/":
 		return llvm.ConstFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
 	default:
