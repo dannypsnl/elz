@@ -16,6 +16,9 @@ type Number struct {
 func (n *Number) Codegen(*Context) llvm.Value {
 	return llvm.ConstFloatFromString(llvm.FloatType(), n.Val)
 }
+func (n *Number) ToCC() string {
+	return n.Val
+}
 func (n *Number) Type() string {
 	return "num"
 }
@@ -28,7 +31,9 @@ type UnaryExpr struct {
 func (u *UnaryExpr) Codegen(ctx *Context) llvm.Value {
 	return llvm.ConstFNeg(u.E.Codegen(ctx))
 }
-
+func (u *UnaryExpr) ToCC() string {
+	return "-" + u.E.ToCC()
+}
 func (u *UnaryExpr) Type() string {
 	return u.E.Type()
 }
@@ -39,14 +44,28 @@ type BinaryExpr struct {
 	Op     string
 }
 
+func (b *BinaryExpr) ToCC() string {
+	switch b.Op {
+	case "+":
+		return b.LeftE.ToCC() + "+" + b.RightE().ToCC()
+	case "-":
+		return b.LeftE.ToCC() + "-" + b.RightE().ToCC()
+	case "*":
+		return b.LeftE.ToCC() + "*" + b.RightE().ToCC()
+	case "/":
+		return b.LeftE.ToCC() + "/" + b.RightE().ToCC()
+	default:
+		panic(`Unsupport`)
+	}
+}
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	switch b.Op {
 	case "+":
-		return ctx.Builder.CreateFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), "addtmp")
+		return llvm.ConstFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
 	case "-":
 		return llvm.ConstFSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
 	case "*":
-		return ctx.Builder.CreateFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), "multmp")
+		return llvm.ConstFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
 	case "/":
 		return llvm.ConstFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
 	default:
