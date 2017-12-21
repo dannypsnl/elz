@@ -67,21 +67,28 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	})
 }
 
-func (s *ElzListener) ExitExpr(ctx *parser.ExprContext) {
-	exprs := ctx.AllExpr()
-	if len(exprs) != 2 {
-		// FIXME: Wait for implementation
-	} else {
-		le := s.exprStack.Pop()
-		re := s.exprStack.Pop()
-		if le != nil && re != nil {
-			e := &ast.BinaryExpr{
-				LeftE:  le.(ast.Expr),
-				RightE: re.(ast.Expr),
-				Op:     ctx.GetOp().GetText(),
-			}
-			s.exprStack.Push(e)
+func (s *ElzListener) ExitAddOrsub(ctx *parser.AddOrSubContext) {
+	le := s.exprStack.Pop()
+	re := s.exprStack.Pop()
+	if le != nil && re != nil {
+		e := &ast.BinaryExpr{
+			LeftE:  le.(ast.Expr),
+			RightE: re.(ast.Expr),
+			Op:     ctx.GetOp().GetText(),
 		}
+		s.exprStack.Push(e)
+	}
+}
+func (s *ElzListener) ExitMulOrDiv(ctx *parser.MulOrDivContext) {
+	le := s.exprStack.Pop()
+	re := s.exprStack.Pop()
+	if le != nil && re != nil {
+		e := &ast.BinaryExpr{
+			LeftE:  le.(ast.Expr),
+			RightE: re.(ast.Expr),
+			Op:     ctx.GetOp().GetText(),
+		}
+		s.exprStack.Push(e)
 	}
 }
 
