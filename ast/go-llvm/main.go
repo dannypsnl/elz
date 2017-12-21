@@ -29,8 +29,10 @@ func main() {
 	// How to create global const float
 	aNum := llvm.ConstFloatFromString(llvm.FloatType(), `3.1415926`)
 	bNum := llvm.ConstFloatFromString(llvm.FloatType(), `2.5`)
-	resNum := llvm.ConstFAdd(aNum, bNum)
-	resNum = llvm.ConstFMul(aNum, resNum)
+	//resNum := llvm.ConstFAdd(aNum, bNum)
+	//resNum = llvm.ConstFMul(aNum, resNum)
+	resNum := ctx.builder.CreateFAdd(aNum, bNum, "tmp")
+	resNum = ctx.builder.CreateFMul(aNum, resNum, "tmp")
 	gNum := llvm.AddGlobal(ctx.m, llvm.FloatType(), "main::float")
 	gNum.SetInitializer(resNum)
 
