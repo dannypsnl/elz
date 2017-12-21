@@ -26,6 +26,14 @@ func main() {
 	ctx.builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
 	ctx.builder.ClearInsertionPoint()
 
+	// How to create global const float
+	aNum := llvm.ConstFloatFromString(llvm.FloatType(), `3.1415926`)
+	bNum := llvm.ConstFloatFromString(llvm.FloatType(), `2.5`)
+	resNum := llvm.ConstFAdd(aNum, bNum)
+	resNum = llvm.ConstFMul(aNum, resNum)
+	gNum := llvm.AddGlobal(ctx.m, llvm.FloatType(), "main::float")
+	gNum.SetInitializer(resNum)
+
 	// How to create string
 	aStr := llvm.ConstString(`\\a你好, llvm, $@#%^!&!)~!#*(@#+_)(*&GBJNLSfdlbc)`, false)
 	gVal := llvm.AddGlobal(ctx.m, aStr.Type(), "main::string")
