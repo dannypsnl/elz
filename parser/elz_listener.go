@@ -98,17 +98,29 @@ type ElzListener interface {
 	// EnterTraitDefine is called when entering the traitDefine production.
 	EnterTraitDefine(c *TraitDefineContext)
 
-	// EnterExpr is called when entering the expr production.
-	EnterExpr(c *ExprContext)
+	// EnterStr is called when entering the Str production.
+	EnterStr(c *StrContext)
 
-	// EnterNum is called when entering the num production.
+	// EnterAddOrSub is called when entering the AddOrSub production.
+	EnterAddOrSub(c *AddOrSubContext)
+
+	// EnterSubExpr is called when entering the SubExpr production.
+	EnterSubExpr(c *SubExprContext)
+
+	// EnterStatExpr is called when entering the StatExpr production.
+	EnterStatExpr(c *StatExprContext)
+
+	// EnterNum is called when entering the Num production.
 	EnterNum(c *NumContext)
 
-	// EnterId is called when entering the id production.
-	EnterId(c *IdContext)
+	// EnterPow is called when entering the Pow production.
+	EnterPow(c *PowContext)
 
-	// EnterStr is called when entering the str production.
-	EnterStr(c *StrContext)
+	// EnterMulAndDiv is called when entering the MulAndDiv production.
+	EnterMulAndDiv(c *MulAndDivContext)
+
+	// EnterId is called when entering the Id production.
+	EnterId(c *IdContext)
 
 	// ExitProg is called when exiting the prog production.
 	ExitProg(c *ProgContext)
@@ -200,15 +212,27 @@ type ElzListener interface {
 	// ExitTraitDefine is called when exiting the traitDefine production.
 	ExitTraitDefine(c *TraitDefineContext)
 
-	// ExitExpr is called when exiting the expr production.
-	ExitExpr(c *ExprContext)
+	// ExitStr is called when exiting the Str production.
+	ExitStr(c *StrContext)
 
-	// ExitNum is called when exiting the num production.
+	// ExitAddOrSub is called when exiting the AddOrSub production.
+	ExitAddOrSub(c *AddOrSubContext)
+
+	// ExitSubExpr is called when exiting the SubExpr production.
+	ExitSubExpr(c *SubExprContext)
+
+	// ExitStatExpr is called when exiting the StatExpr production.
+	ExitStatExpr(c *StatExprContext)
+
+	// ExitNum is called when exiting the Num production.
 	ExitNum(c *NumContext)
 
-	// ExitId is called when exiting the id production.
-	ExitId(c *IdContext)
+	// ExitPow is called when exiting the Pow production.
+	ExitPow(c *PowContext)
 
-	// ExitStr is called when exiting the str production.
-	ExitStr(c *StrContext)
+	// ExitMulAndDiv is called when exiting the MulAndDiv production.
+	ExitMulAndDiv(c *MulAndDivContext)
+
+	// ExitId is called when exiting the Id production.
+	ExitId(c *IdContext)
 }

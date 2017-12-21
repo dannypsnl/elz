@@ -112,15 +112,12 @@ traitDefine:
     '}'
     ;
 
-expr: expr op='^' expr // TODO: We had not support translate it.
-    | expr op=('*'|'/') expr // operation prec
-    | expr op=('+'|'-') expr
-    | op='(' expr ')' // TODO: Waiting for implement
-    | exprStat // Important, exprStat have match & functionCall yet!
-    | num
-    | id
-    | str
+expr: expr op='^' expr # Pow // TODO: We had not support translate it.
+    | expr op=('*'|'/') expr # MulAndDiv // operation prec
+    | expr op=('+'|'-') expr # AddOrSub
+    | '(' expr ')' # SubExpr // TODO: Waiting for implement
+    | exprStat # StatExpr // Important, exprStat have match & functionCall yet!
+    | NUM # Num
+    | ID # Id
+    | STRING # Str
     ;
-num: NUM;
-id: ID;
-str: STRING;

@@ -201,26 +201,50 @@ func (s *BaseElzListener) EnterTraitDefine(ctx *TraitDefineContext) {}
 // ExitTraitDefine is called when production traitDefine is exited.
 func (s *BaseElzListener) ExitTraitDefine(ctx *TraitDefineContext) {}
 
-// EnterExpr is called when production expr is entered.
-func (s *BaseElzListener) EnterExpr(ctx *ExprContext) {}
-
-// ExitExpr is called when production expr is exited.
-func (s *BaseElzListener) ExitExpr(ctx *ExprContext) {}
-
-// EnterNum is called when production num is entered.
-func (s *BaseElzListener) EnterNum(ctx *NumContext) {}
-
-// ExitNum is called when production num is exited.
-func (s *BaseElzListener) ExitNum(ctx *NumContext) {}
-
-// EnterId is called when production id is entered.
-func (s *BaseElzListener) EnterId(ctx *IdContext) {}
-
-// ExitId is called when production id is exited.
-func (s *BaseElzListener) ExitId(ctx *IdContext) {}
-
-// EnterStr is called when production str is entered.
+// EnterStr is called when production Str is entered.
 func (s *BaseElzListener) EnterStr(ctx *StrContext) {}
 
-// ExitStr is called when production str is exited.
+// ExitStr is called when production Str is exited.
 func (s *BaseElzListener) ExitStr(ctx *StrContext) {}
+
+// EnterAddOrSub is called when production AddOrSub is entered.
+func (s *BaseElzListener) EnterAddOrSub(ctx *AddOrSubContext) {}
+
+// ExitAddOrSub is called when production AddOrSub is exited.
+func (s *BaseElzListener) ExitAddOrSub(ctx *AddOrSubContext) {}
+
+// EnterSubExpr is called when production SubExpr is entered.
+func (s *BaseElzListener) EnterSubExpr(ctx *SubExprContext) {}
+
+// ExitSubExpr is called when production SubExpr is exited.
+func (s *BaseElzListener) ExitSubExpr(ctx *SubExprContext) {}
+
+// EnterStatExpr is called when production StatExpr is entered.
+func (s *BaseElzListener) EnterStatExpr(ctx *StatExprContext) {}
+
+// ExitStatExpr is called when production StatExpr is exited.
+func (s *BaseElzListener) ExitStatExpr(ctx *StatExprContext) {}
+
+// EnterNum is called when production Num is entered.
+func (s *BaseElzListener) EnterNum(ctx *NumContext) {}
+
+// ExitNum is called when production Num is exited.
+func (s *BaseElzListener) ExitNum(ctx *NumContext) {}
+
+// EnterPow is called when production Pow is entered.
+func (s *BaseElzListener) EnterPow(ctx *PowContext) {}
+
+// ExitPow is called when production Pow is exited.
+func (s *BaseElzListener) ExitPow(ctx *PowContext) {}
+
+// EnterMulAndDiv is called when production MulAndDiv is entered.
+func (s *BaseElzListener) EnterMulAndDiv(ctx *MulAndDivContext) {}
+
+// ExitMulAndDiv is called when production MulAndDiv is exited.
+func (s *BaseElzListener) ExitMulAndDiv(ctx *MulAndDivContext) {}
+
+// EnterId is called when production Id is entered.
+func (s *BaseElzListener) EnterId(ctx *IdContext) {}
+
+// ExitId is called when production Id is exited.
+func (s *BaseElzListener) ExitId(ctx *IdContext) {}
