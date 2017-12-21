@@ -50,6 +50,7 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	case "/":
 		return llvm.ConstFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
 	default:
+		// FIXME: wait for impl
 		panic(`Unsupport this operator`)
 	}
 }
