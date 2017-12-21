@@ -1,3 +1,5 @@
 #include <stdio.h>
 
-int main() { printf("Hello, World.\n"); }
+extern float a;
+
+int main() { printf("Hello, World.%.6f\n", a); }
