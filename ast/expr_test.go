@@ -44,13 +44,19 @@ func TestBinaryExpr(t *testing.T) {
 	num := &Number{
 		Val: "1.23",
 	}
-	be := &BinaryExpr{
+	be0 := &BinaryExpr{
 		RightE: num,
 		LeftE:  num,
 		Op:     "+",
 	}
+	be := &BinaryExpr{
+		RightE: num,
+		LeftE:  be0,
+		Op:     "+",
+	}
 	result := be.Codegen(ctx)
-	if !result.IsConstant() {
+	if !result.IsConstant() ||
+		result != llvm.ConstFloat(llvm.FloatType(), 3.69) {
 		result.Dump()
 		t.Error(`binary expression fail`)
 	}

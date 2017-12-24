@@ -49,3 +49,12 @@ func TestVarDefination(t *testing.T) {
 	fn.Codegen(ctx)
 	fmt.Println(ctx.Module)
 }
+
+func TestFnDef(t *testing.T) {
+	fn := &FnDefination{
+		Name:    "t",
+		RetType: "num",
+	}
+	fn.Codegen(ctx)
+	fmt.Println(ctx.Module)
+}
