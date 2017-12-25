@@ -100,7 +100,7 @@ fnDefine:
     '}'
     ;
 attrList: attr+;
-attr: ID ':' typePass;
+attr: exportor ID ':' typePass;
 typeDefine:
     'type' exportor? ID '(' attrList ')'
     ;
