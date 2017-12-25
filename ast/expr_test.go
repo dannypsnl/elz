@@ -86,7 +86,8 @@ func TestString(t *testing.T) {
 	result := str.Codegen(ctx)
 	if !result.IsConstant() ||
 		// string is [i8] in LLVM IR
-		result.Type().String() != "ArrayType(IntegerType(8 bits)[22])" {
+		result.Type().String() != "ArrayType(IntegerType(8 bits)[22])" ||
+		result != llvm.ConstString(`"a string with 中文"`, false) {
 		result.Dump()
 		t.Error(`error`)
 	}
