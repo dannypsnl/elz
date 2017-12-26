@@ -31,7 +31,7 @@ topStat: fnDefine // fn foo( params ) { stats }
     | traitDefine // trait DB { methods }
     | importStat
     ;
-importStat: 'import' ID;
+importStat: 'import' '(' ID+ ')';
 
 statList: stat+;
 stat: varDefine
