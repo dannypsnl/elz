@@ -101,5 +101,6 @@ func (s *ElzListener) ExitId(ctx *parser.IdContext) {
 	s.exprStack.Push(ctx.ID().GetText())
 }
 func (s *ElzListener) ExitNum(ctx *parser.NumContext) {
-	s.exprStack.Push(&ast.Number{Val: "1"})
+	s.exprStack.Push(&ast.Number{Val: ctx.NUM().GetText()})
+	//fmt.Println()
 }
