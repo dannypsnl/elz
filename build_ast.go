@@ -70,27 +70,23 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 func (s *ElzListener) ExitAddOrsub(ctx *parser.AddOrSubContext) {
 	le := s.exprStack.Pop()
 	re := s.exprStack.Pop()
-	if le != nil && re != nil {
-		e := &ast.BinaryExpr{
-			LeftE:  le.(ast.Expr),
-			RightE: re.(ast.Expr),
-			Op:     ctx.GetOp().GetText(),
-		}
-		s.exprStack.Push(e)
+	e := &ast.BinaryExpr{
+		LeftE:  le.(ast.Expr),
+		RightE: re.(ast.Expr),
+		Op:     ctx.GetOp().GetText(),
 	}
+	s.exprStack.Push(e)
 }
 
 func (s *ElzListener) ExitMulOrDiv(ctx *parser.MulOrDivContext) {
 	le := s.exprStack.Pop()
 	re := s.exprStack.Pop()
-	if le != nil && re != nil {
-		e := &ast.BinaryExpr{
-			LeftE:  le.(ast.Expr),
-			RightE: re.(ast.Expr),
-			Op:     ctx.GetOp().GetText(),
-		}
-		s.exprStack.Push(e)
+	e := &ast.BinaryExpr{
+		LeftE:  le.(ast.Expr),
+		RightE: re.(ast.Expr),
+		Op:     ctx.GetOp().GetText(),
 	}
+	s.exprStack.Push(e)
 }
 
 func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
@@ -102,5 +98,5 @@ func (s *ElzListener) ExitId(ctx *parser.IdContext) {
 }
 func (s *ElzListener) ExitNum(ctx *parser.NumContext) {
 	s.exprStack.Push(&ast.Number{Val: ctx.NUM().GetText()})
-	fmt.Println(ctx.NUM().GetText())
+	//fmt.Println(ctx.NUM().GetText())
 }
