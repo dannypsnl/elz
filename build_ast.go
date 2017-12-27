@@ -62,7 +62,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		Immutable:  s.immutable,
 		Export:     s.exportThis,
 		Name:       ctx.ID().GetText(),
-		VarType:    expr.(ast.Expr).Type(),
+		VarType:    typ,
 		Expression: expr.(ast.Expr),
 	})
 }
