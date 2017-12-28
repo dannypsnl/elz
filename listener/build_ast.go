@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/elz-lang/elz/ast"
+	colloc "github.com/elz-lang/elz/collection"
 	"github.com/elz-lang/elz/parser"
-	"github.com/golang-collections/collections/stack"
 	_ "llvm.org/llvm/bindings/go/llvm"
 )
 
@@ -14,7 +14,7 @@ type ElzListener struct {
 	// AstList contain top level's ast
 	AstList []ast.Ast
 	// exprStack help we implement expression percedence table.
-	exprStack *stack.Stack // Stack Pop nil is nothing in there
+	exprStack *colloc.Stack // Stack Pop nil is nothing in there
 	// exportThis markup the reference Name should be public or not.
 	exportThis bool
 	// variable default immutable.
@@ -24,7 +24,7 @@ type ElzListener struct {
 func NewElzListener() *ElzListener {
 	return &ElzListener{
 		immutable: true,
-		exprStack: stack.New(),
+		exprStack: colloc.NewStack(),
 	}
 }
 
@@ -51,7 +51,6 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 }
 
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
-	fmt.Println(s.exprStack)
 	expr := s.exprStack.Pop()
 	typ := expr.(ast.Expr).Type()
 	fmt.Print(ctx.ID().GetText(), `: `, typ, ` = `)
@@ -76,7 +75,9 @@ func (s *ElzListener) ExitAddOrsub(ctx *parser.AddOrSubContext) {
 		RightE: re.(ast.Expr),
 		Op:     ctx.GetOp().GetText(),
 	}
+	fmt.Println("Expr Stack", s.exprStack)
 	s.exprStack.Push(e)
+	fmt.Println("Expr Stack", s.exprStack)
 }
 
 func (s *ElzListener) ExitMulOrDiv(ctx *parser.MulOrDivContext) {
@@ -87,7 +88,9 @@ func (s *ElzListener) ExitMulOrDiv(ctx *parser.MulOrDivContext) {
 		RightE: re.(ast.Expr),
 		Op:     ctx.GetOp().GetText(),
 	}
+	fmt.Println("Expr Stack", s.exprStack)
 	s.exprStack.Push(e)
+	fmt.Println("Expr Stack", s.exprStack)
 }
 
 func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
