@@ -26,3 +26,24 @@ func TestPushPop(t *testing.T) {
 		t.Error(`Pop method didn't work as expected`, s.stack, i)
 	}
 }
+
+func TestMockCalc(t *testing.T) {
+	s := NewStack()
+	s.Push(1.1)
+	s.Push(2.4)
+	le := s.Pop().(float64)
+	re := s.Pop().(float64)
+	s.Push(le + re)
+	res := s.Pop()
+	if res != 3.5 {
+		t.Error(`Mock calculator show error`)
+	}
+	s.Push(res)
+	s.Push(3.0)
+	le = s.Pop().(float64)
+	re = s.Pop().(float64)
+	s.Push(le * re)
+	if s.Pop() != 10.5 {
+		t.Error(`Mock calculator show error`)
+	}
+}
