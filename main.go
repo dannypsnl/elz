@@ -6,6 +6,7 @@ import (
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 	"github.com/elz-lang/elz/ast"
+	"github.com/elz-lang/elz/listener"
 	"github.com/elz-lang/elz/parser"
 	"llvm.org/llvm/bindings/go/llvm"
 )
@@ -18,7 +19,7 @@ func main() {
 	p := parser.NewElzParser(stream)
 	p.BuildParseTrees = true
 	tree := p.Prog()
-	eal := NewElzListener()
+	eal := listener.NewElzListener()
 	antlr.ParseTreeWalkerDefault.Walk(eal, tree)
 
 	// Module is temprary variable

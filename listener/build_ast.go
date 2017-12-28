@@ -1,4 +1,4 @@
-package main
+package listener
 
 import (
 	"fmt"
@@ -51,6 +51,7 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 }
 
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
+	fmt.Println(s.exprStack)
 	expr := s.exprStack.Pop()
 	typ := expr.(ast.Expr).Type()
 	fmt.Print(ctx.ID().GetText(), `: `, typ, ` = `)
