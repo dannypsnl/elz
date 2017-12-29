@@ -9,6 +9,17 @@ type Expr interface {
 	Type() string
 }
 
+type Str struct {
+	Val string
+}
+
+func (s *Str) Codegen(ctx *Context) llvm.Value {
+	return llvm.ConstString(s.Val, false)
+}
+func (s *Str) Type() string {
+	return "str"
+}
+
 type Number struct {
 	Val string
 }
@@ -82,15 +93,4 @@ type FnCall struct {
 
 func (fc *FnCall) Type() string {
 	return fc.RetType
-}
-
-type Str struct {
-	Val string
-}
-
-func (s *Str) Codegen(ctx *Context) llvm.Value {
-	return llvm.ConstString(s.Val, false)
-}
-func (s *Str) Type() string {
-	return "str"
 }
