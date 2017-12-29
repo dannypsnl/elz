@@ -4,8 +4,12 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
+// Expr required method that an expression node have to implement
 type Expr interface {
+	// Codegen return a llvm.Value
 	Codegen(*Context) llvm.Value
+	// Type return a type info by string format.
+	// It help elz's type system working with AST.
 	Type() string
 }
 
@@ -39,6 +43,7 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 		return llvm.ConstFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
 	default:
 		// FIXME: wait for impl
+		// TODO: If have function implement by @Op, it can be a operator at here
 		panic(`Unsupport this operator`)
 	}
 }
@@ -56,7 +61,7 @@ type Argu struct {
 }
 
 func (a *Argu) Codegen(ctx *Context) llvm.Value {
-	return llvm.ConstFloatFromString(llvm.FloatType(), "3.14")
+	return a.E.Codegen(ctx)
 }
 
 func (a *Argu) Type() string {
