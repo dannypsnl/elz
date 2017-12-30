@@ -1,1 +1,1 @@
-antlr4 -Dlanguage=Go Elz.g4
+antlr4 Elz.g4
