@@ -111,6 +111,12 @@ func (s *BaseElzListener) EnterTypeList(ctx *TypeListContext) {}
 // ExitTypeList is called when production typeList is exited.
 func (s *BaseElzListener) ExitTypeList(ctx *TypeListContext) {}
 
+// EnterAnnotation is called when production annotation is entered.
+func (s *BaseElzListener) EnterAnnotation(ctx *AnnotationContext) {}
+
+// ExitAnnotation is called when production annotation is exited.
+func (s *BaseElzListener) ExitAnnotation(ctx *AnnotationContext) {}
+
 // EnterMethodList is called when production methodList is entered.
 func (s *BaseElzListener) EnterMethodList(ctx *MethodListContext) {}
 
@@ -248,3 +254,9 @@ func (s *BaseElzListener) EnterId(ctx *IdContext) {}
 
 // ExitId is called when production Id is exited.
 func (s *BaseElzListener) ExitId(ctx *IdContext) {}
+
+// EnterThreeOpCmp is called when production ThreeOpCmp is entered.
+func (s *BaseElzListener) EnterThreeOpCmp(ctx *ThreeOpCmpContext) {}
+
+// ExitThreeOpCmp is called when production ThreeOpCmp is exited.
+func (s *BaseElzListener) ExitThreeOpCmp(ctx *ThreeOpCmpContext) {}

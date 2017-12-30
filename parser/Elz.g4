@@ -79,6 +79,8 @@ fnCall:
 typePass : ID;
 typeList: typePass (',' typePass)*;
 
+annotation: '@' ID ('(' expr ')')? ;
+
 methodList: method+;
 method:
     exportor? ID '(' paramList? ')' ('->' typePass)? '{'
@@ -119,6 +121,7 @@ traitDefine:
 expr: expr op='^' expr # Pow // TODO: We had not support translate it.
     | expr op=('*'|'/') expr # MulOrDiv // operation prec
     | expr op=('+'|'-') expr # AddOrSub
+    | expr '?' expr ':' expr # ThreeOpCmp // TODO: We had not support translate it.
     | '(' expr ')' # SubExpr // TODO: Waiting for implement
     | exprStat # StatExpr // Important, exprStat have match & functionCall yet!
     | NUM # Num

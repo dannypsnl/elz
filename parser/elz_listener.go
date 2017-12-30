@@ -53,6 +53,9 @@ type ElzListener interface {
 	// EnterTypeList is called when entering the typeList production.
 	EnterTypeList(c *TypeListContext)
 
+	// EnterAnnotation is called when entering the annotation production.
+	EnterAnnotation(c *AnnotationContext)
+
 	// EnterMethodList is called when entering the methodList production.
 	EnterMethodList(c *MethodListContext)
 
@@ -122,6 +125,9 @@ type ElzListener interface {
 	// EnterId is called when entering the Id production.
 	EnterId(c *IdContext)
 
+	// EnterThreeOpCmp is called when entering the ThreeOpCmp production.
+	EnterThreeOpCmp(c *ThreeOpCmpContext)
+
 	// ExitProg is called when exiting the prog production.
 	ExitProg(c *ProgContext)
 
@@ -166,6 +172,9 @@ type ElzListener interface {
 
 	// ExitTypeList is called when exiting the typeList production.
 	ExitTypeList(c *TypeListContext)
+
+	// ExitAnnotation is called when exiting the annotation production.
+	ExitAnnotation(c *AnnotationContext)
 
 	// ExitMethodList is called when exiting the methodList production.
 	ExitMethodList(c *MethodListContext)
@@ -235,4 +244,7 @@ type ElzListener interface {
 
 	// ExitId is called when exiting the Id production.
 	ExitId(c *IdContext)
+
+	// ExitThreeOpCmp is called when exiting the ThreeOpCmp production.
+	ExitThreeOpCmp(c *ThreeOpCmpContext)
 }
