@@ -1,5 +1,9 @@
 grammar Elz;
 
+options {
+    language = Go;
+}
+
 WS: [ \t\r\n]+ -> channel(HIDDEN);
 COMMENT: '//' .*? '\n' -> channel(HIDDEN);
 
