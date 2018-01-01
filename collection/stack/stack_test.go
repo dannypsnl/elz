@@ -1,18 +1,18 @@
-package collection
+package stack
 
 import (
 	"testing"
 )
 
-func TestNewStack(t *testing.T) {
-	s := NewStack()
+func TestNew(t *testing.T) {
+	s := New()
 	if s.Len() != 0 {
 		t.Error(`initial state of stack is incorrect`)
 	}
 }
 
 func TestPushPop(t *testing.T) {
-	s := NewStack()
+	s := New()
 	s.Push(1)
 	s.Push(1)
 	s.Push(1)
@@ -28,7 +28,7 @@ func TestPushPop(t *testing.T) {
 }
 
 func TestMockCalc(t *testing.T) {
-	s := NewStack()
+	s := New()
 	s.Push(1.1)
 	s.Push(2.4)
 	le := s.Pop().(float64)

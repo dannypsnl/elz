@@ -1,12 +1,13 @@
-package collection
+// Package stack is stack implementation
+package stack
 
 // Stack is data structure: stack's implement
 type Stack struct {
 	stack []interface{}
 }
 
-// NewStack create a new stack
-func NewStack() *Stack {
+// New create a new stack
+func New() *Stack {
 	return &Stack{
 		stack: make([]interface{}, 0),
 	}

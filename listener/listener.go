@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/elz-lang/elz/ast"
-	colloc "github.com/elz-lang/elz/collection"
+	"github.com/elz-lang/elz/collection/stack"
 	"github.com/elz-lang/elz/parser"
 	_ "llvm.org/llvm/bindings/go/llvm"
 )
@@ -14,7 +14,7 @@ type ElzListener struct {
 	// AstList contain top level's ast
 	AstList []ast.Ast
 	// exprStack help we implement expression percedence table.
-	exprStack *colloc.Stack // Stack Pop nil is nothing in there
+	exprStack *stack.Stack // Stack Pop nil is nothing in there
 	// exportThis markup the reference Name should be public or not.
 	exportThis bool
 	// variable default immutable.
@@ -24,7 +24,7 @@ type ElzListener struct {
 func New() *ElzListener {
 	return &ElzListener{
 		immutable: true,
-		exprStack: colloc.NewStack(),
+		exprStack: stack.New(),
 	}
 }
 
