@@ -7,13 +7,6 @@ import (
 // We still need a type system represent. Not focus on llvm's type.
 // Else the high level type will be hard to represent.
 
-type Context struct {
-	Module  llvm.Module
-	Context llvm.Context
-	Vars    map[string]llvm.Value
-	Builder llvm.Builder
-}
-
 type Ast interface {
 	Codegen(*Context) llvm.Value
 }

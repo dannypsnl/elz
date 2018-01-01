@@ -8,7 +8,6 @@ import (
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/listener"
 	"github.com/elz-lang/elz/parser"
-	"llvm.org/llvm/bindings/go/llvm"
 )
 
 func main() {
@@ -23,12 +22,7 @@ func main() {
 	antlr.ParseTreeWalkerDefault.Walk(eal, tree)
 
 	// Module is temprary variable
-	ctx := &ast.Context{
-		llvm.NewModule("main"),
-		llvm.NewContext(),
-		make(map[string]llvm.Value),
-		llvm.NewBuilder(),
-	}
+	ctx := ast.NewContext()
 	for _, ast := range eal.AstList {
 		ast.Codegen(ctx)
 	}
