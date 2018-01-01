@@ -19,7 +19,7 @@ func main() {
 	p := parser.NewElzParser(stream)
 	p.BuildParseTrees = true
 	tree := p.Prog()
-	eal := listener.NewElzListener()
+	eal := listener.New()
 	antlr.ParseTreeWalkerDefault.Walk(eal, tree)
 
 	// Module is temprary variable

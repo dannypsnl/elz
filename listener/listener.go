@@ -21,7 +21,7 @@ type ElzListener struct {
 	immutable bool
 }
 
-func NewElzListener() *ElzListener {
+func New() *ElzListener {
 	return &ElzListener{
 		immutable: true,
 		exprStack: colloc.NewStack(),
