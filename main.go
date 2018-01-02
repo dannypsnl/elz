@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
-	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/listener"
 	"github.com/elz-lang/elz/parser"
 )
@@ -21,10 +20,5 @@ func main() {
 	eal := listener.New()
 	antlr.ParseTreeWalkerDefault.Walk(eal, tree)
 
-	// Module is temprary variable
-	ctx := ast.NewContext()
-	for _, ast := range eal.AstList {
-		ast.Codegen(ctx)
-	}
-	fmt.Println(ctx.Module)
+	fmt.Println(eal.Module())
 }

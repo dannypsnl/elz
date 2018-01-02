@@ -10,7 +10,7 @@ type Expr interface {
 	Codegen(*Context) llvm.Value
 	// Type return a type info by string format.
 	// It help elz's type system working with AST.
-	Type() string
+	Type(*Context) string
 }
 
 type UnaryExpr struct {
@@ -21,8 +21,8 @@ type UnaryExpr struct {
 func (u *UnaryExpr) Codegen(ctx *Context) llvm.Value {
 	return llvm.ConstFNeg(u.E.Codegen(ctx))
 }
-func (u *UnaryExpr) Type() string {
-	return u.E.Type()
+func (u *UnaryExpr) Type(ctx *Context) string {
+	return u.E.Type(ctx)
 }
 
 type BinaryExpr struct {
@@ -48,9 +48,9 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	}
 }
 
-func (b *BinaryExpr) Type() string {
-	if b.LeftE.Type() == b.RightE.Type() {
-		return b.LeftE.Type()
+func (b *BinaryExpr) Type(ctx *Context) string {
+	if b.LeftE.Type(ctx) == b.RightE.Type(ctx) {
+		return b.LeftE.Type(ctx)
 	} else {
 		panic(`Type error`)
 	}
@@ -64,8 +64,8 @@ func (a *Argu) Codegen(ctx *Context) llvm.Value {
 	return a.E.Codegen(ctx)
 }
 
-func (a *Argu) Type() string {
-	return a.E.Type()
+func (a *Argu) Type(ctx *Context) string {
+	return a.E.Type(ctx)
 }
 
 type FnCall struct {
@@ -74,6 +74,6 @@ type FnCall struct {
 	RetType string
 }
 
-func (fc *FnCall) Type() string {
+func (fc *FnCall) Type(*Context) string {
 	return fc.RetType
 }

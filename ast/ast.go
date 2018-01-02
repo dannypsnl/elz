@@ -29,10 +29,13 @@ type VarDefination struct {
 
 func (v *VarDefination) Codegen(ctx *Context) llvm.Value {
 	expr := v.Expression.Codegen(ctx)
-	if v.VarType != "" && v.Expression.Type() == v.VarType {
+	if v.VarType != "" && v.Expression.Type(ctx) == v.VarType {
 		val := llvm.AddGlobal(ctx.Module, expr.Type(), v.Name)
 		val.SetInitializer(expr)
-		ctx.Vars[v.Name] = val
+		ctx.Vars[v.Name] = &VarNode{
+			v:    val,
+			Type: v.VarType,
+		}
 		return val
 	} else {
 		panic(`expr type != var type`)

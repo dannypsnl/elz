@@ -19,8 +19,8 @@ func TestVarDefination(t *testing.T) {
 		},
 	}
 	v.Codegen(ctx)
-	if ctx.Vars["pi"].IsDeclaration() ||
-		ctx.Vars["pi"].Type().String() != "PointerType(FloatType)" {
+	if ctx.Vars["pi"].v.IsDeclaration() ||
+		ctx.Vars["pi"].v.Type().String() != "PointerType(FloatType)" {
 		t.Error(`error`)
 	}
 	str := &Str{`"a string"`}
@@ -32,9 +32,9 @@ func TestVarDefination(t *testing.T) {
 		Expression: str,
 	}
 	v.Codegen(ctx)
-	if ctx.Vars["string1"].IsDeclaration() ||
-		ctx.Vars["string1"].Type().String() != "PointerType(ArrayType(IntegerType(8 bits)[10]))" {
-		t.Errorf("var: %s, expected: %s", ctx.Vars["string1"].Type().String(), "PointerType(ArrayType(IntegerType(8 bits)[10]))")
+	if ctx.Vars["string1"].v.IsDeclaration() ||
+		ctx.Vars["string1"].v.Type().String() != "PointerType(ArrayType(IntegerType(8 bits)[10]))" {
+		t.Errorf("var: %s, expected: %s", ctx.Vars["string1"].v.Type().String(), "PointerType(ArrayType(IntegerType(8 bits)[10]))")
 	}
 	fn := &FnDefination{
 		Export: true,

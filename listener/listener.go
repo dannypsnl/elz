@@ -6,11 +6,12 @@ import (
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/collection/stack"
 	"github.com/elz-lang/elz/parser"
-	_ "llvm.org/llvm/bindings/go/llvm"
+	"llvm.org/llvm/bindings/go/llvm"
 )
 
 type ElzListener struct {
 	*parser.BaseElzListener
+	context *ast.Context
 	// AstList contain top level's ast
 	AstList []ast.Ast
 	// exprStack help we implement expression percedence table.
@@ -21,8 +22,16 @@ type ElzListener struct {
 	immutable bool
 }
 
+func (s *ElzListener) Module() llvm.Module {
+	for _, ast := range s.AstList {
+		ast.Codegen(s.context)
+	}
+	return s.context.Module
+}
+
 func New() *ElzListener {
 	return &ElzListener{
+		context:   ast.NewContext(),
 		immutable: true,
 		exprStack: stack.New(),
 	}
@@ -52,7 +61,7 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	expr := s.exprStack.Pop()
-	typ := expr.(ast.Expr).Type()
+	typ := expr.(ast.Expr).Type(s.context)
 	fmt.Print(ctx.ID().GetText(), `: `, typ, ` = `)
 	fmt.Println(expr)
 	if ctx.TypePass() != nil {

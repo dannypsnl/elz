@@ -6,12 +6,7 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
-var ctx = &Context{
-	Module:  llvm.NewModule("main"),
-	Context: llvm.NewContext(),
-	Vars:    make(map[string]llvm.Value),
-	Builder: llvm.NewBuilder(),
-}
+var ctx = NewContext()
 
 func TestNumber(t *testing.T) {
 	num := &Number{
