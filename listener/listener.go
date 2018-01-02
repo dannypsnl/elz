@@ -26,6 +26,7 @@ func (s *ElzListener) Module() llvm.Module {
 	for _, ast := range s.AstList {
 		ast.Codegen(s.context)
 	}
+	fmt.Println(s.context.Vars)
 	return s.context.Module
 }
 
@@ -102,9 +103,8 @@ func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
 	s.exprStack.Push(&ast.Str{Val: ctx.STRING().GetText()})
 }
 func (s *ElzListener) ExitId(ctx *parser.IdContext) {
-	// BUG: because not yet implement it.
-	// FIXME: Identifier still do not have Expr to represented it.
-	s.exprStack.Push(ctx.ID().GetText())
+	// BUG: ast.Id implementation is buggy
+	s.exprStack.Push(&ast.Id{Val: ctx.ID().GetText()})
 }
 func (s *ElzListener) ExitNum(ctx *parser.NumContext) {
 	s.exprStack.Push(&ast.Number{Val: ctx.NUM().GetText()})
