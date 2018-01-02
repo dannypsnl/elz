@@ -102,6 +102,7 @@ func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
 	s.exprStack.Push(&ast.Str{Val: ctx.STRING().GetText()})
 }
 func (s *ElzListener) ExitId(ctx *parser.IdContext) {
+	// BUG: because not yet implement it.
 	// FIXME: Identifier still do not have Expr to represented it.
 	s.exprStack.Push(ctx.ID().GetText())
 }
