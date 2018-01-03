@@ -52,6 +52,8 @@ func (b *BinaryExpr) Type(ctx *Context) string {
 	if b.LeftE.Type(ctx) == b.RightE.Type(ctx) {
 		return b.LeftE.Type(ctx)
 	} else {
+		// FIXME: wait for impl
+		// TODO: If have function implement by @Op, it can be a operator at here
 		panic(`Type error`)
 	}
 }
