@@ -2,7 +2,7 @@
 I will write a gitbook to describe more infomation.
 [elz-contributing](https://www.gitbook.com/book/dannypsnl/elz-contributing/welcome)
 
-## Develop Depencies
+## Develop Dependencies
 - antlr-runtime for go
 `go get github.com/antlr/antlr4/runtime/Go/antlr`
 - go-llvm
