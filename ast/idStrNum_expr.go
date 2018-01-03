@@ -9,6 +9,7 @@ type Id struct {
 }
 
 func (i *Id) Codegen(ctx *Context) llvm.Value {
+	println(i.Val)
 	// FIXME: load value
 	return ctx.Builder.CreateLoad(
 		ctx.Vars[i.Val].v,
@@ -20,6 +21,7 @@ func (i *Id) Codegen(ctx *Context) llvm.Value {
 // So Context should send into Type method and Context::Vars
 // need a new structure for usage
 func (i *Id) Type(ctx *Context) string {
+	println(i.Val)
 	return ctx.Vars[i.Val].Type
 }
 

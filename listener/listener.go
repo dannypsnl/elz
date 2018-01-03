@@ -63,8 +63,7 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	expr := s.exprStack.Pop()
 	typ := expr.(ast.Expr).Type(s.context)
-	fmt.Print(ctx.ID().GetText(), `: `, typ, ` = `)
-	fmt.Println(expr)
+	fmt.Println(ctx.ID().GetText(), `: `, typ, ` = `, expr)
 	if ctx.TypePass() != nil {
 		typ = ctx.TypePass().GetText()
 	}
