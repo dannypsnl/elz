@@ -1,4 +1,4 @@
 let a: num = 3*2+4,
- b = "你好世界，我想知道elz能不能用中文"
+    b: str = "你好世界，我想知道elz能不能用中文"
 
-// let c: num = a * 3
+let c: str = a * 3

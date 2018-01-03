@@ -27,14 +27,16 @@ type VarDefination struct {
 	Expression Expr
 }
 
-func (v *VarDefination) Codegen(ctx *Context) llvm.Value {
-	expr := v.Expression.Codegen(ctx)
-	if v.VarType != "" && v.Expression.Type(ctx) == v.VarType {
-		val := llvm.AddGlobal(ctx.Module, expr.Type(), v.Name)
+func (varDef *VarDefination) Codegen(ctx *Context) llvm.Value {
+	// Parser should insert Type if user didn't define it.
+	// So we should not get null string
+	if varDef.VarType != "" && varDef.Expression.Type(ctx) == varDef.VarType {
+		expr := varDef.Expression.Codegen(ctx)
+		val := llvm.AddGlobal(ctx.Module, expr.Type(), varDef.Name)
 		val.SetInitializer(expr)
-		ctx.Vars[v.Name] = &VarNode{
+		ctx.Vars[varDef.Name] = &VarNode{
 			v:    val,
-			Type: v.VarType,
+			Type: varDef.VarType,
 		}
 		return val
 	} else {

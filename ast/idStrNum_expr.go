@@ -10,7 +10,10 @@ type Id struct {
 
 func (i *Id) Codegen(ctx *Context) llvm.Value {
 	// FIXME: load value
-	return ctx.Vars[i.Val].v
+	return ctx.Builder.CreateLoad(
+		ctx.Vars[i.Val].v,
+		i.Val,
+	)
 }
 
 // At here we can see, ident's type need to logging in Context
