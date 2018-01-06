@@ -74,6 +74,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		VarType:    typ,
 		Expression: expr.(ast.Expr),
 	})
+	s.context.VarsType[ctx.ID().GetText()] = typ
 }
 
 func (s *ElzListener) ExitAddOrSub(ctx *parser.AddOrSubContext) {

@@ -22,7 +22,7 @@ func (i *Id) Codegen(ctx *Context) llvm.Value {
 // need a new structure for usage
 func (i *Id) Type(ctx *Context) string {
 	println(i.Val)
-	return ctx.Vars[i.Val].Type
+	return ctx.VarsType[i.Val]
 }
 
 type Str struct {
