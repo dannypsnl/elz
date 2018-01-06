@@ -63,10 +63,10 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	expr := s.exprStack.Pop()
 	typ := expr.(ast.Expr).Type(s.context)
-	fmt.Println(ctx.ID().GetText(), `: `, typ, ` = `, expr)
 	if ctx.TypePass() != nil {
 		typ = ctx.TypePass().GetText()
 	}
+	fmt.Println(ctx.ID().GetText(), `: `, typ, ` = `, expr)
 	s.AstList = append(s.AstList, &ast.VarDefination{
 		Immutable:  s.immutable,
 		Export:     s.exportThis,

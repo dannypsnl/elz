@@ -28,12 +28,12 @@ prog: topStatList?;
 
 topStatList: topStat+;
 
-topStat: fnDefine // fn foo( params ) { stats }
-    | varDefine // let (mut) var: type = expr
-    | typeDefine // type newType ( props )
-    | implBlock // impl type { methods }
-    | traitDefine // trait DB { methods }
-    | importStat
+topStat: fnDefine // fn foo( params ) { stat... }
+    | varDefine   // let (mut) var: type = expr
+    | typeDefine  // type newType ( prop... )
+    | implBlock   // impl type { method... }
+    | traitDefine // trait DB { method... }
+    | importStat  // import ( Module... )
     ;
 importStat: 'import' '(' ID+ ')';
 
@@ -118,13 +118,13 @@ traitDefine:
     '}'
     ;
 
-expr: expr op='^' expr # Pow // TODO: We had not support translate it.
+expr: expr op='^' expr       # Pow // TODO: We had not support translate it.
     | expr op=('*'|'/') expr # MulOrDiv // operation prec
     | expr op=('+'|'-') expr # AddOrSub
     | expr '?' expr ':' expr # ThreeOpCmp // TODO: We had not support translate it.
-    | '(' expr ')' # SubExpr // TODO: Waiting for implement
-    | exprStat # StatExpr // Important, exprStat have match & functionCall yet!
-    | NUM # Num
-    | ID # Id
-    | STRING # Str
+    | '(' expr ')'           # SubExpr // TODO: Waiting for implement
+    | exprStat               # StatExpr // Important, exprStat have match & functionCall yet!
+    | NUM                    # Num
+    | ID                     # Id
+    | STRING                 # Str
     ;
