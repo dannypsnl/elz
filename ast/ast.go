@@ -35,7 +35,8 @@ func (varDef *VarDefination) Codegen(ctx *Context) llvm.Value {
 		val := llvm.AddGlobal(ctx.Module, expr.Type(), varDef.Name)
 		val.SetInitializer(expr)
 		ctx.Vars[varDef.Name] = &VarNode{
-			v:    val,
+			//v:    val,
+			v:    expr,
 			Type: varDef.VarType,
 		}
 		return val
