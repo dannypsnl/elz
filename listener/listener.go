@@ -26,7 +26,6 @@ func (s *ElzListener) Module() llvm.Module {
 	for _, ast := range s.AstList {
 		ast.Codegen(s.context)
 	}
-	fmt.Println(s.context.Vars)
 	return s.context.Module
 }
 
@@ -69,7 +68,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		typ = ctx.TypePass().GetText()
 	}
 
-	fmt.Println(ctx.ID().GetText(), `: `, typ, ` = `, expr)
+	fmt.Printf("%s: %s = %s\n", ctx.ID().GetText(), typ, expr)
 
 	s.AstList = append(s.AstList, &ast.VarDefination{
 		Immutable:  s.immutable,
