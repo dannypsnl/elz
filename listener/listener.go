@@ -63,18 +63,22 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	expr := s.exprStack.Pop()
 	typ := expr.(ast.Expr).Type(s.context)
+	// TODO: fix with scope rule, and some rule to detected fn, type, trait or what
+	name := ctx.ID().GetText()
 	if ctx.TypePass() != nil {
 		typ = ctx.TypePass().GetText()
 	}
+
 	fmt.Println(ctx.ID().GetText(), `: `, typ, ` = `, expr)
+
 	s.AstList = append(s.AstList, &ast.VarDefination{
 		Immutable:  s.immutable,
 		Export:     s.exportThis,
-		Name:       ctx.ID().GetText(),
+		Name:       name,
 		VarType:    typ,
 		Expression: expr.(ast.Expr),
 	})
-	s.context.VarsType[ctx.ID().GetText()] = typ
+	s.context.VarsType[name] = typ
 }
 
 func (s *ElzListener) ExitAddOrSub(ctx *parser.AddOrSubContext) {
