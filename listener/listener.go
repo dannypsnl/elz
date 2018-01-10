@@ -106,7 +106,6 @@ func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
 	s.exprStack.Push(&ast.Str{Val: ctx.STRING().GetText()})
 }
 func (s *ElzListener) ExitId(ctx *parser.IdContext) {
-	// BUG: ast.Id implementation is buggy
 	s.exprStack.Push(&ast.Id{Val: ctx.ID().GetText()})
 }
 func (s *ElzListener) ExitNum(ctx *parser.NumContext) {

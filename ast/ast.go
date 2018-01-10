@@ -35,7 +35,6 @@ func (varDef *VarDefination) Codegen(ctx *Context) llvm.Value {
 		val := llvm.AddGlobal(ctx.Module, expr.Type(), varDef.Name)
 		val.SetInitializer(expr)
 		ctx.Vars[varDef.Name] = &VarNode{
-			//v:    val,
 			v:    expr,
 			Type: varDef.VarType,
 		}
@@ -67,7 +66,7 @@ func (f *FnDefination) Codegen(ctx *Context) llvm.Value {
 	fn := llvm.AddFunction(ctx.Module, f.Name, ft)
 	fBlock := llvm.AddBasicBlock(fn, "entry")
 	ctx.Builder.SetInsertPointAtEnd(fBlock)
-	//for _, stat := range f.Body {
+	// TODO: for _, stat := range f.Body {
 	//ctx.Builder.Insert(stat.Codegen(ctx))
 	//}
 	ctx.Builder.CreateRet(llvm.ConstFloat(llvm.FloatType(), 3.14))

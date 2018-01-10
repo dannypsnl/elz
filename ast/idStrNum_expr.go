@@ -9,11 +9,6 @@ type Id struct {
 }
 
 func (i *Id) Codegen(ctx *Context) llvm.Value {
-	// FIXME: load value
-	//return ctx.Builder.CreateLoad(
-	//ctx.Vars[i.Val].v,
-	//i.Val,
-	//)
 	return ctx.Vars[i.Val].v
 }
 

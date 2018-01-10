@@ -7,7 +7,7 @@ import (
 func convertToLLVMType(t string) llvm.Type {
 	switch t {
 	case "num":
-		return llvm.FloatType()
+		return llvm.FloatType() // f32
 	default:
 		panic(`not support this type yet`)
 	}

@@ -73,7 +73,7 @@ func (a *Argu) Type(ctx *Context) string {
 type FnCall struct {
 	Name    string
 	Args    []Argu
-	RetType string
+	RetType string // Setting by parser
 }
 
 func (fc *FnCall) Type(*Context) string {
