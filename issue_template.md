@@ -7,11 +7,11 @@ For example:<br>
 ### Error Log
   Copy your error log to here...<br>
 
-If you want or need some features, help or infomation, here.<br>
+If you want or need some features, help or information, here.<br>
 Using `[Feature Wanted]` to mark your title.
 ### What you want?
 - Add feature
 - help
-- infomation
+- information
 ### Question
   Describe your question at here...<br>
