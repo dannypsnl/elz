@@ -3,7 +3,10 @@ sudo: true
 language: go
 
 go:
-  - 1.9.0
+  - 1.9
+
+# Skip install step. Control by ourself
+install: true
 
 services:
   - docker
