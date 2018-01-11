@@ -7,7 +7,7 @@ services:
 
 before_script:
   - docker pull dannypsnl/elz-test-env
-  - docker run dannypsnl/elz-test-env /bin/bash -c "cd $GOPATH/src/github.com/elz-lang/elz/; go test -v ./..."
+  - docker run dannypsnl/elz-test-env /bin/bash -c "cd /go/src/github.com/elz-lang/elz; go test -v ./..."
   - docker ps -a
 
 script:
