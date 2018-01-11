@@ -7,8 +7,6 @@ services:
 
 before_script:
   - docker pull dannypsnl/elz-test-env
-  - docker run dannypsnl/elz-test-env /bin/bash -c "cd /go/src/github.com/elz-lang/elz; go test -v ./..."
-  - docker ps -a
 
 script:
-  - go test -v ./...                   # Run all the tests with the race detector enabled
+  - docker run --rm dannypsnl/elz-test-env /bin/bash -c "cd /go/src/github.com/elz-lang/elz; go test -v ./..."
