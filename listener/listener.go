@@ -42,7 +42,6 @@ func (s *ElzListener) EnterProg(ctx *parser.ProgContext) {
 }
 
 func (s *ElzListener) EnterExportor(*parser.ExportorContext) {
-	fmt.Print(`public `)
 	s.exportThis = true
 }
 
@@ -68,6 +67,9 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		typ = ctx.TypePass().GetText()
 	}
 
+	if s.exportThis {
+		fmt.Print("public ")
+	}
 	fmt.Printf("%s: %s = %s\n", ctx.ID().GetText(), typ, expr)
 
 	s.AstList = append(s.AstList, &ast.VarDefination{
@@ -78,6 +80,13 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		Expression: expr.(ast.Expr),
 	})
 	s.context.VarsType[name] = typ
+}
+
+func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
+	if s.exportThis {
+		fmt.Print("public ")
+	}
+	fmt.Printf("fn %s\n", ctx.ID().GetText())
 }
 
 func (s *ElzListener) ExitAddOrSub(ctx *parser.AddOrSubContext) {
