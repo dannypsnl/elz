@@ -12,7 +12,7 @@ services:
   - docker
 
 before_script:
-  - go get github.com/elz-lang/elz
+  - go get -d github.com/elz-lang/elz
   - cd $GOPATH/src/github.com/elz-lang/elz/
   - docker build -t runtest .
 
