@@ -1,10 +1,17 @@
 sudo: true
 
+language: go
+
+go:
+  - 1.9.0
+
 services:
   - docker
 
 before_script:
-  - docker pull dannypsnl/elz-test-env
+  - go get github.com/elz-lang/elz
+  - cd $GOPATH/src/github.com/elz-lang/elz/
+  - docker build -t runtest .
 
 script:
-  - docker run --rm dannypsnl/elz-test-env /bin/bash -c "cd /go/src/github.com/elz-lang/elz; git pull;go test -v ./..."
+  - docker run --rm runtest
