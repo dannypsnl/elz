@@ -4,9 +4,16 @@ language: go
 
 go:
   - 1.9
+  - master
 
 # Skip install step. Control by ourself
 install: true
+
+matrix:
+  allow_failures:
+    - go: master
+  # This mean if stable go version pass the test, will mark test green
+  fast_finish: true
 
 services:
   - docker
@@ -17,5 +24,6 @@ before_script:
   - docker build -t runtest .
 
 script:
+  # Cover default test command
   - go test ./collection/stack/
   - docker run --rm runtest
