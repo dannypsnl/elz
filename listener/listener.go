@@ -22,6 +22,7 @@ type ElzListener struct {
 	immutable bool
 }
 
+// Module return the llvm.Module generate by parse process
 func (s *ElzListener) Module() llvm.Module {
 	for _, ast := range s.AstList {
 		ast.Codegen(s.context)
@@ -29,6 +30,7 @@ func (s *ElzListener) Module() llvm.Module {
 	return s.context.Module
 }
 
+// New create a new listener
 func New() *ElzListener {
 	return &ElzListener{
 		context:   ast.NewContext(),
@@ -41,10 +43,13 @@ func (s *ElzListener) EnterProg(ctx *parser.ProgContext) {
 	fmt.Println(`Elz prog`)
 }
 
+// EnterExportor: + prefix
 func (s *ElzListener) EnterExportor(*parser.ExportorContext) {
 	s.exportThis = true
 }
 
+// VarDef:
+//   let (mut) $var_name = $expr
 func (s *ElzListener) EnterVarDefine(ctx *parser.VarDefineContext) {
 	fmt.Print(`var `)
 	if ctx.GetMut() != nil {
@@ -58,11 +63,17 @@ func (s *ElzListener) ExitVarDefine(*parser.VarDefineContext) {
 	}
 }
 
+// Def:
+//   $var_name = $expr
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
+	// get expr
 	expr := s.exprStack.Pop()
+	// get type from expression
 	typ := expr.(ast.Expr).Type(s.context)
+	// get identifier
 	// TODO: fix with scope rule, and some rule to detected fn, type, trait or what
 	name := ctx.ID().GetText()
+	// get type from source code, so we can find out the problem if expr != user_def type
 	if ctx.TypePass() != nil {
 		typ = ctx.TypePass().GetText()
 	}
@@ -83,6 +94,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 }
 
 func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
+	// FIXME: implement fn generate
 	if s.exportThis {
 		fmt.Print("public ")
 	}
