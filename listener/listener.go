@@ -99,6 +99,7 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 		fmt.Print("public ")
 	}
 	fmt.Printf("fn %s\n", ctx.ID().GetText())
+	// TODO: local var def should be spec
 }
 
 func (s *ElzListener) ExitAddOrSub(ctx *parser.AddOrSubContext) {
