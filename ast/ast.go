@@ -64,8 +64,8 @@ func (f *FnDefination) Codegen(ctx *Context) llvm.Value {
 	retT := convertToLLVMType(f.RetType)
 	ft := llvm.FunctionType(retT, paramsT, false)
 	fn := llvm.AddFunction(ctx.Module, f.Name, ft)
-	fBlock := llvm.AddBasicBlock(fn, "entry")
-	ctx.Builder.SetInsertPointAtEnd(fBlock)
+	entryPoint := llvm.AddBasicBlock(fn, "entry")
+	ctx.Builder.SetInsertPointAtEnd(entryPoint)
 	// TODO: for _, stat := range f.Body {
 	//ctx.Builder.Insert(stat.Codegen(ctx))
 	//}
