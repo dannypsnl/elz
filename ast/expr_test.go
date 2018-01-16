@@ -8,7 +8,7 @@ import (
 
 var ctx = NewContext()
 
-func TestNumber(t *testing.T) {
+func TestNumberAST(t *testing.T) {
 	num := &Number{
 		Val: "3.1415926",
 	}
@@ -20,7 +20,7 @@ func TestNumber(t *testing.T) {
 	}
 }
 
-func TestUnaryExpr(t *testing.T) {
+func TestUnaryExprAST(t *testing.T) {
 	num := &Number{
 		Val: "1.23",
 	}
@@ -35,7 +35,7 @@ func TestUnaryExpr(t *testing.T) {
 	}
 }
 
-func TestBinaryExpr(t *testing.T) {
+func TestBinaryExprAST(t *testing.T) {
 	num := &Number{
 		Val: "1.23",
 	}
@@ -57,7 +57,7 @@ func TestBinaryExpr(t *testing.T) {
 	}
 }
 
-func TestBinaryForUnsupportOp(t *testing.T) {
+func TestUnsupportOpShouldCausePanic(t *testing.T) {
 	defer func() {
 		if p := recover(); p == nil {
 			t.Error(`Didn't panic`)
@@ -74,7 +74,7 @@ func TestBinaryForUnsupportOp(t *testing.T) {
 	be.Codegen(ctx)
 }
 
-func TestString(t *testing.T) {
+func TestStringAST(t *testing.T) {
 	str := &Str{
 		Val: `"a string with 中文"`,
 	}
