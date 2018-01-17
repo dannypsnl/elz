@@ -98,7 +98,15 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 	if s.exportThis {
 		fmt.Print("public ")
 	}
-	fmt.Printf("fn %s\n", ctx.ID().GetText())
+	name := ctx.ID().GetText()
+	fmt.Printf("fn %s\n", name)
+	s.AstList = append(s.AstList, &ast.FnDefination{
+		Export: true,
+		Name:   name,
+		Params: []*ast.Param{},
+		// FIXME: should decide by rule typePass
+		RetType: "num",
+	})
 	// TODO: local var def should be spec
 }
 
