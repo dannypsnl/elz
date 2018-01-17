@@ -48,7 +48,7 @@ type Param struct {
 	Name string
 	Type string
 }
-type FnDefination struct {
+type FnDef struct {
 	Export  bool
 	Name    string
 	Params  []*Param
@@ -56,7 +56,7 @@ type FnDefination struct {
 	RetType string
 }
 
-func (f *FnDefination) Codegen(ctx *Context) llvm.Value {
+func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	var paramsT []llvm.Type
 	for _, v := range f.Params {
 		paramsT = append(paramsT, convertToLLVMType(v.Type))

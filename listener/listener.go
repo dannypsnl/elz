@@ -100,7 +100,7 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 	}
 	name := ctx.ID().GetText()
 	fmt.Printf("fn %s\n", name)
-	s.AstList = append(s.AstList, &ast.FnDefination{
+	s.AstList = append(s.AstList, &ast.FnDef{
 		Export: true,
 		Name:   name,
 		Params: []*ast.Param{},

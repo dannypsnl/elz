@@ -35,7 +35,7 @@ func TestVarDefination(t *testing.T) {
 		t.Errorf("var: %s, expected: %s", ctx.Vars["string1"].v.Type().String(),
 			"ArrayType(IntegerType(8 bits)[10])")
 	}
-	fn := &FnDefination{
+	fn := &FnDef{
 		Export: true,
 		Name:   "foo",
 		Params: []*Param{
@@ -50,7 +50,7 @@ func TestVarDefination(t *testing.T) {
 }
 
 func TestFnDef(t *testing.T) {
-	fn := &FnDefination{
+	fn := &FnDef{
 		Name:    "t",
 		RetType: "num",
 	}
