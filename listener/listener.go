@@ -94,7 +94,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 }
 
 func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
-	// FIXME: implement fn generate
+	// TODO: complete fn generate
 	if s.exportThis {
 		fmt.Print("public ")
 	}
@@ -104,10 +104,11 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 		Export: true,
 		Name:   name,
 		Params: []*ast.Param{},
+		// TODO: implement statments
 		// FIXME: should decide by rule typePass
 		RetType: "num",
 	})
-	// TODO: local var def should be spec
+	// TODO: local var def need spec_name
 }
 
 func (s *ElzListener) ExitAddOrSub(ctx *parser.AddOrSubContext) {
