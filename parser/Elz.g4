@@ -118,6 +118,8 @@ traitDefine:
     '}'
     ;
 
+// Explain for expr, because Antlr support the operation precedence by declared order
+// So we don't have to consider that
 expr: expr op='^' expr       # Pow // TODO: We had not support translate it.
     | expr op=('*'|'/') expr # MulOrDiv // operation prec
     | expr op=('+'|'-') expr # AddOrSub
