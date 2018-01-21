@@ -119,6 +119,9 @@ type ElzListener interface {
 	// EnterMulOrDiv is called when entering the MulOrDiv production.
 	EnterMulOrDiv(c *MulOrDivContext)
 
+	// EnterCmp is called when entering the Cmp production.
+	EnterCmp(c *CmpContext)
+
 	// EnterPow is called when entering the Pow production.
 	EnterPow(c *PowContext)
 
@@ -238,6 +241,9 @@ type ElzListener interface {
 
 	// ExitMulOrDiv is called when exiting the MulOrDiv production.
 	ExitMulOrDiv(c *MulOrDivContext)
+
+	// ExitCmp is called when exiting the Cmp production.
+	ExitCmp(c *CmpContext)
 
 	// ExitPow is called when exiting the Pow production.
 	ExitPow(c *PowContext)

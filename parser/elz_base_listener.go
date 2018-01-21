@@ -243,6 +243,12 @@ func (s *BaseElzListener) EnterMulOrDiv(ctx *MulOrDivContext) {}
 // ExitMulOrDiv is called when production MulOrDiv is exited.
 func (s *BaseElzListener) ExitMulOrDiv(ctx *MulOrDivContext) {}
 
+// EnterCmp is called when production Cmp is entered.
+func (s *BaseElzListener) EnterCmp(ctx *CmpContext) {}
+
+// ExitCmp is called when production Cmp is exited.
+func (s *BaseElzListener) ExitCmp(ctx *CmpContext) {}
+
 // EnterPow is called when production Pow is entered.
 func (s *BaseElzListener) EnterPow(ctx *PowContext) {}
 
