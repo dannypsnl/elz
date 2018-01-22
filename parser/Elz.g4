@@ -123,7 +123,8 @@ traitDefine:
 expr: expr op='^' expr       # Pow // TODO: We had not support translate it.
     | expr op=('*'|'/') expr # MulOrDiv // operation prec
     | expr op=('+'|'-') expr # AddOrSub
-    | expr op='==' expr    # Cmp // TODO: Waiting for implement
+    | expr op='!=' expr      # NotEq // TODO: Waiting for implement
+    | expr op='==' expr      # Eq // TODO: Waiting for implement
     | expr '?' expr ':' expr # ThreeOpCmp // TODO: We had not support translate it.
     | '(' expr ')'           # SubExpr // TODO: Waiting for implement
     | exprStat               # StatExpr // Important, exprStat have match & functionCall yet!

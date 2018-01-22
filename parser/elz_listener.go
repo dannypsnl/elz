@@ -104,6 +104,9 @@ type ElzListener interface {
 	// EnterStr is called when entering the Str production.
 	EnterStr(c *StrContext)
 
+	// EnterNotEq is called when entering the NotEq production.
+	EnterNotEq(c *NotEqContext)
+
 	// EnterAddOrSub is called when entering the AddOrSub production.
 	EnterAddOrSub(c *AddOrSubContext)
 
@@ -119,14 +122,14 @@ type ElzListener interface {
 	// EnterMulOrDiv is called when entering the MulOrDiv production.
 	EnterMulOrDiv(c *MulOrDivContext)
 
-	// EnterCmp is called when entering the Cmp production.
-	EnterCmp(c *CmpContext)
-
 	// EnterPow is called when entering the Pow production.
 	EnterPow(c *PowContext)
 
 	// EnterId is called when entering the Id production.
 	EnterId(c *IdContext)
+
+	// EnterEq is called when entering the Eq production.
+	EnterEq(c *EqContext)
 
 	// EnterThreeOpCmp is called when entering the ThreeOpCmp production.
 	EnterThreeOpCmp(c *ThreeOpCmpContext)
@@ -227,6 +230,9 @@ type ElzListener interface {
 	// ExitStr is called when exiting the Str production.
 	ExitStr(c *StrContext)
 
+	// ExitNotEq is called when exiting the NotEq production.
+	ExitNotEq(c *NotEqContext)
+
 	// ExitAddOrSub is called when exiting the AddOrSub production.
 	ExitAddOrSub(c *AddOrSubContext)
 
@@ -242,14 +248,14 @@ type ElzListener interface {
 	// ExitMulOrDiv is called when exiting the MulOrDiv production.
 	ExitMulOrDiv(c *MulOrDivContext)
 
-	// ExitCmp is called when exiting the Cmp production.
-	ExitCmp(c *CmpContext)
-
 	// ExitPow is called when exiting the Pow production.
 	ExitPow(c *PowContext)
 
 	// ExitId is called when exiting the Id production.
 	ExitId(c *IdContext)
+
+	// ExitEq is called when exiting the Eq production.
+	ExitEq(c *EqContext)
 
 	// ExitThreeOpCmp is called when exiting the ThreeOpCmp production.
 	ExitThreeOpCmp(c *ThreeOpCmpContext)

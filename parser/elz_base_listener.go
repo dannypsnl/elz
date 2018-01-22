@@ -213,6 +213,12 @@ func (s *BaseElzListener) EnterStr(ctx *StrContext) {}
 // ExitStr is called when production Str is exited.
 func (s *BaseElzListener) ExitStr(ctx *StrContext) {}
 
+// EnterNotEq is called when production NotEq is entered.
+func (s *BaseElzListener) EnterNotEq(ctx *NotEqContext) {}
+
+// ExitNotEq is called when production NotEq is exited.
+func (s *BaseElzListener) ExitNotEq(ctx *NotEqContext) {}
+
 // EnterAddOrSub is called when production AddOrSub is entered.
 func (s *BaseElzListener) EnterAddOrSub(ctx *AddOrSubContext) {}
 
@@ -243,12 +249,6 @@ func (s *BaseElzListener) EnterMulOrDiv(ctx *MulOrDivContext) {}
 // ExitMulOrDiv is called when production MulOrDiv is exited.
 func (s *BaseElzListener) ExitMulOrDiv(ctx *MulOrDivContext) {}
 
-// EnterCmp is called when production Cmp is entered.
-func (s *BaseElzListener) EnterCmp(ctx *CmpContext) {}
-
-// ExitCmp is called when production Cmp is exited.
-func (s *BaseElzListener) ExitCmp(ctx *CmpContext) {}
-
 // EnterPow is called when production Pow is entered.
 func (s *BaseElzListener) EnterPow(ctx *PowContext) {}
 
@@ -260,6 +260,12 @@ func (s *BaseElzListener) EnterId(ctx *IdContext) {}
 
 // ExitId is called when production Id is exited.
 func (s *BaseElzListener) ExitId(ctx *IdContext) {}
+
+// EnterEq is called when production Eq is entered.
+func (s *BaseElzListener) EnterEq(ctx *EqContext) {}
+
+// ExitEq is called when production Eq is exited.
+func (s *BaseElzListener) ExitEq(ctx *EqContext) {}
 
 // EnterThreeOpCmp is called when production ThreeOpCmp is entered.
 func (s *BaseElzListener) EnterThreeOpCmp(ctx *ThreeOpCmpContext) {}
