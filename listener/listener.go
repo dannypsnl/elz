@@ -83,13 +83,17 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	}
 	fmt.Printf("%s: %s = %s\n", ctx.ID().GetText(), typ, expr)
 
+	// FIXME: Need to classify global var & local var, because local var of course can't be export
+	// FIXME: Need to classify heap & stack, and can find out the lifetime, else sending data by return will become bug
 	s.AstList = append(s.AstList, &ast.VarDefination{
+		// TODO: immutable should be put in an array, and don't need to be knew by LLVM Module, because LLVM is SSA form
 		Immutable:  s.immutable,
 		Export:     s.exportThis,
 		Name:       name,
 		VarType:    typ,
 		Expression: expr.(ast.Expr),
 	})
+	// Record type for compiler
 	s.context.VarsType[name] = typ
 }
 
@@ -100,6 +104,7 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 	}
 	name := ctx.ID().GetText()
 	fmt.Printf("fn %s\n", name)
+	// FIXME: This is let result show a fn, not correct impl
 	s.AstList = append(s.AstList, &ast.FnDef{
 		Export: true,
 		Name:   name,
@@ -109,4 +114,7 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 		RetType: "num",
 	})
 	// TODO: local var def need spec_name
+}
+func (s *ElzListener) ExitFnDefine(ctx *parser.FnDefineContext) {
+	// TODO: fn need builder to create at here, because it will cross several rules
 }
