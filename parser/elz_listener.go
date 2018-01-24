@@ -17,6 +17,9 @@ type ElzListener interface {
 	// EnterTopStat is called when entering the topStat production.
 	EnterTopStat(c *TopStatContext)
 
+	// EnterImportMod is called when entering the importMod production.
+	EnterImportMod(c *ImportModContext)
+
 	// EnterImportStat is called when entering the importStat production.
 	EnterImportStat(c *ImportStatContext)
 
@@ -142,6 +145,9 @@ type ElzListener interface {
 
 	// ExitTopStat is called when exiting the topStat production.
 	ExitTopStat(c *TopStatContext)
+
+	// ExitImportMod is called when exiting the importMod production.
+	ExitImportMod(c *ImportModContext)
 
 	// ExitImportStat is called when exiting the importStat production.
 	ExitImportStat(c *ImportStatContext)

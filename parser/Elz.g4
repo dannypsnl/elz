@@ -35,7 +35,9 @@ topStat: fnDefine // fn foo( params ) { stat... }
     | traitDefine // trait DB { method... }
     | importStat  // import ( Module... )
     ;
-importStat: 'import' '(' ID+ ')';
+
+importMod: ID ('::' ID)*;
+importStat: 'import' '(' importMod ')';
 
 statList: stat+;
 stat: varDefine

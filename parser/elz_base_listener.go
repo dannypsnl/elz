@@ -39,6 +39,12 @@ func (s *BaseElzListener) EnterTopStat(ctx *TopStatContext) {}
 // ExitTopStat is called when production topStat is exited.
 func (s *BaseElzListener) ExitTopStat(ctx *TopStatContext) {}
 
+// EnterImportMod is called when production importMod is entered.
+func (s *BaseElzListener) EnterImportMod(ctx *ImportModContext) {}
+
+// ExitImportMod is called when production importMod is exited.
+func (s *BaseElzListener) ExitImportMod(ctx *ImportModContext) {}
+
 // EnterImportStat is called when production importStat is entered.
 func (s *BaseElzListener) EnterImportStat(ctx *ImportStatContext) {}
 
