@@ -94,6 +94,10 @@ implBlock:
         methodList?
     '}'
     ;
+
+// exportor can use on detect variable scope
+// Because local scope can't export, it may safe.
+// And create another rule may to complex.
 exportor: '+';
 define: exportor? ID (':' typePass)? '=' expr;
 varDefine:
