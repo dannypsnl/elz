@@ -16,6 +16,8 @@ type ElzListener struct {
 	AstList []ast.Ast
 	// exprStack help we implement expression percedence table.
 	exprStack *stack.Stack // Stack Pop nil is nothing in there
+	// fnBuilder
+	fnBuilder *FnBuilder
 	// exportThis markup the reference Name should be public or not.
 	exportThis bool
 	// variable default immutable.
@@ -97,24 +99,52 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	s.context.VarsType[name] = typ
 }
 
-func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
-	// TODO: complete fn generate
-	if s.exportThis {
+type FnBuilder struct {
+	export    bool
+	name      string
+	returnTyp string
+	params    []*ast.Param
+}
+
+func NewFnBuilder() *FnBuilder {
+	return &FnBuilder{}
+}
+
+func (fb *FnBuilder) setName(n string) *FnBuilder {
+	fb.name = n
+	return fb
+}
+func (fb *FnBuilder) setExport(e bool) *FnBuilder {
+	fb.export = e
+	return fb
+}
+func (fb *FnBuilder) generate() *ast.FnDef {
+	if fb.export {
 		fmt.Print("public ")
 	}
-	name := ctx.ID().GetText()
-	fmt.Printf("fn %s\n", name)
 	// FIXME: This is let result show a fn, not correct impl
-	s.AstList = append(s.AstList, &ast.FnDef{
-		Export: true,
-		Name:   name,
+	fmt.Printf("fn %s\n", fb.name)
+	return &ast.FnDef{
+		Export: fb.export,
+		Name:   fb.name,
 		Params: []*ast.Param{},
 		// TODO: implement statments
 		// FIXME: should decide by rule typePass
 		RetType: "num",
-	})
+	}
 	// TODO: local var def need spec_name
 }
+
+func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
+	// TODO: complete fn generate
+	s.fnBuilder = NewFnBuilder().
+		setName(ctx.ID().GetText()).
+		setExport(s.exportThis)
+}
 func (s *ElzListener) ExitFnDefine(ctx *parser.FnDefineContext) {
+	s.AstList = append(s.AstList,
+		s.fnBuilder.generate(),
+	)
 	// TODO: fn need builder to create at here, because it will cross several rules
+	s.fnBuilder = nil
 }
