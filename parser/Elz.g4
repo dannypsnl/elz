@@ -61,6 +61,10 @@ exprStat: matchRule
     | fnCall
     ;
 
+// match i {
+//   10 => { break },
+//   _ => { i = i + 1 }
+// }
 matchRule:
     'match' expr '{'
         expr '=>' stat
@@ -69,18 +73,23 @@ matchRule:
     '}'
     ;
 
+// var = 1
 assign:
     ID '=' expr
     ;
 
+// 1, 2, 3, 4, 5
 exprList: expr (',' expr)*;
+// add(1, 2)
 fnCall:
     ID '(' exprList? ')'
     ;
 
+// mean a type, but type already be use by Go, so need an alternative name
 typePass : ID;
 typeList: typePass (',' typePass)*;
 
+// @op
 annotation: '@' ID ('(' expr ')')? ;
 
 methodList: method+;
