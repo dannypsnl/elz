@@ -26,6 +26,9 @@ func (s *Stack) Push(element interface{}) {
 // Pop pop off element from stack and return it
 func (s *Stack) Pop() (res interface{}) {
 	l := len(s.stack)
+	if l <= 0 {
+		return
+	}
 	res = s.stack[l-1]
 	s.stack = s.stack[:l-1]
 	return

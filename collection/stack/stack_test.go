@@ -11,6 +11,16 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestPopInitStack(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			t.Error(`pop nil stack should not panic, just not thing happened`)
+		}
+	}()
+	s := New()
+	s.Pop()
+}
+
 func TestPushPop(t *testing.T) {
 	s := New()
 	s.Push(1)
