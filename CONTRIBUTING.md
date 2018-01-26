@@ -1,3 +1,10 @@
+## Commit Rules
+[add]: create a new file or add a new function.
+[feat]: create a new feature. !!! A known feature, if not, create an issue then implement it
+[fix]: Fixed known bug, !!! If this bug is an unknown bug, please create an issue then fixed it.
+[clean]: comment, reformat(gofmt only), refactor. Include improving tests
+[test]: new test
+
 ## translating rule
 I will write a gitbook to describe more infomation.
 [elz-contributing](https://www.gitbook.com/book/dannypsnl/elz-contributing/welcome)
