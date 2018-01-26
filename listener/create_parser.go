@@ -7,7 +7,6 @@ import (
 	"github.com/elz-lang/elz/parser"
 )
 
-// TODO: Put parse task at here
 func NewParse(source string) string {
 	input := antlr.NewInputStream(source)
 	lexer := parser.NewElzLexer(input)

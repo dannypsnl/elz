@@ -9,5 +9,6 @@ Logging change of elz.
 ### Added
 - Use `f32`(float in LLVM) implement `num` type
 - Fake function define Impl
+- Put parse task in a function
 ### Deprecated
 - Fake function Impl
