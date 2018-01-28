@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestOperatorExpression(t *testing.T) {
+func TestNumStrExpression(t *testing.T) {
 	res := NewParse(`
 	let a = 3 * 2
 	let mut b = "abcde"
@@ -20,5 +20,4 @@ source_filename = "main"
 	if res != expected {
 		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
 	}
-
 }
