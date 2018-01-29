@@ -103,7 +103,9 @@ type FnBuilder struct {
 	export    bool
 	name      string
 	returnTyp string
-	params    []*ast.Param
+	// TODO: How to record?
+	// Type: Param = { Name, Type }
+	params []*ast.Param
 }
 
 func NewFnBuilder() *FnBuilder {
