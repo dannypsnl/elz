@@ -4,3 +4,4 @@ let a: num = 3*2-2+4*9/3,
 let +c: num = a * 3
 
 +fn foo() {}
+fn add(l, r: num) -> num {}
