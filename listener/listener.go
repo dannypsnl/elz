@@ -112,11 +112,11 @@ func NewFnBuilder() *FnBuilder {
 	return &FnBuilder{}
 }
 
-func (fb *FnBuilder) setName(n string) *FnBuilder {
+func (fb *FnBuilder) Name(n string) *FnBuilder {
 	fb.name = n
 	return fb
 }
-func (fb *FnBuilder) setExport(e bool) *FnBuilder {
+func (fb *FnBuilder) Export(e bool) *FnBuilder {
 	fb.export = e
 	return fb
 }
@@ -140,8 +140,8 @@ func (fb *FnBuilder) generate() *ast.FnDef {
 func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 	// TODO: complete fn generate
 	s.fnBuilder = NewFnBuilder().
-		setName(ctx.ID().GetText()).
-		setExport(s.exportThis)
+		Name(ctx.ID().GetText()).
+		Export(s.exportThis)
 }
 func (s *ElzListener) ExitFnDefine(ctx *parser.FnDefineContext) {
 	s.AstList = append(s.AstList,
