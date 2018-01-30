@@ -113,7 +113,7 @@ varDefine:
     'let' mut='mut'? define (',' define)*
     ;
 paramList: param (',' param)*;
-param: ID ':' typePass;
+param: ID (':' typePass)?;
 fnDefine:
     // because fn also handle operator, so if we use exportor after keyword fn will cause we hard to divide ++ && + +
     exportor? 'fn' ID '(' paramList? ')' ('->' typePass)? '{'
