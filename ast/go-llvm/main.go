@@ -42,6 +42,7 @@ func main() {
 	gVal.SetInitializer(aStr)
 
 	// How to create a function
+	// llvm.FunctionType( retrun type, params types, is var arg: bool )
 	ft = llvm.FunctionType(aStr.Type(), []llvm.Type{aStr.Type()}, false)
 	llvm.AddFunction(ctx.m, "main::foo_string_string", ft)
 
