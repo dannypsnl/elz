@@ -18,7 +18,7 @@ type FnDef struct {
 }
 
 func (f *FnDef) Codegen(ctx *Context) llvm.Value {
-	paramsT = []llvm.Type{}
+	paramsT := []llvm.Type{}
 	for _, v := range f.Params {
 		paramsT = append(paramsT, convertToLLVMType(v.Type))
 	}
