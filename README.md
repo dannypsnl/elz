@@ -14,8 +14,10 @@ It based on translate elz to nim, and use it compiler to work.<br>
 But that is not enough. nim can not implement some features of elz.<br>
 ## Install
 ```bash
-$ go get github.com/elz-lang/elz
-$ go install
+$ go get -d github.com/elz-lang/elz # -d help you don't check compile
+$ go get -d github.com/antlr/antlr4/runtime/Go/antlr
+$ go get -d llvm.org/llvm/bindings/go/llvm # Goto see Dependencies
+$ cd $GOPATH/src/github.com/elz-lang/elz/ && go install
 ```
 Make sure your `$GOPATH/bin` is one of `$PATH`
 ### Dependencies
