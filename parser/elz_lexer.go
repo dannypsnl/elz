@@ -1,4 +1,4 @@
-// Generated from Elz.g4 by ANTLR 4.7.
+// Code generated from Elz.g4 by ANTLR 4.7.1. DO NOT EDIT.
 
 package parser
 

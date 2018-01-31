@@ -1,4 +1,4 @@
-// Generated from Elz.g4 by ANTLR 4.7.
+// Code generated from Elz.g4 by ANTLR 4.7.1. DO NOT EDIT.
 
 package parser // Elz
 
@@ -5313,21 +5313,23 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				if !(p.Precpred(p.GetParserRuleContext(), 10)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 10)", ""))
 				}
-				p.SetState(334)
+				{
+					p.SetState(334)
 
-				var _lt = p.GetTokenStream().LT(1)
+					var _lt = p.GetTokenStream().LT(1)
 
-				localctx.(*MulOrDivContext).op = _lt
+					localctx.(*MulOrDivContext).op = _lt
 
-				_la = p.GetTokenStream().LA(1)
+					_la = p.GetTokenStream().LA(1)
 
-				if !(_la == ElzParserT__23 || _la == ElzParserT__24) {
-					var _ri = p.GetErrorHandler().RecoverInline(p)
+					if !(_la == ElzParserT__23 || _la == ElzParserT__24) {
+						var _ri = p.GetErrorHandler().RecoverInline(p)
 
-					localctx.(*MulOrDivContext).op = _ri
-				} else {
-					p.GetErrorHandler().ReportMatch(p)
-					p.Consume()
+						localctx.(*MulOrDivContext).op = _ri
+					} else {
+						p.GetErrorHandler().ReportMatch(p)
+						p.Consume()
+					}
 				}
 				{
 					p.SetState(335)
@@ -5342,21 +5344,23 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				if !(p.Precpred(p.GetParserRuleContext(), 9)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 9)", ""))
 				}
-				p.SetState(337)
+				{
+					p.SetState(337)
 
-				var _lt = p.GetTokenStream().LT(1)
+					var _lt = p.GetTokenStream().LT(1)
 
-				localctx.(*AddOrSubContext).op = _lt
+					localctx.(*AddOrSubContext).op = _lt
 
-				_la = p.GetTokenStream().LA(1)
+					_la = p.GetTokenStream().LA(1)
 
-				if !(_la == ElzParserT__16 || _la == ElzParserT__25) {
-					var _ri = p.GetErrorHandler().RecoverInline(p)
+					if !(_la == ElzParserT__16 || _la == ElzParserT__25) {
+						var _ri = p.GetErrorHandler().RecoverInline(p)
 
-					localctx.(*AddOrSubContext).op = _ri
-				} else {
-					p.GetErrorHandler().ReportMatch(p)
-					p.Consume()
+						localctx.(*AddOrSubContext).op = _ri
+					} else {
+						p.GetErrorHandler().ReportMatch(p)
+						p.Consume()
+					}
 				}
 				{
 					p.SetState(338)
