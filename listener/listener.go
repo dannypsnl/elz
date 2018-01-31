@@ -82,6 +82,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 
 	if s.exportThis {
 		fmt.Print("public ")
+		s.exportThis = false
 	}
 	fmt.Printf("%s: %s = %s\n", ctx.ID().GetText(), typ, expr)
 
