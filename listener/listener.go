@@ -106,6 +106,7 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 		Name(ctx.ID().GetText()).
 		Export(s.exportThis)
 }
+
 func (s *ElzListener) ExitFnDefine(ctx *parser.FnDefineContext) {
 	s.AstList = append(s.AstList,
 		s.fnBuilder.generate(),
