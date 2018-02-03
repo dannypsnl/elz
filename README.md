@@ -21,9 +21,9 @@ $ cd $GOPATH/src/github.com/elz-lang/elz/ && go install
 ```
 Make sure your `$GOPATH/bin` is one of `$PATH`
 ### Dependencies
-- antlr-runtime for go
+- antlr-runtime for go<br>
 `go get github.com/antlr/antlr4/runtime/Go/antlr`
-- go-llvm
+- go-llvm<br>
 `go get -d llvm.org/llvm/bindings/go/llvm`<br>
 Then compile it. You can follow [Go bindings](http://llvm.org/svn/llvm-project/llvm/trunk/bindings/go/README.txt)<br>
 And see my [suggest](http://routedan.blogspot.com/2017/12/go-binding-llvm.html)
