@@ -108,6 +108,7 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 }
 
 func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
+	// TODO: get type info
 	fmt.Println(ctx.ID().GetText())
 }
 
