@@ -1,6 +1,8 @@
 FROM dannypsnl/elz-test-env
 
-RUN cd /go/src/github.com/elz-lang/elz/ && rm -r *
-COPY . /go/src/github.com/elz-lang/elz
+WORKDIR /go/src/github.com/elz-lang/elz
 
-CMD cd /go/src/github.com/elz-lang/elz && go test -v ./...
+RUN rm -r *
+COPY . .
+
+CMD go test -v ./...
