@@ -76,8 +76,8 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	// TODO: fix with scope rule, and some rule to detected fn, type, trait or what
 	name := ctx.ID().GetText()
 	// get type from source code, so we can find out the problem if expr != user_def type
-	if ctx.TypePass() != nil {
-		typ = ctx.TypePass().GetText()
+	if ctx.TypeForm() != nil {
+		typ = ctx.TypeForm().GetText()
 	}
 
 	if s.exportThis {
