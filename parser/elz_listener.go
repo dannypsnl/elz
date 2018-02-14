@@ -50,8 +50,8 @@ type ElzListener interface {
 	// EnterFnCall is called when entering the fnCall production.
 	EnterFnCall(c *FnCallContext)
 
-	// EnterTypePass is called when entering the typePass production.
-	EnterTypePass(c *TypePassContext)
+	// EnterTypeForm is called when entering the typeForm production.
+	EnterTypeForm(c *TypeFormContext)
 
 	// EnterTypeList is called when entering the typeList production.
 	EnterTypeList(c *TypeListContext)
@@ -104,20 +104,11 @@ type ElzListener interface {
 	// EnterTraitDefine is called when entering the traitDefine production.
 	EnterTraitDefine(c *TraitDefineContext)
 
-	// EnterStr is called when entering the Str production.
-	EnterStr(c *StrContext)
-
 	// EnterNotEq is called when entering the NotEq production.
 	EnterNotEq(c *NotEqContext)
 
-	// EnterAddOrSub is called when entering the AddOrSub production.
-	EnterAddOrSub(c *AddOrSubContext)
-
 	// EnterSubExpr is called when entering the SubExpr production.
 	EnterSubExpr(c *SubExprContext)
-
-	// EnterStatExpr is called when entering the StatExpr production.
-	EnterStatExpr(c *StatExprContext)
 
 	// EnterNum is called when entering the Num production.
 	EnterNum(c *NumContext)
@@ -125,17 +116,32 @@ type ElzListener interface {
 	// EnterMulOrDiv is called when entering the MulOrDiv production.
 	EnterMulOrDiv(c *MulOrDivContext)
 
+	// EnterCmp is called when entering the Cmp production.
+	EnterCmp(c *CmpContext)
+
+	// EnterEq is called when entering the Eq production.
+	EnterEq(c *EqContext)
+
+	// EnterAndOrOr is called when entering the AndOrOr production.
+	EnterAndOrOr(c *AndOrOrContext)
+
+	// EnterThreeOpCmp is called when entering the ThreeOpCmp production.
+	EnterThreeOpCmp(c *ThreeOpCmpContext)
+
+	// EnterStr is called when entering the Str production.
+	EnterStr(c *StrContext)
+
+	// EnterAddOrSub is called when entering the AddOrSub production.
+	EnterAddOrSub(c *AddOrSubContext)
+
+	// EnterStatExpr is called when entering the StatExpr production.
+	EnterStatExpr(c *StatExprContext)
+
 	// EnterPow is called when entering the Pow production.
 	EnterPow(c *PowContext)
 
 	// EnterId is called when entering the Id production.
 	EnterId(c *IdContext)
-
-	// EnterEq is called when entering the Eq production.
-	EnterEq(c *EqContext)
-
-	// EnterThreeOpCmp is called when entering the ThreeOpCmp production.
-	EnterThreeOpCmp(c *ThreeOpCmpContext)
 
 	// ExitProg is called when exiting the prog production.
 	ExitProg(c *ProgContext)
@@ -179,8 +185,8 @@ type ElzListener interface {
 	// ExitFnCall is called when exiting the fnCall production.
 	ExitFnCall(c *FnCallContext)
 
-	// ExitTypePass is called when exiting the typePass production.
-	ExitTypePass(c *TypePassContext)
+	// ExitTypeForm is called when exiting the typeForm production.
+	ExitTypeForm(c *TypeFormContext)
 
 	// ExitTypeList is called when exiting the typeList production.
 	ExitTypeList(c *TypeListContext)
@@ -233,20 +239,11 @@ type ElzListener interface {
 	// ExitTraitDefine is called when exiting the traitDefine production.
 	ExitTraitDefine(c *TraitDefineContext)
 
-	// ExitStr is called when exiting the Str production.
-	ExitStr(c *StrContext)
-
 	// ExitNotEq is called when exiting the NotEq production.
 	ExitNotEq(c *NotEqContext)
 
-	// ExitAddOrSub is called when exiting the AddOrSub production.
-	ExitAddOrSub(c *AddOrSubContext)
-
 	// ExitSubExpr is called when exiting the SubExpr production.
 	ExitSubExpr(c *SubExprContext)
-
-	// ExitStatExpr is called when exiting the StatExpr production.
-	ExitStatExpr(c *StatExprContext)
 
 	// ExitNum is called when exiting the Num production.
 	ExitNum(c *NumContext)
@@ -254,15 +251,30 @@ type ElzListener interface {
 	// ExitMulOrDiv is called when exiting the MulOrDiv production.
 	ExitMulOrDiv(c *MulOrDivContext)
 
+	// ExitCmp is called when exiting the Cmp production.
+	ExitCmp(c *CmpContext)
+
+	// ExitEq is called when exiting the Eq production.
+	ExitEq(c *EqContext)
+
+	// ExitAndOrOr is called when exiting the AndOrOr production.
+	ExitAndOrOr(c *AndOrOrContext)
+
+	// ExitThreeOpCmp is called when exiting the ThreeOpCmp production.
+	ExitThreeOpCmp(c *ThreeOpCmpContext)
+
+	// ExitStr is called when exiting the Str production.
+	ExitStr(c *StrContext)
+
+	// ExitAddOrSub is called when exiting the AddOrSub production.
+	ExitAddOrSub(c *AddOrSubContext)
+
+	// ExitStatExpr is called when exiting the StatExpr production.
+	ExitStatExpr(c *StatExprContext)
+
 	// ExitPow is called when exiting the Pow production.
 	ExitPow(c *PowContext)
 
 	// ExitId is called when exiting the Id production.
 	ExitId(c *IdContext)
-
-	// ExitEq is called when exiting the Eq production.
-	ExitEq(c *EqContext)
-
-	// ExitThreeOpCmp is called when exiting the ThreeOpCmp production.
-	ExitThreeOpCmp(c *ThreeOpCmpContext)
 }

@@ -1,7 +1,7 @@
 grammar Elz;
 
 options {
-    language = Go;
+    language = Go; // target language
 }
 
 WS: [ \t\r\n]+ -> channel(HIDDEN);
@@ -43,9 +43,9 @@ prog: topStatList?;
 topStatList: topStat+;
 
 topStat: fnDefine // fn foo( params ) { stat... }
-    | varDefine   // let (mut) var: type = expr
-    | typeDefine  // type newType ( prop... )
-    | implBlock   // impl type { method... }
+    | varDefine   // let (mut) var: typeForm = expr
+    | typeDefine  // typeForm newType ( prop... )
+    | implBlock   // impl typeForm { method... }
     | traitDefine // trait DB { method... }
     | importStat  // import ( Module... )
     ;
@@ -99,16 +99,16 @@ fnCall:
     ID '(' exprList? ')'
     ;
 
-// mean a type, but type already be use by Go, so need an alternative name
-typePass : ID;
-typeList: typePass (',' typePass)*;
+// mean a typeForm, but typeForm already be use by Go, so need an alternative name
+typeForm : ID;
+typeList: typeForm (',' typeForm)*;
 
 // @op
 annotation: '@' ID ('(' expr ')')? ;
 
 methodList: method+;
 method:
-    exportor? ID '(' paramList? ')' ('->' typePass)? '{'
+    exportor? ID '(' paramList? ')' ('->' typeForm)? '{'
         statList?
     '}'
     ;
@@ -122,25 +122,28 @@ implBlock:
 // Because local scope can't export, it may safe.
 // And create another rule may to complex.
 exportor: '+';
-define: exportor? ID (':' typePass)? '=' expr;
+define: exportor? ID (':' typeForm)? '=' expr;
 varDefine:
     'let' mut='mut'? define (',' define)*
     ;
+
 paramList: param (',' param)*;
-param: ID (':' typePass)?;
+param: ID (':' typeForm)?;
 fnDefine:
     // because fn also handle operator, so if we use exportor after keyword fn will cause we hard to divide ++ && + +
-    exportor? 'fn' ID '(' paramList? ')' ('->' typePass)? '{'
+    exportor? 'fn' ID '(' paramList? ')' ('->' typeForm)? '{'
         statList?
     '}'
     ;
+
 attrList: attr+;
-attr: exportor ID ':' typePass;
+attr: exportor ID ':' typeForm;
 typeDefine:
-    'type' exportor? ID '(' attrList ')'
+    'typeForm' exportor? ID '(' attrList ')'
     ;
+
 tmethodList: tmethod+;
-tmethod: exportor? ID '(' typeList? ')' ('->' typePass)?;
+tmethod: exportor? ID '(' typeList? ')' ('->' typeForm)?;
 traitDefine:
     'trait' exportor ID '{'
         tmethodList?
@@ -149,15 +152,17 @@ traitDefine:
 
 // Explain for expr, because Antlr support the operation precedence by declared order
 // So we don't have to consider that
-expr: expr op='^' expr       # Pow // TODO: We had not support translate it.
-    | expr op=('*'|'/') expr # MulOrDiv // operation prec
-    | expr op=('+'|'-') expr # AddOrSub
-    | expr op='!=' expr      # NotEq // TODO: Waiting for implement
-    | expr op='==' expr      # Eq // TODO: Waiting for implement
-    | expr '?' expr ':' expr # ThreeOpCmp // TODO: We had not support translate it.
-    | '(' expr ')'           # SubExpr // TODO: Waiting for implement
-    | exprStat               # StatExpr // Important, exprStat have match & functionCall yet!
-    | NUM                    # Num
-    | ID                     # Id
-    | STRING                 # Str
+expr: expr op='^' expr                 # Pow // operation prec
+    | expr op=('*'|'/') expr           # MulOrDiv
+    | expr op=('+'|'-') expr           # AddOrSub
+    | expr op=('<'|'>'|'<='|'>=') expr # Cmp
+    | expr op='!=' expr                # NotEq
+    | expr op='==' expr                # Eq
+    | expr op=('&&'|'||') expr         # AndOrOr
+    | expr '?' expr ':' expr           # ThreeOpCmp
+    | '(' expr ')'                     # SubExpr
+    | exprStat                         # StatExpr
+    | NUM                              # Num
+    | ID                               # Id
+    | STRING                           # Str
     ;

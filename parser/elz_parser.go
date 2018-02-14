@@ -16,7 +16,7 @@ var _ = reflect.Copy
 var _ = strconv.Itoa
 
 var parserATN = []uint16{
-	3, 24715, 42794, 33075, 47597, 16764, 15335, 30598, 22884, 3, 36, 359,
+	3, 24715, 42794, 33075, 47597, 16764, 15335, 30598, 22884, 3, 42, 365,
 	4, 2, 9, 2, 4, 3, 9, 3, 4, 4, 9, 4, 4, 5, 9, 5, 4, 6, 9, 6, 4, 7, 9, 7,
 	4, 8, 9, 8, 4, 9, 9, 9, 4, 10, 9, 10, 4, 11, 9, 11, 4, 12, 9, 12, 4, 13,
 	9, 13, 4, 14, 9, 14, 4, 15, 9, 15, 4, 16, 9, 16, 4, 17, 9, 17, 4, 18, 9,
@@ -54,37 +54,38 @@ var parserATN = []uint16{
 	33, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 5, 34,
 	331, 10, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3,
 	34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34,
-	3, 34, 3, 34, 7, 34, 354, 10, 34, 12, 34, 14, 34, 357, 11, 34, 3, 34, 2,
-	3, 66, 35, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32,
-	34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 2,
-	4, 3, 2, 26, 27, 4, 2, 19, 19, 28, 28, 2, 380, 2, 69, 3, 2, 2, 2, 4, 72,
-	3, 2, 2, 2, 6, 82, 3, 2, 2, 2, 8, 84, 3, 2, 2, 2, 10, 92, 3, 2, 2, 2, 12,
-	98, 3, 2, 2, 2, 14, 107, 3, 2, 2, 2, 16, 109, 3, 2, 2, 2, 18, 112, 3, 2,
-	2, 2, 20, 121, 3, 2, 2, 2, 22, 123, 3, 2, 2, 2, 24, 144, 3, 2, 2, 2, 26,
-	148, 3, 2, 2, 2, 28, 156, 3, 2, 2, 2, 30, 163, 3, 2, 2, 2, 32, 165, 3,
-	2, 2, 2, 34, 173, 3, 2, 2, 2, 36, 182, 3, 2, 2, 2, 38, 187, 3, 2, 2, 2,
-	40, 205, 3, 2, 2, 2, 42, 217, 3, 2, 2, 2, 44, 220, 3, 2, 2, 2, 46, 230,
-	3, 2, 2, 2, 48, 242, 3, 2, 2, 2, 50, 250, 3, 2, 2, 2, 52, 256, 3, 2, 2,
-	2, 54, 276, 3, 2, 2, 2, 56, 280, 3, 2, 2, 2, 58, 285, 3, 2, 2, 2, 60, 295,
-	3, 2, 2, 2, 62, 300, 3, 2, 2, 2, 64, 312, 3, 2, 2, 2, 66, 330, 3, 2, 2,
-	2, 68, 70, 5, 4, 3, 2, 69, 68, 3, 2, 2, 2, 69, 70, 3, 2, 2, 2, 70, 3, 3,
-	2, 2, 2, 71, 73, 5, 6, 4, 2, 72, 71, 3, 2, 2, 2, 73, 74, 3, 2, 2, 2, 74,
-	72, 3, 2, 2, 2, 74, 75, 3, 2, 2, 2, 75, 5, 3, 2, 2, 2, 76, 83, 5, 52, 27,
-	2, 77, 83, 5, 46, 24, 2, 78, 83, 5, 58, 30, 2, 79, 83, 5, 40, 21, 2, 80,
-	83, 5, 64, 33, 2, 81, 83, 5, 10, 6, 2, 82, 76, 3, 2, 2, 2, 82, 77, 3, 2,
-	2, 2, 82, 78, 3, 2, 2, 2, 82, 79, 3, 2, 2, 2, 82, 80, 3, 2, 2, 2, 82, 81,
-	3, 2, 2, 2, 83, 7, 3, 2, 2, 2, 84, 89, 7, 34, 2, 2, 85, 86, 7, 3, 2, 2,
-	86, 88, 7, 34, 2, 2, 87, 85, 3, 2, 2, 2, 88, 91, 3, 2, 2, 2, 89, 87, 3,
-	2, 2, 2, 89, 90, 3, 2, 2, 2, 90, 9, 3, 2, 2, 2, 91, 89, 3, 2, 2, 2, 92,
-	93, 7, 4, 2, 2, 93, 94, 7, 5, 2, 2, 94, 95, 5, 8, 5, 2, 95, 96, 7, 6, 2,
-	2, 96, 11, 3, 2, 2, 2, 97, 99, 5, 14, 8, 2, 98, 97, 3, 2, 2, 2, 99, 100,
-	3, 2, 2, 2, 100, 98, 3, 2, 2, 2, 100, 101, 3, 2, 2, 2, 101, 13, 3, 2, 2,
-	2, 102, 108, 5, 46, 24, 2, 103, 108, 5, 18, 10, 2, 104, 108, 5, 16, 9,
-	2, 105, 108, 5, 24, 13, 2, 106, 108, 5, 20, 11, 2, 107, 102, 3, 2, 2, 2,
-	107, 103, 3, 2, 2, 2, 107, 104, 3, 2, 2, 2, 107, 105, 3, 2, 2, 2, 107,
-	106, 3, 2, 2, 2, 108, 15, 3, 2, 2, 2, 109, 110, 7, 7, 2, 2, 110, 111, 5,
-	66, 34, 2, 111, 17, 3, 2, 2, 2, 112, 113, 7, 8, 2, 2, 113, 115, 7, 9, 2,
-	2, 114, 116, 5, 12, 7, 2, 115, 114, 3, 2, 2, 2, 115, 116, 3, 2, 2, 2, 116,
+	3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 3, 34, 7, 34, 360, 10,
+	34, 12, 34, 14, 34, 363, 11, 34, 3, 34, 2, 3, 66, 35, 2, 4, 6, 8, 10, 12,
+	14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48,
+	50, 52, 54, 56, 58, 60, 62, 64, 66, 2, 6, 3, 2, 26, 27, 4, 2, 19, 19, 28,
+	28, 3, 2, 29, 32, 3, 2, 35, 36, 2, 388, 2, 69, 3, 2, 2, 2, 4, 72, 3, 2,
+	2, 2, 6, 82, 3, 2, 2, 2, 8, 84, 3, 2, 2, 2, 10, 92, 3, 2, 2, 2, 12, 98,
+	3, 2, 2, 2, 14, 107, 3, 2, 2, 2, 16, 109, 3, 2, 2, 2, 18, 112, 3, 2, 2,
+	2, 20, 121, 3, 2, 2, 2, 22, 123, 3, 2, 2, 2, 24, 144, 3, 2, 2, 2, 26, 148,
+	3, 2, 2, 2, 28, 156, 3, 2, 2, 2, 30, 163, 3, 2, 2, 2, 32, 165, 3, 2, 2,
+	2, 34, 173, 3, 2, 2, 2, 36, 182, 3, 2, 2, 2, 38, 187, 3, 2, 2, 2, 40, 205,
+	3, 2, 2, 2, 42, 217, 3, 2, 2, 2, 44, 220, 3, 2, 2, 2, 46, 230, 3, 2, 2,
+	2, 48, 242, 3, 2, 2, 2, 50, 250, 3, 2, 2, 2, 52, 256, 3, 2, 2, 2, 54, 276,
+	3, 2, 2, 2, 56, 280, 3, 2, 2, 2, 58, 285, 3, 2, 2, 2, 60, 295, 3, 2, 2,
+	2, 62, 300, 3, 2, 2, 2, 64, 312, 3, 2, 2, 2, 66, 330, 3, 2, 2, 2, 68, 70,
+	5, 4, 3, 2, 69, 68, 3, 2, 2, 2, 69, 70, 3, 2, 2, 2, 70, 3, 3, 2, 2, 2,
+	71, 73, 5, 6, 4, 2, 72, 71, 3, 2, 2, 2, 73, 74, 3, 2, 2, 2, 74, 72, 3,
+	2, 2, 2, 74, 75, 3, 2, 2, 2, 75, 5, 3, 2, 2, 2, 76, 83, 5, 52, 27, 2, 77,
+	83, 5, 46, 24, 2, 78, 83, 5, 58, 30, 2, 79, 83, 5, 40, 21, 2, 80, 83, 5,
+	64, 33, 2, 81, 83, 5, 10, 6, 2, 82, 76, 3, 2, 2, 2, 82, 77, 3, 2, 2, 2,
+	82, 78, 3, 2, 2, 2, 82, 79, 3, 2, 2, 2, 82, 80, 3, 2, 2, 2, 82, 81, 3,
+	2, 2, 2, 83, 7, 3, 2, 2, 2, 84, 89, 7, 40, 2, 2, 85, 86, 7, 3, 2, 2, 86,
+	88, 7, 40, 2, 2, 87, 85, 3, 2, 2, 2, 88, 91, 3, 2, 2, 2, 89, 87, 3, 2,
+	2, 2, 89, 90, 3, 2, 2, 2, 90, 9, 3, 2, 2, 2, 91, 89, 3, 2, 2, 2, 92, 93,
+	7, 4, 2, 2, 93, 94, 7, 5, 2, 2, 94, 95, 5, 8, 5, 2, 95, 96, 7, 6, 2, 2,
+	96, 11, 3, 2, 2, 2, 97, 99, 5, 14, 8, 2, 98, 97, 3, 2, 2, 2, 99, 100, 3,
+	2, 2, 2, 100, 98, 3, 2, 2, 2, 100, 101, 3, 2, 2, 2, 101, 13, 3, 2, 2, 2,
+	102, 108, 5, 46, 24, 2, 103, 108, 5, 18, 10, 2, 104, 108, 5, 16, 9, 2,
+	105, 108, 5, 24, 13, 2, 106, 108, 5, 20, 11, 2, 107, 102, 3, 2, 2, 2, 107,
+	103, 3, 2, 2, 2, 107, 104, 3, 2, 2, 2, 107, 105, 3, 2, 2, 2, 107, 106,
+	3, 2, 2, 2, 108, 15, 3, 2, 2, 2, 109, 110, 7, 7, 2, 2, 110, 111, 5, 66,
+	34, 2, 111, 17, 3, 2, 2, 2, 112, 113, 7, 8, 2, 2, 113, 115, 7, 9, 2, 2,
+	114, 116, 5, 12, 7, 2, 115, 114, 3, 2, 2, 2, 115, 116, 3, 2, 2, 2, 116,
 	117, 3, 2, 2, 2, 117, 118, 7, 10, 2, 2, 118, 19, 3, 2, 2, 2, 119, 122,
 	5, 22, 12, 2, 120, 122, 5, 28, 15, 2, 121, 119, 3, 2, 2, 2, 121, 120, 3,
 	2, 2, 2, 122, 21, 3, 2, 2, 2, 123, 124, 7, 11, 2, 2, 124, 125, 5, 66, 34,
@@ -94,35 +95,35 @@ var parserATN = []uint16{
 	3, 2, 2, 2, 135, 138, 3, 2, 2, 2, 136, 134, 3, 2, 2, 2, 136, 137, 3, 2,
 	2, 2, 137, 140, 3, 2, 2, 2, 138, 136, 3, 2, 2, 2, 139, 141, 7, 13, 2, 2,
 	140, 139, 3, 2, 2, 2, 140, 141, 3, 2, 2, 2, 141, 142, 3, 2, 2, 2, 142,
-	143, 7, 10, 2, 2, 143, 23, 3, 2, 2, 2, 144, 145, 7, 34, 2, 2, 145, 146,
+	143, 7, 10, 2, 2, 143, 23, 3, 2, 2, 2, 144, 145, 7, 40, 2, 2, 145, 146,
 	7, 14, 2, 2, 146, 147, 5, 66, 34, 2, 147, 25, 3, 2, 2, 2, 148, 153, 5,
 	66, 34, 2, 149, 150, 7, 13, 2, 2, 150, 152, 5, 66, 34, 2, 151, 149, 3,
 	2, 2, 2, 152, 155, 3, 2, 2, 2, 153, 151, 3, 2, 2, 2, 153, 154, 3, 2, 2,
-	2, 154, 27, 3, 2, 2, 2, 155, 153, 3, 2, 2, 2, 156, 157, 7, 34, 2, 2, 157,
+	2, 154, 27, 3, 2, 2, 2, 155, 153, 3, 2, 2, 2, 156, 157, 7, 40, 2, 2, 157,
 	159, 7, 5, 2, 2, 158, 160, 5, 26, 14, 2, 159, 158, 3, 2, 2, 2, 159, 160,
 	3, 2, 2, 2, 160, 161, 3, 2, 2, 2, 161, 162, 7, 6, 2, 2, 162, 29, 3, 2,
-	2, 2, 163, 164, 7, 34, 2, 2, 164, 31, 3, 2, 2, 2, 165, 170, 5, 30, 16,
+	2, 2, 163, 164, 7, 40, 2, 2, 164, 31, 3, 2, 2, 2, 165, 170, 5, 30, 16,
 	2, 166, 167, 7, 13, 2, 2, 167, 169, 5, 30, 16, 2, 168, 166, 3, 2, 2, 2,
 	169, 172, 3, 2, 2, 2, 170, 168, 3, 2, 2, 2, 170, 171, 3, 2, 2, 2, 171,
 	33, 3, 2, 2, 2, 172, 170, 3, 2, 2, 2, 173, 174, 7, 15, 2, 2, 174, 179,
-	7, 34, 2, 2, 175, 176, 7, 5, 2, 2, 176, 177, 5, 66, 34, 2, 177, 178, 7,
+	7, 40, 2, 2, 175, 176, 7, 5, 2, 2, 176, 177, 5, 66, 34, 2, 177, 178, 7,
 	6, 2, 2, 178, 180, 3, 2, 2, 2, 179, 175, 3, 2, 2, 2, 179, 180, 3, 2, 2,
 	2, 180, 35, 3, 2, 2, 2, 181, 183, 5, 38, 20, 2, 182, 181, 3, 2, 2, 2, 183,
 	184, 3, 2, 2, 2, 184, 182, 3, 2, 2, 2, 184, 185, 3, 2, 2, 2, 185, 37, 3,
 	2, 2, 2, 186, 188, 5, 42, 22, 2, 187, 186, 3, 2, 2, 2, 187, 188, 3, 2,
-	2, 2, 188, 189, 3, 2, 2, 2, 189, 190, 7, 34, 2, 2, 190, 192, 7, 5, 2, 2,
+	2, 2, 188, 189, 3, 2, 2, 2, 189, 190, 7, 40, 2, 2, 190, 192, 7, 5, 2, 2,
 	191, 193, 5, 48, 25, 2, 192, 191, 3, 2, 2, 2, 192, 193, 3, 2, 2, 2, 193,
 	194, 3, 2, 2, 2, 194, 197, 7, 6, 2, 2, 195, 196, 7, 16, 2, 2, 196, 198,
 	5, 30, 16, 2, 197, 195, 3, 2, 2, 2, 197, 198, 3, 2, 2, 2, 198, 199, 3,
 	2, 2, 2, 199, 201, 7, 9, 2, 2, 200, 202, 5, 12, 7, 2, 201, 200, 3, 2, 2,
 	2, 201, 202, 3, 2, 2, 2, 202, 203, 3, 2, 2, 2, 203, 204, 7, 10, 2, 2, 204,
-	39, 3, 2, 2, 2, 205, 206, 7, 17, 2, 2, 206, 209, 7, 34, 2, 2, 207, 208,
+	39, 3, 2, 2, 2, 205, 206, 7, 17, 2, 2, 206, 209, 7, 40, 2, 2, 207, 208,
 	7, 18, 2, 2, 208, 210, 5, 32, 17, 2, 209, 207, 3, 2, 2, 2, 209, 210, 3,
 	2, 2, 2, 210, 211, 3, 2, 2, 2, 211, 213, 7, 9, 2, 2, 212, 214, 5, 36, 19,
 	2, 213, 212, 3, 2, 2, 2, 213, 214, 3, 2, 2, 2, 214, 215, 3, 2, 2, 2, 215,
 	216, 7, 10, 2, 2, 216, 41, 3, 2, 2, 2, 217, 218, 7, 19, 2, 2, 218, 43,
 	3, 2, 2, 2, 219, 221, 5, 42, 22, 2, 220, 219, 3, 2, 2, 2, 220, 221, 3,
-	2, 2, 2, 221, 222, 3, 2, 2, 2, 222, 225, 7, 34, 2, 2, 223, 224, 7, 18,
+	2, 2, 2, 221, 222, 3, 2, 2, 2, 222, 225, 7, 40, 2, 2, 223, 224, 7, 18,
 	2, 2, 224, 226, 5, 30, 16, 2, 225, 223, 3, 2, 2, 2, 225, 226, 3, 2, 2,
 	2, 226, 227, 3, 2, 2, 2, 227, 228, 7, 14, 2, 2, 228, 229, 5, 66, 34, 2,
 	229, 45, 3, 2, 2, 2, 230, 232, 7, 20, 2, 2, 231, 233, 7, 21, 2, 2, 232,
@@ -132,11 +133,11 @@ var parserATN = []uint16{
 	2, 2, 240, 47, 3, 2, 2, 2, 241, 239, 3, 2, 2, 2, 242, 247, 5, 50, 26, 2,
 	243, 244, 7, 13, 2, 2, 244, 246, 5, 50, 26, 2, 245, 243, 3, 2, 2, 2, 246,
 	249, 3, 2, 2, 2, 247, 245, 3, 2, 2, 2, 247, 248, 3, 2, 2, 2, 248, 49, 3,
-	2, 2, 2, 249, 247, 3, 2, 2, 2, 250, 253, 7, 34, 2, 2, 251, 252, 7, 18,
+	2, 2, 2, 249, 247, 3, 2, 2, 2, 250, 253, 7, 40, 2, 2, 251, 252, 7, 18,
 	2, 2, 252, 254, 5, 30, 16, 2, 253, 251, 3, 2, 2, 2, 253, 254, 3, 2, 2,
 	2, 254, 51, 3, 2, 2, 2, 255, 257, 5, 42, 22, 2, 256, 255, 3, 2, 2, 2, 256,
 	257, 3, 2, 2, 2, 257, 258, 3, 2, 2, 2, 258, 259, 7, 22, 2, 2, 259, 260,
-	7, 34, 2, 2, 260, 262, 7, 5, 2, 2, 261, 263, 5, 48, 25, 2, 262, 261, 3,
+	7, 40, 2, 2, 260, 262, 7, 5, 2, 2, 261, 263, 5, 48, 25, 2, 262, 261, 3,
 	2, 2, 2, 262, 263, 3, 2, 2, 2, 263, 264, 3, 2, 2, 2, 264, 267, 7, 6, 2,
 	2, 265, 266, 7, 16, 2, 2, 266, 268, 5, 30, 16, 2, 267, 265, 3, 2, 2, 2,
 	267, 268, 3, 2, 2, 2, 268, 269, 3, 2, 2, 2, 269, 271, 7, 9, 2, 2, 270,
@@ -144,38 +145,41 @@ var parserATN = []uint16{
 	3, 2, 2, 2, 273, 274, 7, 10, 2, 2, 274, 53, 3, 2, 2, 2, 275, 277, 5, 56,
 	29, 2, 276, 275, 3, 2, 2, 2, 277, 278, 3, 2, 2, 2, 278, 276, 3, 2, 2, 2,
 	278, 279, 3, 2, 2, 2, 279, 55, 3, 2, 2, 2, 280, 281, 5, 42, 22, 2, 281,
-	282, 7, 34, 2, 2, 282, 283, 7, 18, 2, 2, 283, 284, 5, 30, 16, 2, 284, 57,
+	282, 7, 40, 2, 2, 282, 283, 7, 18, 2, 2, 283, 284, 5, 30, 16, 2, 284, 57,
 	3, 2, 2, 2, 285, 287, 7, 23, 2, 2, 286, 288, 5, 42, 22, 2, 287, 286, 3,
-	2, 2, 2, 287, 288, 3, 2, 2, 2, 288, 289, 3, 2, 2, 2, 289, 290, 7, 34, 2,
+	2, 2, 2, 287, 288, 3, 2, 2, 2, 288, 289, 3, 2, 2, 2, 289, 290, 7, 40, 2,
 	2, 290, 291, 7, 5, 2, 2, 291, 292, 5, 54, 28, 2, 292, 293, 7, 6, 2, 2,
 	293, 59, 3, 2, 2, 2, 294, 296, 5, 62, 32, 2, 295, 294, 3, 2, 2, 2, 296,
 	297, 3, 2, 2, 2, 297, 295, 3, 2, 2, 2, 297, 298, 3, 2, 2, 2, 298, 61, 3,
 	2, 2, 2, 299, 301, 5, 42, 22, 2, 300, 299, 3, 2, 2, 2, 300, 301, 3, 2,
-	2, 2, 301, 302, 3, 2, 2, 2, 302, 303, 7, 34, 2, 2, 303, 305, 7, 5, 2, 2,
+	2, 2, 301, 302, 3, 2, 2, 2, 302, 303, 7, 40, 2, 2, 303, 305, 7, 5, 2, 2,
 	304, 306, 5, 32, 17, 2, 305, 304, 3, 2, 2, 2, 305, 306, 3, 2, 2, 2, 306,
 	307, 3, 2, 2, 2, 307, 310, 7, 6, 2, 2, 308, 309, 7, 16, 2, 2, 309, 311,
 	5, 30, 16, 2, 310, 308, 3, 2, 2, 2, 310, 311, 3, 2, 2, 2, 311, 63, 3, 2,
-	2, 2, 312, 313, 7, 24, 2, 2, 313, 314, 5, 42, 22, 2, 314, 315, 7, 34, 2,
+	2, 2, 312, 313, 7, 24, 2, 2, 313, 314, 5, 42, 22, 2, 314, 315, 7, 40, 2,
 	2, 315, 317, 7, 9, 2, 2, 316, 318, 5, 60, 31, 2, 317, 316, 3, 2, 2, 2,
 	317, 318, 3, 2, 2, 2, 318, 319, 3, 2, 2, 2, 319, 320, 7, 10, 2, 2, 320,
 	65, 3, 2, 2, 2, 321, 322, 8, 34, 1, 2, 322, 323, 7, 5, 2, 2, 323, 324,
 	5, 66, 34, 2, 324, 325, 7, 6, 2, 2, 325, 331, 3, 2, 2, 2, 326, 331, 5,
-	20, 11, 2, 327, 331, 7, 35, 2, 2, 328, 331, 7, 34, 2, 2, 329, 331, 7, 36,
+	20, 11, 2, 327, 331, 7, 41, 2, 2, 328, 331, 7, 40, 2, 2, 329, 331, 7, 42,
 	2, 2, 330, 321, 3, 2, 2, 2, 330, 326, 3, 2, 2, 2, 330, 327, 3, 2, 2, 2,
-	330, 328, 3, 2, 2, 2, 330, 329, 3, 2, 2, 2, 331, 355, 3, 2, 2, 2, 332,
-	333, 12, 13, 2, 2, 333, 334, 7, 25, 2, 2, 334, 354, 5, 66, 34, 14, 335,
-	336, 12, 12, 2, 2, 336, 337, 9, 2, 2, 2, 337, 354, 5, 66, 34, 13, 338,
-	339, 12, 11, 2, 2, 339, 340, 9, 3, 2, 2, 340, 354, 5, 66, 34, 12, 341,
-	342, 12, 10, 2, 2, 342, 343, 7, 29, 2, 2, 343, 354, 5, 66, 34, 11, 344,
-	345, 12, 9, 2, 2, 345, 346, 7, 30, 2, 2, 346, 354, 5, 66, 34, 10, 347,
-	348, 12, 8, 2, 2, 348, 349, 7, 31, 2, 2, 349, 350, 5, 66, 34, 2, 350, 351,
-	7, 18, 2, 2, 351, 352, 5, 66, 34, 9, 352, 354, 3, 2, 2, 2, 353, 332, 3,
-	2, 2, 2, 353, 335, 3, 2, 2, 2, 353, 338, 3, 2, 2, 2, 353, 341, 3, 2, 2,
-	2, 353, 344, 3, 2, 2, 2, 353, 347, 3, 2, 2, 2, 354, 357, 3, 2, 2, 2, 355,
-	353, 3, 2, 2, 2, 355, 356, 3, 2, 2, 2, 356, 67, 3, 2, 2, 2, 357, 355, 3,
-	2, 2, 2, 43, 69, 74, 82, 89, 100, 107, 115, 121, 136, 140, 153, 159, 170,
-	179, 184, 187, 192, 197, 201, 209, 213, 220, 225, 232, 239, 247, 253, 256,
-	262, 267, 271, 278, 287, 297, 300, 305, 310, 317, 330, 353, 355,
+	330, 328, 3, 2, 2, 2, 330, 329, 3, 2, 2, 2, 331, 361, 3, 2, 2, 2, 332,
+	333, 12, 15, 2, 2, 333, 334, 7, 25, 2, 2, 334, 360, 5, 66, 34, 16, 335,
+	336, 12, 14, 2, 2, 336, 337, 9, 2, 2, 2, 337, 360, 5, 66, 34, 15, 338,
+	339, 12, 13, 2, 2, 339, 340, 9, 3, 2, 2, 340, 360, 5, 66, 34, 14, 341,
+	342, 12, 12, 2, 2, 342, 343, 9, 4, 2, 2, 343, 360, 5, 66, 34, 13, 344,
+	345, 12, 11, 2, 2, 345, 346, 7, 33, 2, 2, 346, 360, 5, 66, 34, 12, 347,
+	348, 12, 10, 2, 2, 348, 349, 7, 34, 2, 2, 349, 360, 5, 66, 34, 11, 350,
+	351, 12, 9, 2, 2, 351, 352, 9, 5, 2, 2, 352, 360, 5, 66, 34, 10, 353, 354,
+	12, 8, 2, 2, 354, 355, 7, 37, 2, 2, 355, 356, 5, 66, 34, 2, 356, 357, 7,
+	18, 2, 2, 357, 358, 5, 66, 34, 9, 358, 360, 3, 2, 2, 2, 359, 332, 3, 2,
+	2, 2, 359, 335, 3, 2, 2, 2, 359, 338, 3, 2, 2, 2, 359, 341, 3, 2, 2, 2,
+	359, 344, 3, 2, 2, 2, 359, 347, 3, 2, 2, 2, 359, 350, 3, 2, 2, 2, 359,
+	353, 3, 2, 2, 2, 360, 363, 3, 2, 2, 2, 361, 359, 3, 2, 2, 2, 361, 362,
+	3, 2, 2, 2, 362, 67, 3, 2, 2, 2, 363, 361, 3, 2, 2, 2, 43, 69, 74, 82,
+	89, 100, 107, 115, 121, 136, 140, 153, 159, 170, 179, 184, 187, 192, 197,
+	201, 209, 213, 220, 225, 232, 239, 247, 253, 256, 262, 267, 271, 278, 287,
+	297, 300, 305, 310, 317, 330, 359, 361,
 }
 var deserializer = antlr.NewATNDeserializer(nil)
 var deserializedATN = deserializer.DeserializeFromUInt16(parserATN)
@@ -183,19 +187,19 @@ var deserializedATN = deserializer.DeserializeFromUInt16(parserATN)
 var literalNames = []string{
 	"", "'::'", "'import'", "'('", "')'", "'return'", "'loop'", "'{'", "'}'",
 	"'match'", "'=>'", "','", "'='", "'@'", "'->'", "'impl'", "':'", "'+'",
-	"'let'", "'mut'", "'fn'", "'type'", "'trait'", "'^'", "'*'", "'/'", "'-'",
-	"'!='", "'=='", "'?'",
+	"'let'", "'mut'", "'fn'", "'typeForm'", "'trait'", "'^'", "'*'", "'/'",
+	"'-'", "'<'", "'>'", "'<='", "'>='", "'!='", "'=='", "'&&'", "'||'", "'?'",
 }
 var symbolicNames = []string{
 	"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-	"", "", "", "", "", "", "", "", "", "", "", "", "WS", "COMMENT", "ID",
-	"NUM", "STRING",
+	"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+	"WS", "COMMENT", "ID", "NUM", "STRING",
 }
 
 var ruleNames = []string{
 	"prog", "topStatList", "topStat", "importMod", "importStat", "statList",
 	"stat", "returnStat", "loopStat", "exprStat", "matchRule", "assign", "exprList",
-	"fnCall", "typePass", "typeList", "annotation", "methodList", "method",
+	"fnCall", "typeForm", "typeList", "annotation", "methodList", "method",
 	"implBlock", "exportor", "define", "varDefine", "paramList", "param", "fnDefine",
 	"attrList", "attr", "typeDefine", "tmethodList", "tmethod", "traitDefine",
 	"expr",
@@ -258,11 +262,17 @@ const (
 	ElzParserT__26   = 27
 	ElzParserT__27   = 28
 	ElzParserT__28   = 29
-	ElzParserWS      = 30
-	ElzParserCOMMENT = 31
-	ElzParserID      = 32
-	ElzParserNUM     = 33
-	ElzParserSTRING  = 34
+	ElzParserT__29   = 30
+	ElzParserT__30   = 31
+	ElzParserT__31   = 32
+	ElzParserT__32   = 33
+	ElzParserT__33   = 34
+	ElzParserT__34   = 35
+	ElzParserWS      = 36
+	ElzParserCOMMENT = 37
+	ElzParserID      = 38
+	ElzParserNUM     = 39
+	ElzParserSTRING  = 40
 )
 
 // ElzParser rules.
@@ -281,7 +291,7 @@ const (
 	ElzParserRULE_assign      = 11
 	ElzParserRULE_exprList    = 12
 	ElzParserRULE_fnCall      = 13
-	ElzParserRULE_typePass    = 14
+	ElzParserRULE_typeForm    = 14
 	ElzParserRULE_typeList    = 15
 	ElzParserRULE_annotation  = 16
 	ElzParserRULE_methodList  = 17
@@ -1049,7 +1059,7 @@ func (p *ElzParser) StatList() (localctx IStatListContext) {
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
-	for ok := true; ok; ok = (((_la-5)&-(0x1f+1)) == 0 && ((1<<uint((_la-5)))&((1<<(ElzParserT__4-5))|(1<<(ElzParserT__5-5))|(1<<(ElzParserT__8-5))|(1<<(ElzParserT__17-5))|(1<<(ElzParserID-5)))) != 0) {
+	for ok := true; ok; ok = (((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__4)|(1<<ElzParserT__5)|(1<<ElzParserT__8)|(1<<ElzParserT__17))) != 0) || _la == ElzParserID {
 		{
 			p.SetState(95)
 			p.Stat()
@@ -1437,7 +1447,7 @@ func (p *ElzParser) LoopStat() (localctx ILoopStatContext) {
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
-	if ((_la-5)&-(0x1f+1)) == 0 && ((1<<uint((_la-5)))&((1<<(ElzParserT__4-5))|(1<<(ElzParserT__5-5))|(1<<(ElzParserT__8-5))|(1<<(ElzParserT__17-5))|(1<<(ElzParserID-5)))) != 0 {
+	if (((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__4)|(1<<ElzParserT__5)|(1<<ElzParserT__8)|(1<<ElzParserT__17))) != 0) || _la == ElzParserID {
 		{
 			p.SetState(112)
 			p.StatList()
@@ -2118,7 +2128,7 @@ func (p *ElzParser) FnCall() (localctx IFnCallContext) {
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
-	if ((_la-3)&-(0x1f+1)) == 0 && ((1<<uint((_la-3)))&((1<<(ElzParserT__2-3))|(1<<(ElzParserT__8-3))|(1<<(ElzParserID-3))|(1<<(ElzParserNUM-3))|(1<<(ElzParserSTRING-3)))) != 0 {
+	if _la == ElzParserT__2 || _la == ElzParserT__8 || (((_la-38)&-(0x1f+1)) == 0 && ((1<<uint((_la-38)))&((1<<(ElzParserID-38))|(1<<(ElzParserNUM-38))|(1<<(ElzParserSTRING-38)))) != 0) {
 		{
 			p.SetState(156)
 			p.ExprList()
@@ -2133,71 +2143,71 @@ func (p *ElzParser) FnCall() (localctx IFnCallContext) {
 	return localctx
 }
 
-// ITypePassContext is an interface to support dynamic dispatch.
-type ITypePassContext interface {
+// ITypeFormContext is an interface to support dynamic dispatch.
+type ITypeFormContext interface {
 	antlr.ParserRuleContext
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
-	// IsTypePassContext differentiates from other interfaces.
-	IsTypePassContext()
+	// IsTypeFormContext differentiates from other interfaces.
+	IsTypeFormContext()
 }
 
-type TypePassContext struct {
+type TypeFormContext struct {
 	*antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
-func NewEmptyTypePassContext() *TypePassContext {
-	var p = new(TypePassContext)
+func NewEmptyTypeFormContext() *TypeFormContext {
+	var p = new(TypeFormContext)
 	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
-	p.RuleIndex = ElzParserRULE_typePass
+	p.RuleIndex = ElzParserRULE_typeForm
 	return p
 }
 
-func (*TypePassContext) IsTypePassContext() {}
+func (*TypeFormContext) IsTypeFormContext() {}
 
-func NewTypePassContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *TypePassContext {
-	var p = new(TypePassContext)
+func NewTypeFormContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *TypeFormContext {
+	var p = new(TypeFormContext)
 
 	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
 
 	p.parser = parser
-	p.RuleIndex = ElzParserRULE_typePass
+	p.RuleIndex = ElzParserRULE_typeForm
 
 	return p
 }
 
-func (s *TypePassContext) GetParser() antlr.Parser { return s.parser }
+func (s *TypeFormContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *TypePassContext) ID() antlr.TerminalNode {
+func (s *TypeFormContext) ID() antlr.TerminalNode {
 	return s.GetToken(ElzParserID, 0)
 }
 
-func (s *TypePassContext) GetRuleContext() antlr.RuleContext {
+func (s *TypeFormContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
 
-func (s *TypePassContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+func (s *TypeFormContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
 	return antlr.TreesStringTree(s, ruleNames, recog)
 }
 
-func (s *TypePassContext) EnterRule(listener antlr.ParseTreeListener) {
+func (s *TypeFormContext) EnterRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterTypePass(s)
+		listenerT.EnterTypeForm(s)
 	}
 }
 
-func (s *TypePassContext) ExitRule(listener antlr.ParseTreeListener) {
+func (s *TypeFormContext) ExitRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitTypePass(s)
+		listenerT.ExitTypeForm(s)
 	}
 }
 
-func (p *ElzParser) TypePass() (localctx ITypePassContext) {
-	localctx = NewTypePassContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 28, ElzParserRULE_typePass)
+func (p *ElzParser) TypeForm() (localctx ITypeFormContext) {
+	localctx = NewTypeFormContext(p, p.GetParserRuleContext(), p.GetState())
+	p.EnterRule(localctx, 28, ElzParserRULE_typeForm)
 
 	defer func() {
 		p.ExitRule()
@@ -2262,27 +2272,27 @@ func NewTypeListContext(parser antlr.Parser, parent antlr.ParserRuleContext, inv
 
 func (s *TypeListContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *TypeListContext) AllTypePass() []ITypePassContext {
-	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*ITypePassContext)(nil)).Elem())
-	var tst = make([]ITypePassContext, len(ts))
+func (s *TypeListContext) AllTypeForm() []ITypeFormContext {
+	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*ITypeFormContext)(nil)).Elem())
+	var tst = make([]ITypeFormContext, len(ts))
 
 	for i, t := range ts {
 		if t != nil {
-			tst[i] = t.(ITypePassContext)
+			tst[i] = t.(ITypeFormContext)
 		}
 	}
 
 	return tst
 }
 
-func (s *TypeListContext) TypePass(i int) ITypePassContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypePassContext)(nil)).Elem(), i)
+func (s *TypeListContext) TypeForm(i int) ITypeFormContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypeFormContext)(nil)).Elem(), i)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(ITypePassContext)
+	return t.(ITypeFormContext)
 }
 
 func (s *TypeListContext) GetRuleContext() antlr.RuleContext {
@@ -2329,7 +2339,7 @@ func (p *ElzParser) TypeList() (localctx ITypeListContext) {
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(163)
-		p.TypePass()
+		p.TypeForm()
 	}
 	p.SetState(168)
 	p.GetErrorHandler().Sync(p)
@@ -2342,7 +2352,7 @@ func (p *ElzParser) TypeList() (localctx ITypeListContext) {
 		}
 		{
 			p.SetState(165)
-			p.TypePass()
+			p.TypeForm()
 		}
 
 		p.SetState(170)
@@ -2661,14 +2671,14 @@ func (s *MethodContext) ParamList() IParamListContext {
 	return t.(IParamListContext)
 }
 
-func (s *MethodContext) TypePass() ITypePassContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypePassContext)(nil)).Elem(), 0)
+func (s *MethodContext) TypeForm() ITypeFormContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypeFormContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(ITypePassContext)
+	return t.(ITypeFormContext)
 }
 
 func (s *MethodContext) StatList() IStatListContext {
@@ -2768,7 +2778,7 @@ func (p *ElzParser) Method() (localctx IMethodContext) {
 		}
 		{
 			p.SetState(194)
-			p.TypePass()
+			p.TypeForm()
 		}
 
 	}
@@ -2780,7 +2790,7 @@ func (p *ElzParser) Method() (localctx IMethodContext) {
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
-	if ((_la-5)&-(0x1f+1)) == 0 && ((1<<uint((_la-5)))&((1<<(ElzParserT__4-5))|(1<<(ElzParserT__5-5))|(1<<(ElzParserT__8-5))|(1<<(ElzParserT__17-5))|(1<<(ElzParserID-5)))) != 0 {
+	if (((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__4)|(1<<ElzParserT__5)|(1<<ElzParserT__8)|(1<<ElzParserT__17))) != 0) || _la == ElzParserID {
 		{
 			p.SetState(198)
 			p.StatList()
@@ -3093,14 +3103,14 @@ func (s *DefineContext) Exportor() IExportorContext {
 	return t.(IExportorContext)
 }
 
-func (s *DefineContext) TypePass() ITypePassContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypePassContext)(nil)).Elem(), 0)
+func (s *DefineContext) TypeForm() ITypeFormContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypeFormContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(ITypePassContext)
+	return t.(ITypeFormContext)
 }
 
 func (s *DefineContext) GetRuleContext() antlr.RuleContext {
@@ -3171,7 +3181,7 @@ func (p *ElzParser) Define() (localctx IDefineContext) {
 		}
 		{
 			p.SetState(222)
-			p.TypePass()
+			p.TypeForm()
 		}
 
 	}
@@ -3520,14 +3530,14 @@ func (s *ParamContext) ID() antlr.TerminalNode {
 	return s.GetToken(ElzParserID, 0)
 }
 
-func (s *ParamContext) TypePass() ITypePassContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypePassContext)(nil)).Elem(), 0)
+func (s *ParamContext) TypeForm() ITypeFormContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypeFormContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(ITypePassContext)
+	return t.(ITypeFormContext)
 }
 
 func (s *ParamContext) GetRuleContext() antlr.RuleContext {
@@ -3587,7 +3597,7 @@ func (p *ElzParser) Param() (localctx IParamContext) {
 		}
 		{
 			p.SetState(250)
-			p.TypePass()
+			p.TypeForm()
 		}
 
 	}
@@ -3657,14 +3667,14 @@ func (s *FnDefineContext) ParamList() IParamListContext {
 	return t.(IParamListContext)
 }
 
-func (s *FnDefineContext) TypePass() ITypePassContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypePassContext)(nil)).Elem(), 0)
+func (s *FnDefineContext) TypeForm() ITypeFormContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypeFormContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(ITypePassContext)
+	return t.(ITypeFormContext)
 }
 
 func (s *FnDefineContext) StatList() IStatListContext {
@@ -3768,7 +3778,7 @@ func (p *ElzParser) FnDefine() (localctx IFnDefineContext) {
 		}
 		{
 			p.SetState(264)
-			p.TypePass()
+			p.TypeForm()
 		}
 
 	}
@@ -3780,7 +3790,7 @@ func (p *ElzParser) FnDefine() (localctx IFnDefineContext) {
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
-	if ((_la-5)&-(0x1f+1)) == 0 && ((1<<uint((_la-5)))&((1<<(ElzParserT__4-5))|(1<<(ElzParserT__5-5))|(1<<(ElzParserT__8-5))|(1<<(ElzParserT__17-5))|(1<<(ElzParserID-5)))) != 0 {
+	if (((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__4)|(1<<ElzParserT__5)|(1<<ElzParserT__8)|(1<<ElzParserT__17))) != 0) || _la == ElzParserID {
 		{
 			p.SetState(268)
 			p.StatList()
@@ -3968,14 +3978,14 @@ func (s *AttrContext) ID() antlr.TerminalNode {
 	return s.GetToken(ElzParserID, 0)
 }
 
-func (s *AttrContext) TypePass() ITypePassContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypePassContext)(nil)).Elem(), 0)
+func (s *AttrContext) TypeForm() ITypeFormContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypeFormContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(ITypePassContext)
+	return t.(ITypeFormContext)
 }
 
 func (s *AttrContext) GetRuleContext() antlr.RuleContext {
@@ -4033,7 +4043,7 @@ func (p *ElzParser) Attr() (localctx IAttrContext) {
 	}
 	{
 		p.SetState(281)
-		p.TypePass()
+		p.TypeForm()
 	}
 
 	return localctx
@@ -4361,14 +4371,14 @@ func (s *TmethodContext) TypeList() ITypeListContext {
 	return t.(ITypeListContext)
 }
 
-func (s *TmethodContext) TypePass() ITypePassContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypePassContext)(nil)).Elem(), 0)
+func (s *TmethodContext) TypeForm() ITypeFormContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*ITypeFormContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(ITypePassContext)
+	return t.(ITypeFormContext)
 }
 
 func (s *TmethodContext) GetRuleContext() antlr.RuleContext {
@@ -4458,7 +4468,7 @@ func (p *ElzParser) Tmethod() (localctx ITmethodContext) {
 		}
 		{
 			p.SetState(307)
-			p.TypePass()
+			p.TypeForm()
 		}
 
 	}
@@ -4655,40 +4665,6 @@ func (s *ExprContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) s
 	return antlr.TreesStringTree(s, ruleNames, recog)
 }
 
-type StrContext struct {
-	*ExprContext
-}
-
-func NewStrContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *StrContext {
-	var p = new(StrContext)
-
-	p.ExprContext = NewEmptyExprContext()
-	p.parser = parser
-	p.CopyFrom(ctx.(*ExprContext))
-
-	return p
-}
-
-func (s *StrContext) GetRuleContext() antlr.RuleContext {
-	return s
-}
-
-func (s *StrContext) STRING() antlr.TerminalNode {
-	return s.GetToken(ElzParserSTRING, 0)
-}
-
-func (s *StrContext) EnterRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterStr(s)
-	}
-}
-
-func (s *StrContext) ExitRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitStr(s)
-	}
-}
-
 type NotEqContext struct {
 	*ExprContext
 	op antlr.Token
@@ -4747,64 +4723,6 @@ func (s *NotEqContext) ExitRule(listener antlr.ParseTreeListener) {
 	}
 }
 
-type AddOrSubContext struct {
-	*ExprContext
-	op antlr.Token
-}
-
-func NewAddOrSubContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *AddOrSubContext {
-	var p = new(AddOrSubContext)
-
-	p.ExprContext = NewEmptyExprContext()
-	p.parser = parser
-	p.CopyFrom(ctx.(*ExprContext))
-
-	return p
-}
-
-func (s *AddOrSubContext) GetOp() antlr.Token { return s.op }
-
-func (s *AddOrSubContext) SetOp(v antlr.Token) { s.op = v }
-
-func (s *AddOrSubContext) GetRuleContext() antlr.RuleContext {
-	return s
-}
-
-func (s *AddOrSubContext) AllExpr() []IExprContext {
-	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
-	var tst = make([]IExprContext, len(ts))
-
-	for i, t := range ts {
-		if t != nil {
-			tst[i] = t.(IExprContext)
-		}
-	}
-
-	return tst
-}
-
-func (s *AddOrSubContext) Expr(i int) IExprContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IExprContext)
-}
-
-func (s *AddOrSubContext) EnterRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterAddOrSub(s)
-	}
-}
-
-func (s *AddOrSubContext) ExitRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitAddOrSub(s)
-	}
-}
-
 type SubExprContext struct {
 	*ExprContext
 }
@@ -4842,46 +4760,6 @@ func (s *SubExprContext) EnterRule(listener antlr.ParseTreeListener) {
 func (s *SubExprContext) ExitRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
 		listenerT.ExitSubExpr(s)
-	}
-}
-
-type StatExprContext struct {
-	*ExprContext
-}
-
-func NewStatExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *StatExprContext {
-	var p = new(StatExprContext)
-
-	p.ExprContext = NewEmptyExprContext()
-	p.parser = parser
-	p.CopyFrom(ctx.(*ExprContext))
-
-	return p
-}
-
-func (s *StatExprContext) GetRuleContext() antlr.RuleContext {
-	return s
-}
-
-func (s *StatExprContext) ExprStat() IExprStatContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprStatContext)(nil)).Elem(), 0)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IExprStatContext)
-}
-
-func (s *StatExprContext) EnterRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterStatExpr(s)
-	}
-}
-
-func (s *StatExprContext) ExitRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitStatExpr(s)
 	}
 }
 
@@ -4977,6 +4855,365 @@ func (s *MulOrDivContext) ExitRule(listener antlr.ParseTreeListener) {
 	}
 }
 
+type CmpContext struct {
+	*ExprContext
+	op antlr.Token
+}
+
+func NewCmpContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *CmpContext {
+	var p = new(CmpContext)
+
+	p.ExprContext = NewEmptyExprContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *CmpContext) GetOp() antlr.Token { return s.op }
+
+func (s *CmpContext) SetOp(v antlr.Token) { s.op = v }
+
+func (s *CmpContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *CmpContext) AllExpr() []IExprContext {
+	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
+	var tst = make([]IExprContext, len(ts))
+
+	for i, t := range ts {
+		if t != nil {
+			tst[i] = t.(IExprContext)
+		}
+	}
+
+	return tst
+}
+
+func (s *CmpContext) Expr(i int) IExprContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
+}
+
+func (s *CmpContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.EnterCmp(s)
+	}
+}
+
+func (s *CmpContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.ExitCmp(s)
+	}
+}
+
+type EqContext struct {
+	*ExprContext
+	op antlr.Token
+}
+
+func NewEqContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *EqContext {
+	var p = new(EqContext)
+
+	p.ExprContext = NewEmptyExprContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *EqContext) GetOp() antlr.Token { return s.op }
+
+func (s *EqContext) SetOp(v antlr.Token) { s.op = v }
+
+func (s *EqContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *EqContext) AllExpr() []IExprContext {
+	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
+	var tst = make([]IExprContext, len(ts))
+
+	for i, t := range ts {
+		if t != nil {
+			tst[i] = t.(IExprContext)
+		}
+	}
+
+	return tst
+}
+
+func (s *EqContext) Expr(i int) IExprContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
+}
+
+func (s *EqContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.EnterEq(s)
+	}
+}
+
+func (s *EqContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.ExitEq(s)
+	}
+}
+
+type AndOrOrContext struct {
+	*ExprContext
+	op antlr.Token
+}
+
+func NewAndOrOrContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *AndOrOrContext {
+	var p = new(AndOrOrContext)
+
+	p.ExprContext = NewEmptyExprContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *AndOrOrContext) GetOp() antlr.Token { return s.op }
+
+func (s *AndOrOrContext) SetOp(v antlr.Token) { s.op = v }
+
+func (s *AndOrOrContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *AndOrOrContext) AllExpr() []IExprContext {
+	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
+	var tst = make([]IExprContext, len(ts))
+
+	for i, t := range ts {
+		if t != nil {
+			tst[i] = t.(IExprContext)
+		}
+	}
+
+	return tst
+}
+
+func (s *AndOrOrContext) Expr(i int) IExprContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
+}
+
+func (s *AndOrOrContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.EnterAndOrOr(s)
+	}
+}
+
+func (s *AndOrOrContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.ExitAndOrOr(s)
+	}
+}
+
+type ThreeOpCmpContext struct {
+	*ExprContext
+}
+
+func NewThreeOpCmpContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ThreeOpCmpContext {
+	var p = new(ThreeOpCmpContext)
+
+	p.ExprContext = NewEmptyExprContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *ThreeOpCmpContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *ThreeOpCmpContext) AllExpr() []IExprContext {
+	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
+	var tst = make([]IExprContext, len(ts))
+
+	for i, t := range ts {
+		if t != nil {
+			tst[i] = t.(IExprContext)
+		}
+	}
+
+	return tst
+}
+
+func (s *ThreeOpCmpContext) Expr(i int) IExprContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
+}
+
+func (s *ThreeOpCmpContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.EnterThreeOpCmp(s)
+	}
+}
+
+func (s *ThreeOpCmpContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.ExitThreeOpCmp(s)
+	}
+}
+
+type StrContext struct {
+	*ExprContext
+}
+
+func NewStrContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *StrContext {
+	var p = new(StrContext)
+
+	p.ExprContext = NewEmptyExprContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *StrContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *StrContext) STRING() antlr.TerminalNode {
+	return s.GetToken(ElzParserSTRING, 0)
+}
+
+func (s *StrContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.EnterStr(s)
+	}
+}
+
+func (s *StrContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.ExitStr(s)
+	}
+}
+
+type AddOrSubContext struct {
+	*ExprContext
+	op antlr.Token
+}
+
+func NewAddOrSubContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *AddOrSubContext {
+	var p = new(AddOrSubContext)
+
+	p.ExprContext = NewEmptyExprContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *AddOrSubContext) GetOp() antlr.Token { return s.op }
+
+func (s *AddOrSubContext) SetOp(v antlr.Token) { s.op = v }
+
+func (s *AddOrSubContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *AddOrSubContext) AllExpr() []IExprContext {
+	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
+	var tst = make([]IExprContext, len(ts))
+
+	for i, t := range ts {
+		if t != nil {
+			tst[i] = t.(IExprContext)
+		}
+	}
+
+	return tst
+}
+
+func (s *AddOrSubContext) Expr(i int) IExprContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
+}
+
+func (s *AddOrSubContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.EnterAddOrSub(s)
+	}
+}
+
+func (s *AddOrSubContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.ExitAddOrSub(s)
+	}
+}
+
+type StatExprContext struct {
+	*ExprContext
+}
+
+func NewStatExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *StatExprContext {
+	var p = new(StatExprContext)
+
+	p.ExprContext = NewEmptyExprContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *StatExprContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *StatExprContext) ExprStat() IExprStatContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprStatContext)(nil)).Elem(), 0)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprStatContext)
+}
+
+func (s *StatExprContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.EnterStatExpr(s)
+	}
+}
+
+func (s *StatExprContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(ElzListener); ok {
+		listenerT.ExitStatExpr(s)
+	}
+}
+
 type PowContext struct {
 	*ExprContext
 	op antlr.Token
@@ -5066,117 +5303,6 @@ func (s *IdContext) EnterRule(listener antlr.ParseTreeListener) {
 func (s *IdContext) ExitRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
 		listenerT.ExitId(s)
-	}
-}
-
-type EqContext struct {
-	*ExprContext
-	op antlr.Token
-}
-
-func NewEqContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *EqContext {
-	var p = new(EqContext)
-
-	p.ExprContext = NewEmptyExprContext()
-	p.parser = parser
-	p.CopyFrom(ctx.(*ExprContext))
-
-	return p
-}
-
-func (s *EqContext) GetOp() antlr.Token { return s.op }
-
-func (s *EqContext) SetOp(v antlr.Token) { s.op = v }
-
-func (s *EqContext) GetRuleContext() antlr.RuleContext {
-	return s
-}
-
-func (s *EqContext) AllExpr() []IExprContext {
-	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
-	var tst = make([]IExprContext, len(ts))
-
-	for i, t := range ts {
-		if t != nil {
-			tst[i] = t.(IExprContext)
-		}
-	}
-
-	return tst
-}
-
-func (s *EqContext) Expr(i int) IExprContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IExprContext)
-}
-
-func (s *EqContext) EnterRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterEq(s)
-	}
-}
-
-func (s *EqContext) ExitRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitEq(s)
-	}
-}
-
-type ThreeOpCmpContext struct {
-	*ExprContext
-}
-
-func NewThreeOpCmpContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ThreeOpCmpContext {
-	var p = new(ThreeOpCmpContext)
-
-	p.ExprContext = NewEmptyExprContext()
-	p.parser = parser
-	p.CopyFrom(ctx.(*ExprContext))
-
-	return p
-}
-
-func (s *ThreeOpCmpContext) GetRuleContext() antlr.RuleContext {
-	return s
-}
-
-func (s *ThreeOpCmpContext) AllExpr() []IExprContext {
-	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IExprContext)(nil)).Elem())
-	var tst = make([]IExprContext, len(ts))
-
-	for i, t := range ts {
-		if t != nil {
-			tst[i] = t.(IExprContext)
-		}
-	}
-
-	return tst
-}
-
-func (s *ThreeOpCmpContext) Expr(i int) IExprContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), i)
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IExprContext)
-}
-
-func (s *ThreeOpCmpContext) EnterRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterThreeOpCmp(s)
-	}
-}
-
-func (s *ThreeOpCmpContext) ExitRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitThreeOpCmp(s)
 	}
 }
 
@@ -5272,7 +5398,7 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 
 	}
 	p.GetParserRuleContext().SetStop(p.GetTokenStream().LT(-1))
-	p.SetState(353)
+	p.SetState(359)
 	p.GetErrorHandler().Sync(p)
 	_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 40, p.GetParserRuleContext())
 
@@ -5282,7 +5408,7 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				p.TriggerExitRuleEvent()
 			}
 			_prevctx = localctx
-			p.SetState(351)
+			p.SetState(357)
 			p.GetErrorHandler().Sync(p)
 			switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 39, p.GetParserRuleContext()) {
 			case 1:
@@ -5290,8 +5416,8 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
 				p.SetState(330)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 11)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 11)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 13)) {
+					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 13)", ""))
 				}
 				{
 					p.SetState(331)
@@ -5302,7 +5428,7 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				}
 				{
 					p.SetState(332)
-					p.expr(12)
+					p.expr(14)
 				}
 
 			case 2:
@@ -5310,8 +5436,8 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
 				p.SetState(333)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 10)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 10)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 12)) {
+					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 12)", ""))
 				}
 				{
 					p.SetState(334)
@@ -5333,7 +5459,7 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				}
 				{
 					p.SetState(335)
-					p.expr(11)
+					p.expr(13)
 				}
 
 			case 3:
@@ -5341,8 +5467,8 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
 				p.SetState(336)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 9)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 9)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 11)) {
+					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 11)", ""))
 				}
 				{
 					p.SetState(337)
@@ -5364,78 +5490,140 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 				}
 				{
 					p.SetState(338)
-					p.expr(10)
+					p.expr(12)
 				}
 
 			case 4:
-				localctx = NewNotEqContext(p, NewExprContext(p, _parentctx, _parentState))
+				localctx = NewCmpContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
 				p.SetState(339)
+
+				if !(p.Precpred(p.GetParserRuleContext(), 10)) {
+					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 10)", ""))
+				}
+				{
+					p.SetState(340)
+
+					var _lt = p.GetTokenStream().LT(1)
+
+					localctx.(*CmpContext).op = _lt
+
+					_la = p.GetTokenStream().LA(1)
+
+					if !(((_la)&-(0x1f+1)) == 0 && ((1<<uint(_la))&((1<<ElzParserT__26)|(1<<ElzParserT__27)|(1<<ElzParserT__28)|(1<<ElzParserT__29))) != 0) {
+						var _ri = p.GetErrorHandler().RecoverInline(p)
+
+						localctx.(*CmpContext).op = _ri
+					} else {
+						p.GetErrorHandler().ReportMatch(p)
+						p.Consume()
+					}
+				}
+				{
+					p.SetState(341)
+					p.expr(11)
+				}
+
+			case 5:
+				localctx = NewNotEqContext(p, NewExprContext(p, _parentctx, _parentState))
+				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
+				p.SetState(342)
+
+				if !(p.Precpred(p.GetParserRuleContext(), 9)) {
+					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 9)", ""))
+				}
+				{
+					p.SetState(343)
+
+					var _m = p.Match(ElzParserT__30)
+
+					localctx.(*NotEqContext).op = _m
+				}
+				{
+					p.SetState(344)
+					p.expr(10)
+				}
+
+			case 6:
+				localctx = NewEqContext(p, NewExprContext(p, _parentctx, _parentState))
+				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
+				p.SetState(345)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 8)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 8)", ""))
 				}
 				{
-					p.SetState(340)
+					p.SetState(346)
 
-					var _m = p.Match(ElzParserT__26)
+					var _m = p.Match(ElzParserT__31)
 
-					localctx.(*NotEqContext).op = _m
+					localctx.(*EqContext).op = _m
 				}
 				{
-					p.SetState(341)
+					p.SetState(347)
 					p.expr(9)
 				}
 
-			case 5:
-				localctx = NewEqContext(p, NewExprContext(p, _parentctx, _parentState))
+			case 7:
+				localctx = NewAndOrOrContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(342)
+				p.SetState(348)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 7)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 7)", ""))
 				}
 				{
-					p.SetState(343)
+					p.SetState(349)
 
-					var _m = p.Match(ElzParserT__27)
+					var _lt = p.GetTokenStream().LT(1)
 
-					localctx.(*EqContext).op = _m
+					localctx.(*AndOrOrContext).op = _lt
+
+					_la = p.GetTokenStream().LA(1)
+
+					if !(_la == ElzParserT__32 || _la == ElzParserT__33) {
+						var _ri = p.GetErrorHandler().RecoverInline(p)
+
+						localctx.(*AndOrOrContext).op = _ri
+					} else {
+						p.GetErrorHandler().ReportMatch(p)
+						p.Consume()
+					}
 				}
 				{
-					p.SetState(344)
+					p.SetState(350)
 					p.expr(8)
 				}
 
-			case 6:
+			case 8:
 				localctx = NewThreeOpCmpContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(345)
+				p.SetState(351)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 6)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 6)", ""))
 				}
 				{
-					p.SetState(346)
-					p.Match(ElzParserT__28)
+					p.SetState(352)
+					p.Match(ElzParserT__34)
 				}
 				{
-					p.SetState(347)
+					p.SetState(353)
 					p.expr(0)
 				}
 				{
-					p.SetState(348)
+					p.SetState(354)
 					p.Match(ElzParserT__15)
 				}
 				{
-					p.SetState(349)
+					p.SetState(355)
 					p.expr(7)
 				}
 
 			}
 
 		}
-		p.SetState(355)
+		p.SetState(361)
 		p.GetErrorHandler().Sync(p)
 		_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 40, p.GetParserRuleContext())
 	}
@@ -5460,21 +5648,27 @@ func (p *ElzParser) Sempred(localctx antlr.RuleContext, ruleIndex, predIndex int
 func (p *ElzParser) Expr_Sempred(localctx antlr.RuleContext, predIndex int) bool {
 	switch predIndex {
 	case 0:
-		return p.Precpred(p.GetParserRuleContext(), 11)
+		return p.Precpred(p.GetParserRuleContext(), 13)
 
 	case 1:
-		return p.Precpred(p.GetParserRuleContext(), 10)
+		return p.Precpred(p.GetParserRuleContext(), 12)
 
 	case 2:
-		return p.Precpred(p.GetParserRuleContext(), 9)
+		return p.Precpred(p.GetParserRuleContext(), 11)
 
 	case 3:
-		return p.Precpred(p.GetParserRuleContext(), 8)
+		return p.Precpred(p.GetParserRuleContext(), 10)
 
 	case 4:
-		return p.Precpred(p.GetParserRuleContext(), 7)
+		return p.Precpred(p.GetParserRuleContext(), 9)
 
 	case 5:
+		return p.Precpred(p.GetParserRuleContext(), 8)
+
+	case 6:
+		return p.Precpred(p.GetParserRuleContext(), 7)
+
+	case 7:
 		return p.Precpred(p.GetParserRuleContext(), 6)
 
 	default:
