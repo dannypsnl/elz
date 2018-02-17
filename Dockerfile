@@ -5,4 +5,4 @@ WORKDIR /go/src/github.com/elz-lang/elz
 RUN rm -r *
 COPY . .
 
-CMD go test -v ./...
+CMD go test -v ./... && go build
