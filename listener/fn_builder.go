@@ -15,7 +15,9 @@ type FnBuilder struct {
 }
 
 func NewFnBuilder() *FnBuilder {
-	return &FnBuilder{}
+	return &FnBuilder{
+		params: make([]*ast.Param, 0),
+	}
 }
 
 func (fb *FnBuilder) Name(n string) *FnBuilder {
@@ -28,6 +30,14 @@ func (fb *FnBuilder) Export(e bool) *FnBuilder {
 	return fb
 }
 
+func (fb *FnBuilder) Param(name string, typ string) *FnBuilder {
+	fb.params = append(fb.params, &ast.Param{
+		Name: name,
+		Type: typ,
+	})
+	return fb
+}
+
 func (fb *FnBuilder) generate() *ast.FnDef {
 	if fb.export {
 		fmt.Print("public ")
@@ -37,7 +47,7 @@ func (fb *FnBuilder) generate() *ast.FnDef {
 	return &ast.FnDef{
 		Export: fb.export,
 		Name:   fb.name,
-		Params: []*ast.Param{},
+		Params: fb.params,
 		// TODO: implement statments
 		// FIXME: should decide by rule typePass
 		RetType: "num",
