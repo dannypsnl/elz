@@ -7,8 +7,8 @@ import (
 
 func TestNumStrExpression(t *testing.T) {
 	res := NewParse(`
-	let a = 3 * 2
-	let mut b = "abcde"
+	a = 3 * 2
+	b = "abcde"
 	`)
 
 	expected := `; ModuleID = 'main'
