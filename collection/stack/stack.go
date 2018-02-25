@@ -18,6 +18,11 @@ func (s *Stack) Len() int {
 	return len(s.stack)
 }
 
+// Empty return the stack is empty or not
+func (s *Stack) Empty() bool {
+	return len(s.stack) == 0
+}
+
 // Push push new element into stack
 func (s *Stack) Push(element interface{}) {
 	s.stack = append(s.stack, element)

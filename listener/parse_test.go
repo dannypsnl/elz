@@ -6,7 +6,7 @@ import (
 
 func TestParse(t *testing.T) {
 	res := NewParse(`
-	let a = 10
+	a = 10
 	`)
 
 	expected := `; ModuleID = 'main'

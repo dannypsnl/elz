@@ -37,6 +37,23 @@ func TestPushPop(t *testing.T) {
 	}
 }
 
+func TestEmptyAtInit(t *testing.T) {
+	s := New()
+	if !s.Empty() {
+		t.Error(`should not have size before push anything into stack`)
+	}
+}
+
+func TestEmptyAfterPush(t *testing.T) {
+	s := New()
+	s.Push(1)
+	s.Push(1)
+	s.Push(1)
+	if s.Empty() {
+		t.Error(`stack should not be empty after push 3 things into it`)
+	}
+}
+
 func TestMockCalc(t *testing.T) {
 	s := New()
 	s.Push(1.1)

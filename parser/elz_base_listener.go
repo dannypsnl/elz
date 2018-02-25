@@ -147,17 +147,23 @@ func (s *BaseElzListener) EnterExportor(ctx *ExportorContext) {}
 // ExitExportor is called when production exportor is exited.
 func (s *BaseElzListener) ExitExportor(ctx *ExportorContext) {}
 
+// EnterGlobalVarDefine is called when production globalVarDefine is entered.
+func (s *BaseElzListener) EnterGlobalVarDefine(ctx *GlobalVarDefineContext) {}
+
+// ExitGlobalVarDefine is called when production globalVarDefine is exited.
+func (s *BaseElzListener) ExitGlobalVarDefine(ctx *GlobalVarDefineContext) {}
+
 // EnterDefine is called when production define is entered.
 func (s *BaseElzListener) EnterDefine(ctx *DefineContext) {}
 
 // ExitDefine is called when production define is exited.
 func (s *BaseElzListener) ExitDefine(ctx *DefineContext) {}
 
-// EnterVarDefine is called when production varDefine is entered.
-func (s *BaseElzListener) EnterVarDefine(ctx *VarDefineContext) {}
+// EnterLocalVarDefine is called when production localVarDefine is entered.
+func (s *BaseElzListener) EnterLocalVarDefine(ctx *LocalVarDefineContext) {}
 
-// ExitVarDefine is called when production varDefine is exited.
-func (s *BaseElzListener) ExitVarDefine(ctx *VarDefineContext) {}
+// ExitLocalVarDefine is called when production localVarDefine is exited.
+func (s *BaseElzListener) ExitLocalVarDefine(ctx *LocalVarDefineContext) {}
 
 // EnterParamList is called when production paramList is entered.
 func (s *BaseElzListener) EnterParamList(ctx *ParamListContext) {}

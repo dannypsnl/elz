@@ -42,19 +42,19 @@ prog: topStatList?;
 
 topStatList: topStat+;
 
-topStat: fnDefine // fn foo( params ) { stat... }
-    | varDefine   // let (mut) var: typeForm = expr
-    | typeDefine  // typeForm newType ( prop... )
-    | implBlock   // impl typeForm { method... }
-    | traitDefine // trait DB { method... }
-    | importStat  // import ( Module... )
+topStat: fnDefine     // fn foo( $params ) { $stat... }
+    | globalVarDefine // pi: num = $expr
+    | typeDefine      // type Writer ( prop... )
+    | implBlock       // impl Stack { $method... }
+    | traitDefine     // trait DB { method... }
+    | importStat      // import ( Module... )
     ;
 
 importMod: ID ('::' ID)*;
 importStat: 'import' '(' importMod ')';
 
 statList: stat+;
-stat: varDefine
+stat: localVarDefine
     | loopStat // loop { stats }
     | returnStat
     | assign
@@ -118,12 +118,11 @@ implBlock:
     '}'
     ;
 
-// exportor can use on detect variable scope
-// Because local scope can't export, it may safe.
-// And create another rule may to complex.
 exportor: '+';
-define: exportor? ID (':' typeForm)? '=' expr;
-varDefine:
+globalVarDefine: exportor? define;
+
+define: ID (':' typeForm)? '=' expr;
+localVarDefine:
     'let' mut='mut'? define (',' define)*
     ;
 

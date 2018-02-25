@@ -1,2 +1,2 @@
-let helloworld = "Hello, World"
+helloworld = "Hello, World"
 println(helloworld)
