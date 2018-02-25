@@ -1,2 +1,2 @@
-let num1 = 2*2 // Expected: 4
-let num2 = 3*4/2 // Expected: 10
+num1 = 2*2 // Expected: 4
+num2 = 3*4/2 // Expected: 10
