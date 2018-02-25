@@ -8,6 +8,8 @@ import (
 
 func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 	// TODO: complete fn generate
+	s.inFn = true
+
 	s.fnBuilder = NewFnBuilder().
 		Name(ctx.ID().GetText()).
 		Export(s.exportThis)
@@ -22,6 +24,8 @@ func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
 }
 
 func (s *ElzListener) ExitFnDefine(ctx *parser.FnDefineContext) {
+	s.inFn = false
+
 	s.AstList = append(s.AstList,
 		s.fnBuilder.generate(),
 	)

@@ -20,6 +20,8 @@ type ElzListener struct {
 	fnBuilder *FnBuilder
 	// exportThis markup the reference Name should be public or not.
 	exportThis bool
+	// record location, in fn or not
+	inFn bool
 	// variable default immutable.
 	immutable bool
 }
