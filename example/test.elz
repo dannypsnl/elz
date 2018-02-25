@@ -1,8 +1,8 @@
-let a: num = 3*2-2+4*9/3,
-    b: str = "你好世界，我想知道elz能不能用中文"
+a: num = 3*2-2+4*9/3,
+b: str = "你好世界，我想知道elz能不能用中文"
 
-let +c: num = a * 3
-let mut 世界="world"
++c: num = a * 3
+世界="world"
 
 +fn foo() {}
 fn add(l, r: num) -> num {}
