@@ -56,4 +56,4 @@ $ elz source.elz  # elz will compile it to llvm ir then print it.
 
 ## Contributing
 
-Watch [contributing.md](https://github.com/elz-lang/elz/blob/master/contributing.md)<br>
+Watch [contributing.md](https://github.com/elz-lang/elz/blob/master/CONTRIBUTING.md)
