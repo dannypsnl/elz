@@ -1,13 +1,8 @@
 # elz
 
 [![Build Status](https://travis-ci.org/elz-lang/elz.svg?branch=master)](https://travis-ci.org/elz-lang/elz)
-<br>
-elz is a modern programming language.<br>
-It trying to solve the most complex issue in production programming.<br>
-Why concurrency is so hard? Why design a useful and simple data type is so hard?<br>
-Why the access level is so complex?(Who want to know public, external, internal, private, file private?)<br>
-Why don't have meta programming? How to testing?<br>
-Don't worry anymore. elz is design for this all.<br>
+
+Elz is a modern programming language focus on production. I hope it can change daily work of us.
 
 ## prototype version
 
