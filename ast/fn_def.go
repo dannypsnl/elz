@@ -13,7 +13,7 @@ type FnDef struct {
 	Export  bool
 	Name    string
 	Params  []*Param
-	Body    StatList
+	Body    []Stat
 	RetType string
 }
 

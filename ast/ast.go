@@ -15,8 +15,6 @@ type Stat interface {
 	Codegen(*Context) llvm.Value
 }
 
-type StatList []Stat
-
 type VarDefination struct {
 	Immutable bool
 	Export    bool

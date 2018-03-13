@@ -42,7 +42,7 @@ func TestVarDefination(t *testing.T) {
 			&Param{"x", "num"},
 			&Param{"y", "num"},
 		},
-		Body:    StatList{v},
+		Body:    []Stat{v},
 		RetType: "num",
 	}
 	fn.Codegen(ctx)
