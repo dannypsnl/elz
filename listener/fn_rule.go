@@ -17,7 +17,12 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 
 func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
 	// TODO: get type info
+
 	fmt.Println(ctx.ID().GetText())
+	// get parameter text
+	// rule $Param = $ID: $type
+
+	// TODO:
 	// insert ID.Text into fnBuilder
 	// set flag let fnBuilder record the type when pass type rule
 	// clean flag
