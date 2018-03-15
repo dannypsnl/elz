@@ -1,0 +1,25 @@
+# Title
+# <type>: title
+
+# types can be
+# fix:
+#  (bug fix)
+# feat:
+#  (new feature)
+# add:
+#  (add code)
+# refactor:
+#  (refactoring)
+# style:
+#  (formatting)
+# test:
+#  (adding or refactoring test)
+# docs:
+#  (changes to documentation)
+
+# Block
+problem: What happened
+reason: Problem's Reason
+solution: What do I done
+project: commander
+note: N/A
