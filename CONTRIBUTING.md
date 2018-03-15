@@ -3,7 +3,7 @@
 Setting git as:
 
 ```
-$ cd elz && git config commit.template ./.git_message.txt
+$ git config commit.template $GOPATH/src/github.com/elz-lang/elz/.git_message.txt
 ```
 
 ## translating rule
