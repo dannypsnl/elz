@@ -46,6 +46,23 @@ func main() {
 	ft = llvm.FunctionType(aStr.Type(), []llvm.Type{aStr.Type()}, false)
 	llvm.AddFunction(ctx.m, "main::foo_string_string", ft)
 
+	ft = llvm.FunctionType(llvm.Int32Type(), []llvm.Type{
+		llvm.Int32Type(),
+		llvm.Int32Type(),
+	}, false)
+	addFn := llvm.AddFunction(ctx.m, "main::add", ft)
+	addBlock := llvm.AddBasicBlock(addFn, "entry")
+	ctx.builder.SetInsertPointAtEnd(addBlock)
+	ctx.builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
+	ctx.builder.ClearInsertionPoint()
+	fmt.Println(addFn.ParamsCount())
+	args := []string{"lv", "rv"}
+	i := 0
+	for _, param := range addFn.Params() {
+		param.SetName(args[i])
+		i++
+	}
+
 	ft = llvm.FunctionType(ctx.ctx.FloatType(), []llvm.Type{}, false)
 	llvm.AddFunction(ctx.m, "main::foo_float", ft)
 
@@ -57,5 +74,6 @@ func main() {
 	gStruct := llvm.AddGlobal(ctx.m, structTp, "main::A struct")
 	gStruct.SetInitializer(insStruct)
 
+	fmt.Println("===================================")
 	fmt.Println(ctx.m)
 }
