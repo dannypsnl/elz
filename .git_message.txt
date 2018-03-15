@@ -18,8 +18,11 @@
 #  (changes to documentation)
 
 # Block
-problem: What happened
-reason: Problem's Reason
-solution: What do I done
+problem:
+# What happened?
+reason:
+# Problem's Reason?
+solution:
+# What do U done?
 project: elz
 note: N/A
