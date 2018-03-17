@@ -1,8 +1,6 @@
 package listener
 
 import (
-	"fmt"
-
 	"github.com/elz-lang/elz/parser"
 )
 
