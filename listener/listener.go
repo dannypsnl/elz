@@ -83,10 +83,8 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	}
 
 	if s.exportThis {
-		fmt.Print("public ")
 		s.exportThis = false
 	}
-	fmt.Printf("%s: %s = %s\n", ctx.ID().GetText(), typ, expr)
 
 	// FIXME: Need to classify global var & local var, because local var of course can't be export
 	// FIXME: Need to classify heap & stack, and can find out the lifetime, else sending data by return will become bug
