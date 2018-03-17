@@ -1,8 +1,6 @@
 package listener
 
 import (
-	"fmt"
-
 	"github.com/elz-lang/elz/parser"
 )
 
@@ -17,7 +15,6 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 
 func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
 	// TODO: get type info
-	fmt.Println(ctx.ID().GetText())
 	// insert ID.Text into fnBuilder
 	// set flag let fnBuilder record the type when pass type rule
 	// clean flag
