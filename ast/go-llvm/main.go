@@ -77,6 +77,16 @@ func main() {
 	gStruct := llvm.AddGlobal(ctx.m, structTp, "main::A struct")
 	gStruct.SetInitializer(insStruct)
 
+	engine, err := llvm.NewExecutionEngine(ctx.m)
+	if err != nil {
+		panic(err)
+	}
+	result := engine.RunFunction(addFn, []llvm.GenericValue{
+		llvm.NewGenericValueFromInt(llvm.Int32Type(), 2, false),
+		llvm.NewGenericValueFromInt(llvm.Int32Type(), 3, false),
+	})
+	fmt.Println(result.Int(false))
+
 	fmt.Println("===================================")
 	fmt.Println(ctx.m)
 }
