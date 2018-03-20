@@ -142,9 +142,9 @@ typeDefine:
     ;
 
 tmethodList: tmethod+;
-tmethod: exportor? ID '(' typeList? ')' ('->' typeForm)?;
+tmethod: ID '(' typeList? ')' ('->' typeForm)?;
 traitDefine:
-    'trait' exportor ID '{'
+    exportor? 'trait' ID '{'
         tmethodList?
     '}'
     ;

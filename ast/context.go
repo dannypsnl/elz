@@ -10,7 +10,6 @@ func NewContext() *Context {
 		Context:  llvm.NewContext(),
 		Vars:     make(map[string]*VarNode),
 		VarsType: make(map[string]string),
-		Builder:  llvm.NewBuilder(),
 	}
 }
 
@@ -24,5 +23,4 @@ type Context struct {
 	Context  llvm.Context
 	Vars     map[string]*VarNode
 	VarsType map[string]string
-	Builder  llvm.Builder
 }
