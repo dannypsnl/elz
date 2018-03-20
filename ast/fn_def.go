@@ -27,12 +27,11 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	fn := llvm.AddFunction(ctx.Module, f.Name, ft)
 	entryPoint := llvm.AddBasicBlock(fn, "entry")
 
-	builder := llvm.NewBuilder()
-	builder.SetInsertPointAtEnd(entryPoint)
+	ctx.Builder.SetInsertPointAtEnd(entryPoint)
 	// TODO: for _, stat := range f.Body {
-	//builder.Insert(stat.Codegen(ctx))
-	//}
-	builder.CreateRet(llvm.ConstFloat(llvm.FloatType(), 3.14))
-	builder.ClearInsertionPoint()
+	// ctx.Builder.Insert(stat.Codegen(ctx))
+	// }
+	ctx.Builder.CreateRet(llvm.ConstFloat(llvm.FloatType(), 3.14))
+	ctx.Builder.ClearInsertionPoint()
 	return fn
 }
