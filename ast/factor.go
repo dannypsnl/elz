@@ -9,7 +9,7 @@ type Id struct {
 }
 
 func (i *Id) Codegen(ctx *Context) llvm.Value {
-	return ctx.Vars[i.Val].v
+	return ctx.GlobalVars[i.Val].v
 }
 
 // At here we can see, ident's type need to logging in Context
