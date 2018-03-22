@@ -62,10 +62,11 @@ func main() {
 	mainFn := llvm.AddFunction(ctx.m, "main", ft)
 	mainBlock := llvm.AddBasicBlock(mainFn, "entry")
 	ctx.builder.SetInsertPointAtEnd(mainBlock)
-	ctx.builder.CreateCall(addFn, []llvm.Value{
+	resultOfCallAdd := ctx.builder.CreateCall(addFn, []llvm.Value{
 		llvm.ConstInt(llvm.Int32Type(), 2, false),
 		llvm.ConstInt(llvm.Int32Type(), 3, false),
 	}, "tmp")
+	ctx.builder.CreateAdd(resultOfCallAdd, llvm.ConstInt(llvm.Int32Type(), 6, false), "tmp")
 	ctx.builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
 	ctx.builder.ClearInsertionPoint()
 
@@ -77,6 +78,7 @@ func main() {
 	gStruct := llvm.AddGlobal(ctx.m, structTp, "main::A struct")
 	gStruct.SetInitializer(insStruct)
 
+	// Use ExecutionEngine test function's result
 	engine, err := llvm.NewExecutionEngine(ctx.m)
 	if err != nil {
 		panic(err)
@@ -85,7 +87,7 @@ func main() {
 		llvm.NewGenericValueFromInt(llvm.Int32Type(), 2, false),
 		llvm.NewGenericValueFromInt(llvm.Int32Type(), 3, false),
 	})
-	fmt.Println(result.Int(false))
+	fmt.Println(result.Int(false)) // false -> Not unsigned int
 
 	fmt.Println("===================================")
 	fmt.Println(ctx.m)

@@ -6,10 +6,11 @@ import (
 
 func NewContext() *Context {
 	return &Context{
-		Module:   llvm.NewModule("main"),
-		Context:  llvm.NewContext(),
-		Vars:     make(map[string]*VarNode),
-		VarsType: make(map[string]string),
+		Module:     llvm.NewModule("main"),
+		Context:    llvm.NewContext(),
+		GlobalVars: make(map[string]*VarNode),
+		VarsType:   make(map[string]string),
+		Builder:    llvm.NewBuilder(),
 	}
 }
 
@@ -19,8 +20,9 @@ type VarNode struct {
 }
 
 type Context struct {
-	Module   llvm.Module
-	Context  llvm.Context
-	Vars     map[string]*VarNode
-	VarsType map[string]string
+	Module     llvm.Module
+	Context    llvm.Context
+	GlobalVars map[string]*VarNode
+	VarsType   map[string]string
+	Builder    llvm.Builder
 }
