@@ -44,10 +44,8 @@ func main() {
 	}, false)
 	addFn := llvm.AddFunction(ctx.m, "main::add", ft)
 	args := []string{"lv", "rv"}
-	i := 0
-	for _, param := range addFn.Params() {
+	for i, param := range addFn.Params() {
 		param.SetName(args[i])
-		i++
 	}
 	addBlock := llvm.AddBasicBlock(addFn, "entry")
 	ctx.builder.SetInsertPointAtEnd(addBlock)
