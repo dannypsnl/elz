@@ -29,7 +29,7 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 
 	ctx.Builder.SetInsertPointAtEnd(entryPoint)
 	// TODO: for _, stat := range f.Body {
-	// ctx.Builder.Insert(stat.Codegen(ctx))
+	//     stat.Codegen(ctx)
 	// }
 	ctx.Builder.CreateRet(llvm.ConstFloat(llvm.FloatType(), 3.14))
 	ctx.Builder.ClearInsertionPoint()
