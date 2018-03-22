@@ -28,9 +28,9 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	entryPoint := llvm.AddBasicBlock(fn, "entry")
 
 	ctx.Builder.SetInsertPointAtEnd(entryPoint)
-	// TODO: for _, stat := range f.Body {
-	//     stat.Codegen(ctx)
-	// }
+	for _, stat := range f.Body {
+		stat.Codegen(ctx)
+	}
 	ctx.Builder.CreateRet(llvm.ConstFloat(llvm.FloatType(), 3.14))
 	ctx.Builder.ClearInsertionPoint()
 	return fn
