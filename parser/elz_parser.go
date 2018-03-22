@@ -201,9 +201,9 @@ var ruleNames = []string{
 	"prog", "topStatList", "topStat", "importMod", "importStat", "statList",
 	"stat", "returnStat", "loopStat", "exprStat", "matchRule", "assign", "exprList",
 	"fnCall", "typeForm", "typeList", "annotation", "methodList", "method",
-	"implBlock", "exportor", "globalVarDefine", "define", "localVarDefine",
-	"paramList", "param", "fnDefine", "attrList", "attr", "typeDefine", "tmethodList",
-	"tmethod", "traitDefine", "expr",
+	"implBlock", "exportor", "globalVarDef", "define", "localVarDef", "paramList",
+	"param", "fnDefine", "attrList", "attr", "typeDefine", "tmethodList", "tmethod",
+	"traitDefine", "expr",
 }
 var decisionToDFA = make([]*antlr.DFA, len(deserializedATN.DecisionToState))
 
@@ -278,40 +278,40 @@ const (
 
 // ElzParser rules.
 const (
-	ElzParserRULE_prog            = 0
-	ElzParserRULE_topStatList     = 1
-	ElzParserRULE_topStat         = 2
-	ElzParserRULE_importMod       = 3
-	ElzParserRULE_importStat      = 4
-	ElzParserRULE_statList        = 5
-	ElzParserRULE_stat            = 6
-	ElzParserRULE_returnStat      = 7
-	ElzParserRULE_loopStat        = 8
-	ElzParserRULE_exprStat        = 9
-	ElzParserRULE_matchRule       = 10
-	ElzParserRULE_assign          = 11
-	ElzParserRULE_exprList        = 12
-	ElzParserRULE_fnCall          = 13
-	ElzParserRULE_typeForm        = 14
-	ElzParserRULE_typeList        = 15
-	ElzParserRULE_annotation      = 16
-	ElzParserRULE_methodList      = 17
-	ElzParserRULE_method          = 18
-	ElzParserRULE_implBlock       = 19
-	ElzParserRULE_exportor        = 20
-	ElzParserRULE_globalVarDefine = 21
-	ElzParserRULE_define          = 22
-	ElzParserRULE_localVarDefine  = 23
-	ElzParserRULE_paramList       = 24
-	ElzParserRULE_param           = 25
-	ElzParserRULE_fnDefine        = 26
-	ElzParserRULE_attrList        = 27
-	ElzParserRULE_attr            = 28
-	ElzParserRULE_typeDefine      = 29
-	ElzParserRULE_tmethodList     = 30
-	ElzParserRULE_tmethod         = 31
-	ElzParserRULE_traitDefine     = 32
-	ElzParserRULE_expr            = 33
+	ElzParserRULE_prog         = 0
+	ElzParserRULE_topStatList  = 1
+	ElzParserRULE_topStat      = 2
+	ElzParserRULE_importMod    = 3
+	ElzParserRULE_importStat   = 4
+	ElzParserRULE_statList     = 5
+	ElzParserRULE_stat         = 6
+	ElzParserRULE_returnStat   = 7
+	ElzParserRULE_loopStat     = 8
+	ElzParserRULE_exprStat     = 9
+	ElzParserRULE_matchRule    = 10
+	ElzParserRULE_assign       = 11
+	ElzParserRULE_exprList     = 12
+	ElzParserRULE_fnCall       = 13
+	ElzParserRULE_typeForm     = 14
+	ElzParserRULE_typeList     = 15
+	ElzParserRULE_annotation   = 16
+	ElzParserRULE_methodList   = 17
+	ElzParserRULE_method       = 18
+	ElzParserRULE_implBlock    = 19
+	ElzParserRULE_exportor     = 20
+	ElzParserRULE_globalVarDef = 21
+	ElzParserRULE_define       = 22
+	ElzParserRULE_localVarDef  = 23
+	ElzParserRULE_paramList    = 24
+	ElzParserRULE_param        = 25
+	ElzParserRULE_fnDefine     = 26
+	ElzParserRULE_attrList     = 27
+	ElzParserRULE_attr         = 28
+	ElzParserRULE_typeDefine   = 29
+	ElzParserRULE_tmethodList  = 30
+	ElzParserRULE_tmethod      = 31
+	ElzParserRULE_traitDefine  = 32
+	ElzParserRULE_expr         = 33
 )
 
 // IProgContext is an interface to support dynamic dispatch.
@@ -588,14 +588,14 @@ func (s *TopStatContext) FnDefine() IFnDefineContext {
 	return t.(IFnDefineContext)
 }
 
-func (s *TopStatContext) GlobalVarDefine() IGlobalVarDefineContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IGlobalVarDefineContext)(nil)).Elem(), 0)
+func (s *TopStatContext) GlobalVarDef() IGlobalVarDefContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IGlobalVarDefContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(IGlobalVarDefineContext)
+	return t.(IGlobalVarDefContext)
 }
 
 func (s *TopStatContext) TypeDefine() ITypeDefineContext {
@@ -692,7 +692,7 @@ func (p *ElzParser) TopStat() (localctx ITopStatContext) {
 		p.EnterOuterAlt(localctx, 2)
 		{
 			p.SetState(77)
-			p.GlobalVarDefine()
+			p.GlobalVarDef()
 		}
 
 	case 3:
@@ -1110,14 +1110,14 @@ func NewStatContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokin
 
 func (s *StatContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *StatContext) LocalVarDefine() ILocalVarDefineContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*ILocalVarDefineContext)(nil)).Elem(), 0)
+func (s *StatContext) LocalVarDef() ILocalVarDefContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*ILocalVarDefContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(ILocalVarDefineContext)
+	return t.(ILocalVarDefContext)
 }
 
 func (s *StatContext) LoopStat() ILoopStatContext {
@@ -1207,7 +1207,7 @@ func (p *ElzParser) Stat() (localctx IStatContext) {
 		p.EnterOuterAlt(localctx, 1)
 		{
 			p.SetState(102)
-			p.LocalVarDefine()
+			p.LocalVarDef()
 		}
 
 	case 2:
@@ -3040,45 +3040,45 @@ func (p *ElzParser) Exportor() (localctx IExportorContext) {
 	return localctx
 }
 
-// IGlobalVarDefineContext is an interface to support dynamic dispatch.
-type IGlobalVarDefineContext interface {
+// IGlobalVarDefContext is an interface to support dynamic dispatch.
+type IGlobalVarDefContext interface {
 	antlr.ParserRuleContext
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
-	// IsGlobalVarDefineContext differentiates from other interfaces.
-	IsGlobalVarDefineContext()
+	// IsGlobalVarDefContext differentiates from other interfaces.
+	IsGlobalVarDefContext()
 }
 
-type GlobalVarDefineContext struct {
+type GlobalVarDefContext struct {
 	*antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
-func NewEmptyGlobalVarDefineContext() *GlobalVarDefineContext {
-	var p = new(GlobalVarDefineContext)
+func NewEmptyGlobalVarDefContext() *GlobalVarDefContext {
+	var p = new(GlobalVarDefContext)
 	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
-	p.RuleIndex = ElzParserRULE_globalVarDefine
+	p.RuleIndex = ElzParserRULE_globalVarDef
 	return p
 }
 
-func (*GlobalVarDefineContext) IsGlobalVarDefineContext() {}
+func (*GlobalVarDefContext) IsGlobalVarDefContext() {}
 
-func NewGlobalVarDefineContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *GlobalVarDefineContext {
-	var p = new(GlobalVarDefineContext)
+func NewGlobalVarDefContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *GlobalVarDefContext {
+	var p = new(GlobalVarDefContext)
 
 	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
 
 	p.parser = parser
-	p.RuleIndex = ElzParserRULE_globalVarDefine
+	p.RuleIndex = ElzParserRULE_globalVarDef
 
 	return p
 }
 
-func (s *GlobalVarDefineContext) GetParser() antlr.Parser { return s.parser }
+func (s *GlobalVarDefContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *GlobalVarDefineContext) Define() IDefineContext {
+func (s *GlobalVarDefContext) Define() IDefineContext {
 	var t = s.GetTypedRuleContext(reflect.TypeOf((*IDefineContext)(nil)).Elem(), 0)
 
 	if t == nil {
@@ -3088,7 +3088,7 @@ func (s *GlobalVarDefineContext) Define() IDefineContext {
 	return t.(IDefineContext)
 }
 
-func (s *GlobalVarDefineContext) Exportor() IExportorContext {
+func (s *GlobalVarDefContext) Exportor() IExportorContext {
 	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExportorContext)(nil)).Elem(), 0)
 
 	if t == nil {
@@ -3098,29 +3098,29 @@ func (s *GlobalVarDefineContext) Exportor() IExportorContext {
 	return t.(IExportorContext)
 }
 
-func (s *GlobalVarDefineContext) GetRuleContext() antlr.RuleContext {
+func (s *GlobalVarDefContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
 
-func (s *GlobalVarDefineContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+func (s *GlobalVarDefContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
 	return antlr.TreesStringTree(s, ruleNames, recog)
 }
 
-func (s *GlobalVarDefineContext) EnterRule(listener antlr.ParseTreeListener) {
+func (s *GlobalVarDefContext) EnterRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterGlobalVarDefine(s)
+		listenerT.EnterGlobalVarDef(s)
 	}
 }
 
-func (s *GlobalVarDefineContext) ExitRule(listener antlr.ParseTreeListener) {
+func (s *GlobalVarDefContext) ExitRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitGlobalVarDefine(s)
+		listenerT.ExitGlobalVarDef(s)
 	}
 }
 
-func (p *ElzParser) GlobalVarDefine() (localctx IGlobalVarDefineContext) {
-	localctx = NewGlobalVarDefineContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 42, ElzParserRULE_globalVarDefine)
+func (p *ElzParser) GlobalVarDef() (localctx IGlobalVarDefContext) {
+	localctx = NewGlobalVarDefContext(p, p.GetParserRuleContext(), p.GetState())
+	p.EnterRule(localctx, 42, ElzParserRULE_globalVarDef)
 	var _la int
 
 	defer func() {
@@ -3294,8 +3294,8 @@ func (p *ElzParser) Define() (localctx IDefineContext) {
 	return localctx
 }
 
-// ILocalVarDefineContext is an interface to support dynamic dispatch.
-type ILocalVarDefineContext interface {
+// ILocalVarDefContext is an interface to support dynamic dispatch.
+type ILocalVarDefContext interface {
 	antlr.ParserRuleContext
 
 	// GetParser returns the parser.
@@ -3307,43 +3307,43 @@ type ILocalVarDefineContext interface {
 	// SetMut sets the mut token.
 	SetMut(antlr.Token)
 
-	// IsLocalVarDefineContext differentiates from other interfaces.
-	IsLocalVarDefineContext()
+	// IsLocalVarDefContext differentiates from other interfaces.
+	IsLocalVarDefContext()
 }
 
-type LocalVarDefineContext struct {
+type LocalVarDefContext struct {
 	*antlr.BaseParserRuleContext
 	parser antlr.Parser
 	mut    antlr.Token
 }
 
-func NewEmptyLocalVarDefineContext() *LocalVarDefineContext {
-	var p = new(LocalVarDefineContext)
+func NewEmptyLocalVarDefContext() *LocalVarDefContext {
+	var p = new(LocalVarDefContext)
 	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
-	p.RuleIndex = ElzParserRULE_localVarDefine
+	p.RuleIndex = ElzParserRULE_localVarDef
 	return p
 }
 
-func (*LocalVarDefineContext) IsLocalVarDefineContext() {}
+func (*LocalVarDefContext) IsLocalVarDefContext() {}
 
-func NewLocalVarDefineContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *LocalVarDefineContext {
-	var p = new(LocalVarDefineContext)
+func NewLocalVarDefContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *LocalVarDefContext {
+	var p = new(LocalVarDefContext)
 
 	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
 
 	p.parser = parser
-	p.RuleIndex = ElzParserRULE_localVarDefine
+	p.RuleIndex = ElzParserRULE_localVarDef
 
 	return p
 }
 
-func (s *LocalVarDefineContext) GetParser() antlr.Parser { return s.parser }
+func (s *LocalVarDefContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *LocalVarDefineContext) GetMut() antlr.Token { return s.mut }
+func (s *LocalVarDefContext) GetMut() antlr.Token { return s.mut }
 
-func (s *LocalVarDefineContext) SetMut(v antlr.Token) { s.mut = v }
+func (s *LocalVarDefContext) SetMut(v antlr.Token) { s.mut = v }
 
-func (s *LocalVarDefineContext) AllDefine() []IDefineContext {
+func (s *LocalVarDefContext) AllDefine() []IDefineContext {
 	var ts = s.GetTypedRuleContexts(reflect.TypeOf((*IDefineContext)(nil)).Elem())
 	var tst = make([]IDefineContext, len(ts))
 
@@ -3356,7 +3356,7 @@ func (s *LocalVarDefineContext) AllDefine() []IDefineContext {
 	return tst
 }
 
-func (s *LocalVarDefineContext) Define(i int) IDefineContext {
+func (s *LocalVarDefContext) Define(i int) IDefineContext {
 	var t = s.GetTypedRuleContext(reflect.TypeOf((*IDefineContext)(nil)).Elem(), i)
 
 	if t == nil {
@@ -3366,29 +3366,29 @@ func (s *LocalVarDefineContext) Define(i int) IDefineContext {
 	return t.(IDefineContext)
 }
 
-func (s *LocalVarDefineContext) GetRuleContext() antlr.RuleContext {
+func (s *LocalVarDefContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
 
-func (s *LocalVarDefineContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+func (s *LocalVarDefContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
 	return antlr.TreesStringTree(s, ruleNames, recog)
 }
 
-func (s *LocalVarDefineContext) EnterRule(listener antlr.ParseTreeListener) {
+func (s *LocalVarDefContext) EnterRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterLocalVarDefine(s)
+		listenerT.EnterLocalVarDef(s)
 	}
 }
 
-func (s *LocalVarDefineContext) ExitRule(listener antlr.ParseTreeListener) {
+func (s *LocalVarDefContext) ExitRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitLocalVarDefine(s)
+		listenerT.ExitLocalVarDef(s)
 	}
 }
 
-func (p *ElzParser) LocalVarDefine() (localctx ILocalVarDefineContext) {
-	localctx = NewLocalVarDefineContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 46, ElzParserRULE_localVarDefine)
+func (p *ElzParser) LocalVarDef() (localctx ILocalVarDefContext) {
+	localctx = NewLocalVarDefContext(p, p.GetParserRuleContext(), p.GetState())
+	p.EnterRule(localctx, 46, ElzParserRULE_localVarDef)
 	var _la int
 
 	defer func() {
@@ -3424,7 +3424,7 @@ func (p *ElzParser) LocalVarDefine() (localctx ILocalVarDefineContext) {
 
 			var _m = p.Match(ElzParserT__18)
 
-			localctx.(*LocalVarDefineContext).mut = _m
+			localctx.(*LocalVarDefContext).mut = _m
 		}
 
 	}
