@@ -32,3 +32,20 @@ func (varDef *GlobalVarDef) Codegen(ctx *Context) llvm.Value {
 	}
 	return val
 }
+
+type LocalVarDef struct {
+	Immutable  bool
+	Name       string
+	VarType    string
+	Expression Expr
+}
+
+func (lv *LocalVarDef) Codegen(ctx *Context) llvm.Value {
+	if lv.VarType == "" || lv.Expression.Type(ctx) != lv.VarType {
+		panic(`expr type != var type`)
+	}
+	expr := lv.Expression.Codegen(ctx)
+	val := ctx.Builder.CreateAlloca(convertToLLVMType(lv.VarType), lv.Name)
+	ctx.Builder.CreateStore(expr, val)
+	return val
+}
