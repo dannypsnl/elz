@@ -69,10 +69,10 @@ func (s *ElzListener) ExitLocalVarDef(*parser.LocalVarDefContext) {
 	}
 }
 
-func (s *ElzListener) EnterGlobalVarDefine(*parser.GlobalVarDefineContext) {
+func (s *ElzListener) EnterGlobalVarDef(*parser.GlobalVarDefContext) {
 	s.isGlobalDef = true
 }
-func (s *ElzListener) ExitGlobalVarDefine(*parser.GlobalVarDefineContext) {
+func (s *ElzListener) ExitGlobalVarDef(*parser.GlobalVarDefContext) {
 	s.isGlobalDef = false
 }
 
