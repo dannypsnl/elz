@@ -25,6 +25,11 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	retT := convertToLLVMType(f.RetType)
 	ft := llvm.FunctionType(retT, paramsT, false)
 	fn := llvm.AddFunction(ctx.Module, f.Name, ft)
+
+	for i, param := range fn.Params() {
+		param.SetName(f.Params[i].Name)
+	}
+
 	entryPoint := llvm.AddBasicBlock(fn, "entry")
 
 	ctx.Builder.SetInsertPointAtEnd(entryPoint)
