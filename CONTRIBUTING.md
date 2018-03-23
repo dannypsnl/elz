@@ -1,9 +1,10 @@
 ## Commit Rules
-[add]: create a new file or add a new function<br>
-[feat]: create a new feature. !!! A known feature, if not, create an issue then implement it<br>
-[fix]: Fixed known bug, !!! If this bug is an unknown bug, please create an issue then fixed it<br>
-[clean]: comment, reformat(gofmt only), refactor. Include improving tests<br>
-[test]: new test
+
+Setting git as:
+
+```
+$ git config commit.template $GOPATH/src/github.com/elz-lang/elz/.git_message.txt
+```
 
 ## translating rule
 I will write a gitbook to describe more infomation.
