@@ -43,7 +43,7 @@ prog: topStatList?;
 topStatList: topStat+;
 
 topStat: fnDefine     // fn foo( $params ) { $stat... }
-    | globalVarDefine // pi: num = $expr
+    | globalVarDef    // pi: num = $expr
     | typeDefine      // type Writer ( prop... )
     | implBlock       // impl Stack { $method... }
     | traitDefine     // trait DB { method... }
@@ -54,7 +54,7 @@ importMod: ID ('::' ID)*;
 importStat: 'import' '(' importMod ')';
 
 statList: stat+;
-stat: localVarDefine
+stat: localVarDef
     | loopStat // loop { stats }
     | returnStat
     | assign
@@ -119,10 +119,10 @@ implBlock:
     ;
 
 exportor: '+';
-globalVarDefine: exportor? define;
+globalVarDef: exportor? define;
 
 define: ID (':' typeForm)? '=' expr;
-localVarDefine:
+localVarDef:
     'let' mut='mut'? define (',' define)*
     ;
 
@@ -142,9 +142,9 @@ typeDefine:
     ;
 
 tmethodList: tmethod+;
-tmethod: exportor? ID '(' typeList? ')' ('->' typeForm)?;
+tmethod: ID '(' typeList? ')' ('->' typeForm)?;
 traitDefine:
-    'trait' exportor ID '{'
+    exportor? 'trait' ID '{'
         tmethodList?
     '}'
     ;

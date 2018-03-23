@@ -57,23 +57,6 @@ func TestBinaryExprAST(t *testing.T) {
 	}
 }
 
-func TestUnsupportOpShouldCausePanic(t *testing.T) {
-	defer func() {
-		if p := recover(); p == nil {
-			t.Error(`Didn't panic`)
-		}
-	}()
-	num := &Number{
-		Val: "1.23",
-	}
-	be := &BinaryExpr{
-		RightE: num,
-		LeftE:  num,
-		Op:     "~",
-	}
-	be.Codegen(ctx)
-}
-
 func TestStringAST(t *testing.T) {
 	str := &Str{
 		Val: `"a string with 中文"`,

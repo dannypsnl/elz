@@ -71,14 +71,14 @@ type ElzListener interface {
 	// EnterExportor is called when entering the exportor production.
 	EnterExportor(c *ExportorContext)
 
-	// EnterGlobalVarDefine is called when entering the globalVarDefine production.
-	EnterGlobalVarDefine(c *GlobalVarDefineContext)
+	// EnterGlobalVarDef is called when entering the globalVarDef production.
+	EnterGlobalVarDef(c *GlobalVarDefContext)
 
 	// EnterDefine is called when entering the define production.
 	EnterDefine(c *DefineContext)
 
-	// EnterLocalVarDefine is called when entering the localVarDefine production.
-	EnterLocalVarDefine(c *LocalVarDefineContext)
+	// EnterLocalVarDef is called when entering the localVarDef production.
+	EnterLocalVarDef(c *LocalVarDefContext)
 
 	// EnterParamList is called when entering the paramList production.
 	EnterParamList(c *ParamListContext)
@@ -209,14 +209,14 @@ type ElzListener interface {
 	// ExitExportor is called when exiting the exportor production.
 	ExitExportor(c *ExportorContext)
 
-	// ExitGlobalVarDefine is called when exiting the globalVarDefine production.
-	ExitGlobalVarDefine(c *GlobalVarDefineContext)
+	// ExitGlobalVarDef is called when exiting the globalVarDef production.
+	ExitGlobalVarDef(c *GlobalVarDefContext)
 
 	// ExitDefine is called when exiting the define production.
 	ExitDefine(c *DefineContext)
 
-	// ExitLocalVarDefine is called when exiting the localVarDefine production.
-	ExitLocalVarDefine(c *LocalVarDefineContext)
+	// ExitLocalVarDef is called when exiting the localVarDef production.
+	ExitLocalVarDef(c *LocalVarDefContext)
 
 	// ExitParamList is called when exiting the paramList production.
 	ExitParamList(c *ParamListContext)
