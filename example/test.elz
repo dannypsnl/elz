@@ -4,5 +4,7 @@ b: str = "你好世界，我想知道elz能不能用中文"
 +c: num = a * 3
 世界="world"
 
-+fn foo() {}
++fn foo() {
+    let a: num = 1
+}
 fn add(l, r: num) -> num {}

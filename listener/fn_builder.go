@@ -11,7 +11,8 @@ type FnBuilder struct {
 	returnTyp string
 	// TODO: How to record?
 	// Type: Param = { Name, Type }
-	params []*ast.Param
+	params    []*ast.Param
+	statments []ast.Stat
 }
 
 func NewFnBuilder() *FnBuilder {
@@ -38,6 +39,11 @@ func (fb *FnBuilder) Param(name string, typ string) *FnBuilder {
 	return fb
 }
 
+func (fb *FnBuilder) Stat(s ast.Stat) *FnBuilder {
+	fb.statments = append(fb.statments, s)
+	return fb
+}
+
 func (fb *FnBuilder) generate() *ast.FnDef {
 	if fb.export {
 		fmt.Print("public ")
@@ -49,6 +55,7 @@ func (fb *FnBuilder) generate() *ast.FnDef {
 		Name:   fb.name,
 		Params: fb.params,
 		// TODO: implement statments
+		Body: fb.statments,
 		// FIXME: should decide by rule typePass
 		RetType: "num",
 	}

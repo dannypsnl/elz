@@ -106,5 +106,14 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		})
 		s.context.VarsType[name] = typ
 		// Record type for compiler
+	} else if s.inFn {
+		s.fnBuilder.Stat(&ast.LocalVarDef{
+			Immutable:  s.immutable,
+			Name:       name,
+			VarType:    typ,
+			Expression: expr.(ast.Expr),
+		})
+	} else {
+		panic("A define should be Global Var else is Local Var, but both of this isn't")
 	}
 }
