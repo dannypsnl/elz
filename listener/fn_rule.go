@@ -5,7 +5,6 @@ import (
 )
 
 func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
-	// TODO: complete fn generate
 	s.inFn = true
 
 	s.fnBuilder = NewFnBuilder().
@@ -14,6 +13,7 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 }
 
 func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
+	// TODO: complete fn generate
 	// TODO: get type info
 	// insert ID.Text into fnBuilder
 	// set flag let fnBuilder record the type when pass type rule
@@ -21,11 +21,10 @@ func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
 }
 
 func (s *ElzListener) ExitFnDefine(ctx *parser.FnDefineContext) {
-	s.inFn = false
+	s.inFn = false // Already leave function scope
 
 	s.AstList = append(s.AstList,
 		s.fnBuilder.generate(),
 	)
-	// TODO: fn need builder to create at here, because it will cross several rules
 	s.fnBuilder = nil
 }
