@@ -36,7 +36,6 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	for _, stat := range f.Body {
 		stat.Codegen(ctx)
 	}
-	ctx.Builder.CreateRet(llvm.ConstFloat(llvm.FloatType(), 3.14))
 	ctx.Builder.ClearInsertionPoint()
 	return fn
 }
