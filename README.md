@@ -4,13 +4,6 @@
 
 Elz is a modern programming language focus on production. I hope it can change daily work of us.
 
-## prototype version
-
-Here is my little try.<br>
-[nim-elz](https://github.com/elz-lang/nim-elz)<br>
-It based on translate elz to nim, and use it compiler to work.<br>
-But that is not enough. nim can not implement some features of elz.<br>
-
 ## Install
 
 ```bash
