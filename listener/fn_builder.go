@@ -1,7 +1,6 @@
 package listener
 
 import (
-	"fmt"
 	"github.com/elz-lang/elz/ast"
 )
 
@@ -44,20 +43,13 @@ func (fb *FnBuilder) Stat(s ast.Stat) *FnBuilder {
 }
 
 func (fb *FnBuilder) generate() *ast.FnDef {
-	if fb.export {
-		fmt.Print("public ")
-	}
 	params := []*ast.Param{}
-	// FIXME: This is let result show a fn, not correct impl
-	fmt.Printf("fn %s\n", fb.name)
 	return &ast.FnDef{
 		Export: fb.export,
 		Name:   fb.name,
 		Params: params,
-		// TODO: implement statments
-		Body: fb.statments,
-		// FIXME: should decide by rule typePass
+		Body:   fb.statments,
+		// FIXME: should decide by rule typeFrom
 		RetType: "num",
 	}
-	// TODO: local var def need spec_name
 }
