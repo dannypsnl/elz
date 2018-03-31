@@ -4,13 +4,6 @@
 
 Elz is a modern programming language focus on production. I hope it can change daily work of us.
 
-## prototype version
-
-Here is my little try.<br>
-[nim-elz](https://github.com/elz-lang/nim-elz)<br>
-It based on translate elz to nim, and use it compiler to work.<br>
-But that is not enough. nim can not implement some features of elz.<br>
-
 ## Install
 
 ```bash
@@ -21,15 +14,6 @@ $ cd $GOPATH/src/github.com/elz-lang/elz/ && go install
 ```
 
 Make sure your `$GOPATH/bin` is one of `$PATH`
-
-#### cgo flags problem could happen at Go 1.9.4
-
-If you see a compilation error while compiling your code with Go 1.9.4 or later as follows,
-
-`go build llvm.org/llvm/bindings/go/llvm: invalid flag in #cgo LDFLAGS: -Wl,-headerpad_max_install_names`
-you need to setup $CGO_LDFLAGS_ALLOW to allow a compiler to specify some linker options:
-
-`$ export CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'`
 
 ### Dependencies
 
