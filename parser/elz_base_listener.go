@@ -177,6 +177,12 @@ func (s *BaseElzListener) EnterParam(ctx *ParamContext) {}
 // ExitParam is called when production param is exited.
 func (s *BaseElzListener) ExitParam(ctx *ParamContext) {}
 
+// EnterReturnType is called when production returnType is entered.
+func (s *BaseElzListener) EnterReturnType(ctx *ReturnTypeContext) {}
+
+// ExitReturnType is called when production returnType is exited.
+func (s *BaseElzListener) ExitReturnType(ctx *ReturnTypeContext) {}
+
 // EnterFnDefine is called when production fnDefine is entered.
 func (s *BaseElzListener) EnterFnDefine(ctx *FnDefineContext) {}
 

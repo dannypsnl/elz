@@ -86,6 +86,9 @@ type ElzListener interface {
 	// EnterParam is called when entering the param production.
 	EnterParam(c *ParamContext)
 
+	// EnterReturnType is called when entering the returnType production.
+	EnterReturnType(c *ReturnTypeContext)
+
 	// EnterFnDefine is called when entering the fnDefine production.
 	EnterFnDefine(c *FnDefineContext)
 
@@ -223,6 +226,9 @@ type ElzListener interface {
 
 	// ExitParam is called when exiting the param production.
 	ExitParam(c *ParamContext)
+
+	// ExitReturnType is called when exiting the returnType production.
+	ExitReturnType(c *ReturnTypeContext)
 
 	// ExitFnDefine is called when exiting the fnDefine production.
 	ExitFnDefine(c *FnDefineContext)
