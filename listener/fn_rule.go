@@ -12,20 +12,11 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 		Export(s.exportThis)
 }
 
-func (s *ElzListener) EnterParamList(ctx *parser.ParamListContext) {
-	// s.paramRecorder = recoder()
-}
-
 func (s *ElzListener) EnterTypeForm(ctx *parser.TypeFormContext) {
 	s.fnBuilder.PushPType(ctx.GetText())
 }
 
 func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
-	// TODO: complete fn generate
-	// TODO: get type info
-	// insert ID.Text into fnBuilder
-	// set flag let fnBuilder record the type when pass type rule
-	// clean flag
 	s.fnBuilder.PushParamName(ctx.ID().GetText())
 }
 
