@@ -20,8 +20,6 @@ type ElzListener struct {
 	fnBuilder *FnBuilder
 	// exportThis markup the reference Name should be public or not.
 	exportThis bool
-	// record location, in fn or not
-	inFn bool
 	// variable default immutable.
 	immutable bool
 	// isGlobalDef, if is global level var
@@ -106,7 +104,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		})
 		s.context.VarsType[name] = typ
 		// Record type for compiler
-	} else if s.inFn {
+	} else if s.fnBuilder != nil {
 		s.fnBuilder.Stat(&ast.LocalVarDef{
 			Immutable:  s.immutable,
 			Name:       name,

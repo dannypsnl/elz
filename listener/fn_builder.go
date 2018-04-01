@@ -5,11 +5,9 @@ import (
 )
 
 type FnBuilder struct {
-	export    bool
-	name      string
-	returnTyp string
-	// TODO: How to record?
-	// Type: Param = { Name, Type }
+	export     bool
+	name       string
+	returnTyp  string
 	paramsName []string
 	paramsType []string
 	statments  []ast.Stat
@@ -24,16 +22,23 @@ func (fb *FnBuilder) Name(n string) *FnBuilder {
 	return fb
 }
 
+func (fb *FnBuilder) RetType(typ string) *FnBuilder {
+	fb.returnTyp = typ
+	return fb
+}
+
 func (fb *FnBuilder) Export(e bool) *FnBuilder {
 	fb.export = e
 	return fb
 }
 
 func (fb *FnBuilder) PushPType(typ string) *FnBuilder {
+	fb.paramsType = append(fb.paramsType, typ)
 	return fb
 }
 
 func (fb *FnBuilder) PushParamName(name string) *FnBuilder {
+	fb.paramsName = append(fb.paramsName, name)
 	return fb
 }
 
@@ -44,12 +49,17 @@ func (fb *FnBuilder) Stat(s ast.Stat) *FnBuilder {
 
 func (fb *FnBuilder) generate() *ast.FnDef {
 	params := []*ast.Param{}
+
+	for i, name := range fb.paramsName {
+		t := fb.paramsType[i]
+		params = append(params, &ast.Param{name, t})
+	}
+
 	return &ast.FnDef{
-		Export: fb.export,
-		Name:   fb.name,
-		Params: params,
-		Body:   fb.statments,
-		// FIXME: should decide by rule typeFrom
+		Export:  fb.export,
+		Name:    fb.name,
+		Params:  params,
+		Body:    fb.statments,
 		RetType: "num",
 	}
 }
