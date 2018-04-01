@@ -2,27 +2,27 @@
 # <type>: title
 
 # types can be
-# fix:
+#fix:
 #  (bug fix)
-# feat:
+#feat:
 #  (new feature)
-# add:
+#add:
 #  (add code)
-# refactor:
+#refactor:
 #  (refactoring)
-# style:
+#style:
 #  (formatting)
-# test:
+#test:
 #  (adding or refactoring test)
-# docs:
+#docs:
 #  (changes to documentation)
 
 # Block
-problem:
+#problem: N/A
 # What happened?
-reason:
+#reason: N/A
 # Problem's Reason?
-solution:
+#solution:
 # What do U done?
-project: elz
-note: N/A
+#project: elz
+#note: N/A
