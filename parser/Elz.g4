@@ -128,9 +128,10 @@ localVarDef:
 
 paramList: param (',' param)*;
 param: ID (':' typeForm)?;
+returnType: '->' typeForm;
 fnDefine:
     // because fn also handle operator, so if we use exportor after keyword fn will cause we hard to divide ++ && + +
-    exportor? 'fn' ID '(' paramList? ')' ('->' typeForm)? '{'
+    exportor? 'fn' ID '(' paramList? ')' returnType? '{'
         statList?
     '}'
     ;

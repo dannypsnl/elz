@@ -1,11 +1,13 @@
 package listener
 
 import (
+	"fmt"
+
 	"github.com/elz-lang/elz/parser"
 )
 
 func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
-	s.inFn = true
+	fmt.Println("fn", ctx.ID().GetText())
 
 	s.fnBuilder = NewFnBuilder().
 		Name(ctx.ID().GetText()).
@@ -13,18 +15,25 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 }
 
 func (s *ElzListener) EnterTypeForm(ctx *parser.TypeFormContext) {
-	s.fnBuilder.PushPType(ctx.GetText())
+	if s.fnBuilder != nil {
+		s.fnBuilder.PushPType(ctx.GetText())
+	}
 }
 
 func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
 	s.fnBuilder.PushParamName(ctx.ID().GetText())
 }
 
-func (s *ElzListener) ExitFnDefine(ctx *parser.FnDefineContext) {
-	s.inFn = false // Already leave function scope
+func (s *ElzListener) EnterReturnType(ctx *parser.ReturnTypeContext) {
+	fmt.Println("return", ctx.TypeForm().GetText())
+	s.fnBuilder.RetType(ctx.TypeForm().GetText())
+}
 
+func (s *ElzListener) ExitFnDefine(ctx *parser.FnDefineContext) {
+	fmt.Println("fn", ctx.ID().GetText(), "end")
 	s.AstList = append(s.AstList,
 		s.fnBuilder.generate(),
 	)
+	// Already leave function scope
 	s.fnBuilder = nil
 }

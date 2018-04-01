@@ -7,4 +7,4 @@ b: str = "你好世界，我想知道elz能不能用中文"
 +fn foo() {
     let a: num = 1
 }
-fn add(l, r: num) -> num {}
+fn add(l: num, r: num) -> num {}
