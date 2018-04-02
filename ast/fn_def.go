@@ -46,5 +46,10 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 		stat.Codegen(ctx)
 	}
 	ctx.Builder.ClearInsertionPoint()
+	if f.Name == "main" {
+		ctx.Builder.SetInsertPointAtEnd(entryPoint)
+		ctx.Builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
+		ctx.Builder.ClearInsertionPoint()
+	}
 	return fn
 }
