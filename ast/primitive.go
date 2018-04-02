@@ -44,3 +44,42 @@ func (n *Number) Codegen(*Context) llvm.Value {
 func (n *Number) Type(*Context) string {
 	return "num"
 }
+
+type F32 struct {
+	Val string
+}
+
+func (f32 *F32) Codegen(*Context) llvm.Value {
+	return llvm.ConstFloatFromString(llvm.FloatType(), f32.Val)
+}
+
+func (f32 *F32) Type(*Context) string { return "f32" }
+
+type F64 struct {
+	Val string
+}
+
+func (f64 *F64) Codegen(*Context) llvm.Value {
+	return llvm.ConstFloatFromString(llvm.DoubleType(), f64.Val)
+}
+
+func (f64 *F64) Type(*Context) string { return "f64" }
+
+type I32 struct {
+	Val string
+}
+
+func (i32 *I32) Codegen(*Context) llvm.Value {
+	return llvm.ConstIntFromString(llvm.Int32Type(), i32.Val, 10)
+}
+func (i32 *I32) Type(*Context) string { return "i32" }
+
+type I64 struct {
+	Val string
+}
+
+func (i64 *I64) Codegen(*Context) llvm.Value {
+	return llvm.ConstIntFromString(llvm.Int64Type(), i64.Val, 10)
+}
+
+func (i64 *I64) Type(*Context) string { return "i64" }
