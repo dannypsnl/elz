@@ -55,7 +55,6 @@ func (s *ElzListener) EnterExportor(*parser.ExportorContext) {
 // VarDef:
 //   let (mut) $var_name = $expr
 func (s *ElzListener) EnterLocalVarDef(ctx *parser.LocalVarDefContext) {
-	fmt.Print(`var `)
 	if ctx.GetMut() != nil {
 		s.immutable = false
 	}

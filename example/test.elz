@@ -8,3 +8,5 @@ b: str = "你好世界，我想知道elz能不能用中文"
     let a: num = 1
 }
 fn add(l: num, r: num) -> num {}
+
+fn main() {}
