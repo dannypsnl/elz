@@ -60,6 +60,6 @@ func (fb *FnBuilder) generate() *ast.FnDef {
 		Name:    fb.name,
 		Params:  params,
 		Body:    fb.statments,
-		RetType: "num",
+		RetType: fb.returnTyp,
 	}
 }

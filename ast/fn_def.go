@@ -22,7 +22,16 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	for _, v := range f.Params {
 		paramsT = append(paramsT, convertToLLVMType(v.Type))
 	}
-	retT := convertToLLVMType(f.RetType)
+
+	rt := f.RetType
+	if rt == "" {
+		rt = "()"
+	}
+	if f.Name == "main" && rt == "()" {
+		rt = "i32"
+	}
+	retT := convertToLLVMType(rt)
+
 	ft := llvm.FunctionType(retT, paramsT, false)
 	fn := llvm.AddFunction(ctx.Module, f.Name, ft)
 
