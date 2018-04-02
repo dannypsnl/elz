@@ -21,3 +21,21 @@ entry:
 		t.Errorf("Function Error; expected: `%s`\nactual: `%s`", expected, res)
 	}
 }
+
+func TestMainFunction(t *testing.T) {
+	res := NewParse(`
+	fn main() {}
+	`)
+
+	expected := `; ModuleID = 'main'
+source_filename = "main"
+
+define i32 @main() {
+entry:
+}
+`
+
+	if res != expected {
+		t.Errorf("Main Function Error; expected: `%s`\nactual: `%s`", expected, res)
+	}
+}
