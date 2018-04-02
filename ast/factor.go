@@ -9,6 +9,7 @@ type Id struct {
 }
 
 func (i *Id) Codegen(ctx *Context) llvm.Value {
+	// FIXME: id should not only be a global var
 	return ctx.GlobalVars[i.Val].v
 }
 
@@ -16,6 +17,7 @@ func (i *Id) Codegen(ctx *Context) llvm.Value {
 // So Context should send into Type method and Context::Vars
 // need a new structure for usage
 func (i *Id) Type(ctx *Context) string {
+	// FIXME: id should not only be a global var
 	return ctx.VarsType[i.Val]
 }
 
