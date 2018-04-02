@@ -1,14 +1,10 @@
 package listener
 
 import (
-	"fmt"
-
 	"github.com/elz-lang/elz/parser"
 )
 
 func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
-	fmt.Println("fn", ctx.ID().GetText())
-
 	s.fnBuilder = NewFnBuilder().
 		Name(ctx.ID().GetText()).
 		Export(s.exportThis)
@@ -25,12 +21,10 @@ func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
 }
 
 func (s *ElzListener) EnterReturnType(ctx *parser.ReturnTypeContext) {
-	fmt.Println("return", ctx.TypeForm().GetText())
 	s.fnBuilder.RetType(ctx.TypeForm().GetText())
 }
 
 func (s *ElzListener) ExitFnDefine(ctx *parser.FnDefineContext) {
-	fmt.Println("fn", ctx.ID().GetText(), "end")
 	s.AstList = append(s.AstList,
 		s.fnBuilder.generate(),
 	)
