@@ -18,6 +18,15 @@ type FnDef struct {
 }
 
 func (f *FnDef) Codegen(ctx *Context) llvm.Value {
+	var cache string
+	for i := len(f.Params); i > 0; i-- {
+		if f.Params[i-1].Type != "" {
+			cache = f.Params[i-1].Type
+		} else {
+			f.Params[i-1].Type = cache
+		}
+	}
+
 	paramsT := []llvm.Type{}
 	for _, v := range f.Params {
 		paramsT = append(paramsT, convertToLLVMType(v.Type))

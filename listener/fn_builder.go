@@ -5,12 +5,11 @@ import (
 )
 
 type FnBuilder struct {
-	export     bool
-	name       string
-	returnTyp  string
-	paramsName []string
-	paramsType []string
-	statments  []ast.Stat
+	export    bool
+	name      string
+	returnTyp string
+	params    []*ast.Param
+	statments []ast.Stat
 }
 
 func NewFnBuilder() *FnBuilder {
@@ -33,12 +32,18 @@ func (fb *FnBuilder) Export(e bool) *FnBuilder {
 }
 
 func (fb *FnBuilder) PushPType(typ string) *FnBuilder {
-	fb.paramsType = append(fb.paramsType, typ)
+	l := len(fb.params)
+	if l > 0 {
+		fb.params[l-1].Type = typ
+	}
 	return fb
 }
 
 func (fb *FnBuilder) PushParamName(name string) *FnBuilder {
-	fb.paramsName = append(fb.paramsName, name)
+	fb.params = append(fb.params, &ast.Param{
+		Name: name,
+		Type: "",
+	})
 	return fb
 }
 
@@ -48,17 +53,10 @@ func (fb *FnBuilder) Stat(s ast.Stat) *FnBuilder {
 }
 
 func (fb *FnBuilder) generate() *ast.FnDef {
-	params := []*ast.Param{}
-
-	for i, name := range fb.paramsName {
-		t := fb.paramsType[i]
-		params = append(params, &ast.Param{name, t})
-	}
-
 	return &ast.FnDef{
 		Export:  fb.export,
 		Name:    fb.name,
-		Params:  params,
+		Params:  fb.params,
 		Body:    fb.statments,
 		RetType: fb.returnTyp,
 	}
