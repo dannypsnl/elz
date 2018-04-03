@@ -7,12 +7,17 @@ import (
 func TestNumAddFunction(t *testing.T) {
 	res := NewParse(`
 	fn add(l: num, r: num) -> num {}
+	fn add(l: i32, r: i32) -> i32 {}
 	`)
 
 	expected := `; ModuleID = 'main'
 source_filename = "main"
 
 define float @add(float %l, float %r) {
+entry:
+}
+
+define i32 @add.1(i32 %l, i32 %r) {
 entry:
 }
 `
