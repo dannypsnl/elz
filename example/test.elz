@@ -8,6 +8,8 @@ b: str = "你好世界，我想知道elz能不能用中文"
     let a: num = 1
 }
 fn add(l: num, r: num) -> num {}
-fn add(l, r: i32) -> i32 {}
+fn add(l, r: i32) -> i32 {
+    return 2
+}
 
 fn main() {}
