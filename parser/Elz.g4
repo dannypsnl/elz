@@ -56,7 +56,7 @@ importStat: 'import' '(' importMod ')';
 statList: stat+;
 stat: localVarDef
     | loopStat // loop { stats }
-    | returnStat
+    | returnStat // return expr
     | assign
     | exprStat
     ;
