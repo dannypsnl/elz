@@ -10,10 +10,10 @@ func TestGlobalVarDef(t *testing.T) {
 	v := &GlobalVarDef{
 		Export:  false,
 		Name:    "pi",
-		VarType: "num",
+		VarType: "f32",
 		Expression: &BinaryExpr{
-			&Number{"2.1215926"},
-			&Number{"1.02"},
+			&F32{"2.1215926"},
+			&F32{"1.02"},
 			"+",
 		},
 	}
@@ -46,10 +46,10 @@ func TestLocalVarDef(t *testing.T) {
 	v := &LocalVarDef{
 		Immutable: true,
 		Name:      "x",
-		VarType:   "num",
+		VarType:   "f32",
 		Expression: &BinaryExpr{
-			&Number{"2.1215926"},
-			&Number{"1.02"},
+			&F32{"2.1215926"},
+			&F32{"1.02"},
 			"+",
 		},
 	}

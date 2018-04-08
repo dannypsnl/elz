@@ -14,7 +14,7 @@ func TestNumStrExpression(t *testing.T) {
 	expected := `; ModuleID = 'main'
 source_filename = "main"
 
-@a = global float 6.000000e+00
+@a = global i32 6
 @b = global [7 x i8] c"\22abcde\22"
 `
 

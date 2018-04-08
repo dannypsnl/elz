@@ -10,7 +10,7 @@ func TestUnsupportOpShouldCausePanic(t *testing.T) {
 			t.Error(`Didn't panic`)
 		}
 	}()
-	num := &Number{
+	num := &F32{
 		Val: "1.23",
 	}
 	be := &BinaryExpr{

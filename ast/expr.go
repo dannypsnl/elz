@@ -32,6 +32,22 @@ type BinaryExpr struct {
 }
 
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
+	if b.Type(ctx) == "i32" {
+		switch b.Op {
+		case "+":
+			return llvm.ConstAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		case "-":
+			return llvm.ConstSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		case "*":
+			return llvm.ConstMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		case "/":
+			return llvm.ConstSDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		default:
+			// FIXME: wait for impl
+			// TODO: If have function implement by @Op, it can be a operator at here
+			panic(`Unsupport this operator`)
+		}
+	}
 	switch b.Op {
 	case "+":
 		return llvm.ConstFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))

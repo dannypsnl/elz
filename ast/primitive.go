@@ -33,18 +33,6 @@ func (s *Str) Type(*Context) string {
 	return "str"
 }
 
-type Number struct {
-	Val string
-}
-
-func (n *Number) Codegen(*Context) llvm.Value {
-	return llvm.ConstFloatFromString(llvm.FloatType(), n.Val)
-}
-
-func (n *Number) Type(*Context) string {
-	return "num"
-}
-
 type F32 struct {
 	Val string
 }

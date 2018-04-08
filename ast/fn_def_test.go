@@ -37,11 +37,11 @@ func TestVarDefInFn(t *testing.T) {
 			&LocalVarDef{
 				Immutable:  true,
 				Name:       "a",
-				VarType:    "num",
-				Expression: &Number{Val: "3.14"},
+				VarType:    "f32",
+				Expression: &F32{Val: "3.14"},
 			},
 		},
-		RetType: "num",
+		RetType: "f32",
 	}
 	f.Codegen(ctx)
 	println(ctx.Module.String())

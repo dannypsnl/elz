@@ -116,9 +116,6 @@ type ElzListener interface {
 	// EnterSubExpr is called when entering the SubExpr production.
 	EnterSubExpr(c *SubExprContext)
 
-	// EnterNum is called when entering the Num production.
-	EnterNum(c *NumContext)
-
 	// EnterMulOrDiv is called when entering the MulOrDiv production.
 	EnterMulOrDiv(c *MulOrDivContext)
 
@@ -131,11 +128,17 @@ type ElzListener interface {
 	// EnterAndOrOr is called when entering the AndOrOr production.
 	EnterAndOrOr(c *AndOrOrContext)
 
+	// EnterInt is called when entering the Int production.
+	EnterInt(c *IntContext)
+
 	// EnterThreeOpCmp is called when entering the ThreeOpCmp production.
 	EnterThreeOpCmp(c *ThreeOpCmpContext)
 
 	// EnterStr is called when entering the Str production.
 	EnterStr(c *StrContext)
+
+	// EnterFloat is called when entering the Float production.
+	EnterFloat(c *FloatContext)
 
 	// EnterAddOrSub is called when entering the AddOrSub production.
 	EnterAddOrSub(c *AddOrSubContext)
@@ -257,9 +260,6 @@ type ElzListener interface {
 	// ExitSubExpr is called when exiting the SubExpr production.
 	ExitSubExpr(c *SubExprContext)
 
-	// ExitNum is called when exiting the Num production.
-	ExitNum(c *NumContext)
-
 	// ExitMulOrDiv is called when exiting the MulOrDiv production.
 	ExitMulOrDiv(c *MulOrDivContext)
 
@@ -272,11 +272,17 @@ type ElzListener interface {
 	// ExitAndOrOr is called when exiting the AndOrOr production.
 	ExitAndOrOr(c *AndOrOrContext)
 
+	// ExitInt is called when exiting the Int production.
+	ExitInt(c *IntContext)
+
 	// ExitThreeOpCmp is called when exiting the ThreeOpCmp production.
 	ExitThreeOpCmp(c *ThreeOpCmpContext)
 
 	// ExitStr is called when exiting the Str production.
 	ExitStr(c *StrContext)
+
+	// ExitFloat is called when exiting the Float production.
+	ExitFloat(c *FloatContext)
 
 	// ExitAddOrSub is called when exiting the AddOrSub production.
 	ExitAddOrSub(c *AddOrSubContext)
