@@ -12,8 +12,6 @@ func convertToLLVMType(t string) llvm.Type {
 		return llvm.Int32Type()
 	case "i64":
 		return llvm.Int64Type()
-	case "num":
-		fallthrough
 	case "f32":
 		return llvm.FloatType() // f32
 	case "f64":
