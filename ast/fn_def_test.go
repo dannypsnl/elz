@@ -13,15 +13,15 @@ func TestFnDef(t *testing.T) {
 		Params: []*Param{
 			&Param{
 				Name: "lv",
-				Type: "num",
+				Type: "f32",
 			},
 			&Param{
 				Name: "rv",
-				Type: "num",
+				Type: "f32",
 			},
 		},
 		Body:    []Stat{},
-		RetType: "num",
+		RetType: "f32",
 	}
 	f.Codegen(ctx)
 }

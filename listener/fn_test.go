@@ -27,7 +27,7 @@ entry:
 
 func TestOverloadingFunction(t *testing.T) {
 	res := NewParse(`
-	fn add(l: num, r: num) -> num {}
+	fn add(l: f32, r: f32) -> f32 {}
 	fn add(l: i32, r: i32) -> i32 {}
 	`)
 
