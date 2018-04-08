@@ -8,8 +8,8 @@ import (
 
 var ctx = NewContext()
 
-func TestNumberAST(t *testing.T) {
-	num := &Number{
+func TestF32AST(t *testing.T) {
+	num := &F32{
 		Val: "3.1415926",
 	}
 	result := num.Codegen(ctx)
@@ -21,7 +21,7 @@ func TestNumberAST(t *testing.T) {
 }
 
 func TestUnaryExprAST(t *testing.T) {
-	num := &Number{
+	num := &F32{
 		Val: "1.23",
 	}
 	ub := &UnaryExpr{
@@ -36,7 +36,7 @@ func TestUnaryExprAST(t *testing.T) {
 }
 
 func TestBinaryExprAST(t *testing.T) {
-	num := &Number{
+	num := &F32{
 		Val: "1.23",
 	}
 	be0 := &BinaryExpr{

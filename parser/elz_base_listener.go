@@ -237,12 +237,6 @@ func (s *BaseElzListener) EnterSubExpr(ctx *SubExprContext) {}
 // ExitSubExpr is called when production SubExpr is exited.
 func (s *BaseElzListener) ExitSubExpr(ctx *SubExprContext) {}
 
-// EnterNum is called when production Num is entered.
-func (s *BaseElzListener) EnterNum(ctx *NumContext) {}
-
-// ExitNum is called when production Num is exited.
-func (s *BaseElzListener) ExitNum(ctx *NumContext) {}
-
 // EnterMulOrDiv is called when production MulOrDiv is entered.
 func (s *BaseElzListener) EnterMulOrDiv(ctx *MulOrDivContext) {}
 
@@ -267,6 +261,12 @@ func (s *BaseElzListener) EnterAndOrOr(ctx *AndOrOrContext) {}
 // ExitAndOrOr is called when production AndOrOr is exited.
 func (s *BaseElzListener) ExitAndOrOr(ctx *AndOrOrContext) {}
 
+// EnterInt is called when production Int is entered.
+func (s *BaseElzListener) EnterInt(ctx *IntContext) {}
+
+// ExitInt is called when production Int is exited.
+func (s *BaseElzListener) ExitInt(ctx *IntContext) {}
+
 // EnterThreeOpCmp is called when production ThreeOpCmp is entered.
 func (s *BaseElzListener) EnterThreeOpCmp(ctx *ThreeOpCmpContext) {}
 
@@ -278,6 +278,12 @@ func (s *BaseElzListener) EnterStr(ctx *StrContext) {}
 
 // ExitStr is called when production Str is exited.
 func (s *BaseElzListener) ExitStr(ctx *StrContext) {}
+
+// EnterFloat is called when production Float is entered.
+func (s *BaseElzListener) EnterFloat(ctx *FloatContext) {}
+
+// ExitFloat is called when production Float is exited.
+func (s *BaseElzListener) ExitFloat(ctx *FloatContext) {}
 
 // EnterAddOrSub is called when production AddOrSub is entered.
 func (s *BaseElzListener) EnterAddOrSub(ctx *AddOrSubContext) {}

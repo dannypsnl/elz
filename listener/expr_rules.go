@@ -35,6 +35,10 @@ func (s *ElzListener) ExitId(ctx *parser.IdContext) {
 	s.exprStack.Push(&ast.Id{Val: ctx.ID().GetText()})
 }
 
-func (s *ElzListener) ExitNum(ctx *parser.NumContext) {
-	s.exprStack.Push(&ast.Number{Val: ctx.NUM().GetText()})
+func (s *ElzListener) ExitFloat(ctx *parser.FloatContext) {
+	s.exprStack.Push(&ast.F32{Val: ctx.FLOAT().GetText()})
+}
+
+func (s *ElzListener) ExitInt(ctx *parser.IntContext) {
+	s.exprStack.Push(&ast.I32{Val: ctx.INT().GetText()})
 }

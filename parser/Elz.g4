@@ -30,7 +30,10 @@ Letter: StartLetter
     | '\u203F'..'\u2040'
     ;
 
-NUM: StartDigit Digit*;
+// 1.34, .1, 0.4
+FLOAT: StartDigit Digit+;
+// 123, 1, 2, 54, 67, 98760, 0
+INT: Digit+;
 fragment
 StartDigit: [0-9.];
 fragment
@@ -162,7 +165,8 @@ expr: expr op='^' expr                 # Pow // operation prec
     | expr '?' expr ':' expr           # ThreeOpCmp
     | '(' expr ')'                     # SubExpr
     | exprStat                         # StatExpr
-    | NUM                              # Num
+    | INT                              # Int
+    | FLOAT                            # Float
     | ID                               # Id
     | STRING                           # Str
     ;
