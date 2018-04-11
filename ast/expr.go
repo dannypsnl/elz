@@ -72,13 +72,13 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 
 func (b *BinaryExpr) Type(ctx *Context) string {
 	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
-	if leftT == rightT {
-		return leftT
-	} else {
+	if leftT != rightT {
 		// TODO: If have function implement by @Op, it can be a operator at here
+
+		// TODO: if can't find Op-function support this operation, error report
 		ctx.Reporter.Emit(fmt.Sprintf("left expression type: %s, right expression type: %s", leftT, rightT))
-		return ":error"
 	}
+	return leftT
 }
 
 type Argu struct {
