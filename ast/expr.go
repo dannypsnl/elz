@@ -66,7 +66,7 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 			panic(`Unsupport this operator`)
 		}
 	} else {
-		panic(`Not support this type BinaryExpr yet`)
+		panic(fmt.Sprintf("BinaryExpr not support this type: %s yet", exprType))
 	}
 }
 
@@ -80,8 +80,9 @@ func (b *BinaryExpr) Type(ctx *Context) string {
 		if rightT != "type error" {
 			ctx.Reporter.Emit(fmt.Sprintf("left expression type: %s, right expression type: %s", leftT, rightT))
 		}
+		return "type error"
 	}
-	return "type error"
+	return leftT
 }
 
 type Argu struct {
