@@ -49,9 +49,8 @@ func main() {
 	}
 	addBlock := llvm.AddBasicBlock(addFn, "entry")
 	ctx.builder.SetInsertPointAtEnd(addBlock)
-	returnVal := ctx.builder.CreateAdd(addFn.Param(0), addFn.Param(1), "result")
 	ctx.builder.CreateRet(
-		returnVal,
+		ctx.builder.CreateAdd(addFn.Param(0), addFn.Param(1), "result"),
 	)
 	ctx.builder.ClearInsertionPoint()
 
