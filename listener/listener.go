@@ -30,8 +30,10 @@ type ElzListener struct {
 
 // Module return the llvm.Module generate by parse process
 func (s *ElzListener) Module() llvm.Module {
-	for _, ast := range s.AstList {
-		ast.Codegen(s.context)
+	if s.context.Reporter.HasNoError() {
+		for _, ast := range s.AstList {
+			ast.Codegen(s.context)
+		}
 	}
 	return s.context.Module
 }

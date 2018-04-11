@@ -24,3 +24,7 @@ func (el *Reporter) Report() {
 		fmt.Printf("Error[%d]: %s\n", i, eMsg)
 	}
 }
+
+func (r *Reporter) HasNoError() bool {
+	return len(r.errMsgs) == 0
+}
