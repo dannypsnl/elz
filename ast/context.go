@@ -1,11 +1,14 @@
 package ast
 
 import (
+	"github.com/elz-lang/elz/errors"
+
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
 func NewContext() *Context {
 	return &Context{
+		Reporter:   errors.NewReporter(),
 		Module:     llvm.NewModule("main"),
 		Context:    llvm.NewContext(),
 		GlobalVars: make(map[string]*VarNode),
@@ -20,6 +23,7 @@ type VarNode struct {
 }
 
 type Context struct {
+	Reporter   *errors.Reporter
 	Module     llvm.Module
 	Context    llvm.Context
 	GlobalVars map[string]*VarNode

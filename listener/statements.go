@@ -15,6 +15,6 @@ func (s *ElzListener) ExitReturnStat(ctx *parser.ReturnStatContext) {
 	} else {
 		// FIXME: please use error reporter handle error report
 		// return statement only allow in function, so it's an error if no fnBuilder at here
-		s.reporter.Emit("return statement contains a wrong expression")
+		s.context.Reporter.Emit("return statement contains a wrong expression")
 	}
 }

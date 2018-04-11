@@ -5,7 +5,6 @@ import (
 
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/collection/stack"
-	"github.com/elz-lang/elz/errors"
 	"github.com/elz-lang/elz/parser"
 
 	"llvm.org/llvm/bindings/go/llvm"
@@ -14,8 +13,7 @@ import (
 type ElzListener struct {
 	*parser.BaseElzListener
 
-	reporter *errors.Reporter
-	context  *ast.Context
+	context *ast.Context
 	// AstList contain top level's ast
 	AstList []ast.Ast
 	// exprStack help we implement expression percedence table.
@@ -41,7 +39,6 @@ func (s *ElzListener) Module() llvm.Module {
 // New create a new listener
 func New() *ElzListener {
 	return &ElzListener{
-		reporter:  errors.NewReporter(),
 		context:   ast.NewContext(),
 		immutable: true,
 		exprStack: stack.New(),
@@ -49,7 +46,7 @@ func New() *ElzListener {
 }
 
 func (s *ElzListener) ExitProg(ctx *parser.ProgContext) {
-	s.reporter.Report()
+	s.context.Reporter.Report()
 }
 
 func (s *ElzListener) EnterProg(ctx *parser.ProgContext) {
