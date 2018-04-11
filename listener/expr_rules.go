@@ -6,8 +6,8 @@ import (
 )
 
 func (s *ElzListener) ExitAddOrSub(ctx *parser.AddOrSubContext) {
-	le := s.exprStack.Pop()
 	re := s.exprStack.Pop()
+	le := s.exprStack.Pop()
 	defer func() {
 		// Only miss right expression can cause panic
 		if r := recover(); r != nil {
@@ -24,8 +24,8 @@ func (s *ElzListener) ExitAddOrSub(ctx *parser.AddOrSubContext) {
 }
 
 func (s *ElzListener) ExitMulOrDiv(ctx *parser.MulOrDivContext) {
-	le := s.exprStack.Pop()
 	re := s.exprStack.Pop()
+	le := s.exprStack.Pop()
 	defer func() {
 		// Only miss right expression can cause panic
 		if r := recover(); r != nil {

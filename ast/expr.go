@@ -76,9 +76,12 @@ func (b *BinaryExpr) Type(ctx *Context) string {
 		// TODO: If have function implement by @Op, it can be a operator at here
 
 		// TODO: if can't find Op-function support this operation, error report
-		ctx.Reporter.Emit(fmt.Sprintf("left expression type: %s, right expression type: %s", leftT, rightT))
+		// check `rightT != "type error"` for sure the error won't report again
+		if rightT != "type error" {
+			ctx.Reporter.Emit(fmt.Sprintf("left expression type: %s, right expression type: %s", leftT, rightT))
+		}
 	}
-	return leftT
+	return "type error"
 }
 
 type Argu struct {
