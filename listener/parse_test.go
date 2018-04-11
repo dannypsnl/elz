@@ -12,7 +12,7 @@ func TestParse(t *testing.T) {
 	expected := `; ModuleID = 'main'
 source_filename = "main"
 
-@a = global float 1.000000e+01
+@a = global i32 10
 `
 
 	if res != expected {

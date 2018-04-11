@@ -31,11 +31,9 @@ Letter: StartLetter
     ;
 
 // 1.34, .1, 0.4
-FLOAT: StartDigit Digit+;
+FLOAT: Digit* '.' Digit+;
 // 123, 1, 2, 54, 67, 98760, 0
 INT: Digit+;
-fragment
-StartDigit: [0-9.];
 fragment
 Digit: [0-9];
 
