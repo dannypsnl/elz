@@ -32,7 +32,8 @@ type BinaryExpr struct {
 }
 
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
-	if b.Type(ctx) == "i32" {
+	exprType := b.Type(ctx)
+	if exprType == "i32" || exprType == "i64" {
 		switch b.Op {
 		case "+":
 			return llvm.ConstAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
@@ -47,20 +48,23 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 			// TODO: If have function implement by @Op, it can be a operator at here
 			panic(`Unsupport this operator`)
 		}
-	}
-	switch b.Op {
-	case "+":
-		return llvm.ConstFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
-	case "-":
-		return llvm.ConstFSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
-	case "*":
-		return llvm.ConstFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
-	case "/":
-		return llvm.ConstFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
-	default:
-		// FIXME: wait for impl
-		// TODO: If have function implement by @Op, it can be a operator at here
-		panic(`Unsupport this operator`)
+	} else if exprType == "f32" || exprType == "f64" {
+		switch b.Op {
+		case "+":
+			return llvm.ConstFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		case "-":
+			return llvm.ConstFSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		case "*":
+			return llvm.ConstFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		case "/":
+			return llvm.ConstFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx))
+		default:
+			// FIXME: wait for impl
+			// TODO: If have function implement by @Op, it can be a operator at here
+			panic(`Unsupport this operator`)
+		}
+	} else {
+		panic(`Not support this type BinaryExpr yet`)
 	}
 }
 
