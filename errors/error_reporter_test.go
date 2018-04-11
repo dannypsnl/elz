@@ -1,11 +1,11 @@
-package error_logger
+package errors
 
 import (
 	"testing"
 )
 
 func TestEmit(t *testing.T) {
-	reporter := New()
+	reporter := NewReporter()
 	reporter.Emit("mismatch keyword `let`")
 
 	if len(reporter.errMsgs) != 1 {

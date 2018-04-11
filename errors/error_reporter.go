@@ -1,4 +1,4 @@
-package error_logger
+package errors
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ type Reporter struct {
 	errMsgs []string
 }
 
-func New() *Reporter {
+func NewReporter() *Reporter {
 	return &Reporter{
 		errMsgs: make([]string, 0),
 	}
