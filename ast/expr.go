@@ -69,12 +69,12 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 }
 
 func (b *BinaryExpr) Type(ctx *Context) string {
-	if b.LeftE.Type(ctx) == b.RightE.Type(ctx) {
-		return b.LeftE.Type(ctx)
+	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
+	if leftT == rightT {
+		return leftT
 	} else {
-		// FIXME: wait for impl
 		// TODO: If have function implement by @Op, it can be a operator at here
-		panic(`Type error`)
+		ctx.Reporter.Emit(fmt.Sprintf("left expression type: %s, right expression type: %s", leftT, rightT))
 	}
 }
 
