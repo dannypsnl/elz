@@ -48,6 +48,10 @@ func New() *ElzListener {
 	}
 }
 
+func (s *ElzListener) ExitProg(ctx *parser.ProgContext) {
+	s.reporter.Report()
+}
+
 func (s *ElzListener) EnterProg(ctx *parser.ProgContext) {
 	fmt.Println(`Elz prog`)
 }
