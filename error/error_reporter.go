@@ -4,22 +4,22 @@ import (
 	"fmt"
 )
 
-// ErrorLogger organize error emit by it user
-type ErrorLogger struct {
+// Reporter organize error emit by it user
+type Reporter struct {
 	errMsgs []string
 }
 
-func New() *ErrorLogger {
-	return &ErrorLogger{
+func New() *Reporter {
+	return &Reporter{
 		errMsgs: make([]string, 0),
 	}
 }
 
-func (el *ErrorLogger) Emit(msg string) {
+func (el *Reporter) Emit(msg string) {
 	el.errMsgs = append(el.errMsgs, msg)
 }
 
-func (el *ErrorLogger) Report() {
+func (el *Reporter) Report() {
 	for i, eMsg := range el.errMsgs {
 		fmt.Printf("Error[%d]: %s\n", i, eMsg)
 	}

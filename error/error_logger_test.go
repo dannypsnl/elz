@@ -5,10 +5,10 @@ import (
 )
 
 func TestEmit(t *testing.T) {
-	errLogger := New()
-	errLogger.Emit("mismatch keyword `let`")
+	reporter := New()
+	reporter.Emit("mismatch keyword `let`")
 
-	if len(errLogger.errMsgs) != 1 {
+	if len(reporter.errMsgs) != 1 {
 		t.Error("Didn't emit success")
 	}
 }
