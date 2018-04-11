@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"fmt"
+
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
@@ -75,6 +77,7 @@ func (b *BinaryExpr) Type(ctx *Context) string {
 	} else {
 		// TODO: If have function implement by @Op, it can be a operator at here
 		ctx.Reporter.Emit(fmt.Sprintf("left expression type: %s, right expression type: %s", leftT, rightT))
+		return ":error"
 	}
 }
 
