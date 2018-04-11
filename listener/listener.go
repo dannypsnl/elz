@@ -120,6 +120,6 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 			Expression: expr.(ast.Expr),
 		})
 	} else {
-		s.reporter.Emit("A define should be Global Var else is Local Var, but both of this isn't")
+		panic("A define should be Global Var else is Local Var, but both of this isn't")
 	}
 }
