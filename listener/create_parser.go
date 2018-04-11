@@ -14,7 +14,7 @@ func NewParse(source string) string {
 	p := parser.NewElzParser(stream)
 	p.BuildParseTrees = true
 	tree := p.Prog()
-	eal := /*listener.*/ New()
-	antlr.ParseTreeWalkerDefault.Walk(eal, tree)
-	return fmt.Sprint(eal.Module())
+	listener := /*listener.*/ New()
+	antlr.ParseTreeWalkerDefault.Walk(listener, tree)
+	return fmt.Sprint(listener.Module())
 }
