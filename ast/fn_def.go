@@ -36,6 +36,7 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	if rt == "" {
 		rt = "()"
 	}
+	// FIXME: if main function define it's return type, it's an error
 	if f.Name == "main" && rt == "()" {
 		rt = "i32"
 	}
