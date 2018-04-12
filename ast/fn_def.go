@@ -56,9 +56,13 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	}
 	ctx.Builder.ClearInsertionPoint()
 	if f.Name == "main" {
-		ctx.Builder.SetInsertPointAtEnd(entryPoint)
-		ctx.Builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
-		ctx.Builder.ClearInsertionPoint()
+		mainFn(ctx.Builder, entryPoint)
 	}
 	return fn
+}
+
+func mainFn(builder llvm.Builder, entryPoint llvm.BasicBlock) {
+	builder.SetInsertPointAtEnd(entryPoint)
+	builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
+	builder.ClearInsertionPoint()
 }
