@@ -17,7 +17,7 @@ type FnDef struct {
 	RetType string
 }
 
-func (f *FnDef) Codegen(ctx *Context) llvm.Value {
+func (f *FnDef) setupMissParamType() {
 	var cache string
 	for i := len(f.Params); i > 0; i-- {
 		if f.Params[i-1].Type != "" {
@@ -26,11 +26,10 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 			f.Params[i-1].Type = cache
 		}
 	}
+}
 
-	paramsT := []llvm.Type{}
-	for _, v := range f.Params {
-		paramsT = append(paramsT, convertToLLVMType(v.Type))
-	}
+func (f *FnDef) Codegen(ctx *Context) llvm.Value {
+	f.setupMissParamType()
 
 	rt := f.RetType
 	if rt == "" {
@@ -42,7 +41,7 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	}
 	retT := convertToLLVMType(rt)
 
-	ft := llvm.FunctionType(retT, paramsT, false)
+	ft := llvm.FunctionType(retT, fnType(f.Params), false)
 	fn := llvm.AddFunction(ctx.Module, f.Name, ft)
 
 	for i, param := range fn.Params() {
@@ -66,4 +65,12 @@ func mainFn(builder llvm.Builder, entryPoint llvm.BasicBlock) {
 	builder.SetInsertPointAtEnd(entryPoint)
 	builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
 	builder.ClearInsertionPoint()
+}
+
+func fnType(params []*Param) []llvm.Type {
+	paramsT := []llvm.Type{}
+	for _, v := range params {
+		paramsT = append(paramsT, convertToLLVMType(v.Type))
+	}
+	return paramsT
 }

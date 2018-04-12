@@ -25,6 +25,23 @@ entry:
 	}
 }
 
+func TestMissTypeComplete(t *testing.T) {
+	res := NewParse(`
+	fn foo(a, b, c: i32) {}
+	`)
+
+	expected := `; ModuleID = 'main'
+source_filename = "main"
+
+define void @foo(i32 %a, i32 %b, i32 %c) {
+entry:
+}
+`
+	if res != expected {
+		t.Errorf("Function Error; expected: `%s`\nactual: `%s`", expected, res)
+	}
+}
+
 func TestOverloadingFunction(t *testing.T) {
 	res := NewParse(`
 	fn add(l: f32, r: f32) -> f32 {}
