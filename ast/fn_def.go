@@ -28,9 +28,7 @@ func (f *FnDef) setupMissParamType() {
 	}
 }
 
-func (f *FnDef) Codegen(ctx *Context) llvm.Value {
-	f.setupMissParamType()
-
+func (f *FnDef) returnType() llvm.Type {
 	rt := f.RetType
 	if rt == "" {
 		rt = "()"
@@ -40,8 +38,21 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 		rt = "i32"
 	}
 	retT := convertToLLVMType(rt)
+	return retT
+}
 
-	ft := llvm.FunctionType(retT, fnType(f.Params), false)
+func (f *FnDef) fnType() []llvm.Type {
+	paramsT := []llvm.Type{}
+	for _, v := range f.Params {
+		paramsT = append(paramsT, convertToLLVMType(v.Type))
+	}
+	return paramsT
+}
+
+func (f *FnDef) Codegen(ctx *Context) llvm.Value {
+	f.setupMissParamType()
+
+	ft := llvm.FunctionType(f.returnType(), f.fnType(), false)
 	fn := llvm.AddFunction(ctx.Module, f.Name, ft)
 
 	for i, param := range fn.Params() {
@@ -65,12 +76,4 @@ func mainFn(builder llvm.Builder, entryPoint llvm.BasicBlock) {
 	builder.SetInsertPointAtEnd(entryPoint)
 	builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
 	builder.ClearInsertionPoint()
-}
-
-func fnType(params []*Param) []llvm.Type {
-	paramsT := []llvm.Type{}
-	for _, v := range params {
-		paramsT = append(paramsT, convertToLLVMType(v.Type))
-	}
-	return paramsT
 }
