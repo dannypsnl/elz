@@ -22,17 +22,19 @@ func (varDef *GlobalVarDef) Codegen(ctx *Context) llvm.Value {
 	// Parser should insert Type if user didn't define it.
 	// So we should not get null string
 	exprType := varDef.Expression.Type(ctx)
-	if varDef.VarType == "" || exprType != varDef.VarType {
+	if varDef.VarType != "" && exprType != varDef.VarType {
 		ctx.Reporter.Emit(fmt.Sprintf("global var: %s, it's type is: %s, but receive: %s", varDef.Name, varDef.VarType, exprType))
+		return llvm.Value{}
+	} else {
+		expr := varDef.Expression.Codegen(ctx)
+		val := llvm.AddGlobal(ctx.Module, expr.Type(), varDef.Name)
+		val.SetInitializer(expr)
+		ctx.GlobalVars[varDef.Name] = &VarNode{
+			v:    expr,
+			Type: varDef.VarType,
+		}
+		return val
 	}
-	expr := varDef.Expression.Codegen(ctx)
-	val := llvm.AddGlobal(ctx.Module, expr.Type(), varDef.Name)
-	val.SetInitializer(expr)
-	ctx.GlobalVars[varDef.Name] = &VarNode{
-		v:    expr,
-		Type: varDef.VarType,
-	}
-	return val
 }
 
 type LocalVarDef struct {
@@ -44,11 +46,13 @@ type LocalVarDef struct {
 
 func (lv *LocalVarDef) Codegen(ctx *Context) llvm.Value {
 	exprType := lv.Expression.Type(ctx)
-	if lv.VarType == "" || exprType != lv.VarType {
+	if lv.VarType != "" && exprType != lv.VarType {
 		ctx.Reporter.Emit(fmt.Sprintf("local var: %s, it's type is: %s, but receive: %s", lv.Name, lv.VarType, exprType))
+		return llvm.Value{}
+	} else {
+		expr := lv.Expression.Codegen(ctx)
+		val := ctx.Builder.CreateAlloca(convertToLLVMType(lv.VarType), lv.Name)
+		ctx.Builder.CreateStore(expr, val)
+		return val
 	}
-	expr := lv.Expression.Codegen(ctx)
-	val := ctx.Builder.CreateAlloca(convertToLLVMType(lv.VarType), lv.Name)
-	ctx.Builder.CreateStore(expr, val)
-	return val
 }
