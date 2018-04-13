@@ -35,6 +35,6 @@ func TestTypeErrorInVarDef(t *testing.T) {
 	antlr.ParseTreeWalkerDefault.Walk(listener, tree)
 
 	if listener.context.Reporter.HasNoError() {
-		t.Error("fkngberbjobdfbnj;dfb;")
+		t.Error("var type is not equal to expression's type should be an error")
 	}
 }
