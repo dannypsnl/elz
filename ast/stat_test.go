@@ -6,6 +6,23 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
+func TestLocalTypeError(t *testing.T) {
+	context := NewContext()
+
+	v := &LocalVarDef{
+		Immutable:  true,
+		Name:       "x",
+		VarType:    "f32",
+		Expression: &I32{"10"},
+	}
+
+	v.Codegen(context)
+
+	if context.Reporter.HasNoError() {
+		t.Error("should receive an error about var type is not equal to expression type")
+	}
+}
+
 func TestTypeError(t *testing.T) {
 	context := NewContext()
 
@@ -21,7 +38,6 @@ func TestTypeError(t *testing.T) {
 	if context.Reporter.HasNoError() {
 		t.Error("should receive an error about var type is not equal to expression type")
 	}
-	context.Reporter.Report()
 }
 
 func TestGlobalVarDef(t *testing.T) {
