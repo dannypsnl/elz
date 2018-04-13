@@ -1,8 +1,6 @@
 package listener
 
 import (
-	"fmt"
-
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/collection/stack"
 	"github.com/elz-lang/elz/parser"
@@ -31,11 +29,10 @@ type ElzListener struct {
 // Module return the llvm.Module generate by parse process
 func (s *ElzListener) Module() llvm.Module {
 	if s.context.Reporter.HasNoError() {
-		for _, ast := range s.AstList {
-			ast.Codegen(s.context)
-		}
+		return s.context.Module
+	} else {
+		return llvm.Module{}
 	}
-	return s.context.Module
 }
 
 // New create a new listener
@@ -48,6 +45,9 @@ func New() *ElzListener {
 }
 
 func (s *ElzListener) ExitProg(ctx *parser.ProgContext) {
+	for _, ast := range s.AstList {
+		ast.Codegen(s.context)
+	}
 	s.context.Reporter.Report()
 }
 

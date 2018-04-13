@@ -2,6 +2,10 @@ package listener
 
 import (
 	"testing"
+
+	"github.com/elz-lang/elz/parser"
+
+	"github.com/antlr/antlr4/runtime/Go/antlr"
 )
 
 func TestF32(t *testing.T) {
@@ -17,5 +21,20 @@ source_filename = "main"
 
 	if expected != res {
 		t.Errorf("f32 parse Error; expected: `%s`\nactual: `%s`", expected, res)
+	}
+}
+
+func TestTypeErrorInVarDef(t *testing.T) {
+	input := antlr.NewInputStream(`x: i32 = 3.2`)
+	lexer := parser.NewElzLexer(input)
+	stream := antlr.NewCommonTokenStream(lexer, 0)
+	p := parser.NewElzParser(stream)
+	p.BuildParseTrees = true
+	tree := p.Prog()
+	listener := /*listener.*/ New()
+	antlr.ParseTreeWalkerDefault.Walk(listener, tree)
+
+	if listener.context.Reporter.HasNoError() {
+		t.Error("fkngberbjobdfbnj;dfb;")
 	}
 }
