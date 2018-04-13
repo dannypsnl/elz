@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
@@ -41,8 +42,9 @@ type LocalVarDef struct {
 }
 
 func (lv *LocalVarDef) Codegen(ctx *Context) llvm.Value {
-	if lv.VarType == "" || lv.Expression.Type(ctx) != lv.VarType {
-		panic(`expr type != var type`)
+	exprType := lv.Expression.Type(ctx)
+	if lv.VarType == "" || exprType != lv.VarType {
+		ctx.Reporter.Emit(fmt.Sprintf("local var: %s, it's type is: %s, but receive: %s", lv.Name, lv.VarType, exprType))
 	}
 	expr := lv.Expression.Codegen(ctx)
 	val := ctx.Builder.CreateAlloca(convertToLLVMType(lv.VarType), lv.Name)

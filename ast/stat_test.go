@@ -42,7 +42,7 @@ func TestStrGlobalVarDef(t *testing.T) {
 
 func TestLocalVarDef(t *testing.T) {
 	context := NewContext()
-	ft := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
+	ft := llvm.FunctionType(llvm.FloatType(), []llvm.Type{}, false)
 	fn := llvm.AddFunction(context.Module, "test", ft)
 	block := llvm.AddBasicBlock(fn, "entry")
 	context.Builder.SetInsertPointAtEnd(block)
