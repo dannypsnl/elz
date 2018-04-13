@@ -21,8 +21,9 @@ type GlobalVarDef struct {
 func (varDef *GlobalVarDef) Codegen(ctx *Context) llvm.Value {
 	// Parser should insert Type if user didn't define it.
 	// So we should not get null string
-	if varDef.VarType == "" || varDef.Expression.Type(ctx) != varDef.VarType {
-		panic(`expr type != var type`)
+	exprType := varDef.Expression.Type(ctx)
+	if varDef.VarType == "" || exprType != varDef.VarType {
+		ctx.Reporter.Emit(fmt.Sprintf("global var: %s, it's type is: %s, but receive: %s", varDef.Name, varDef.VarType, exprType))
 	}
 	expr := varDef.Expression.Codegen(ctx)
 	val := llvm.AddGlobal(ctx.Module, expr.Type(), varDef.Name)
