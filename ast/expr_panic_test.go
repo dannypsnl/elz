@@ -5,7 +5,7 @@ import (
 )
 
 func TestUnsupportOpShouldCausePanic(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	defer func() {
 		if p := recover(); p == nil {
 			t.Error(`Didn't panic`)
@@ -19,5 +19,5 @@ func TestUnsupportOpShouldCausePanic(t *testing.T) {
 		LeftE:  num,
 		Op:     "~",
 	}
-	be.Codegen(ctx)
+	be.Codegen(context)
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func TestFnDef(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	f := &FnDef{
 		Export: false,
 		Name:   "add",
@@ -24,11 +24,11 @@ func TestFnDef(t *testing.T) {
 		Body:    []Stat{},
 		RetType: "f32",
 	}
-	f.Codegen(ctx)
+	f.Codegen(context)
 }
 
 func TestVarDefInFn(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 
 	f := &FnDef{
 		Export: false,
@@ -44,6 +44,6 @@ func TestVarDefInFn(t *testing.T) {
 		},
 		RetType: "f32",
 	}
-	f.Codegen(ctx)
-	println(ctx.Module.String())
+	f.Codegen(context)
+	println(context.Module.String())
 }

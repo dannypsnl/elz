@@ -7,11 +7,11 @@ import (
 )
 
 func TestF32AST(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	num := &F32{
 		Val: "3.1415926",
 	}
-	result := num.Codegen(ctx)
+	result := num.Codegen(context)
 	if !result.IsConstant() ||
 		result.Type().String() != "FloatType" {
 		result.Dump()
@@ -20,7 +20,7 @@ func TestF32AST(t *testing.T) {
 }
 
 func TestUnaryExprAST(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	num := &F32{
 		Val: "1.23",
 	}
@@ -28,7 +28,7 @@ func TestUnaryExprAST(t *testing.T) {
 		E:  num,
 		Op: "-",
 	}
-	result := ub.Codegen(ctx)
+	result := ub.Codegen(context)
 	if !result.IsConstant() {
 		result.Dump()
 		t.Error(`unary expression fail`)
@@ -36,7 +36,7 @@ func TestUnaryExprAST(t *testing.T) {
 }
 
 func TestBinaryExprAST(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	num := &F32{
 		Val: "1.23",
 	}
@@ -50,7 +50,7 @@ func TestBinaryExprAST(t *testing.T) {
 		LeftE:  be0,
 		Op:     "+",
 	}
-	result := be.Codegen(ctx)
+	result := be.Codegen(context)
 	if !result.IsConstant() ||
 		result != llvm.ConstFloat(llvm.FloatType(), 3.69) {
 		result.Dump()
@@ -59,11 +59,11 @@ func TestBinaryExprAST(t *testing.T) {
 }
 
 func TestStringAST(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	str := &Str{
 		Val: `"a string with 中文"`,
 	}
-	result := str.Codegen(ctx)
+	result := str.Codegen(context)
 	if !result.IsConstant() ||
 		// string is [i8] in LLVM IR
 		result.Type().String() != "ArrayType(IntegerType(8 bits)[22])" ||

@@ -7,18 +7,18 @@ import (
 )
 
 func TestI32(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	iVal := &I32{Val: "10"}
-	llvmIR := iVal.Codegen(ctx)
+	llvmIR := iVal.Codegen(context)
 	if llvmIR.Type() != llvm.Int32Type() {
 		t.Error("Bug in ast.I32")
 	}
 }
 
 func TestF32(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	fVal := &F32{Val: "3.14"}
-	llvmIR := fVal.Codegen(ctx)
+	llvmIR := fVal.Codegen(context)
 	if llvmIR.Type() != llvm.FloatType() {
 		t.Error("Bug in ast.F32")
 	}

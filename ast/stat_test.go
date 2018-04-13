@@ -7,7 +7,7 @@ import (
 )
 
 func TestGlobalVarDef(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	v := &GlobalVarDef{
 		Export:  false,
 		Name:    "pi",
@@ -18,14 +18,14 @@ func TestGlobalVarDef(t *testing.T) {
 			"+",
 		},
 	}
-	v.Codegen(ctx)
-	if ctx.GlobalVars["pi"].v.Type().String() != "FloatType" {
+	v.Codegen(context)
+	if context.GlobalVars["pi"].v.Type().String() != "FloatType" {
 		t.Error(`error`)
 	}
 }
 
 func TestStrGlobalVarDef(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	str := &Str{`"a string"`}
 	v := &GlobalVarDef{
 		Export:     false,
@@ -33,19 +33,19 @@ func TestStrGlobalVarDef(t *testing.T) {
 		VarType:    "str",
 		Expression: str,
 	}
-	v.Codegen(ctx)
-	if ctx.GlobalVars["string1"].v.Type().String() != "ArrayType(IntegerType(8 bits)[10])" {
-		t.Errorf("var: %s, expected: %s", ctx.GlobalVars["string1"].v.Type().String(),
+	v.Codegen(context)
+	if context.GlobalVars["string1"].v.Type().String() != "ArrayType(IntegerType(8 bits)[10])" {
+		t.Errorf("var: %s, expected: %s", context.GlobalVars["string1"].v.Type().String(),
 			"ArrayType(IntegerType(8 bits)[10])")
 	}
 }
 
 func TestLocalVarDef(t *testing.T) {
-	ctx := NewContext()
+	context := NewContext()
 	ft := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
-	fn := llvm.AddFunction(ctx.Module, "test", ft)
+	fn := llvm.AddFunction(context.Module, "test", ft)
 	block := llvm.AddBasicBlock(fn, "entry")
-	ctx.Builder.SetInsertPointAtEnd(block)
+	context.Builder.SetInsertPointAtEnd(block)
 	v := &LocalVarDef{
 		Immutable: true,
 		Name:      "x",
@@ -56,10 +56,10 @@ func TestLocalVarDef(t *testing.T) {
 			"+",
 		},
 	}
-	res := ctx.Builder.CreateLoad(v.Codegen(ctx), "x.load")
-	ctx.Builder.CreateRet(res)
+	res := context.Builder.CreateLoad(v.Codegen(context), "x.load")
+	context.Builder.CreateRet(res)
 
-	engine, err := llvm.NewExecutionEngine(ctx.Module)
+	engine, err := llvm.NewExecutionEngine(context.Module)
 	if err != nil {
 		t.Error("Build Engine Problem")
 	}
