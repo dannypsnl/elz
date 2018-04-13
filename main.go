@@ -20,6 +20,5 @@ func main() {
 	elzListener := listener.New()
 	antlr.ParseTreeWalkerDefault.Walk(elzListener, tree)
 
-	fmt.Println("===================================================")
 	fmt.Println(elzListener.Module())
 }

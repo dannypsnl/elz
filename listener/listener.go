@@ -51,10 +51,6 @@ func (s *ElzListener) ExitProg(ctx *parser.ProgContext) {
 	s.context.Reporter.Report()
 }
 
-func (s *ElzListener) EnterProg(ctx *parser.ProgContext) {
-	fmt.Println(`Elz prog`)
-}
-
 // EnterExportor: + prefix
 func (s *ElzListener) EnterExportor(*parser.ExportorContext) {
 	s.exportThis = true
