@@ -7,6 +7,7 @@ import (
 )
 
 func TestI32(t *testing.T) {
+	ctx := NewContext()
 	iVal := &I32{Val: "10"}
 	llvmIR := iVal.Codegen(ctx)
 	if llvmIR.Type() != llvm.Int32Type() {
@@ -15,6 +16,7 @@ func TestI32(t *testing.T) {
 }
 
 func TestF32(t *testing.T) {
+	ctx := NewContext()
 	fVal := &F32{Val: "3.14"}
 	llvmIR := fVal.Codegen(ctx)
 	if llvmIR.Type() != llvm.FloatType() {

@@ -7,6 +7,7 @@ import (
 )
 
 func TestGlobalVarDef(t *testing.T) {
+	ctx := NewContext()
 	v := &GlobalVarDef{
 		Export:  false,
 		Name:    "pi",
@@ -24,6 +25,7 @@ func TestGlobalVarDef(t *testing.T) {
 }
 
 func TestStrGlobalVarDef(t *testing.T) {
+	ctx := NewContext()
 	str := &Str{`"a string"`}
 	v := &GlobalVarDef{
 		Export:     false,
@@ -39,6 +41,7 @@ func TestStrGlobalVarDef(t *testing.T) {
 }
 
 func TestLocalVarDef(t *testing.T) {
+	ctx := NewContext()
 	ft := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
 	fn := llvm.AddFunction(ctx.Module, "test", ft)
 	block := llvm.AddBasicBlock(fn, "entry")

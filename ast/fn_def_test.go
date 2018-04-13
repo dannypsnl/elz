@@ -7,6 +7,7 @@ import (
 )
 
 func TestFnDef(t *testing.T) {
+	ctx := NewContext()
 	f := &FnDef{
 		Export: false,
 		Name:   "add",

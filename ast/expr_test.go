@@ -6,9 +6,8 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
-var ctx = NewContext()
-
 func TestF32AST(t *testing.T) {
+	ctx := NewContext()
 	num := &F32{
 		Val: "3.1415926",
 	}
@@ -21,6 +20,7 @@ func TestF32AST(t *testing.T) {
 }
 
 func TestUnaryExprAST(t *testing.T) {
+	ctx := NewContext()
 	num := &F32{
 		Val: "1.23",
 	}
@@ -36,6 +36,7 @@ func TestUnaryExprAST(t *testing.T) {
 }
 
 func TestBinaryExprAST(t *testing.T) {
+	ctx := NewContext()
 	num := &F32{
 		Val: "1.23",
 	}
@@ -58,6 +59,7 @@ func TestBinaryExprAST(t *testing.T) {
 }
 
 func TestStringAST(t *testing.T) {
+	ctx := NewContext()
 	str := &Str{
 		Val: `"a string with 中文"`,
 	}

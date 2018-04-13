@@ -5,6 +5,7 @@ import (
 )
 
 func TestUnsupportOpShouldCausePanic(t *testing.T) {
+	ctx := NewContext()
 	defer func() {
 		if p := recover(); p == nil {
 			t.Error(`Didn't panic`)
