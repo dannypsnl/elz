@@ -11,9 +11,9 @@ type Stat interface {
 
 type GlobalVarDef struct {
 	Export bool
-	// let a = 1, a is Name
+	// a = 1, a is Name
 	Name string
-	// let a: num = 1, num is VarType, but expression could not have the same type, we have to check it.
+	// a: num = 1, num is VarType, but expression could not have the same type, we have to check it.
 	VarType    string
 	Expression Expr
 }
