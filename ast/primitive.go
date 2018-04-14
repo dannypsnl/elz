@@ -10,7 +10,11 @@ type Id struct {
 
 func (i *Id) Codegen(ctx *Context) llvm.Value {
 	// FIXME: id should not only be a global var
-	return ctx.GlobalVars[i.Val].v
+	if ctx.Vars[i.Val].IsConstant() {
+		return ctx.Vars[i.Val]
+	} else {
+		return ctx.Builder.CreateLoad(ctx.Vars[i.Val], i.Val)
+	}
 }
 
 // At here we can see, ident's type need to logging in Context

@@ -29,10 +29,7 @@ func (varDef *GlobalVarDef) Codegen(ctx *Context) llvm.Value {
 		expr := varDef.Expression.Codegen(ctx)
 		val := llvm.AddGlobal(ctx.Module, expr.Type(), varDef.Name)
 		val.SetInitializer(expr)
-		ctx.GlobalVars[varDef.Name] = &VarNode{
-			v:    expr,
-			Type: varDef.VarType,
-		}
+		ctx.Vars[varDef.Name] = expr // Let's use load to access all var
 		return val
 	}
 }
