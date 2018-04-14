@@ -14,6 +14,10 @@ func TestGlobalVarLoad(t *testing.T) {
 	y := llvm.AddGlobal(mod, llvm.Int32Type(), "y")
 	x := llvm.AddGlobal(mod, llvm.Int32Type(), "x")
 	x.SetInitializer(llvm.ConstInt(llvm.Int32Type(), 10, false))
+	println(x.IsConstant())
+	println(x.IsGlobalConstant())
+	println(x.IsDeclaration())
+	println(llvm.ConstInt(llvm.Int32Type(), 10, true).IsConstant())
 
 	fnType := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
 	foo := llvm.AddFunction(mod, "foo", fnType)
@@ -23,6 +27,7 @@ func TestGlobalVarLoad(t *testing.T) {
 	builder.SetInsertPointAtEnd(block)
 
 	xLoad := builder.CreateLoad(x, "x.load")
+	println(xLoad.IsConstant())
 	builder.CreateRet(xLoad)
 
 	builder.ClearInsertionPoint()
