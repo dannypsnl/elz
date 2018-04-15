@@ -13,7 +13,7 @@ fn add(l, r: i32) -> i32 {
 }
 
 fn main() {
-    let a = 1
-    let b = 2
-    let c = a + b
+    let d = 1
+    let e = 2
+    let c = d + e
 }
