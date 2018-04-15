@@ -82,6 +82,7 @@ func (s *ElzListener) ExitGlobalVarDef(*parser.GlobalVarDefContext) {
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	// get expr
 	expr := s.exprStack.Pop()
+	// FIXME: this line cause we have to get type at parsing stage
 	// get type from expression
 	typ := expr.(ast.Expr).Type(s.context)
 	// get identifier
