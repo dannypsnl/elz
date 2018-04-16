@@ -8,6 +8,8 @@ type Return struct {
 	Expr Expr
 }
 
+func (r *Return) Check(*Context) {}
+
 func (r *Return) Codegen(c *Context) llvm.Value {
 	return c.Builder.CreateRet(r.Expr.Codegen(c))
 }

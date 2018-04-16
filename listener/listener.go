@@ -46,6 +46,9 @@ func New() *ElzListener {
 
 func (s *ElzListener) ExitProg(ctx *parser.ProgContext) {
 	for _, ast := range s.AstList {
+		ast.Check(s.context)
+	}
+	for _, ast := range s.AstList {
 		ast.Codegen(s.context)
 	}
 	s.context.Reporter.Report()
@@ -84,7 +87,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	expr := s.exprStack.Pop()
 	// FIXME: this line cause we have to get type at parsing stage
 	// get type from expression
-	typ := expr.(ast.Expr).Type(s.context)
+	var typ string
 	// get identifier
 	// TODO: fix with scope rule, and some rule to detected fn, type, trait or what
 	name := ctx.ID().GetText()
@@ -106,7 +109,6 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 			VarType:    typ,
 			Expression: expr.(ast.Expr),
 		})
-		s.context.VarsType[name] = typ
 		// Record type for compiler
 	} else if s.fnBuilder != nil {
 		s.fnBuilder.Stat(&ast.LocalVarDef{

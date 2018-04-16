@@ -9,4 +9,5 @@ import (
 
 type Ast interface {
 	Codegen(*Context) llvm.Value
+	Check(*Context)
 }

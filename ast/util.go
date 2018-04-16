@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"fmt"
+
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
@@ -17,6 +19,6 @@ func convertToLLVMType(t string) llvm.Type {
 	case "f64":
 		return llvm.DoubleType() // f64
 	default:
-		panic(`not support this type yet`)
+		panic(fmt.Sprintf("not support type: `%s` yet", t))
 	}
 }

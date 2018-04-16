@@ -17,6 +17,12 @@ type FnDef struct {
 	RetType string
 }
 
+func (f *FnDef) Check(ctx *Context) {
+	for _, stat := range f.Body {
+		stat.Check(ctx)
+	}
+}
+
 func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	f.setupMissParamType()
 
