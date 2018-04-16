@@ -19,7 +19,7 @@ func TestLocalTypeError(t *testing.T) {
 	v.Codegen(context)
 
 	if context.Reporter.HasNoError() {
-		t.Error("should receive an error about var type is not equal to expression type")
+		t.Error("Local Var Ast should receive an error about var type is not equal to expression type")
 	}
 }
 
@@ -36,7 +36,7 @@ func TestTypeError(t *testing.T) {
 	v.Codegen(context)
 
 	if context.Reporter.HasNoError() {
-		t.Error("should receive an error about var type is not equal to expression type")
+		t.Error("Global Var Ast should receive an error about var type is not equal to expression type")
 	}
 }
 
