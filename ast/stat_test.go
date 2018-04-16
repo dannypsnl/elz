@@ -33,6 +33,7 @@ func TestTypeError(t *testing.T) {
 		Expression: &I32{"10"},
 	}
 
+	v.Check(context)
 	v.Codegen(context)
 
 	if context.Reporter.HasNoError() {
