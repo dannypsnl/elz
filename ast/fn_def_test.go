@@ -45,5 +45,4 @@ func TestVarDefInFn(t *testing.T) {
 		RetType: "f32",
 	}
 	f.Codegen(context)
-	println(context.Module.String())
 }
