@@ -18,25 +18,29 @@ type FnDef struct {
 }
 
 func (f *FnDef) Check(ctx *Context) {
+	f.setupMissParamType()
+
+	for _, p := range f.Params {
+		ctx.VarsType[p.Name] = p.Type
+	}
 	for _, stat := range f.Body {
 		stat.Check(ctx)
 	}
 }
 
 func (f *FnDef) Codegen(ctx *Context) llvm.Value {
-	f.setupMissParamType()
-
 	fn := llvm.AddFunction(ctx.Module, f.Name,
 		llvm.FunctionType(f.returnType(), f.paramsType(), false),
 	)
 
+	entryPoint := llvm.AddBasicBlock(fn, "entry")
+	ctx.Builder.SetInsertPointAtEnd(entryPoint)
+
 	for i, param := range fn.Params() {
 		param.SetName(f.Params[i].Name)
+		ctx.Vars[f.Params[i].Name] = param
 	}
 
-	entryPoint := llvm.AddBasicBlock(fn, "entry")
-
-	ctx.Builder.SetInsertPointAtEnd(entryPoint)
 	for _, stat := range f.Body {
 		stat.Codegen(ctx)
 	}

@@ -9,7 +9,7 @@ b: str = "你好世界，我想知道elz能不能用中文"
 }
 fn add(l: f32, r: f32) -> f32 {}
 fn add(l, r: i32) -> i32 {
-    return 2
+    return l + r
 }
 
 fn main() {
