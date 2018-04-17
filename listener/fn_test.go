@@ -82,3 +82,23 @@ entry:
 		t.Errorf("Main Function Error; expected: `%s`\nactual: `%s`", expected, res)
 	}
 }
+
+func TestBasicComputingFunction(t *testing.T) {
+	res := NewParse(`
+	fn add(lv, rv: i32) -> i32 { return lv + rv }
+	`)
+
+	expected := `; ModuleID = 'main'
+source_filename = "main"
+
+define i32 @add(i32 %lv, i32 %rv) {
+entry:
+  %">>add_tmp" = add i32 %lv, %rv
+  ret i32 %">>add_tmp"
+}
+`
+
+	if res != expected {
+		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
+	}
+}
