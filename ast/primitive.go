@@ -12,11 +12,7 @@ type Id struct {
 
 func (i *Id) Codegen(ctx *Context) llvm.Value {
 	// FIXME: id should not only be a global var
-	if ctx.Vars[i.Val].IsConstant() {
-		return ctx.Vars[i.Val]
-	} else {
-		return ctx.Builder.CreateLoad(ctx.Vars[i.Val], i.Val)
-	}
+	return ctx.Vars[i.Val]
 }
 
 func (i *Id) Check(c *Context) {
