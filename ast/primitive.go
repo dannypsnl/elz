@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"fmt"
+
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
@@ -17,6 +19,13 @@ func (i *Id) Codegen(ctx *Context) llvm.Value {
 	}
 }
 
+func (i *Id) Check(c *Context) {
+	_, ok := c.VarsType[i.Val]
+	if !ok {
+		c.Reporter.Emit(fmt.Sprintf("No var: %s can be found", i.Val))
+	}
+}
+
 // At here we can see, ident's type need to logging in Context
 // So Context should send into Type method and Context::Vars
 // need a new structure for usage
@@ -29,6 +38,7 @@ type Str struct {
 	Val string
 }
 
+func (s *Str) Check(*Context) {}
 func (s *Str) Codegen(ctx *Context) llvm.Value {
 	return llvm.ConstString(s.Val, false)
 }
@@ -41,6 +51,7 @@ type F32 struct {
 	Val string
 }
 
+func (f32 *F32) Check(*Context) {}
 func (f32 *F32) Codegen(*Context) llvm.Value {
 	return llvm.ConstFloatFromString(llvm.FloatType(), f32.Val)
 }
@@ -55,12 +66,14 @@ func (f64 *F64) Codegen(*Context) llvm.Value {
 	return llvm.ConstFloatFromString(llvm.DoubleType(), f64.Val)
 }
 
+func (f64 *F64) Check(*Context)       {}
 func (f64 *F64) Type(*Context) string { return "f64" }
 
 type I32 struct {
 	Val string
 }
 
+func (i32 *I32) Check(*Context) {}
 func (i32 *I32) Codegen(*Context) llvm.Value {
 	return llvm.ConstIntFromString(llvm.Int32Type(), i32.Val, 10)
 }
@@ -70,6 +83,7 @@ type I64 struct {
 	Val string
 }
 
+func (i64 *I64) Check(*Context) {}
 func (i64 *I64) Codegen(*Context) llvm.Value {
 	return llvm.ConstIntFromString(llvm.Int64Type(), i64.Val, 10)
 }

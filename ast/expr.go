@@ -13,6 +13,7 @@ type Expr interface {
 	// Type return a type info by string format.
 	// It help elz's type system working with AST.
 	Type(*Context) string
+	Check(*Context)
 }
 
 type UnaryExpr struct {
@@ -70,7 +71,7 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	}
 }
 
-func (b *BinaryExpr) Type(ctx *Context) string {
+func (b *BinaryExpr) Check(ctx *Context) {
 	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
 	if leftT != rightT {
 		// TODO: If have function implement by @Op, it can be a operator at here
@@ -80,6 +81,16 @@ func (b *BinaryExpr) Type(ctx *Context) string {
 		if rightT != "type error" {
 			ctx.Reporter.Emit(fmt.Sprintf("left expression type: %s, right expression type: %s", leftT, rightT))
 		}
+	}
+}
+
+func (b *BinaryExpr) Type(ctx *Context) string {
+	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
+	if leftT != rightT {
+		// TODO: If have function implement by @Op, it can be a operator at here
+
+		// TODO: if can't find Op-function support this operation, error report
+		// check `rightT != "type error"` for sure the error won't report again
 		return "type error"
 	}
 	return leftT
