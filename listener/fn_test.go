@@ -18,6 +18,7 @@ define void @foo() {
 entry:
   %a = alloca i32
   store i32 4, i32* %a
+  %a1 = load i32, i32* %a
 }
 `
 	if res != expected {
