@@ -2,15 +2,13 @@ package ast
 
 import (
 	"testing"
-
-	"llvm.org/llvm/bindings/go/llvm"
 )
 
 func TestI32(t *testing.T) {
 	context := NewContext()
 	iVal := &I32{Val: "10"}
 	llvmIR := iVal.Codegen(context)
-	if llvmIR.Type() != llvm.Int32Type() {
+	if llvmIR.Type() != LLVMType("i32") {
 		t.Error("Bug in ast.I32")
 	}
 }
@@ -19,7 +17,7 @@ func TestF32(t *testing.T) {
 	context := NewContext()
 	fVal := &F32{Val: "3.14"}
 	llvmIR := fVal.Codegen(context)
-	if llvmIR.Type() != llvm.FloatType() {
+	if llvmIR.Type() != LLVMType("f32") {
 		t.Error("Bug in ast.F32")
 	}
 }

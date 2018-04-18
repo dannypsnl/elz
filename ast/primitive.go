@@ -71,7 +71,7 @@ type I32 struct {
 
 func (i32 *I32) Check(*Context) {}
 func (i32 *I32) Codegen(*Context) llvm.Value {
-	return llvm.ConstIntFromString(llvm.Int32Type(), i32.Val, 10)
+	return llvm.ConstIntFromString(LLVMType("i32"), i32.Val, 10)
 }
 func (i32 *I32) Type(*Context) string { return "i32" }
 

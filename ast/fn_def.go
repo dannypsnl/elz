@@ -53,7 +53,7 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 
 func generateMainFn(builder llvm.Builder, entryPoint llvm.BasicBlock) {
 	builder.SetInsertPointAtEnd(entryPoint)
-	builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
+	builder.CreateRet(llvm.ConstInt(LLVMType("i32"), 0, false))
 	builder.ClearInsertionPoint()
 }
 
@@ -77,14 +77,14 @@ func (f *FnDef) returnType() llvm.Type {
 	if f.Name == "main" && rt == "()" {
 		rt = "i32"
 	}
-	retT := convertToLLVMType(rt)
+	retT := LLVMType(rt)
 	return retT
 }
 
 func (f *FnDef) paramsType() []llvm.Type {
 	paramsT := []llvm.Type{}
 	for _, v := range f.Params {
-		paramsT = append(paramsT, convertToLLVMType(v.Type))
+		paramsT = append(paramsT, LLVMType(v.Type))
 	}
 	return paramsT
 }

@@ -65,7 +65,7 @@ func (lv *LocalVarDef) Codegen(ctx *Context) llvm.Value {
 		return llvm.Value{}
 	} else {
 		expr := lv.Expression.Codegen(ctx)
-		val := ctx.Builder.CreateAlloca(convertToLLVMType(lv.VarType), lv.Name)
+		val := ctx.Builder.CreateAlloca(LLVMType(lv.VarType), lv.Name)
 		ctx.Builder.CreateStore(expr, val)
 		ctx.Vars[lv.Name] = ctx.Builder.CreateLoad(val, lv.Name)
 		return val

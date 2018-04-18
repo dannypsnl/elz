@@ -6,7 +6,7 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
-func convertToLLVMType(t string) llvm.Type {
+func LLVMType(t string) llvm.Type {
 	switch t {
 	case "()":
 		return llvm.VoidType()
