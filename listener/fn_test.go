@@ -93,8 +93,8 @@ source_filename = "main"
 
 define i32 @add(i32 %lv, i32 %rv) {
 entry:
-  %">>add_tmp" = add i32 %lv, %rv
-  ret i32 %">>add_tmp"
+  %.add_tmp = add i32 %lv, %rv
+  ret i32 %.add_tmp
 }
 `
 

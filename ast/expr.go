@@ -39,13 +39,13 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	if exprType == "i32" || exprType == "i64" {
 		switch b.Op {
 		case "+":
-			return ctx.Builder.CreateAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ">>add_tmp")
+			return ctx.Builder.CreateAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".add_tmp")
 		case "-":
-			return ctx.Builder.CreateSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ">>sub_tmp")
+			return ctx.Builder.CreateSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".sub_tmp")
 		case "*":
-			return ctx.Builder.CreateMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ">>mul_tmp")
+			return ctx.Builder.CreateMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".mul_tmp")
 		case "/":
-			return ctx.Builder.CreateSDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ">>div_tmp")
+			return ctx.Builder.CreateSDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".div_tmp")
 		default:
 			// FIXME: wait for impl
 			// TODO: If have function implement by @Op, it can be a operator at here
@@ -54,13 +54,13 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	} else if exprType == "f32" || exprType == "f64" {
 		switch b.Op {
 		case "+":
-			return ctx.Builder.CreateFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ">>fadd_tmp")
+			return ctx.Builder.CreateFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".fadd_tmp")
 		case "-":
-			return ctx.Builder.CreateFSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ">>fsub_tmp")
+			return ctx.Builder.CreateFSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".fsub_tmp")
 		case "*":
-			return ctx.Builder.CreateFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ">>fmul_tmp")
+			return ctx.Builder.CreateFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".fmul_tmp")
 		case "/":
-			return ctx.Builder.CreateFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ">>fdiv_tmp")
+			return ctx.Builder.CreateFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".fdiv_tmp")
 		default:
 			// FIXME: wait for impl
 			// TODO: If have function implement by @Op, it can be a operator at here
