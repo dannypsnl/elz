@@ -34,7 +34,7 @@ func TestTypeErrorInVarDef(t *testing.T) {
 	listener := /*listener.*/ New()
 	antlr.ParseTreeWalkerDefault.Walk(listener, tree)
 
-	if listener.context.Reporter.HasNoError() {
+	if listener.context.Reporter.ErrMsgs[0] != "global var: x, it's type is: i32, but receive: f32" {
 		t.Error("var type is not equal to expression's type should be an error")
 	}
 }
