@@ -1,7 +1,7 @@
 # elz
 
 [![Build Status](https://travis-ci.org/elz-lang/elz.svg?branch=master)](https://travis-ci.org/elz-lang/elz)
-[![Coverage Status](https://coveralls.io/repos/github/elz-lang/elz/badge.svg?branch=master)](https://coveralls.io/github/elz-lang/elz?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/elz-lang/elz/badge.svg)](https://coveralls.io/github/elz-lang/elz)
 
 Elz is a modern programming language focus on production. I hope it can change daily work of us.
 
