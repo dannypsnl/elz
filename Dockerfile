@@ -7,12 +7,9 @@ RUN go get github.com/go-playground/overalls
 WORKDIR /go/src/github.com/elz-lang/elz
 
 RUN rm -r *
-COPY . .
 
 ENV PATH=$PATH:$GOPATH/bin/
-ENV COVER_TOKEN=q1SjUrwywcLURT4eok5Ki37gXZeGZiwg4
 
 CMD go list -f '{{if len .TestGoFiles}}"go test -coverprofile={{.Dir}}/.coverprofile {{.ImportPath}}"{{end}}' ./... | xargs sh -c && \
     go build && \
-    overalls -project=github.com/elz-lang/elz && \
-    goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVER_TOKEN
+    overalls -project=github.com/elz-lang/elz
