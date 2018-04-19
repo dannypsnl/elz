@@ -9,6 +9,5 @@ RUN rm -r *
 
 ENV PATH=$PATH:$GOPATH/bin/
 
-CMD go list -f '{{if len .TestGoFiles}}"go test -coverprofile={{.Dir}}/.coverprofile {{.ImportPath}}"{{end}}' ./... | xargs sh -c && \
-    go build && \
+CMD go build && \
     overalls -project=github.com/elz-lang/elz
