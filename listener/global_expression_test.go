@@ -1,7 +1,6 @@
 package listener
 
 import (
-	_ "strings"
 	"testing"
 )
 
