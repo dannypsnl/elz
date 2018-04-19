@@ -27,4 +27,3 @@ script:
   # Cover default test command
   - go test ./collection/stack/
   - docker run --rm runtest
-  - go vet ./ ./listener/ ./ast/ ./errors/ ./collection/stack/
