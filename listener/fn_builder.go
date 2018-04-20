@@ -31,7 +31,7 @@ func (fb *FnBuilder) Export(e bool) *FnBuilder {
 	return fb
 }
 
-func (fb *FnBuilder) PushPType(typ string) *FnBuilder {
+func (fb *FnBuilder) PushParamType(typ string) *FnBuilder {
 	l := len(fb.params)
 	if l > 0 {
 		fb.params[l-1].Type = typ

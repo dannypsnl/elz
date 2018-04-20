@@ -128,7 +128,8 @@ localVarDef:
     ;
 
 paramList: param (',' param)*;
-param: ID (':' typeForm)?;
+paramType: ':' typeForm;
+param: ID paramType?;
 returnType: '->' typeForm;
 fnDefine:
     // because fn also handle operator, so if we use exportor after keyword fn will cause we hard to divide ++ && + +

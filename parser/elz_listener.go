@@ -83,6 +83,9 @@ type ElzListener interface {
 	// EnterParamList is called when entering the paramList production.
 	EnterParamList(c *ParamListContext)
 
+	// EnterParamType is called when entering the paramType production.
+	EnterParamType(c *ParamTypeContext)
+
 	// EnterParam is called when entering the param production.
 	EnterParam(c *ParamContext)
 
@@ -226,6 +229,9 @@ type ElzListener interface {
 
 	// ExitParamList is called when exiting the paramList production.
 	ExitParamList(c *ParamListContext)
+
+	// ExitParamType is called when exiting the paramType production.
+	ExitParamType(c *ParamTypeContext)
 
 	// ExitParam is called when exiting the param production.
 	ExitParam(c *ParamContext)

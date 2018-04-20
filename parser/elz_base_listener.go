@@ -171,6 +171,12 @@ func (s *BaseElzListener) EnterParamList(ctx *ParamListContext) {}
 // ExitParamList is called when production paramList is exited.
 func (s *BaseElzListener) ExitParamList(ctx *ParamListContext) {}
 
+// EnterParamType is called when production paramType is entered.
+func (s *BaseElzListener) EnterParamType(ctx *ParamTypeContext) {}
+
+// ExitParamType is called when production paramType is exited.
+func (s *BaseElzListener) ExitParamType(ctx *ParamTypeContext) {}
+
 // EnterParam is called when production param is entered.
 func (s *BaseElzListener) EnterParam(ctx *ParamContext) {}
 

@@ -10,12 +10,11 @@ func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 		Export(s.exportThis)
 }
 
-func (s *ElzListener) EnterTypeForm(ctx *parser.TypeFormContext) {
-	if s.fnBuilder != nil {
-		s.fnBuilder.PushPType(ctx.GetText())
-	}
+func (s *ElzListener) EnterParamType(ctx *parser.ParamTypeContext) {
+	s.fnBuilder.PushParamType(ctx.TypeForm().GetText())
 }
 
+// EnterParam listen parameter rule, emit name of parameter to FnBuilder
 func (s *ElzListener) EnterParam(ctx *parser.ParamContext) {
 	s.fnBuilder.PushParamName(ctx.ID().GetText())
 }
