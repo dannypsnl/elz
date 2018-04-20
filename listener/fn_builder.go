@@ -4,6 +4,7 @@ import (
 	"github.com/elz-lang/elz/ast"
 )
 
+// FnBuilder is function's building recorder, help we generate function much more easier
 type FnBuilder struct {
 	export    bool
 	name      string
@@ -12,10 +13,12 @@ type FnBuilder struct {
 	statments []ast.Stat
 }
 
+// create a null FnBuilder
 func NewFnBuilder() *FnBuilder {
 	return &FnBuilder{}
 }
 
+// Name setup function name by n
 func (fb *FnBuilder) Name(n string) *FnBuilder {
 	fb.name = n
 	return fb
@@ -26,6 +29,7 @@ func (fb *FnBuilder) RetType(typ string) *FnBuilder {
 	return fb
 }
 
+// Export setup final function access level by e
 func (fb *FnBuilder) Export(e bool) *FnBuilder {
 	fb.export = e
 	return fb
@@ -52,6 +56,7 @@ func (fb *FnBuilder) Stat(s ast.Stat) *FnBuilder {
 	return fb
 }
 
+// generate return the final AST of function
 func (fb *FnBuilder) generate() *ast.FnDef {
 	return &ast.FnDef{
 		Export:  fb.export,

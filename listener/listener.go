@@ -8,6 +8,7 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
+// ElzListener listen signal from antlr parser then provide API let user can access the compiled result
 type ElzListener struct {
 	*parser.BaseElzListener
 
@@ -44,6 +45,7 @@ func New() *ElzListener {
 	}
 }
 
+// ExitProg is end of an elz file, we will check and report error at this stage
 func (s *ElzListener) ExitProg(ctx *parser.ProgContext) {
 	for _, ast := range s.AstList {
 		ast.Check(s.context)
