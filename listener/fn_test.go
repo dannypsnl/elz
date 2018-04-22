@@ -102,3 +102,24 @@ entry:
 		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
 	}
 }
+
+func TestAccessGlobalVarInFunction(t *testing.T) {
+	res := NewParse(`
+	one = 1
+	fn add_one(v: i32) -> i32 { return v + one }
+	`)
+
+	expected := `; ModuleID = 'main'
+source_filename = "main"
+
+define i32 @add_one(i32 %v) {
+entry:
+  %.add_tmp = add i32 %v,
+  ret i32 %.add_tmp
+}
+`
+
+	if res != expected {
+		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
+	}
+}
