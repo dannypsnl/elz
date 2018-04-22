@@ -21,6 +21,7 @@ type FnDef struct {
 func (f *FnDef) Check(ctx *Context) {
 	f.setupMissParamType()
 	f.Ctx = &Context{
+		Parent:   ctx,
 		Reporter: ctx.Reporter,
 		Module:   ctx.Module,
 		Context:  ctx.Context,

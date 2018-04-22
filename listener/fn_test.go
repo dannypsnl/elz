@@ -112,9 +112,11 @@ func TestAccessGlobalVarInFunction(t *testing.T) {
 	expected := `; ModuleID = 'main'
 source_filename = "main"
 
+@one = global i32 1
+
 define i32 @add_one(i32 %v) {
 entry:
-  %.add_tmp = add i32 %v,
+  %.add_tmp = add i32 %v, 1
   ret i32 %.add_tmp
 }
 `

@@ -10,24 +10,29 @@ type Id struct {
 	Val string
 }
 
-func (i *Id) Codegen(ctx *Context) llvm.Value {
+func (i *Id) Codegen(c *Context) llvm.Value {
 	// FIXME: id should not only be a global var
-	return ctx.Vars[i.Val]
+	v, ok := c.Var(i.Val)
+	if ok {
+		return v
+	}
+	return llvm.Value{}
 }
 
 func (i *Id) Check(c *Context) {
-	_, ok := c.VarsType[i.Val]
+	_, ok := c.VarType(i.Val)
 	if !ok {
-		c.Reporter.Emit(fmt.Sprintf("No var: %s can be found", i.Val))
+		c.Reporter.Emit(fmt.Sprintf("var: %s not found", i.Val))
 	}
 }
 
 // At here we can see, ident's type need to logging in Context
 // So Context should send into Type method and Context::Vars
 // need a new structure for usage
-func (i *Id) Type(ctx *Context) string {
+func (i *Id) Type(c *Context) string {
 	// FIXME: id should not only be a global var
-	return ctx.VarsType[i.Val]
+	v, _ := c.VarType(i.Val)
+	return v
 }
 
 type Str struct {
