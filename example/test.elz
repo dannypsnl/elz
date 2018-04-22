@@ -15,5 +15,6 @@ fn add(l, r: i32) -> i32 {
 fn main() {
     let d = 1
     let e = 2
-    let c = d + e
+    let c = d + e + a
+    let f = c / d
 }
