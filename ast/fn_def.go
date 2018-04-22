@@ -15,16 +15,25 @@ type FnDef struct {
 	Params  []*Param
 	Body    []Stat
 	RetType string
+	Ctx     *Context
 }
 
 func (f *FnDef) Check(ctx *Context) {
 	f.setupMissParamType()
+	f.Ctx = &Context{
+		Reporter: ctx.Reporter,
+		Module:   ctx.Module,
+		Context:  ctx.Context,
+		Vars:     make(map[string]llvm.Value),
+		VarsType: make(map[string]string),
+		Builder:  llvm.NewBuilder(),
+	}
 
 	for _, p := range f.Params {
-		ctx.VarsType[p.Name] = p.Type
+		f.Ctx.VarsType[p.Name] = p.Type
 	}
 	for _, stat := range f.Body {
-		stat.Check(ctx)
+		stat.Check(f.Ctx)
 	}
 }
 
@@ -34,19 +43,19 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	)
 
 	entryPoint := llvm.AddBasicBlock(fn, "entry")
-	ctx.Builder.SetInsertPointAtEnd(entryPoint)
+	f.Ctx.Builder.SetInsertPointAtEnd(entryPoint)
 
 	for i, param := range fn.Params() {
 		param.SetName(f.Params[i].Name)
-		ctx.Vars[f.Params[i].Name] = param
+		f.Ctx.Vars[f.Params[i].Name] = param
 	}
 
 	for _, stat := range f.Body {
-		stat.Codegen(ctx)
+		stat.Codegen(f.Ctx)
 	}
-	ctx.Builder.ClearInsertionPoint()
+	f.Ctx.Builder.ClearInsertionPoint()
 	if f.Name == "main" {
-		generateMainFn(ctx.Builder, entryPoint)
+		generateMainFn(f.Ctx.Builder, entryPoint)
 	}
 	return fn
 }

@@ -24,6 +24,7 @@ func TestFnDef(t *testing.T) {
 		Body:    []Stat{},
 		RetType: "f32",
 	}
+	f.Check(context)
 	f.Codegen(context)
 }
 
@@ -44,5 +45,6 @@ func TestVarDefInFn(t *testing.T) {
 		},
 		RetType: "f32",
 	}
+	f.Check(context)
 	f.Codegen(context)
 }
