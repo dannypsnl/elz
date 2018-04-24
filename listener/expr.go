@@ -43,6 +43,13 @@ func (s *ElzListener) ExitMulOrDiv(ctx *parser.MulOrDivContext) {
 	s.exprStack.Push(e)
 }
 
+// ExitAs listen as expression, like: `3.1 as f64`
+func (s *ElzListener) ExitAs(ctx *parser.AsContext) {
+	e := s.exprStack.Pop()
+	typ := ctx.TypeForm().GetText()
+	s.exprStack.Push(&ast.As{E: e.(ast.Expr), T: typ})
+}
+
 // ExitStr listen string literal, like: `"hello world"`
 func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
 	s.exprStack.Push(&ast.Str{Val: ctx.STRING().GetText()})

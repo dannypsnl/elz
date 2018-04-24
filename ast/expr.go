@@ -96,6 +96,21 @@ func (b *BinaryExpr) Type(ctx *Context) string {
 	return leftT
 }
 
+type As struct {
+	E Expr
+	T string
+}
+
+func (a *As) Check(ctx *Context) {
+
+}
+func (a *As) Codegen(ctx *Context) llvm.Value {
+	return llvm.Value{}
+}
+func (a *As) Type(ctx *Context) string {
+	return a.T
+}
+
 type Argu struct {
 	E Expr
 }
