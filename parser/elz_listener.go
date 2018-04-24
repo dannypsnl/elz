@@ -146,6 +146,9 @@ type ElzListener interface {
 	// EnterAddOrSub is called when entering the AddOrSub production.
 	EnterAddOrSub(c *AddOrSubContext)
 
+	// EnterAs is called when entering the As production.
+	EnterAs(c *AsContext)
+
 	// EnterStatExpr is called when entering the StatExpr production.
 	EnterStatExpr(c *StatExprContext)
 
@@ -292,6 +295,9 @@ type ElzListener interface {
 
 	// ExitAddOrSub is called when exiting the AddOrSub production.
 	ExitAddOrSub(c *AddOrSubContext)
+
+	// ExitAs is called when exiting the As production.
+	ExitAs(c *AsContext)
 
 	// ExitStatExpr is called when exiting the StatExpr production.
 	ExitStatExpr(c *StatExprContext)

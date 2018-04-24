@@ -297,6 +297,12 @@ func (s *BaseElzListener) EnterAddOrSub(ctx *AddOrSubContext) {}
 // ExitAddOrSub is called when production AddOrSub is exited.
 func (s *BaseElzListener) ExitAddOrSub(ctx *AddOrSubContext) {}
 
+// EnterAs is called when production As is entered.
+func (s *BaseElzListener) EnterAs(ctx *AsContext) {}
+
+// ExitAs is called when production As is exited.
+func (s *BaseElzListener) ExitAs(ctx *AsContext) {}
+
 // EnterStatExpr is called when production StatExpr is entered.
 func (s *BaseElzListener) EnterStatExpr(ctx *StatExprContext) {}
 
