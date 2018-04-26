@@ -96,21 +96,9 @@ func (b *BinaryExpr) Type(ctx *Context) string {
 	return leftT
 }
 
-type Argu struct {
-	E Expr
-}
-
-func (a *Argu) Codegen(ctx *Context) llvm.Value {
-	return a.E.Codegen(ctx)
-}
-
-func (a *Argu) Type(ctx *Context) string {
-	return a.E.Type(ctx)
-}
-
 type FnCall struct {
 	Name    string
-	Args    []Argu
+	Args    []Expr
 	RetType string // Setting by parser
 }
 
