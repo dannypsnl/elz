@@ -102,10 +102,22 @@ type As struct {
 }
 
 func (a *As) Check(ctx *Context) {
-
 }
 func (a *As) Codegen(ctx *Context) llvm.Value {
-	return llvm.Value{}
+	v := a.E.Codegen(ctx)
+	switch a.T {
+	case "i32":
+		fallthrough
+	case "i64":
+		return ctx.Builder.CreateCast(v, llvm.ZExt, LLVMType(a.T), ".as_tmp")
+	case "f32":
+		fallthrough
+	case "f64":
+		return ctx.Builder.CreateCast(v, llvm.FPExt, LLVMType(a.T), ".as_tmp")
+	default:
+		panic(fmt.Sprintf("Unsupport: %s yet", a.T))
+	}
+
 }
 func (a *As) Type(ctx *Context) string {
 	return a.T
