@@ -9,10 +9,10 @@ import (
 func TestCasting(t *testing.T) {
 	c := NewTestContext()
 
-	argsRef := []llvm.Type{}
-	arrT := llvm.PointerType(llvm.Int8Type(), 0)
-	argsRef = append(argsRef, arrT)
-	pft := llvm.FunctionType(llvm.Int32Type(), argsRef, false)
+	argsRef := []llvm.Type{
+		llvm.PointerType(llvm.Int8Type(), 0),
+	}
+	pft := llvm.FunctionType(llvm.Int32Type(), argsRef, true)
 	printf := llvm.AddFunction(c.module, "printf", pft)
 
 	ft := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
@@ -25,17 +25,19 @@ func TestCasting(t *testing.T) {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int32Type(), 10, true), bar)
 	barLoad := c.builder.CreateLoad(bar, "bar.load")
 
-	cast(llvm.ZExt, llvm.Int64Type(), c.builder, barLoad, printf)
-	cast(llvm.SExt, llvm.Int64Type(), c.builder, barLoad, printf)
-	cast(llvm.Trunc, llvm.Int16Type(), c.builder, barLoad, printf)
+	v := cast(llvm.ZExt, llvm.Int64Type(), c.builder, barLoad)
+	s := c.builder.CreateGlobalStringPtr("hello world, number: %d\n", "format")
+	c.builder.CreateCall(printf, []llvm.Value{s, v}, "p")
+	v = cast(llvm.SExt, llvm.Int64Type(), c.builder, barLoad)
+	c.builder.CreateCall(printf, []llvm.Value{s, v}, "p")
+	v = cast(llvm.Trunc, llvm.Int16Type(), c.builder, barLoad)
+	c.builder.CreateCall(printf, []llvm.Value{s, v}, "p")
 
 	c.builder.CreateRet(barLoad)
 
 	println(c.module.String())
 }
 
-func cast(castBy llvm.Opcode, castTo llvm.Type, builder llvm.Builder, v llvm.Value, printf llvm.Value) {
-	s := builder.CreateGlobalStringPtr("hello world\n", "format")
-	builder.CreateCast(v, castBy, castTo, "tmp")
-	builder.CreateCall(printf, []llvm.Value{s}, "p")
+func cast(castBy llvm.Opcode, castTo llvm.Type, builder llvm.Builder, v llvm.Value) llvm.Value {
+	return builder.CreateCast(v, castBy, castTo, "tmp")
 }
