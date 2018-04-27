@@ -32,16 +32,10 @@ func TestCasting(t *testing.T) {
 	c.builder.CreateRet(barLoad)
 
 	println(c.module.String())
-
-	ee, err := llvm.NewExecutionEngine(c.module)
-	if err != nil {
-		panic(err)
-	}
-	ee.RunFunction(main, []llvm.GenericValue{})
 }
 
 func cast(castBy llvm.Opcode, castTo llvm.Type, builder llvm.Builder, v llvm.Value, printf llvm.Value) {
-	s := builder.CreateGlobalStringPtr("hello %d ", "format")
+	s := builder.CreateGlobalStringPtr("hello world\n", "format")
 	builder.CreateCast(v, castBy, castTo, "tmp")
 	builder.CreateCall(printf, []llvm.Value{s}, "p")
 }
