@@ -23,6 +23,7 @@ func (g *GlobalVarDef) Check(ctx *Context) {
 	if g.VarType == "" {
 		g.VarType = g.Expression.Type(ctx)
 	}
+	g.Expression.Check(ctx)
 	exprType := g.Expression.Type(ctx)
 	if g.VarType != exprType {
 		ctx.Reporter.Emit(fmt.Sprintf("global var: %s, it's type is: %s, but receive: %s", g.Name, g.VarType, exprType))
@@ -51,6 +52,7 @@ func (lv *LocalVarDef) Check(ctx *Context) {
 	if lv.VarType == "" {
 		lv.VarType = lv.Expression.Type(ctx)
 	}
+	lv.Expression.Check(ctx)
 	exprType := lv.Expression.Type(ctx)
 	if lv.VarType != exprType {
 		ctx.Reporter.Emit(fmt.Sprintf("var: %s, it's type is: %s, but receive: %s", lv.Name, lv.VarType, exprType))
