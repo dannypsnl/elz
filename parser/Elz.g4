@@ -44,6 +44,7 @@ prog: topStatList?;
 topStatList: topStat+;
 
 topStat: fnDefine     // fn foo( $params ) { $stat... }
+    | externBlock     // extern "C" { $declareFn }
     | globalVarDef    // pi: num = $expr
     | typeDefine      // type Writer ( prop... )
     | implBlock       // impl Stack { $method... }
@@ -135,6 +136,15 @@ fnDefine:
     // because fn also handle operator, so if we use exportor after keyword fn will cause we hard to divide ++ && + +
     exportor? 'fn' ID '(' paramList? ')' returnType? '{'
         statList?
+    '}'
+    ;
+
+declareFn:
+    'fn' ID '(' typeList? ')' returnType?
+    ;
+externBlock:
+    'extern' STRING '{'
+        declareFn*
     '}'
     ;
 

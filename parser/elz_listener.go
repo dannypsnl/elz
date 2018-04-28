@@ -95,6 +95,12 @@ type ElzListener interface {
 	// EnterFnDefine is called when entering the fnDefine production.
 	EnterFnDefine(c *FnDefineContext)
 
+	// EnterDeclareFn is called when entering the declareFn production.
+	EnterDeclareFn(c *DeclareFnContext)
+
+	// EnterExternBlock is called when entering the externBlock production.
+	EnterExternBlock(c *ExternBlockContext)
+
 	// EnterAttrList is called when entering the attrList production.
 	EnterAttrList(c *AttrListContext)
 
@@ -244,6 +250,12 @@ type ElzListener interface {
 
 	// ExitFnDefine is called when exiting the fnDefine production.
 	ExitFnDefine(c *FnDefineContext)
+
+	// ExitDeclareFn is called when exiting the declareFn production.
+	ExitDeclareFn(c *DeclareFnContext)
+
+	// ExitExternBlock is called when exiting the externBlock production.
+	ExitExternBlock(c *ExternBlockContext)
 
 	// ExitAttrList is called when exiting the attrList production.
 	ExitAttrList(c *AttrListContext)

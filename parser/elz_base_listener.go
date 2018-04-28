@@ -195,6 +195,18 @@ func (s *BaseElzListener) EnterFnDefine(ctx *FnDefineContext) {}
 // ExitFnDefine is called when production fnDefine is exited.
 func (s *BaseElzListener) ExitFnDefine(ctx *FnDefineContext) {}
 
+// EnterDeclareFn is called when production declareFn is entered.
+func (s *BaseElzListener) EnterDeclareFn(ctx *DeclareFnContext) {}
+
+// ExitDeclareFn is called when production declareFn is exited.
+func (s *BaseElzListener) ExitDeclareFn(ctx *DeclareFnContext) {}
+
+// EnterExternBlock is called when production externBlock is entered.
+func (s *BaseElzListener) EnterExternBlock(ctx *ExternBlockContext) {}
+
+// ExitExternBlock is called when production externBlock is exited.
+func (s *BaseElzListener) ExitExternBlock(ctx *ExternBlockContext) {}
+
 // EnterAttrList is called when production attrList is entered.
 func (s *BaseElzListener) EnterAttrList(ctx *AttrListContext) {}
 
