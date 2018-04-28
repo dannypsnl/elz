@@ -16,4 +16,7 @@ fn main() {
     let a = 1
     let d = a as i64
     let e = d + a as i64
+    let b = 3.14
+    let c = b as f64
+    let f = c as f32
 }
