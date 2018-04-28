@@ -63,7 +63,7 @@ func convertTemplate(t *testing.T, from, targetType string) {
 	expected := `; ModuleID = 'main'
 source_filename = "main"
 
-define ` + from + ` @main() {
+define i32 @main() {
 entry:
   %a = alloca ` + from + `
   store ` + from + ` 10, ` + from + `* %a
@@ -82,6 +82,8 @@ func opcode2String(op llvm.Opcode) string {
 	switch op {
 	case llvm.ZExt:
 		return "zext"
+	case llvm.Trunc:
+		return "trunc"
 	default:
 		panic("unknown opcode")
 	}
@@ -89,4 +91,5 @@ func opcode2String(op llvm.Opcode) string {
 
 func testI32ToI64(t *testing.T) {
 	convertTemplate(t, "i32", "i64")
+	convertTemplate(t, "i64", "i32")
 }
