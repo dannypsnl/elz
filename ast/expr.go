@@ -73,6 +73,8 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 
 func (b *BinaryExpr) Check(ctx *Context) {
 	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
+	b.LeftE.Check(ctx)
+	b.RightE.Check(ctx)
 	if leftT != rightT {
 		// TODO: If have function implement by @Op, it can be a operator at here
 
@@ -114,8 +116,17 @@ func makeOp(exprType, toType string) llvm.Opcode {
 		return llvm.FPExt
 	} else if exprType == "f64" && toType == "f32" {
 		return llvm.FPTrunc
+	} else if exprType == "i64" {
+		switch toType {
+		case "i32":
+			fallthrough
+		case "i16":
+			fallthrough
+		case "i8":
+			return llvm.Trunc
+		}
 	}
-	panic("Not yet impl other as expr")
+	panic(fmt.Sprintf("Not yet impl other as expr, %s, %s", exprType, toType))
 }
 
 func (a *As) Check(ctx *Context) {

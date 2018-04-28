@@ -15,4 +15,5 @@ fn add(l, r: i32) -> i32 {
 fn main() {
     let a = 1
     let d = a as i64
+    let e = d + a as i64
 }
