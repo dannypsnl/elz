@@ -7,6 +7,31 @@ import (
 )
 
 func TestAsZExt(t *testing.T) {
+	testI32ToI64(t)
+}
+
+func assertEq(t *testing.T, actual, expected string) {
+	if actual != expected {
+		t.Errorf("expected: %s, actual: %s", expected, actual)
+	}
+}
+
+func getStructBy(typ string) Expr {
+	v := "10"
+	switch typ {
+	case "i32":
+		return &I32{Val: v}
+	case "f32":
+		return &F32{Val: v}
+	case "i64":
+		return &I64{Val: v}
+	case "f64":
+		return &F64{Val: v}
+	}
+	panic("We don't support yet")
+}
+
+func convertTemplate(t *testing.T, from, targetType string) {
 	context := NewContext()
 	ft := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
 	main := llvm.AddFunction(context.Module, "main", ft)
@@ -17,14 +42,15 @@ func TestAsZExt(t *testing.T) {
 	local := &LocalVarDef{
 		Immutable:  true,
 		Name:       "a",
-		VarType:    "i32",
-		Expression: &I32{Val: "10"},
+		VarType:    from,
+		Expression: getStructBy(from),
 	}
+	as := &As{E: &Id{Val: "a"}, T: targetType}
 	target := &LocalVarDef{
 		Immutable:  true,
 		Name:       "b",
-		VarType:    "i64",
-		Expression: &As{E: &Id{Val: "a"}, T: "i64"},
+		VarType:    targetType,
+		Expression: as,
 	}
 	local.Check(context)
 	target.Check(context)
@@ -32,24 +58,38 @@ func TestAsZExt(t *testing.T) {
 	local.Codegen(context)
 	target.Codegen(context)
 
+	actual := context.Module.String()
+
 	expected := `; ModuleID = 'main'
 source_filename = "main"
 
 define i32 @main() {
 entry:
-  %a = alloca i32
-  store i32 10, i32* %a
-  %a1 = load i32, i32* %a
-  %.as_tmp = zext i32 %a1 to i64
-  %b = alloca i64
-  store i64 %.as_tmp, i64* %b
-  %b2 = load i64, i64* %b
+  %a = alloca ` + from + `
+  store ` + from + ` 10, ` + from + `* %a
+  %a1 = load ` + from + `, ` + from + `* %a
+  %.as_tmp = ` + opcode2String(as.op) + ` ` + from + ` %a1 to ` + targetType + `
+  %b = alloca ` + targetType + `
+  store ` + targetType + ` %.as_tmp, ` + targetType + `* %b
+  %b2 = load ` + targetType + `, ` + targetType + `* %b
 }
 `
 
-	actual := context.Module
+	assertEq(t, actual, expected)
+}
 
-	if context.Module.String() != expected {
-		t.Errorf("expected: %s, actual: %s", expected, actual)
+func opcode2String(op llvm.Opcode) string {
+	switch op {
+	case llvm.ZExt:
+		return "zext"
+	case llvm.Trunc:
+		return "trunc"
+	default:
+		panic("unknown opcode")
 	}
+}
+
+func testI32ToI64(t *testing.T) {
+	convertTemplate(t, "i32", "i64")
+	convertTemplate(t, "i64", "i32")
 }
