@@ -20,7 +20,7 @@ type FnDef struct {
 }
 
 func (f *FnDef) Check(ctx *Context) {
-	f.setupMissParamType()
+	f.completeParamType()
 	f.Ctx = &Context{
 		Parent:   ctx,
 		Reporter: ctx.Reporter,
@@ -71,7 +71,7 @@ func generateMainFn(builder llvm.Builder, entryPoint llvm.BasicBlock) {
 	builder.ClearInsertionPoint()
 }
 
-func (f *FnDef) setupMissParamType() {
+func (f *FnDef) completeParamType() {
 	var cache string
 	for i := len(f.Params); i > 0; i-- {
 		if f.Params[i-1].Type != "" {
@@ -82,14 +82,17 @@ func (f *FnDef) setupMissParamType() {
 	}
 }
 
-func (f *FnDef) returnType() llvm.Type {
+func (f *FnDef) returnType(c *Context) llvm.Type {
 	rt := f.RetType
 	if rt == "" {
 		rt = "()"
 	}
-	// FIXME: if main function define it's return type, it's an error
-	if f.Name == "main" && rt == "()" {
-		rt = "i32"
+	if f.Name == "main" {
+		if rt == "()" {
+			rt = "i32"
+		} else {
+			c.Reporter.Emit("you can't have return type for main function!")
+		}
 	}
 	retT := LLVMType(rt)
 	return retT
