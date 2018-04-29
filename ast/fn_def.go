@@ -41,7 +41,7 @@ func (f *FnDef) Check(ctx *Context) {
 
 func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	fn := llvm.AddFunction(ctx.Module, f.Name,
-		llvm.FunctionType(f.returnType(), f.paramsType(), false),
+		llvm.FunctionType(f.returnType(ctx), f.paramsType(), false),
 	)
 
 	// is a declaration in extern block for ffi we don't generate the statement for it
