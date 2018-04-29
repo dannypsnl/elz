@@ -80,6 +80,16 @@ func (i8 *I8) Codegen(*Context) llvm.Value {
 }
 func (i8 *I8) Type(*Context) string { return "i8" }
 
+type I16 struct {
+	Val string
+}
+
+func (i16 *I16) Check(*Context) {}
+func (i16 *I16) Codegen(*Context) llvm.Value {
+	return llvm.ConstIntFromString(LLVMType("i16"), i16.Val, 10)
+}
+func (i16 *I16) Type(*Context) string { return "i16" }
+
 type I32 struct {
 	Val string
 }

@@ -18,6 +18,26 @@ func TestStr(t *testing.T) {
 	}
 }
 
+func TestI8(t *testing.T) {
+	context := NewContext()
+	iVal := &I8{Val: "10"}
+	iVal.Check(context)
+	llvmIR := iVal.Codegen(context)
+	if llvmIR.Type() != LLVMType(iVal.Type(context)) {
+		t.Error("Bug in ast.I8")
+	}
+}
+
+func TestI16(t *testing.T) {
+	context := NewContext()
+	iVal := &I16{Val: "10"}
+	iVal.Check(context)
+	llvmIR := iVal.Codegen(context)
+	if llvmIR.Type() != LLVMType(iVal.Type(context)) {
+		t.Error("Bug in ast.I16")
+	}
+}
+
 func TestI32(t *testing.T) {
 	context := NewContext()
 	iVal := &I32{Val: "10"}
@@ -30,10 +50,10 @@ func TestI32(t *testing.T) {
 
 func TestI64(t *testing.T) {
 	context := NewContext()
-	fVal := &I64{Val: "10"}
-	fVal.Check(context)
-	llvmIR := fVal.Codegen(context)
-	if llvmIR.Type() != LLVMType(fVal.Type(context)) {
+	iVal := &I64{Val: "10"}
+	iVal.Check(context)
+	llvmIR := iVal.Codegen(context)
+	if llvmIR.Type() != LLVMType(iVal.Type(context)) {
 		t.Error("Bug in ast.I64")
 	}
 }
