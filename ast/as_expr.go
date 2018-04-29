@@ -18,7 +18,27 @@ func makeOp(exprType, toType string) llvm.Opcode {
 		case "i64":
 			return llvm.ZExt
 		case "i8":
+			fallthrough
+		case "i16":
 			return llvm.Trunc
+		}
+	} else if exprType == "i8" {
+		switch toType {
+		case "i16":
+			fallthrough
+		case "i32":
+			fallthrough
+		case "i64":
+			return llvm.ZExt
+		}
+	} else if exprType == "i16" {
+		switch toType {
+		case "i8":
+			return llvm.Trunc
+		case "i32":
+			fallthrough
+		case "i64":
+			return llvm.ZExt
 		}
 	} else if exprType == "f32" && toType == "f64" {
 		return llvm.FPExt
@@ -34,6 +54,7 @@ func makeOp(exprType, toType string) llvm.Opcode {
 			return llvm.Trunc
 		}
 	}
+	// This part need to call function to complete
 	panic(fmt.Sprintf("Not yet impl other as expr, %s, %s", exprType, toType))
 }
 

@@ -21,12 +21,16 @@ func assertEq(t *testing.T, actual, expected string) {
 func getStructBy(typ string) Expr {
 	v := "10"
 	switch typ {
+	case "i8":
+		return &I8{Val: v}
+	case "i16":
+		return &I16{Val: v}
 	case "i32":
 		return &I32{Val: v}
-	case "f32":
-		return &F32{Val: v}
 	case "i64":
 		return &I64{Val: v}
+	case "f32":
+		return &F32{Val: v}
 	case "f64":
 		return &F64{Val: v}
 	}
@@ -99,14 +103,32 @@ func opcode2String(op llvm.Opcode) string {
 }
 
 func testI32ToI64(t *testing.T) {
+	convertTemplate(t, "i8", "i16")
+	convertTemplate(t, "i8", "i32")
+	convertTemplate(t, "i8", "i64")
+
+	convertTemplate(t, "i16", "i8")
+	convertTemplate(t, "i16", "i32")
+	convertTemplate(t, "i16", "i64")
+
 	convertTemplate(t, "i32", "i64")
+	convertTemplate(t, "i32", "i16")
+	convertTemplate(t, "i32", "i8")
+
 	convertTemplate(t, "i64", "i32")
+	convertTemplate(t, "i64", "i16")
+	convertTemplate(t, "i64", "i8")
+
 	convertTemplate(t, "f32", "f64")
 	convertTemplate(t, "f64", "f32")
 }
 
 func convertToLLVMType(t string) string {
 	switch t {
+	case "i8":
+		fallthrough
+	case "i16":
+		fallthrough
 	case "i32":
 		fallthrough
 	case "i64":
@@ -122,6 +144,10 @@ func convertToLLVMType(t string) string {
 
 func constValueDecideBy(t string) string {
 	switch t {
+	case "i8":
+		fallthrough
+	case "i16":
+		fallthrough
 	case "i32":
 		fallthrough
 	case "i64":
