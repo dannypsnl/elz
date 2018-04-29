@@ -38,6 +38,7 @@ func makeOp(exprType, toType string) llvm.Opcode {
 }
 
 func (a *As) Check(ctx *Context) {
+	a.E.Check(ctx)
 	a.op = makeOp(a.E.Type(ctx), a.T)
 }
 func (a *As) Codegen(ctx *Context) llvm.Value {
