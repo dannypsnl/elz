@@ -25,6 +25,8 @@ type ElzListener struct {
 	immutable bool
 	// isGlobalDef, if is global level var
 	isGlobalDef bool
+	// inExternBlock mean in extern "C" {}
+	inExternBlock bool
 }
 
 // Module return the llvm.Module generate by parse process

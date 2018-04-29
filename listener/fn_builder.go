@@ -57,12 +57,13 @@ func (fb *FnBuilder) Stat(s ast.Stat) *FnBuilder {
 }
 
 // generate return the final AST of function
-func (fb *FnBuilder) generate() *ast.FnDef {
+func (fb *FnBuilder) generate(extern bool) *ast.FnDef {
 	return &ast.FnDef{
-		Export:  fb.export,
-		Name:    fb.name,
-		Params:  fb.params,
-		Body:    fb.statments,
-		RetType: fb.returnTyp,
+		Export:      fb.export,
+		Name:        fb.name,
+		Params:      fb.params,
+		Body:        fb.statments,
+		RetType:     fb.returnTyp,
+		IsExternDef: extern,
 	}
 }

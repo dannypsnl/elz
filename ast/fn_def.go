@@ -10,12 +10,13 @@ type Param struct {
 }
 
 type FnDef struct {
-	Export  bool
-	Name    string
-	Params  []*Param
-	Body    []Stat
-	RetType string
-	Ctx     *Context
+	Export      bool
+	Name        string
+	Params      []*Param
+	Body        []Stat
+	RetType     string
+	Ctx         *Context
+	IsExternDef bool
 }
 
 func (f *FnDef) Check(ctx *Context) {
@@ -43,20 +44,23 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 		llvm.FunctionType(f.returnType(), f.paramsType(), false),
 	)
 
-	entryPoint := llvm.AddBasicBlock(fn, "entry")
-	f.Ctx.Builder.SetInsertPointAtEnd(entryPoint)
+	// is a declaration in extern block for ffi we don't generate the statement for it
+	if !f.IsExternDef {
+		entryPoint := llvm.AddBasicBlock(fn, "entry")
+		f.Ctx.Builder.SetInsertPointAtEnd(entryPoint)
 
-	for i, param := range fn.Params() {
-		param.SetName(f.Params[i].Name)
-		f.Ctx.Vars[f.Params[i].Name] = param
-	}
+		for i, param := range fn.Params() {
+			param.SetName(f.Params[i].Name)
+			f.Ctx.Vars[f.Params[i].Name] = param
+		}
 
-	for _, stat := range f.Body {
-		stat.Codegen(f.Ctx)
-	}
-	f.Ctx.Builder.ClearInsertionPoint()
-	if f.Name == "main" {
-		generateMainFn(f.Ctx.Builder, entryPoint)
+		for _, stat := range f.Body {
+			stat.Codegen(f.Ctx)
+		}
+		f.Ctx.Builder.ClearInsertionPoint()
+		if f.Name == "main" {
+			generateMainFn(f.Ctx.Builder, entryPoint)
+		}
 	}
 	return fn
 }
