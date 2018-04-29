@@ -70,6 +70,16 @@ func (f64 *F64) Codegen(*Context) llvm.Value {
 func (f64 *F64) Check(*Context)       {}
 func (f64 *F64) Type(*Context) string { return "f64" }
 
+type I8 struct {
+	Val string
+}
+
+func (i8 *I8) Check(*Context) {}
+func (i8 *I8) Codegen(*Context) llvm.Value {
+	return llvm.ConstIntFromString(LLVMType("i8"), i8.Val, 10)
+}
+func (i8 *I8) Type(*Context) string { return "i8" }
+
 type I32 struct {
 	Val string
 }
