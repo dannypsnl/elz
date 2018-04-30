@@ -29,6 +29,25 @@ func (s *ElzListener) ExitDeclareFn(c *parser.DeclareFnContext) {
 	if s.fnBuilder == nil {
 		panic("Compiler bug, declaration expect have function builder when parsing")
 	}
+
+	typ := ""
+	escapeLevel := 0
+	for _, r := range c.TypeList().GetText() {
+		typ += string(r)
+		if r == '<' {
+			escapeLevel++
+		} else if r == '>' {
+			escapeLevel--
+		}
+		if escapeLevel == 0 && r == ',' {
+			s.fnBuilder.PushParamName(".wont_use")
+			s.fnBuilder.PushParamType(typ)
+			typ = ""
+		}
+	}
+	s.fnBuilder.PushParamName(".wont_use")
+	s.fnBuilder.PushParamType(typ)
+
 	s.AstList = append(s.AstList,
 		// generate extern declaration
 		s.fnBuilder.generate(true),
