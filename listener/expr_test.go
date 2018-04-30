@@ -61,6 +61,24 @@ source_filename = "main"
 `
 
 	if expected != res {
-		t.Errorf("suffix parse Error; expected: `%s`\nactual: `%s`", expected, res)
+		t.Errorf("int suffix parse Error; expected: `%s`\nactual: `%s`", expected, res)
+	}
+}
+
+func TestFloatSuffix(t *testing.T) {
+	res := NewParse(`
+	a = 3.14'f32
+	b = 3.14'f64
+	`)
+
+	expected := `; ModuleID = 'main'
+source_filename = "main"
+
+@a = global float 0x40091EB860000000
+@b = global double 3.140000e+00
+`
+
+	if expected != res {
+		t.Errorf("float suffix parse Error; expected: `%s`\nactual: `%s`", expected, res)
 	}
 }
