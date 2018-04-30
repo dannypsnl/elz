@@ -30,6 +30,11 @@ Letter: StartLetter
     | '\u203F'..'\u2040'
     ;
 
+intSuffix: '_i' ('8'|'16'|'32'|'64')
+    | floatSuffix
+    ;
+floatSuffix: '_f' ('32'|'64');
+
 // 1.34, .1, 0.4
 FLOAT: Digit* '.' Digit+;
 // 123, 1, 2, 54, 67, 98760, 0
@@ -175,8 +180,8 @@ expr: expr op='as' typeForm            # As
     | expr '?' expr ':' expr           # ThreeOpCmp
     | '(' expr ')'                     # SubExpr
     | exprStat                         # StatExpr
-    | INT                              # Int
-    | FLOAT                            # Float
+    | INT intSuffix?                   # Int
+    | FLOAT floatSuffix?               # Float
     | ID                               # Id
     | STRING                           # Str
     ;

@@ -21,6 +21,18 @@ func (s *BaseElzListener) EnterEveryRule(ctx antlr.ParserRuleContext) {}
 // ExitEveryRule is called when any rule is exited.
 func (s *BaseElzListener) ExitEveryRule(ctx antlr.ParserRuleContext) {}
 
+// EnterIntSuffix is called when production intSuffix is entered.
+func (s *BaseElzListener) EnterIntSuffix(ctx *IntSuffixContext) {}
+
+// ExitIntSuffix is called when production intSuffix is exited.
+func (s *BaseElzListener) ExitIntSuffix(ctx *IntSuffixContext) {}
+
+// EnterFloatSuffix is called when production floatSuffix is entered.
+func (s *BaseElzListener) EnterFloatSuffix(ctx *FloatSuffixContext) {}
+
+// ExitFloatSuffix is called when production floatSuffix is exited.
+func (s *BaseElzListener) ExitFloatSuffix(ctx *FloatSuffixContext) {}
+
 // EnterProg is called when production prog is entered.
 func (s *BaseElzListener) EnterProg(ctx *ProgContext) {}
 

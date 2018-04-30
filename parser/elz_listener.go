@@ -8,6 +8,12 @@ import "github.com/antlr/antlr4/runtime/Go/antlr"
 type ElzListener interface {
 	antlr.ParseTreeListener
 
+	// EnterIntSuffix is called when entering the intSuffix production.
+	EnterIntSuffix(c *IntSuffixContext)
+
+	// EnterFloatSuffix is called when entering the floatSuffix production.
+	EnterFloatSuffix(c *FloatSuffixContext)
+
 	// EnterProg is called when entering the prog production.
 	EnterProg(c *ProgContext)
 
@@ -163,6 +169,12 @@ type ElzListener interface {
 
 	// EnterId is called when entering the Id production.
 	EnterId(c *IdContext)
+
+	// ExitIntSuffix is called when exiting the intSuffix production.
+	ExitIntSuffix(c *IntSuffixContext)
+
+	// ExitFloatSuffix is called when exiting the floatSuffix production.
+	ExitFloatSuffix(c *FloatSuffixContext)
 
 	// ExitProg is called when exiting the prog production.
 	ExitProg(c *ProgContext)
