@@ -23,9 +23,16 @@ func LLVMType(t string) llvm.Type {
 	case "f64":
 		return llvm.DoubleType() // f64
 	default:
+		if len(t) == 3 && string(t[:3]) == "any" {
+			goto end
+		}
 		if len(t) > 4 && string(t[:4]) == "ref<" && string(t[len(t)-1:]) == ">" {
 			return llvm.PointerType(LLVMType(t[4:len(t)-1]), 0)
 		}
+		if len(t) > 3 && string(t[:3]) == "..." {
+			return LLVMType(t[3:])
+		}
+	end:
 		panic(fmt.Sprintf("not support type: `%s` yet", t))
 	}
 }
