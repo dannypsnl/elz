@@ -315,6 +315,12 @@ func (s *BaseElzListener) EnterFloat(ctx *FloatContext) {}
 // ExitFloat is called when production Float is exited.
 func (s *BaseElzListener) ExitFloat(ctx *FloatContext) {}
 
+// EnterRef is called when production Ref is entered.
+func (s *BaseElzListener) EnterRef(ctx *RefContext) {}
+
+// ExitRef is called when production Ref is exited.
+func (s *BaseElzListener) ExitRef(ctx *RefContext) {}
+
 // EnterAddOrSub is called when production AddOrSub is entered.
 func (s *BaseElzListener) EnterAddOrSub(ctx *AddOrSubContext) {}
 

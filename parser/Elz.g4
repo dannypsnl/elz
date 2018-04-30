@@ -169,8 +169,9 @@ traitDefine:
 
 // Explain for expr, because Antlr support the operation precedence by declared order
 // So we don't have to consider that
-expr: expr op='as' typeForm            # As
-    | expr op='^' expr                 # Pow // operation prec
+expr: op='&' expr                      # Ref // operation prec
+    | expr op='as' typeForm            # As
+    | expr op='^' expr                 # Pow
     | expr op=('*'|'/') expr           # MulOrDiv
     | expr op=('+'|'-') expr           # AddOrSub
     | expr op=('<'|'>'|'<='|'>=') expr # Cmp

@@ -155,6 +155,9 @@ type ElzListener interface {
 	// EnterFloat is called when entering the Float production.
 	EnterFloat(c *FloatContext)
 
+	// EnterRef is called when entering the Ref production.
+	EnterRef(c *RefContext)
+
 	// EnterAddOrSub is called when entering the AddOrSub production.
 	EnterAddOrSub(c *AddOrSubContext)
 
@@ -316,6 +319,9 @@ type ElzListener interface {
 
 	// ExitFloat is called when exiting the Float production.
 	ExitFloat(c *FloatContext)
+
+	// ExitRef is called when exiting the Ref production.
+	ExitRef(c *RefContext)
 
 	// ExitAddOrSub is called when exiting the AddOrSub production.
 	ExitAddOrSub(c *AddOrSubContext)
