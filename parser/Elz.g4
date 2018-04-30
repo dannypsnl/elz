@@ -31,7 +31,7 @@ Letter: StartLetter
     ;
 
 intSuffix: '\'i' ('8'|'16'|'32'|'64')
-    | floatSuffix
+    | '\'f' ('32'|'64')
     ;
 floatSuffix: '\'_f' ('32'|'64');
 

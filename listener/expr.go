@@ -80,6 +80,10 @@ func (s *ElzListener) ExitInt(ctx *parser.IntContext) {
 		s.exprStack.Push(&ast.I32{Val: ctx.INT().GetText()})
 	case "'i64":
 		s.exprStack.Push(&ast.I64{Val: ctx.INT().GetText()})
+	case "'f32":
+		s.exprStack.Push(&ast.F32{Val: ctx.INT().GetText()})
+	case "'f64":
+		s.exprStack.Push(&ast.F64{Val: ctx.INT().GetText()})
 	default:
 		s.exprStack.Push(&ast.I32{Val: ctx.INT().GetText()})
 	}

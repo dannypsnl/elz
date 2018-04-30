@@ -45,6 +45,8 @@ func TestIntSuffix(t *testing.T) {
 	b = 3'i16
 	c = 3'i32
 	d = 3'i64
+	e = 3'f32
+	f = 3'f64
 	`)
 
 	expected := `; ModuleID = 'main'
@@ -54,6 +56,8 @@ source_filename = "main"
 @b = global i16 3
 @c = global i32 3
 @d = global i64 3
+@e = global float 3.000000e+00
+@f = global double 3.000000e+00
 `
 
 	if expected != res {
