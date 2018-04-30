@@ -16,4 +16,6 @@ fn main() {
     let a = 1
     let b = &c
     let d = &a
+    let e = 1'i8
+    let f: ref<i8> = &e
 }
