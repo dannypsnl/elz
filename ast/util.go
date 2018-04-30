@@ -22,6 +22,8 @@ func LLVMType(t string) llvm.Type {
 		return llvm.FloatType() // f32
 	case "f64":
 		return llvm.DoubleType() // f64
+	case "ref<i32>":
+		return llvm.PointerType(llvm.Int32Type(), 0)
 	default:
 		panic(fmt.Sprintf("not support type: `%s` yet", t))
 	}

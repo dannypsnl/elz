@@ -14,7 +14,7 @@ func (r *Ref) Check(c *Context) {
 func (r *Ref) Codegen(c *Context) llvm.Value {
 	return c.Builder.CreatePointerCast(
 		r.E.Codegen(c),
-		llvm.Type{},
+		LLVMType(r.E.Type(c)),
 		".ref_tmp",
 	)
 }
