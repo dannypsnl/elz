@@ -212,7 +212,7 @@ var deserializer = antlr.NewATNDeserializer(nil)
 var deserializedATN = deserializer.DeserializeFromUInt16(parserATN)
 
 var literalNames = []string{
-	"", "'_i'", "'8'", "'16'", "'32'", "'64'", "'_f'", "'::'", "'import'",
+	"", "''i'", "'8'", "'16'", "'32'", "'64'", "''_f'", "'::'", "'import'",
 	"'('", "')'", "'return'", "'loop'", "'{'", "'}'", "'match'", "'=>'", "','",
 	"'='", "'@'", "'->'", "'impl'", "':'", "'+'", "'let'", "'mut'", "'fn'",
 	"'extern'", "'typeForm'", "'trait'", "'as'", "'^'", "'*'", "'/'", "'-'",

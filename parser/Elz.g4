@@ -30,10 +30,10 @@ Letter: StartLetter
     | '\u203F'..'\u2040'
     ;
 
-intSuffix: '_i' ('8'|'16'|'32'|'64')
+intSuffix: '\'i' ('8'|'16'|'32'|'64')
     | floatSuffix
     ;
-floatSuffix: '_f' ('32'|'64');
+floatSuffix: '\'_f' ('32'|'64');
 
 // 1.34, .1, 0.4
 FLOAT: Digit* '.' Digit+;
