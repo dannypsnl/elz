@@ -12,10 +12,10 @@ fn add(l, r: i32) -> i32 {
     return l + r
 }
 
+extern "C" {
+    fn printf(ref<i8>) -> i32
+}
+
 fn main() {
-    let a = 1
-    let b = &c
-    let d = &a
-    let e = 1'i8
-    let f: ref<i8> = &e
+    let a = &c
 }
