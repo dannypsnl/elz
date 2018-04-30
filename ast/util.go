@@ -22,9 +22,10 @@ func LLVMType(t string) llvm.Type {
 		return llvm.FloatType() // f32
 	case "f64":
 		return llvm.DoubleType() // f64
-	case "ref<i32>":
-		return llvm.PointerType(llvm.Int32Type(), 0)
 	default:
+		if string(t[:4]) == "ref<" && string(t[len(t)-1:]) == ">" {
+			return llvm.PointerType(LLVMType(t[4:len(t)-1]), 0)
+		}
 		panic(fmt.Sprintf("not support type: `%s` yet", t))
 	}
 }
