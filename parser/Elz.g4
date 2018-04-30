@@ -55,6 +55,7 @@ topStat: fnDefine     // fn foo( $params ) { $stat... }
     | implBlock       // impl Stack { $method... }
     | traitDefine     // trait DB { method... }
     | importStat      // import ( Module... )
+    | stat            // Just for recognizing!
     ;
 
 importMod: ID ('::' ID)*;
@@ -83,7 +84,7 @@ exprStat: matchRule
     ;
 
 // match i {
-//   10 => { break },
+//   10 => { break },"
 //   _ => { i = i + 1 }
 // }
 matchRule:

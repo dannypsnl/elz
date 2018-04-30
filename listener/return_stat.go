@@ -13,6 +13,6 @@ func (s *ElzListener) ExitReturnStat(ctx *parser.ReturnStatContext) {
 			Expr: expr.(ast.Expr),
 		})
 	} else {
-		s.context.Reporter.Emit("return statement must in a function")
+		s.context.Reporter.Emit("return statement must in function")
 	}
 }
