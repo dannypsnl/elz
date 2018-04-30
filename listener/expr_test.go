@@ -38,3 +38,25 @@ func TestTypeErrorInVarDef(t *testing.T) {
 		t.Error("var type is not equal to expression's type should be an error")
 	}
 }
+
+func TestIntSuffix(t *testing.T) {
+	res := NewParse(`
+	a = 3'i8
+	b = 3'i16
+	c = 3'i32
+	d = 3'i64
+	`)
+
+	expected := `; ModuleID = 'main'
+source_filename = "main"
+
+@a = global i8 3
+@b = global i16 3
+@c = global i32 3
+@d = global i64 3
+`
+
+	if expected != res {
+		t.Errorf("suffix parse Error; expected: `%s`\nactual: `%s`", expected, res)
+	}
+}

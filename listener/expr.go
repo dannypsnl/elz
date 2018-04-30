@@ -67,5 +67,20 @@ func (s *ElzListener) ExitFloat(ctx *parser.FloatContext) {
 
 // ExitInt listen i32 literal, like: `1, 5, 321, 89`
 func (s *ElzListener) ExitInt(ctx *parser.IntContext) {
-	s.exprStack.Push(&ast.I32{Val: ctx.INT().GetText()})
+	suffix := ""
+	if ctx.IntSuffix() != nil {
+		suffix = ctx.IntSuffix().GetText()
+	}
+	switch suffix {
+	case "'i8":
+		s.exprStack.Push(&ast.I8{Val: ctx.INT().GetText()})
+	case "'i16":
+		s.exprStack.Push(&ast.I16{Val: ctx.INT().GetText()})
+	case "'i32":
+		s.exprStack.Push(&ast.I32{Val: ctx.INT().GetText()})
+	case "'i64":
+		s.exprStack.Push(&ast.I64{Val: ctx.INT().GetText()})
+	default:
+		s.exprStack.Push(&ast.I32{Val: ctx.INT().GetText()})
+	}
 }
