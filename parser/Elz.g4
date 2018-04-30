@@ -33,7 +33,7 @@ Letter: StartLetter
 intSuffix: '\'i' ('8'|'16'|'32'|'64')
     | '\'f' ('32'|'64')
     ;
-floatSuffix: '\'_f' ('32'|'64');
+floatSuffix: '\'f' ('32'|'64');
 
 // 1.34, .1, 0.4
 FLOAT: Digit* '.' Digit+;
