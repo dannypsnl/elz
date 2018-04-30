@@ -14,7 +14,7 @@ func TestNumStrExpression(t *testing.T) {
 source_filename = "main"
 
 @a = global i32 6
-@b = global [7 x i8] c"\22abcde\22"
+@b = global [5 x i8] c"abcde"
 `
 
 	if res != expected {

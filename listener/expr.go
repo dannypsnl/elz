@@ -52,7 +52,9 @@ func (s *ElzListener) ExitAs(ctx *parser.AsContext) {
 
 // ExitStr listen string literal, like: `"hello world"`
 func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
-	s.exprStack.Push(&ast.Str{Val: ctx.STRING().GetText()})
+	value := ctx.STRING().GetText()
+	value = value[1 : len(value)-1]
+	s.exprStack.Push(&ast.Str{Val: value})
 }
 
 // ExitId listen identify rule
