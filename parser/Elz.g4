@@ -110,6 +110,7 @@ fnCall:
 // mean a typeForm, but typeForm already be use by Go, so need an alternative name
 typeForm : ID
     | ID '<' typeList '>'
+    | '...' typeForm
     ;
 typeList: typeForm (',' typeForm)*;
 
