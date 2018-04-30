@@ -40,12 +40,12 @@ func (s *ElzListener) ExitDeclareFn(c *parser.DeclareFnContext) {
 			escapeLevel--
 		}
 		if escapeLevel == 0 && r == ',' {
-			s.fnBuilder.PushParamName(".wont_use")
-			s.fnBuilder.PushParamType(typ)
+			s.fnBuilder.PushParamName("")
+			s.fnBuilder.PushParamType(typ[:len(typ)-1])
 			typ = ""
 		}
 	}
-	s.fnBuilder.PushParamName(".wont_use")
+	s.fnBuilder.PushParamName("")
 	s.fnBuilder.PushParamType(typ)
 
 	s.AstList = append(s.AstList,

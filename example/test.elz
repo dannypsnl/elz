@@ -14,6 +14,7 @@ fn add(l, r: i32) -> i32 {
 
 extern "C" {
     fn printf(ref<i8>) -> i32
+    fn foo(ref<i8>, ref<i32>) -> i32
 }
 
 fn main() {
