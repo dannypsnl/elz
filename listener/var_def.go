@@ -36,7 +36,6 @@ func (s *ElzListener) ExitGlobalVarDef(*parser.GlobalVarDefContext) {
 func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 	// get expr
 	expr := s.exprStack.Pop()
-	// FIXME: this line cause we have to get type at parsing stage
 	// get type from expression
 	var typ string
 	// get identifier
@@ -51,8 +50,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		s.exportThis = false
 	}
 
-	// FIXME: Need to classify global var & local var, because local var of course can't be export
-	// FIXME: Need to classify heap & stack, and can find out the lifetime, else sending data by return will become bug
+	// FIXME: Need to classify heap & stack, and can find out the lifetime, else return something in stack will become bug
 	if s.isGlobalDef {
 		s.AstList = append(s.AstList, &ast.GlobalVarDef{
 			Export:     s.exportThis,
