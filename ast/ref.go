@@ -5,18 +5,18 @@ import (
 )
 
 type Ref struct {
-	E Expr
+	E *Id
 }
 
 func (r *Ref) Check(c *Context) {
 	r.E.Check(c)
 }
 func (r *Ref) Codegen(c *Context) llvm.Value {
-	return c.Builder.CreatePointerCast(
-		r.E.Codegen(c),
-		LLVMType(r.E.Type(c)),
-		".ref_tmp",
-	)
+	v, ok := c.Var("&" + r.E.Val)
+	if ok {
+		return v
+	}
+	return llvm.Value{}
 }
 func (r *Ref) Type(c *Context) string {
 	return "ref<" + r.E.Type(c) + ">"

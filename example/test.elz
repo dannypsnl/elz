@@ -14,5 +14,5 @@ fn add(l, r: i32) -> i32 {
 
 fn main() {
     let a = 1
-    let d = a
+    let d = &a
 }
