@@ -1,22 +1,14 @@
 a: i32 = 3*2-2+4*9/3
 b: str = "你好世界，我想知道elz能不能用中文"
-
 +c: i32 = a * 3
 世界="world"
 
-+fn foo() {
-  let a: i32 = 1 + 2 + 3
-}
-fn add(l: f32, r: f32) -> f32 {
-  return l + r
-}
 fn add(l, r: i32) -> i32 {
   return l + r
 }
 
 extern "C" {
   fn printf(ref<i8>) -> i32
-  fn foo(ref<i8>, ref<i32>) -> i32
 }
 
 fn main() {
