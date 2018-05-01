@@ -16,6 +16,7 @@ func TestLocalTypeError(t *testing.T) {
 		Expression: &I32{"10"},
 	}
 
+	v.Check(context)
 	v.Codegen(context)
 
 	if context.Reporter.HasNoError() {
@@ -99,6 +100,7 @@ func TestLocalVarDef(t *testing.T) {
 			"+",
 		},
 	}
+	v.Check(context)
 	res := context.Builder.CreateLoad(v.Codegen(context), "x.load")
 	context.Builder.CreateRet(res)
 
