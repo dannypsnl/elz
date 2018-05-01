@@ -12,12 +12,6 @@ func TestAsZExt(t *testing.T) {
 	testI32ToI64(t)
 }
 
-func assertEq(t *testing.T, actual, expected string) {
-	if actual != expected {
-		t.Errorf("expected: %s, actual: %s", expected, actual)
-	}
-}
-
 func getStructBy(typ string) Expr {
 	v := "10"
 	switch typ {
