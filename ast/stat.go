@@ -51,12 +51,13 @@ type LocalVarDef struct {
 }
 
 func (lv *LocalVarDef) Check(ctx *Context) {
-	lv.generateIsSafe = true
-	if lv.VarType == "" {
-		lv.VarType = lv.Expression.Type(ctx)
-	}
 	lv.Expression.Check(ctx)
+
+	lv.generateIsSafe = true
 	exprType := lv.Expression.Type(ctx)
+	if lv.VarType == "" {
+		lv.VarType = exprType
+	}
 	if lv.VarType != exprType {
 		ctx.Reporter.Emit(fmt.Sprintf("var: %s, it's type is: %s, but receive: %s", lv.Name, lv.VarType, exprType))
 		lv.generateIsSafe = false

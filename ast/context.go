@@ -8,24 +8,41 @@ import (
 
 func NewContext() *Context {
 	return &Context{
-		Parent:   nil,
-		Reporter: errors.NewReporter(),
-		Module:   llvm.NewModule("main"),
-		Context:  llvm.NewContext(),
-		Vars:     make(map[string]llvm.Value),
-		VarsType: make(map[string]string),
-		Builder:  llvm.NewBuilder(),
+		Parent:    nil,
+		Reporter:  errors.NewReporter(),
+		Module:    llvm.NewModule("main"),
+		Context:   llvm.NewContext(),
+		Vars:      make(map[string]llvm.Value),
+		VarsType:  make(map[string]string),
+		functions: make(map[string]*Function),
+		Builder:   llvm.NewBuilder(),
 	}
 }
 
 type Context struct {
-	Parent   *Context
-	Reporter *errors.Reporter
-	Module   llvm.Module
-	Context  llvm.Context
-	Vars     map[string]llvm.Value
-	VarsType map[string]string
-	Builder  llvm.Builder
+	Parent    *Context
+	Reporter  *errors.Reporter
+	Module    llvm.Module
+	Context   llvm.Context
+	Vars      map[string]llvm.Value
+	VarsType  map[string]string
+	functions map[string]*Function
+	Builder   llvm.Builder
+}
+
+type Function struct {
+	value   llvm.Value
+	retType string
+}
+
+func (c *Context) funcRetTyp(signature string) *Function {
+	if f, ok := c.functions[signature]; ok {
+		return f
+	}
+	if c.Parent != nil {
+		return c.Parent.funcRetTyp(signature)
+	}
+	return nil
 }
 
 func (c *Context) Var(name string) (llvm.Value, bool) {

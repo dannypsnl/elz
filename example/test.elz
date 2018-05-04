@@ -13,4 +13,5 @@ extern "C" {
 
 fn main() {
   let a = &c
+  let b = add(1, 2)
 }
