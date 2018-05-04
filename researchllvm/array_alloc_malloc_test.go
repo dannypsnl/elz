@@ -41,7 +41,7 @@ func TestArrayAlloc(t *testing.T) {
 
 	ctx.builder.SetInsertPointAtEnd(entry)
 
-	ar := ctx.builder.CreateArrayAlloca(llvm.Int32Type(), llvm.ConstInt(llvm.Int32Type(), 15, false), "array.alloca")
+	ar := ctx.builder.CreateArrayAlloca(llvm.PointerType(llvm.Int32Type(), 0), llvm.ConstInt(llvm.Int32Type(), 0, true), "array.alloca")
 	ctx.builder.CreateGEP(ar, []llvm.Value{llvm.ConstInt(llvm.Int32Type(), 0, false)}, "sp")
 	arrLoad := ctx.builder.CreateLoad(array, "array.load")
 	ctx.builder.CreateExtractValue(arrLoad, 0, "arr[0]")
