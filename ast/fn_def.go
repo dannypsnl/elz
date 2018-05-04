@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"bytes"
+
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
@@ -17,6 +19,7 @@ type FnDef struct {
 	RetType     string
 	Ctx         *Context
 	IsExternDef bool
+	fcache      string
 }
 
 func (f *FnDef) Check(ctx *Context) {
@@ -31,8 +34,21 @@ func (f *FnDef) Check(ctx *Context) {
 		Builder:  llvm.NewBuilder(),
 	}
 
-	for _, p := range f.Params {
+	buf := bytes.NewBuffer([]byte{})
+	buf.WriteString(f.Name)
+	buf.WriteRune('(')
+	for i, p := range f.Params {
 		f.Ctx.VarsType[p.Name] = p.Type
+		buf.WriteString(p.Type)
+		if i != len(f.Params)-1 {
+			buf.WriteRune(',')
+		}
+	}
+	buf.WriteRune(')')
+	f.fcache = buf.String()
+	ctx.functions[f.fcache] = &Function{
+		value:   llvm.Value{},
+		retType: f.RetType,
 	}
 	for _, stat := range f.Body {
 		stat.Check(f.Ctx)
@@ -43,6 +59,9 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 	fn := llvm.AddFunction(ctx.Module, f.Name,
 		llvm.FunctionType(f.returnType(ctx), f.paramsType(), false),
 	)
+
+	fc := ctx.functions[f.fcache]
+	fc.value = fn
 
 	// is a declaration in extern block for ffi we don't generate the statement for it
 	if !f.IsExternDef {

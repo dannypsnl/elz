@@ -97,13 +97,3 @@ func (b *BinaryExpr) Type(ctx *Context) string {
 	}
 	return leftT
 }
-
-type FnCall struct {
-	Name    string
-	Args    []Expr
-	RetType string // Setting by parser
-}
-
-func (fc *FnCall) Type(*Context) string {
-	return fc.RetType
-}
