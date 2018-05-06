@@ -83,8 +83,8 @@ entry:
 
 func opcode2String(op llvm.Opcode) string {
 	switch op {
-	case llvm.ZExt:
-		return "zext"
+	case llvm.SExt:
+		return "sext"
 	case llvm.Trunc:
 		return "trunc"
 	case llvm.FPExt:

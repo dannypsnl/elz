@@ -16,7 +16,7 @@ func makeOp(exprType, toType string) llvm.Opcode {
 	if exprType == "i32" {
 		switch toType {
 		case "i64":
-			return llvm.ZExt
+			return llvm.SExt
 		case "i8":
 			fallthrough
 		case "i16":
@@ -29,7 +29,7 @@ func makeOp(exprType, toType string) llvm.Opcode {
 		case "i32":
 			fallthrough
 		case "i64":
-			return llvm.ZExt
+			return llvm.SExt
 		}
 	} else if exprType == "i16" {
 		switch toType {
@@ -38,7 +38,7 @@ func makeOp(exprType, toType string) llvm.Opcode {
 		case "i32":
 			fallthrough
 		case "i64":
-			return llvm.ZExt
+			return llvm.SExt
 		}
 	} else if exprType == "f32" && toType == "f64" {
 		return llvm.FPExt
