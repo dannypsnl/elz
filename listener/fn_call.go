@@ -18,8 +18,21 @@ func (s *ElzListener) ExitFnCall(ctx *parser.FnCallContext) {
 	for e := stack.Pop(); e != nil; e = stack.Pop() {
 		args = append(args, e.(ast.Expr))
 	}
-	s.exprStack.Push(&ast.FnCall{
+
+	fnCallAst := &ast.FnCall{
 		Name: ctx.ID().GetText(),
 		Args: args,
-	})
+	}
+	if s.isStatExpr {
+		s.exprStack.Push(fnCallAst)
+	} else {
+		s.AstList = append(s.AstList, fnCallAst)
+	}
+}
+
+func (s *ElzListener) EnterStatExpr(c *parser.StatExprContext) {
+	s.isStatExpr = true
+}
+func (s *ElzListener) ExitStatExpr(c *parser.StatExprContext) {
+	s.isStatExpr = false
 }
