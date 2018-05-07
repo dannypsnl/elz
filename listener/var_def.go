@@ -5,11 +5,6 @@ import (
 	"github.com/elz-lang/elz/parser"
 )
 
-// EnterExportor: + prefix
-func (s *ElzListener) EnterExportor(*parser.ExportorContext) {
-	s.exportThis = true
-}
-
 // VarDef:
 //   let (mut) $var_name = $expr
 func (s *ElzListener) EnterLocalVarDef(ctx *parser.LocalVarDefContext) {
