@@ -23,3 +23,21 @@ func TestFnCall(t *testing.T) {
 		t.Errorf("expected: %s, actual: %s", expected, r)
 	}
 }
+
+func TestFnCallAsStatement(t *testing.T) {
+	r := NewParse(`
+	fn foo() {
+		// do nothing
+	}
+	fn main() {
+		foo()
+	}
+	`)
+
+	expected := `
+  %.call_tmp = call void @foo()`
+
+	if !strings.Contains(r, expected) {
+		t.Errorf("expected: %s, actual: %s", expected, r)
+	}
+}
