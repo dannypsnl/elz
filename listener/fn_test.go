@@ -19,6 +19,7 @@ entry:
   %a = alloca i32
   store i32 4, i32* %a
   %a1 = load i32, i32* %a
+  ret void
 }
 `
 	if res != expected {
@@ -36,6 +37,7 @@ source_filename = "main"
 
 define void @foo(i32 %a, i32 %b, i32 %c) {
 entry:
+  ret void
 }
 `
 	if res != expected {
@@ -45,8 +47,8 @@ entry:
 
 func TestOverloadingFunction(t *testing.T) {
 	res := NewParse(`
-	fn add(l: f32, r: f32) -> f32 {}
-	fn add(l: i32, r: i32) -> i32 {}
+	fn add(l: f32, r: f32) -> f32 { return l + r }
+	fn add(l: i32, r: i32) -> i32 { return l + r }
 	`)
 
 	expected := `; ModuleID = 'main'
@@ -54,10 +56,14 @@ source_filename = "main"
 
 define float @add(float %l, float %r) {
 entry:
+  %.fadd_tmp = fadd float %l, %r
+  ret float %.fadd_tmp
 }
 
 define i32 @add.1(i32 %l, i32 %r) {
 entry:
+  %.add_tmp = add i32 %l, %r
+  ret i32 %.add_tmp
 }
 `
 	if res != expected {

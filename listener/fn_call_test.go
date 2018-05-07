@@ -26,11 +26,11 @@ func TestFnCall(t *testing.T) {
 
 func TestFnCallAsStatement(t *testing.T) {
 	r := NewParse(`
-	fn add(l, r: i32) -> i32 {
-		return l + r
+	fn foo() {
+		// do nothing
 	}
 	fn main() {
-		add(1, 2)
+		foo()
 	}
 	`)
 

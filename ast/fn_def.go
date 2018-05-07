@@ -76,10 +76,12 @@ func (f *FnDef) Codegen(ctx *Context) llvm.Value {
 		for _, stat := range f.Body {
 			stat.Codegen(f.Ctx)
 		}
-		f.Ctx.Builder.ClearInsertionPoint()
 		if f.Name == "main" {
 			generateMainFn(f.Ctx.Builder, entryPoint)
+		} else if f.RetType == "" {
+			f.Ctx.Builder.CreateRetVoid()
 		}
+		f.Ctx.Builder.ClearInsertionPoint()
 	}
 	return fn
 }
