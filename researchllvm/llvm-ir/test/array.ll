@@ -7,16 +7,20 @@ target triple = "x86_64-apple-macosx10.13.0"
 
 ; Function Attrs: noinline nounwind optnone ssp uwtable
 define i32 @main() #0 {
-  ; arr
   %1 = alloca [5 x i32], align 16
-  ; buf
   %2 = alloca i32*, align 8
-  %3 = bitcast [5 x i32]* %1 to i8*
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %3, i8* bitcast ([5 x i32]* @main.arr to i8*), i64 20, i32 16, i1 false)
-  ; get arr
-  %4 = getelementptr inbounds [5 x i32], [5 x i32]* %1, i32 0, i32 0
-  ; buf = arr
-  store i32* %4, i32** %2, align 8
+  %3 = alloca i32, align 4
+  %4 = alloca i32, align 4
+  %5 = bitcast [5 x i32]* %1 to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %5, i8* bitcast ([5 x i32]* @main.arr to i8*), i64 20, i32 16, i1 false)
+  %6 = getelementptr inbounds [5 x i32], [5 x i32]* %1, i32 0, i32 0
+  store i32* %6, i32** %2, align 8
+  %7 = getelementptr inbounds [5 x i32], [5 x i32]* %1, i64 0, i64 0
+  %8 = load i32, i32* %7, align 16
+  store i32 %8, i32* %3, align 4
+  %9 = getelementptr inbounds [5 x i32], [5 x i32]* %1, i64 0, i64 1
+  %10 = load i32, i32* %9, align 4
+  store i32 %10, i32* %4, align 4
   ret i32 0
 }
 
