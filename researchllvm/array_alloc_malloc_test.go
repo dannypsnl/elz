@@ -23,6 +23,12 @@ func NewTestContext() *TestContext {
 func TestArrayAlloc(t *testing.T) {
 	ctx := NewTestContext()
 
+	argsRef := []llvm.Type{
+		llvm.PointerType(llvm.Int8Type(), 0),
+	}
+	pft := llvm.FunctionType(llvm.Int32Type(), argsRef, true)
+	printf := llvm.AddFunction(ctx.module, "printf", pft)
+
 	arrayType := llvm.ArrayType(llvm.Int32Type(), 5)
 	arrayV := llvm.ConstArray(llvm.Int32Type(), []llvm.Value{
 		llvm.ConstInt(llvm.Int32Type(), 1, true),
@@ -41,10 +47,17 @@ func TestArrayAlloc(t *testing.T) {
 
 	ctx.builder.SetInsertPointAtEnd(entry)
 
-	ar := ctx.builder.CreateArrayAlloca(llvm.PointerType(llvm.Int32Type(), 0), llvm.ConstInt(llvm.Int32Type(), 0, true), "array.alloca")
-	ctx.builder.CreateGEP(ar, []llvm.Value{llvm.ConstInt(llvm.Int32Type(), 0, false)}, "sp")
-	arrLoad := ctx.builder.CreateLoad(array, "array.load")
-	ctx.builder.CreateExtractValue(arrLoad, 0, "arr[0]")
+	s := ctx.builder.CreateGlobalStringPtr("value: %d\n", "format")
+
+	arr0Addr := ctx.builder.CreateGEP(array, []llvm.Value{
+		llvm.ConstInt(llvm.Int64Type(), 0, false),
+		llvm.ConstInt(llvm.Int32Type(), 0, false),
+	}, "&arr[0]")
+
+	arr0Value := ctx.builder.CreateLoad(arr0Addr, "arr[0]")
+	ctx.builder.CreateCall(printf, []llvm.Value{s, arr0Value}, "")
+
+	ctx.builder.CreateRetVoid()
 
 	println(ctx.module.String())
 }
