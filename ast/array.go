@@ -47,5 +47,5 @@ func (a *Array) Codegen(c *Context) llvm.Value {
 }
 
 func (a *Array) Type(*Context) string {
-	return fmt.Sprintf("array<%s,%d>", a.ElementType, a.Len)
+	return fmt.Sprintf("[%s;%d]", a.ElementType, a.Len)
 }

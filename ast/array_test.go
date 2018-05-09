@@ -21,7 +21,7 @@ func TestArray(t *testing.T) {
 
 func testArrayType(t *testing.T, arr *Array, c *Context) {
 	actual := arr.Type(c)
-	expected := "array<i32,1>"
+	expected := "[i32;1]"
 
 	if actual != expected {
 		t.Errorf(fmt.Sprintf("expected: `%s`, actual: `%s`", expected, actual))
