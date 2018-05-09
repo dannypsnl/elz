@@ -40,3 +40,20 @@ func testCodegenResult(t *testing.T, arr *Array, c *Context) {
 		t.Errorf(fmt.Sprintf("expected contains: `%s`, actual module is: `%s`", expected, c.Module))
 	}
 }
+
+func TestBadArrayShouldReport(t *testing.T) {
+	c := NewContext()
+	arr := &Array{
+		Elements:    []Expr{&I32{Val: "10"}},
+		ElementType: "i64",
+		Len:         1,
+	}
+	arr.Check(c)
+	report := c.Reporter.ErrMsgs[0]
+
+	expectedReport := "Array expected type: i64, but contains expression type: i32"
+
+	if report != expectedReport {
+		t.Errorf(fmt.Sprintf("expectedReport: `%s`, report: `%s`", expectedReport, report))
+	}
+}
