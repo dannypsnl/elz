@@ -57,6 +57,16 @@ func TestArrayAlloc(t *testing.T) {
 	arr0Value := ctx.builder.CreateLoad(arr0Addr, "arr[0]")
 	ctx.builder.CreateCall(printf, []llvm.Value{s, arr0Value}, "")
 
+	arrayAlloc := ctx.builder.CreateAlloca(arrayType, "array.alloc")
+	arrayLoad := ctx.builder.CreateLoad(array, "array.load")
+	ctx.builder.CreateStore(arrayLoad, arrayAlloc)
+	arr1Addr := ctx.builder.CreateGEP(arrayAlloc, []llvm.Value{
+		llvm.ConstInt(llvm.Int64Type(), 0, false),
+		llvm.ConstInt(llvm.Int32Type(), 1, false),
+	}, "&arr[1]")
+	arr1Value := ctx.builder.CreateLoad(arr1Addr, "arr[1]")
+	ctx.builder.CreateCall(printf, []llvm.Value{s, arr1Value}, "")
+
 	ctx.builder.CreateRetVoid()
 
 	println(ctx.module.String())
