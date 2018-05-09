@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"strconv"
 
 	"llvm.org/llvm/bindings/go/llvm"
 )
@@ -24,6 +25,19 @@ func LLVMType(t string) llvm.Type {
 		return llvm.DoubleType() // f64
 	default:
 		if len(t) == 3 && string(t[:3]) == "any" {
+			goto end
+		}
+		if t[0] == '[' && t[len(t)-1] == ']' {
+			for i, v := range t {
+				if v == ';' {
+					lenS := t[i+1 : len(t)-1]
+					length, err := strconv.ParseInt(lenS, 10, 32)
+					if err != nil {
+						panic(err)
+					}
+					return llvm.ArrayType(LLVMType(string(t[1:i])), int(length))
+				}
+			}
 			goto end
 		}
 		if len(t) > 4 && string(t[:4]) == "ref<" && string(t[len(t)-1:]) == ">" {
