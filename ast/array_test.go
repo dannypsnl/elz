@@ -15,6 +15,20 @@ func TestArray(t *testing.T) {
 		ElementType: "i32",
 		Len:         1,
 	}
+
+	testCodegenResult(t, arr, c)
+}
+
+func testArrayType(t *testing.T, arr *Array, c *Context) {
+	actual := arr.Type(c)
+	expected := "array<i32,1>"
+
+	if actual != expected {
+		t.Errorf(fmt.Sprintf("expected: `%s`, actual: `%s`", expected, actual))
+	}
+}
+
+func testCodegenResult(t *testing.T, arr *Array, c *Context) {
 	arr.Check(c)
 	arrv := arr.Codegen(c)
 	garr := llvm.AddGlobal(c.Module, llvm.ArrayType(llvm.Int32Type(), 1), "arr")
