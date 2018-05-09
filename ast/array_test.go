@@ -17,6 +17,8 @@ func TestArray(t *testing.T) {
 	}
 
 	testCodegenResult(t, arr, c)
+	testArrayType(t, arr, c)
+	testLocalVarCodegenResult(t, arr)
 }
 
 func testArrayType(t *testing.T, arr *Array, c *Context) {
@@ -25,6 +27,33 @@ func testArrayType(t *testing.T, arr *Array, c *Context) {
 
 	if actual != expected {
 		t.Errorf(fmt.Sprintf("expected: `%s`, actual: `%s`", expected, actual))
+	}
+}
+
+func testLocalVarCodegenResult(t *testing.T, arr *Array) {
+	c := NewContext()
+
+	arrl := &LocalVarDef{
+		Immutable:  true,
+		Name:       "arr",
+		VarType:    "",
+		Expression: arr,
+	}
+	main := &FnDef{
+		Export:      false,
+		Name:        "main",
+		Params:      []*Param{},
+		Body:        []Stat{arrl},
+		RetType:     "i32",
+		IsExternDef: false,
+	}
+	main.Check(c)
+	main.Codegen(c)
+
+	expected := `yeee`
+
+	if !strings.Contains(c.Module.String(), expected) {
+		t.Errorf(fmt.Sprintf("expected contains: `%s`, actual module is: `%s`", expected, c.Module))
 	}
 }
 
