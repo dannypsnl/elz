@@ -59,6 +59,9 @@ type ElzListener interface {
 	// EnterTypeForm is called when entering the typeForm production.
 	EnterTypeForm(c *TypeFormContext)
 
+	// EnterTypeInfoList is called when entering the typeInfoList production.
+	EnterTypeInfoList(c *TypeInfoListContext)
+
 	// EnterTypeList is called when entering the typeList production.
 	EnterTypeList(c *TypeListContext)
 
@@ -128,6 +131,9 @@ type ElzListener interface {
 	// EnterNotEq is called when entering the NotEq production.
 	EnterNotEq(c *NotEqContext)
 
+	// EnterArrWithList is called when entering the ArrWithList production.
+	EnterArrWithList(c *ArrWithListContext)
+
 	// EnterSubExpr is called when entering the SubExpr production.
 	EnterSubExpr(c *SubExprContext)
 
@@ -139,6 +145,9 @@ type ElzListener interface {
 
 	// EnterEq is called when entering the Eq production.
 	EnterEq(c *EqContext)
+
+	// EnterArrWithLen is called when entering the ArrWithLen production.
+	EnterArrWithLen(c *ArrWithLenContext)
 
 	// EnterAndOrOr is called when entering the AndOrOr production.
 	EnterAndOrOr(c *AndOrOrContext)
@@ -224,6 +233,9 @@ type ElzListener interface {
 	// ExitTypeForm is called when exiting the typeForm production.
 	ExitTypeForm(c *TypeFormContext)
 
+	// ExitTypeInfoList is called when exiting the typeInfoList production.
+	ExitTypeInfoList(c *TypeInfoListContext)
+
 	// ExitTypeList is called when exiting the typeList production.
 	ExitTypeList(c *TypeListContext)
 
@@ -293,6 +305,9 @@ type ElzListener interface {
 	// ExitNotEq is called when exiting the NotEq production.
 	ExitNotEq(c *NotEqContext)
 
+	// ExitArrWithList is called when exiting the ArrWithList production.
+	ExitArrWithList(c *ArrWithListContext)
+
 	// ExitSubExpr is called when exiting the SubExpr production.
 	ExitSubExpr(c *SubExprContext)
 
@@ -304,6 +319,9 @@ type ElzListener interface {
 
 	// ExitEq is called when exiting the Eq production.
 	ExitEq(c *EqContext)
+
+	// ExitArrWithLen is called when exiting the ArrWithLen production.
+	ExitArrWithLen(c *ArrWithLenContext)
 
 	// ExitAndOrOr is called when exiting the AndOrOr production.
 	ExitAndOrOr(c *AndOrOrContext)

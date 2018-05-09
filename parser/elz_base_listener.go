@@ -123,6 +123,12 @@ func (s *BaseElzListener) EnterTypeForm(ctx *TypeFormContext) {}
 // ExitTypeForm is called when production typeForm is exited.
 func (s *BaseElzListener) ExitTypeForm(ctx *TypeFormContext) {}
 
+// EnterTypeInfoList is called when production typeInfoList is entered.
+func (s *BaseElzListener) EnterTypeInfoList(ctx *TypeInfoListContext) {}
+
+// ExitTypeInfoList is called when production typeInfoList is exited.
+func (s *BaseElzListener) ExitTypeInfoList(ctx *TypeInfoListContext) {}
+
 // EnterTypeList is called when production typeList is entered.
 func (s *BaseElzListener) EnterTypeList(ctx *TypeListContext) {}
 
@@ -261,6 +267,12 @@ func (s *BaseElzListener) EnterNotEq(ctx *NotEqContext) {}
 // ExitNotEq is called when production NotEq is exited.
 func (s *BaseElzListener) ExitNotEq(ctx *NotEqContext) {}
 
+// EnterArrWithList is called when production ArrWithList is entered.
+func (s *BaseElzListener) EnterArrWithList(ctx *ArrWithListContext) {}
+
+// ExitArrWithList is called when production ArrWithList is exited.
+func (s *BaseElzListener) ExitArrWithList(ctx *ArrWithListContext) {}
+
 // EnterSubExpr is called when production SubExpr is entered.
 func (s *BaseElzListener) EnterSubExpr(ctx *SubExprContext) {}
 
@@ -284,6 +296,12 @@ func (s *BaseElzListener) EnterEq(ctx *EqContext) {}
 
 // ExitEq is called when production Eq is exited.
 func (s *BaseElzListener) ExitEq(ctx *EqContext) {}
+
+// EnterArrWithLen is called when production ArrWithLen is entered.
+func (s *BaseElzListener) EnterArrWithLen(ctx *ArrWithLenContext) {}
+
+// ExitArrWithLen is called when production ArrWithLen is exited.
+func (s *BaseElzListener) ExitArrWithLen(ctx *ArrWithLenContext) {}
 
 // EnterAndOrOr is called when production AndOrOr is entered.
 func (s *BaseElzListener) EnterAndOrOr(ctx *AndOrOrContext) {}

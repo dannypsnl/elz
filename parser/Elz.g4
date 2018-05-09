@@ -109,9 +109,10 @@ fnCall:
 
 // mean a typeForm, but typeForm already be use by Go, so need an alternative name
 typeForm : ID
-    | ID '<' typeList '>'
+    | ID '<' typeInfoList '>'
     | '...' typeForm
     ;
+typeInfoList: (typeForm|expr) (',' (typeForm|expr))*;
 typeList: typeForm (',' typeForm)*;
 
 // @op
@@ -185,6 +186,8 @@ expr: op='&' expr                      # Ref // operation prec
     | expr '?' expr ':' expr           # ThreeOpCmp
     | '(' expr ')'                     # SubExpr
     | exprStat                         # StatExpr
+    | '[' expr ';' INT ']'             # ArrWithLen
+    | '[' exprList ']'                 # ArrWithList
     | INT intSuffix?                   # Int
     | FLOAT floatSuffix?               # Float
     | ID                               # Id
