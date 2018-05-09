@@ -16,7 +16,7 @@ func TestArray(t *testing.T) {
 		Len:         1,
 	}
 
-	testCodegenResult(t, arr, c)
+	//testCodegenResult(t, arr, c)
 	testArrayType(t, arr, c)
 	testLocalVarCodegenResult(t, arr)
 }
