@@ -44,9 +44,9 @@ func (a *Array) Codegen(c *Context) llvm.Value {
 		values = append(values, e.Codegen(c))
 	}
 	array := llvm.ConstArray(LLVMType(a.ElementType), values)
-	tmpGlobal := llvm.AddGlobal(c.Module, LLVMType(a.ElementType), ".tmp_array")
+	tmpGlobal := llvm.AddGlobal(c.Module, LLVMType(a.Type(c)), ".tmp_array")
 	tmpGlobal.SetInitializer(array)
-	return tmpGlobal
+	return c.Builder.CreateLoad(tmpGlobal, ".load_tmp")
 }
 
 func (a *Array) Type(*Context) string {

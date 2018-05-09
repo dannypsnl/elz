@@ -36,7 +36,7 @@ func testLocalVarCodegenResult(t *testing.T, arr *Array) {
 	arrl := &LocalVarDef{
 		Immutable:  true,
 		Name:       "arr",
-		VarType:    "",
+		VarType:    "[i32;1]",
 		Expression: arr,
 	}
 	main := &FnDef{
