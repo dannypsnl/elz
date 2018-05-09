@@ -22,13 +22,13 @@ type FnDef struct {
 	fcache      string
 }
 
-func (f *FnDef) Check(ctx *Context) {
+func (f *FnDef) Check(c *Context) {
 	f.completeParamType()
 	f.Ctx = &Context{
-		Parent:   ctx,
-		Reporter: ctx.Reporter,
-		Module:   ctx.Module,
-		Context:  ctx.Context,
+		Parent:   c,
+		Reporter: c.Reporter,
+		Module:   c.Module,
+		Context:  c.Context,
 		Vars:     make(map[string]llvm.Value),
 		VarsType: make(map[string]string),
 		Builder:  llvm.NewBuilder(),
@@ -46,21 +46,22 @@ func (f *FnDef) Check(ctx *Context) {
 	}
 	buf.WriteRune(')')
 	f.fcache = buf.String()
-	ctx.functions[f.fcache] = &Function{
+	c.functions[f.fcache] = &Function{
 		value:   llvm.Value{},
 		retType: f.RetType,
 	}
+
 	for _, stat := range f.Body {
 		stat.Check(f.Ctx)
 	}
 }
 
-func (f *FnDef) Codegen(ctx *Context) llvm.Value {
-	fn := llvm.AddFunction(ctx.Module, f.Name,
-		llvm.FunctionType(f.returnType(ctx), f.paramsType(), false),
+func (f *FnDef) Codegen(c *Context) llvm.Value {
+	fn := llvm.AddFunction(c.Module, f.Name,
+		llvm.FunctionType(f.returnType(c), f.paramsType(), false),
 	)
 
-	fc := ctx.functions[f.fcache]
+	fc := c.functions[f.fcache]
 	fc.value = fn
 
 	// is a declaration in extern block for ffi we don't generate the statement for it
