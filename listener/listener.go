@@ -57,3 +57,15 @@ func (s *ElzListener) ExitProg(ctx *parser.ProgContext) {
 	}
 	s.context.Reporter.Report()
 }
+
+func NewParse(source string) string {
+	input := antlr.NewInputStream(source)
+	lexer := parser.NewElzLexer(input)
+	stream := antlr.NewCommonTokenStream(lexer, 0)
+	p := parser.NewElzParser(stream)
+	p.BuildParseTrees = true
+	tree := p.Prog()
+	listener := /*listener.*/ New()
+	antlr.ParseTreeWalkerDefault.Walk(listener, tree)
+	return fmt.Sprint(listener.Module())
+}
