@@ -1,6 +1,7 @@
 package listener
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/elz-lang/elz/parser"
@@ -49,19 +50,17 @@ func TestIntSuffix(t *testing.T) {
 	f = 3'f64
 	`)
 
-	expected := `; ModuleID = 'main'
-source_filename = "main"
-
-@a = global i8 3
-@b = global i16 3
-@c = global i32 3
-@d = global i64 3
-@e = global float 3.000000e+00
-@f = global double 3.000000e+00
+	expected := `
+		@a = global i8 3
+		@b = global i16 3
+		@c = global i32 3
+		@d = global i64 3
+		@e = global float 3.000000e+00
+		@f = global double 3.000000e+00
 `
 
-	if expected != res {
-		t.Errorf("int suffix parse Error; expected: `%s`\nactual: `%s`", expected, res)
+	if strings.Contains(res, expected) {
+		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
 	}
 }
 
@@ -71,14 +70,12 @@ func TestFloatSuffix(t *testing.T) {
 	b = 3.14'f64
 	`)
 
-	expected := `; ModuleID = 'main'
-source_filename = "main"
-
-@a = global float 0x40091EB860000000
-@b = global double 3.140000e+00
+	expected := `
+		@a = global float 0x40091EB860000000
+		@b = global double 3.140000e+00
 `
 
-	if expected != res {
-		t.Errorf("float suffix parse Error; expected: `%s`\nactual: `%s`", expected, res)
+	if strings.Contains(res, expected) {
+		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
 	}
 }
