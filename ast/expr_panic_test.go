@@ -4,11 +4,11 @@ import (
 	"testing"
 )
 
-func TestUnsupportOpShouldCausePanic(t *testing.T) {
+func TestBinaryExprWithUnsupportOpShouldPanic(t *testing.T) {
 	context := NewContext()
 	defer func() {
 		if p := recover(); p == nil {
-			t.Error(`Didn't panic`)
+			t.Error(`Should panic but not`)
 		}
 	}()
 	num := &F32{
