@@ -6,20 +6,6 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
-type TestContext struct {
-	module  llvm.Module
-	context llvm.Context
-	builder llvm.Builder
-}
-
-func NewTestContext() *TestContext {
-	return &TestContext{
-		module:  llvm.NewModule("test"),
-		context: llvm.NewContext(),
-		builder: llvm.NewBuilder(),
-	}
-}
-
 func TestArrayAlloc(t *testing.T) {
 	ctx := NewTestContext()
 
