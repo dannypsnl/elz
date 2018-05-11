@@ -42,8 +42,8 @@ func TestMissTypeComplete(t *testing.T) {
 
 func TestOverloadingFunction(t *testing.T) {
 	res := NewParse(`
-	fn add(l: f32, r: f32) -> f32 {}
-	fn add(l: i32, r: i32) -> i32 {}
+	fn add(l: f32, r: f32) -> f32 { return l + r }
+	fn add(l: i32, r: i32) -> i32 { return l + r }
 	`)
 
 	expected := `

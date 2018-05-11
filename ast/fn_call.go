@@ -40,7 +40,7 @@ func (fc *FnCall) Codegen(c *Context) llvm.Value {
 		args = append(args, a.Codegen(c))
 	}
 
-	return c.Builder.CreateCall(fn, args, ".call_tmp")
+	return c.Builder.CreateCall(fn, args, "")
 }
 
 func (fc *FnCall) Type(*Context) string {

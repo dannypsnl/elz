@@ -15,9 +15,26 @@ func TestFnCall(t *testing.T) {
 	`)
 
 	expected := `
-  %.call_tmp = call i32 @add(i32 1, i32 2)
+  %0 = call i32 @add(i32 1, i32 2)
   %a = alloca i32
-  store i32 %.call_tmp, i32* %a`
+  store i32 %0, i32* %a`
+
+	if !strings.Contains(r, expected) {
+		t.Errorf("expected: %s, actual: %s", expected, r)
+	}
+}
+
+func TestFnCallAsStatement(t *testing.T) {
+	r := NewParse(`
+	fn foo() {
+		// do nothing
+	}
+	fn main() {
+		foo()
+	}
+	`)
+
+	expected := `call`
 
 	if !strings.Contains(r, expected) {
 		t.Errorf("expected: %s, actual: %s", expected, r)

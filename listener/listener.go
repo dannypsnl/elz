@@ -30,6 +30,8 @@ type ElzListener struct {
 	isGlobalDef bool
 	// inExternBlock mean in extern "C" {}
 	inExternBlock bool
+	// This one is fuzzy, it
+	isStatExpr bool
 }
 
 // Module return the llvm.Module generate by parse process

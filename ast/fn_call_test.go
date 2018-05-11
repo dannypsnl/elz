@@ -54,6 +54,7 @@ func TestFnCall(t *testing.T) {
 	f.Codegen(context)
 	m.Codegen(context)
 
+	actual := context.Module.String()
 	expected := `define i32 @add(i32 %lv, i32 %rv) {
 entry:
   %.add_tmp = add i32 %lv, %rv
@@ -62,10 +63,10 @@ entry:
 
 define i32 @main() {
 entry:
-  %.call_tmp = call i32 @add(i32 10, i32 10)
+  %0 = call i32 @add(i32 10, i32 10)
   ret i32 0
 }`
-	if !strings.Contains(context.Module.String(), expected) {
-		t.Error()
+	if !strings.Contains(actual, expected) {
+		t.Errorf("expected: `%s`, actual: `%s`", expected, actual)
 	}
 }

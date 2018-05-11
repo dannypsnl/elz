@@ -18,8 +18,19 @@ func (s *ElzListener) ExitFnCall(ctx *parser.FnCallContext) {
 	for e := stack.Pop(); e != nil; e = stack.Pop() {
 		args = append(args, e.(ast.Expr))
 	}
-	s.exprStack.Push(&ast.FnCall{
+
+	fnCallAst := &ast.FnCall{
 		Name: ctx.ID().GetText(),
 		Args: args,
-	})
+	}
+	s.exprStack.Push(fnCallAst)
+}
+
+func (s *ElzListener) ExitStat(c *parser.StatContext) {
+	some := s.exprStack.Pop()
+	if v, ok := some.(*ast.FnCall); ok {
+		if s.fnBuilder != nil {
+			s.fnBuilder.Stat(v)
+		}
+	}
 }
