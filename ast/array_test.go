@@ -9,19 +9,19 @@ import (
 )
 
 func TestArray(t *testing.T) {
-	c := NewContext()
 	arr := &Array{
 		Elements:    []Expr{&I32{Val: "10"}},
 		ElementType: "i32",
 		Len:         1,
 	}
 
-	//testCodegenResult(t, arr, c)
-	testArrayType(t, arr, c)
+	testCodegenResult(t, arr)
+	testArrayType(t, arr)
 	testLocalVarCodegenResult(t, arr)
 }
 
-func testArrayType(t *testing.T, arr *Array, c *Context) {
+func testArrayType(t *testing.T, arr *Array) {
+	c := NewContext()
 	actual := arr.Type(c)
 	expected := "[i32;1]"
 
@@ -35,7 +35,7 @@ func testLocalVarCodegenResult(t *testing.T, arr *Array) {
 
 	arrl := &LocalVarDef{
 		Immutable:  true,
-		Name:       "arr",
+		Name:       "local_arr",
 		VarType:    "[i32;1]",
 		Expression: arr,
 	}
@@ -57,7 +57,8 @@ func testLocalVarCodegenResult(t *testing.T, arr *Array) {
 	}
 }
 
-func testCodegenResult(t *testing.T, arr *Array, c *Context) {
+func testCodegenResult(t *testing.T, arr *Array) {
+	c := NewContext()
 	arr.Check(c)
 	arrv := arr.Codegen(c)
 	garr := llvm.AddGlobal(c.Module, llvm.ArrayType(llvm.Int32Type(), 1), "arr")
