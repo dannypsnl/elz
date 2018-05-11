@@ -31,7 +31,30 @@ func TestFnDef(t *testing.T) {
 	expected := `define float @add(float %lv, float %rv)`
 
 	if !strings.Contains(context.Module.String(), expected) {
-		t.Errorf("expected has: %s, but actual: %s", expected, context.Module.String())
+		t.Errorf("expected has: `%s`, but actual: `%s`", expected, context.Module.String())
+	}
+}
+
+func TestFnDefParamMissingType(t *testing.T) {
+	c := NewContext()
+	f := &FnDef{
+		Export: false,
+		Name:   "add",
+		Params: []*Param{
+			&Param{Name: "lv", Type: ""},
+			&Param{Name: "rv", Type: "i32"},
+		},
+		RetType: "i32",
+	}
+
+	f.Check(c)
+	f.Codegen(c)
+
+	actual := c.Module.String()
+	expected := `define i32 @add(i32 %lv, i32 %rv)`
+
+	if !strings.Contains(actual, expected) {
+		t.Errorf("expected has: `%s`, but actual: `%s`", expected, actual)
 	}
 }
 
@@ -65,6 +88,6 @@ entry:
 `
 
 	if !strings.Contains(context.Module.String(), expected) {
-		t.Errorf("expected has: %s, but actual: %s", expected, context.Module.String())
+		t.Errorf("expected has: `%s`, but actual: `%s`", expected, context.Module.String())
 	}
 }
