@@ -48,3 +48,22 @@ func TestBinaryExprWithUnsupportOpShouldPanic(t *testing.T) {
 	}
 	be.Codegen(context)
 }
+
+func TestBinaryReportLeftRightTypeIsDifferent(t *testing.T) {
+	c := NewContext()
+
+	b := &BinaryExpr{
+		RightE: &F32{Val: "3.134"},
+		LeftE:  &I32{Val: "10"},
+		Op:     "-",
+	}
+
+	b.Check(c)
+
+	actual := c.Reporter.ErrMsgs[0]
+	expected := `left expression type: i32, right expression type: f32`
+
+	if actual != expected {
+		t.Errorf("expected: %s, actual: %s", expected, actual)
+	}
+}
