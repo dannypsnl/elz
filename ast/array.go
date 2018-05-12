@@ -22,6 +22,10 @@ func (a *Array) Check(c *Context) {
 		e.Check(c)
 	}
 
+	if a.ElementType == "" {
+		a.ElementType = a.Elements[0].Type(c)
+	}
+
 	for _, e := range a.Elements {
 		if e.Type(c) != a.ElementType {
 			a.dontCompile = true
