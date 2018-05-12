@@ -8,20 +8,15 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
-func TestArray(t *testing.T) {
+func TestArrayType(t *testing.T) {
+	c := NewContext()
+
 	arr := &Array{
 		Elements:    []Expr{&I32{Val: "10"}},
 		ElementType: "i32",
 		Len:         1,
 	}
 
-	testCodegenResult(t, arr)
-	testArrayType(t, arr)
-	testLocalVarCodegenResult(t, arr)
-}
-
-func testArrayType(t *testing.T, arr *Array) {
-	c := NewContext()
 	actual := arr.Type(c)
 	expected := "[i32;1]"
 
@@ -30,21 +25,26 @@ func testArrayType(t *testing.T, arr *Array) {
 	}
 }
 
-func testLocalVarCodegenResult(t *testing.T, arr *Array) {
+func TestLocalVarCodegenResult(t *testing.T) {
 	c := NewContext()
 
-	arrl := &LocalVarDef{
-		Immutable:  true,
-		Name:       "local_arr",
-		VarType:    "[i32;1]",
-		Expression: arr,
-	}
 	main := &FnDef{
-		Export:      false,
-		Name:        "main",
-		Params:      []*Param{},
-		Body:        []Stat{arrl},
-		RetType:     "i32",
+		Export: false,
+		Name:   "main",
+		Params: []*Param{},
+		Body: []Stat{
+			&LocalVarDef{
+				Immutable: true,
+				Name:      "a",
+				VarType:   "[i32;1]",
+				Expression: &Array{
+					Elements:    []Expr{&I32{Val: "10"}},
+					ElementType: "i32",
+					Len:         1,
+				},
+			},
+		},
+		RetType:     "",
 		IsExternDef: false,
 	}
 	main.Check(c)
@@ -53,12 +53,19 @@ func testLocalVarCodegenResult(t *testing.T, arr *Array) {
 	expected := `yeee`
 
 	if !strings.Contains(c.Module.String(), expected) {
-		t.Errorf(fmt.Sprintf("expected contains: `%s`, actual module is: `%s`", expected, c.Module))
+		t.Errorf(fmt.Sprintf("expected contains: `%s`, actual module is: `%s`", expected, c.Module.String()))
 	}
 }
 
-func testCodegenResult(t *testing.T, arr *Array) {
+func TestCodegenResult(t *testing.T) {
 	c := NewContext()
+
+	arr := &Array{
+		Elements:    []Expr{&I32{Val: "10"}},
+		ElementType: "i32",
+		Len:         1,
+	}
+
 	arr.Check(c)
 	arrv := arr.Codegen(c)
 	garr := llvm.AddGlobal(c.Module, llvm.ArrayType(llvm.Int32Type(), 1), "arr")
