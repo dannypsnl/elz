@@ -16,4 +16,5 @@ fn main() {
   let b = add(1, 2)
   let c = [1; 1]
   let c = [1; 4]
+  let d = [1, 2, 3, 4, 5, 6]
 }
