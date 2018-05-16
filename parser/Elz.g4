@@ -111,6 +111,7 @@ fnCall:
 typeForm : ID
     | ID '<' typeInfoList '>'
     | '...' typeForm
+    | '[' typeForm ';' INT ']'
     ;
 typeInfoList: (typeForm|expr) (',' (typeForm|expr))*;
 typeList: typeForm (',' typeForm)*;
