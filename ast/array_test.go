@@ -25,38 +25,6 @@ func TestArrayType(t *testing.T) {
 	}
 }
 
-func TestLocalVarCodegenResult(t *testing.T) {
-	c := NewContext()
-
-	main := &FnDef{
-		Export: false,
-		Name:   "main",
-		Params: []*Param{},
-		Body: []Stat{
-			&LocalVarDef{
-				Immutable: true,
-				Name:      "a",
-				VarType:   "[i32;1]",
-				Expression: &Array{
-					Elements:    []Expr{&I32{Val: "10"}},
-					ElementType: "i32",
-					Len:         1,
-				},
-			},
-		},
-		RetType:     "",
-		IsExternDef: false,
-	}
-	main.Check(c)
-	main.Codegen(c)
-
-	expected := `yeee`
-
-	if !strings.Contains(c.Module.String(), expected) {
-		t.Errorf(fmt.Sprintf("expected contains: `%s`, actual module is: `%s`", expected, c.Module.String()))
-	}
-}
-
 func TestCodegenResult(t *testing.T) {
 	c := NewContext()
 
