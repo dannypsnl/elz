@@ -44,7 +44,13 @@ func (a *Array) Codegen(c *Context) llvm.Value {
 	}
 
 	values := make([]llvm.Value, 0)
-	for _, e := range a.Elements {
+	for i := 0; i < a.Len; i++ {
+		var e Expr
+		if len(a.Elements) == 1 {
+			e = a.Elements[0]
+		} else {
+			e = a.Elements[i]
+		}
 		values = append(values, e.Codegen(c))
 	}
 	array := llvm.ConstArray(LLVMType(a.ElementType), values)
