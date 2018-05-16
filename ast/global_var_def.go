@@ -31,8 +31,9 @@ func (varDef *GlobalVarDef) Codegen(ctx *Context) llvm.Value {
 	// So we should not get null string
 	expr := varDef.Expression.Codegen(ctx)
 	val := llvm.AddGlobal(ctx.Module, expr.Type(), varDef.Name)
-	val.SetInitializer(expr)
-	ctx.Vars["&"+varDef.Name] = val
-	ctx.Vars[varDef.Name] = expr // Let's use load to access all var
+	if expr.IsConstant() {
+		val.SetInitializer(expr)
+	}
+	ctx.Vars[varDef.Name] = val
 	return val
 }

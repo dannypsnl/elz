@@ -44,10 +44,9 @@ define i32 @main() {
 entry:
   %a = alloca i32
   store i32 10, i32* %a
-  %a1 = load i32, i32* %a
+  %0 = getelementptr i32, i32* %a, i32 0
   %b = alloca i32*
-  store i32* %a, i32** %b
-  %b2 = load i32*, i32** %b
+  store i32* %0, i32** %b
 }
 `
 

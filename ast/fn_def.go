@@ -71,7 +71,7 @@ func (f *FnDef) Codegen(c *Context) llvm.Value {
 
 		for i, param := range fn.Params() {
 			param.SetName(f.Params[i].Name)
-			f.Ctx.Vars[f.Params[i].Name] = param
+			f.Ctx.Vars[f.Params[i].Name+" param"] = param
 		}
 
 		for _, stat := range f.Body {

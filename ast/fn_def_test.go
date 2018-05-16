@@ -83,7 +83,6 @@ define float @Foo() {
 entry:
   %a = alloca float
   store float 0x40091EB860000000, float* %a
-  %a1 = load float, float* %a
 }
 `
 

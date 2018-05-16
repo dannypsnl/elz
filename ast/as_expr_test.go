@@ -70,11 +70,10 @@ define i32 @main() {
 entry:
   %a = alloca ` + from + `
   store ` + from + ` ` + constValueDecideBy(from) + `, ` + from + `* %a
-  %a1 = load ` + from + `, ` + from + `* %a
-  %.as_tmp = ` + opcode2String(as.op) + ` ` + from + ` %a1 to ` + targetType + `
+  %0 = load ` + from + `, ` + from + `* %a
+  %.as_tmp = ` + opcode2String(as.op) + ` ` + from + ` %0 to ` + targetType + `
   %b = alloca ` + targetType + `
   store ` + targetType + ` %.as_tmp, ` + targetType + `* %b
-  %b2 = load ` + targetType + `, ` + targetType + `* %b
 }
 `
 

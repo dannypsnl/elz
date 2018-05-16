@@ -11,8 +11,11 @@ type Id struct {
 }
 
 func (i *Id) Codegen(c *Context) llvm.Value {
-	// FIXME: id should not only be a global var
 	v, ok := c.Var(i.Val)
+	if ok {
+		return c.Builder.CreateLoad(v, "")
+	}
+	v, ok = c.Var(i.Val + " param")
 	if ok {
 		return v
 	}
