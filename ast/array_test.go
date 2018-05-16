@@ -12,10 +12,11 @@ func TestArrayType(t *testing.T) {
 	c := NewContext()
 
 	arr := &Array{
-		Elements:    []Expr{&I32{Val: "10"}},
-		ElementType: "i32",
-		Len:         1,
+		Elements: []Expr{&I32{Val: "10"}},
+		Len:      1,
 	}
+
+	arr.Check(c)
 
 	actual := arr.Type(c)
 	expected := "[i32;1]"
@@ -29,9 +30,8 @@ func TestCodegenResult(t *testing.T) {
 	c := NewContext()
 
 	arr := &Array{
-		Elements:    []Expr{&I32{Val: "10"}},
-		ElementType: "i32",
-		Len:         1,
+		Elements: []Expr{&I32{Val: "10"}},
+		Len:      1,
 	}
 
 	arr.Check(c)
@@ -49,14 +49,13 @@ func TestCodegenResult(t *testing.T) {
 func TestBadArrayShouldReport(t *testing.T) {
 	c := NewContext()
 	arr := &Array{
-		Elements:    []Expr{&I32{Val: "10"}},
-		ElementType: "i64",
-		Len:         1,
+		Elements: []Expr{&I32{Val: "10"}, &I64{Val: "20"}},
+		Len:      2,
 	}
 	arr.Check(c)
 	report := c.Reporter.ErrMsgs[0]
 
-	expectedReport := "Array expected type: i64, but contains expression type: i32"
+	expectedReport := "Array expected type: i32, but contains expression type: i64"
 
 	if report != expectedReport {
 		t.Errorf(fmt.Sprintf("expectedReport: `%s`, report: `%s`", expectedReport, report))

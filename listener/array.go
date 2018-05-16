@@ -19,9 +19,8 @@ func (s *ElzListener) ExitArrWithLen(c *parser.ArrWithLenContext) {
 		panic("parser INT rule is not a integer, must is error")
 	}
 	s.exprStack.Push(&ast.Array{
-		Elements:    []ast.Expr{expr.(ast.Expr)},
-		ElementType: "",
-		Len:         i,
+		Elements: []ast.Expr{expr.(ast.Expr)},
+		Len:      i,
 	})
 }
 
@@ -39,8 +38,7 @@ func (s *ElzListener) ExitArrWithList(c *parser.ArrWithListContext) {
 		exprs = append(exprs, e.(ast.Expr))
 	}
 	s.exprStack.Push(&ast.Array{
-		Elements:    exprs,
-		ElementType: "",
-		Len:         len(exprs),
+		Elements: exprs,
+		Len:      len(exprs),
 	})
 }

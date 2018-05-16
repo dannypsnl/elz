@@ -11,7 +11,7 @@ import (
 // It is preparing for array literal
 type Array struct {
 	Elements    []Expr
-	ElementType string
+	elementType string
 	Len         int
 	dontCompile bool
 }
@@ -22,17 +22,15 @@ func (a *Array) Check(c *Context) {
 		e.Check(c)
 	}
 
-	if a.ElementType == "" {
-		a.ElementType = a.Elements[0].Type(c)
-	}
+	a.elementType = a.Elements[0].Type(c)
 
 	for _, e := range a.Elements {
-		if e.Type(c) != a.ElementType {
+		if e.Type(c) != a.elementType {
 			a.dontCompile = true
 			c.Reporter.Emit(
 				fmt.Sprintf(
 					"Array expected type: %s, but contains expression type: %s",
-					a.ElementType, e.Type(c),
+					a.elementType, e.Type(c),
 				))
 		}
 	}
@@ -53,7 +51,7 @@ func (a *Array) Codegen(c *Context) llvm.Value {
 		}
 		values = append(values, e.Codegen(c))
 	}
-	array := llvm.ConstArray(LLVMType(a.ElementType), values)
+	array := llvm.ConstArray(LLVMType(a.elementType), values)
 	//tmpGlobal := llvm.AddGlobal(c.Module, LLVMType(a.Type(c)), ".tmp_array")
 	//tmpGlobal.SetInitializer(array)
 	//return c.Builder.CreateLoad(tmpGlobal, ".load_tmp")
@@ -61,5 +59,5 @@ func (a *Array) Codegen(c *Context) llvm.Value {
 }
 
 func (a *Array) Type(*Context) string {
-	return fmt.Sprintf("[%s;%d]", a.ElementType, a.Len)
+	return fmt.Sprintf("[%s;%d]", a.elementType, a.Len)
 }
