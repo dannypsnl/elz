@@ -5,18 +5,26 @@ import (
 )
 
 type Ref struct {
-	E *Id
+	E          Expr
+	compilable bool
 }
 
 func (r *Ref) Check(c *Context) {
 	r.E.Check(c)
+
+	if _, ok := r.E.(*Id); ok {
+		r.compilable = true
+	}
 }
 func (r *Ref) Codegen(c *Context) llvm.Value {
-	v, ok := c.Var(r.E.Val)
-	if ok {
-		return c.Builder.CreateGEP(v, []llvm.Value{
-			llvm.ConstInt(llvm.Int32Type(), 0, true),
-		}, "")
+	if r.compilable {
+		e := r.E.(*Id)
+		v, ok := c.Var(e.Val)
+		if ok {
+			return c.Builder.CreateGEP(v, []llvm.Value{
+				llvm.ConstInt(llvm.Int32Type(), 0, true),
+			}, "")
+		}
 	}
 	return llvm.Value{}
 }
