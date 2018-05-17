@@ -1,4 +1,5 @@
 fn main() {
-  let a: [i32; 1] = [1]
-  let b: [i32; 3] = [1, 2, 3]
+  let a = 1
+  let b = &a
+  let c = *a
 }
