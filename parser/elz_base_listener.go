@@ -368,3 +368,9 @@ func (s *BaseElzListener) EnterId(ctx *IdContext) {}
 
 // ExitId is called when production Id is exited.
 func (s *BaseElzListener) ExitId(ctx *IdContext) {}
+
+// EnterDeRef is called when production DeRef is entered.
+func (s *BaseElzListener) EnterDeRef(ctx *DeRefContext) {}
+
+// ExitDeRef is called when production DeRef is exited.
+func (s *BaseElzListener) ExitDeRef(ctx *DeRefContext) {}

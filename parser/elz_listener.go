@@ -182,6 +182,9 @@ type ElzListener interface {
 	// EnterId is called when entering the Id production.
 	EnterId(c *IdContext)
 
+	// EnterDeRef is called when entering the DeRef production.
+	EnterDeRef(c *DeRefContext)
+
 	// ExitIntSuffix is called when exiting the intSuffix production.
 	ExitIntSuffix(c *IntSuffixContext)
 
@@ -355,4 +358,7 @@ type ElzListener interface {
 
 	// ExitId is called when exiting the Id production.
 	ExitId(c *IdContext)
+
+	// ExitDeRef is called when exiting the DeRef production.
+	ExitDeRef(c *DeRefContext)
 }

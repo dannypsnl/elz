@@ -176,6 +176,7 @@ traitDefine:
 // Explain for expr, because Antlr support the operation precedence by declared order
 // So we don't have to consider that
 expr: op='&' expr                      # Ref // operation prec
+    | op='*' expr                      # DeRef
     | expr op='as' typeForm            # As
     | expr op='^' expr                 # Pow
     | expr op=('*'|'/') expr           # MulOrDiv
