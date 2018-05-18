@@ -1,5 +1,6 @@
 # elz
 
+[![version badges](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/elz-lang/elz/releases)
 [![Build Status](https://travis-ci.org/elz-lang/elz.svg?branch=master)](https://travis-ci.org/elz-lang/elz)
 [![Coverage Status](https://coveralls.io/repos/github/elz-lang/elz/badge.svg)](https://coveralls.io/github/elz-lang/elz)
 
