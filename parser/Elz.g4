@@ -162,7 +162,7 @@ externBlock:
 attrList: attr+;
 attr: exportor ID ':' typeForm;
 typeDefine:
-    'typeForm' exportor? ID '(' attrList ')'
+    'type' exportor? ID '(' attrList ')'
     ;
 
 tmethodList: tmethod+;
