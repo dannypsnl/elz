@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"strings"
 
 	"llvm.org/llvm/bindings/go/llvm"
 )
@@ -53,6 +54,8 @@ func makeOp(exprType, toType string) llvm.Opcode {
 		case "i8":
 			return llvm.Trunc
 		}
+	} else if isArrayType(exprType) && isRefType(toType) {
+		return 0 // won't use
 	}
 	// This part need to call function to complete
 	panic(fmt.Sprintf("Not yet impl other as expr, %s, %s", exprType, toType))
@@ -62,10 +65,53 @@ func (a *As) Check(ctx *Context) {
 	a.E.Check(ctx)
 	a.op = makeOp(a.E.Type(ctx), a.T)
 }
-func (a *As) Codegen(ctx *Context) llvm.Value {
-	v := a.E.Codegen(ctx)
-	return ctx.Builder.CreateCast(v, a.op, LLVMType(a.T), ".as_tmp")
+func (a *As) Codegen(c *Context) llvm.Value {
+	v := a.E.Codegen(c)
+	if isArrayType(a.E.Type(c)) && isRefType(a.T) {
+		_, ok := a.E.(*Id)
+		if elemType(a.E.Type(c)) == elemType(a.T) && ok {
+			v, _ = c.Var(a.E.(*Id).Val)
+			return c.Builder.CreateGEP(v, []llvm.Value{
+				llvm.ConstInt(llvm.Int32Type(), 0, false),
+				llvm.ConstInt(llvm.Int32Type(), 0, false),
+			}, "")
+		}
+		return v // FIXME: tmp solution
+	}
+	return c.Builder.CreateCast(v, a.op, LLVMType(a.T), ".as_tmp")
 }
 func (a *As) Type(ctx *Context) string {
 	return a.T
+}
+
+func isArrayType(t string) bool {
+	if t[0] == '[' && t[len(t)-1] == ']' {
+		for _, r := range t {
+			if r == ';' {
+				return true
+			}
+		}
+		return false
+	}
+	return false
+}
+
+func isRefType(t string) bool {
+	if strings.HasPrefix(t, "ref<") && t[len(t)-1] == '>' && len(t) != 5 {
+		return true
+	}
+	return false
+}
+
+func elemType(t string) string {
+	if isArrayType(t) {
+		for i, v := range t {
+			if v == ';' {
+				return string(t[1:i])
+			}
+		}
+	} else if isRefType(t) {
+		return t[4 : len(t)-1]
+	}
+	return "error"
 }
