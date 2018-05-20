@@ -1,5 +1,4 @@
 fn main() {
-  let a = 1
-  let b = &a
-  let c = *b
+  let a = [1, 2, 3, 4]
+  let b = a as ref<i32>
 }
