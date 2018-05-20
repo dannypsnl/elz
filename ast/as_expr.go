@@ -54,8 +54,6 @@ func makeOp(exprType, toType string) llvm.Opcode {
 		case "i8":
 			return llvm.Trunc
 		}
-	} else if isArrayType(exprType) && isRefType(toType) {
-		return 0 // won't use
 	}
 	// This part need to call function to complete
 	panic(fmt.Sprintf("Not yet impl other as expr, %s, %s", exprType, toType))
@@ -63,7 +61,6 @@ func makeOp(exprType, toType string) llvm.Opcode {
 
 func (a *As) Check(ctx *Context) {
 	a.E.Check(ctx)
-	a.op = makeOp(a.E.Type(ctx), a.T)
 }
 func (a *As) Codegen(c *Context) llvm.Value {
 	v := a.E.Codegen(c)
@@ -78,6 +75,7 @@ func (a *As) Codegen(c *Context) llvm.Value {
 		}
 		return v // FIXME: tmp solution
 	}
+	a.op = makeOp(a.E.Type(c), a.T)
 	return c.Builder.CreateCast(v, a.op, LLVMType(a.T), ".as_tmp")
 }
 func (a *As) Type(ctx *Context) string {
