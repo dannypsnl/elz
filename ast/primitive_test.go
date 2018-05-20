@@ -9,7 +9,7 @@ func TestStr(t *testing.T) {
 	str := &Str{Val: "Hello"}
 	str.Check(context)
 	ir := str.Codegen(context)
-	if str.Type(context) != "str" {
+	if str.Type(context) != "[i8;5]" {
 		t.Error("str::Type return type is wrong")
 	}
 	if ir.Type().String() != "ArrayType(IntegerType(8 bits)[5])" {

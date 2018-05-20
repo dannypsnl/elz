@@ -48,7 +48,7 @@ func (s *Str) Codegen(ctx *Context) llvm.Value {
 }
 
 func (s *Str) Type(*Context) string {
-	return "str"
+	return fmt.Sprintf("[i8;%d]", len(s.Val))
 }
 
 type F32 struct {
