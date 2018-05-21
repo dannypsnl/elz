@@ -46,10 +46,14 @@ STRING: '"' .*? '"';
 
 prog: topStatList?;
 
-topStatList: topStat+;
+compilerNotation: '#' '[' ID ']'
+    | '#' '[' ID '(' ID (',' ID)* ')' ']'
+    ;
+
+topStatList: (compilerNotation? topStat)+;
 
 topStat: fnDefine     // fn foo( $params ) { $stat... }
-    | externBlock     // extern "C" { $declareFn }
+    | declareFn       // fn printf(ref<i8>) -> i32
     | globalVarDef    // pi: num = $expr
     | typeDefine      // type Writer ( prop... )
     | implBlock       // impl Stack { $method... }
@@ -152,11 +156,6 @@ fnDefine:
 
 declareFn:
     'fn' ID '(' typeList? ')' returnType?
-    ;
-externBlock:
-    'extern' STRING '{'
-        declareFn*
-    '}'
     ;
 
 attrList: attr+;

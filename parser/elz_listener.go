@@ -17,6 +17,9 @@ type ElzListener interface {
 	// EnterProg is called when entering the prog production.
 	EnterProg(c *ProgContext)
 
+	// EnterCompilerNotation is called when entering the compilerNotation production.
+	EnterCompilerNotation(c *CompilerNotationContext)
+
 	// EnterTopStatList is called when entering the topStatList production.
 	EnterTopStatList(c *TopStatListContext)
 
@@ -107,9 +110,6 @@ type ElzListener interface {
 	// EnterDeclareFn is called when entering the declareFn production.
 	EnterDeclareFn(c *DeclareFnContext)
 
-	// EnterExternBlock is called when entering the externBlock production.
-	EnterExternBlock(c *ExternBlockContext)
-
 	// EnterAttrList is called when entering the attrList production.
 	EnterAttrList(c *AttrListContext)
 
@@ -193,6 +193,9 @@ type ElzListener interface {
 
 	// ExitProg is called when exiting the prog production.
 	ExitProg(c *ProgContext)
+
+	// ExitCompilerNotation is called when exiting the compilerNotation production.
+	ExitCompilerNotation(c *CompilerNotationContext)
 
 	// ExitTopStatList is called when exiting the topStatList production.
 	ExitTopStatList(c *TopStatListContext)
@@ -283,9 +286,6 @@ type ElzListener interface {
 
 	// ExitDeclareFn is called when exiting the declareFn production.
 	ExitDeclareFn(c *DeclareFnContext)
-
-	// ExitExternBlock is called when exiting the externBlock production.
-	ExitExternBlock(c *ExternBlockContext)
 
 	// ExitAttrList is called when exiting the attrList production.
 	ExitAttrList(c *AttrListContext)

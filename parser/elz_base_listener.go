@@ -39,6 +39,12 @@ func (s *BaseElzListener) EnterProg(ctx *ProgContext) {}
 // ExitProg is called when production prog is exited.
 func (s *BaseElzListener) ExitProg(ctx *ProgContext) {}
 
+// EnterCompilerNotation is called when production compilerNotation is entered.
+func (s *BaseElzListener) EnterCompilerNotation(ctx *CompilerNotationContext) {}
+
+// ExitCompilerNotation is called when production compilerNotation is exited.
+func (s *BaseElzListener) ExitCompilerNotation(ctx *CompilerNotationContext) {}
+
 // EnterTopStatList is called when production topStatList is entered.
 func (s *BaseElzListener) EnterTopStatList(ctx *TopStatListContext) {}
 
@@ -218,12 +224,6 @@ func (s *BaseElzListener) EnterDeclareFn(ctx *DeclareFnContext) {}
 
 // ExitDeclareFn is called when production declareFn is exited.
 func (s *BaseElzListener) ExitDeclareFn(ctx *DeclareFnContext) {}
-
-// EnterExternBlock is called when production externBlock is entered.
-func (s *BaseElzListener) EnterExternBlock(ctx *ExternBlockContext) {}
-
-// ExitExternBlock is called when production externBlock is exited.
-func (s *BaseElzListener) ExitExternBlock(ctx *ExternBlockContext) {}
 
 // EnterAttrList is called when production attrList is entered.
 func (s *BaseElzListener) EnterAttrList(ctx *AttrListContext) {}
