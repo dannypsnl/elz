@@ -4,5 +4,5 @@ extern "C" {
 
 fn main() {
   let a = "hello"
-  let i = printf(a as ref<i8>)
+  printf(a as ref<i8>)
 }
