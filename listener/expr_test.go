@@ -1,7 +1,6 @@
 package listener
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/elz-lang/elz/parser"
@@ -10,19 +9,15 @@ import (
 )
 
 func TestF32(t *testing.T) {
-	res := NewParse(`
+	src := `
 	x = 3.2
-	`)
+	`
 
-	expected := `; ModuleID = 'main'
-source_filename = "main"
-
+	expected := `
 @x = global float 0x40099999A0000000
 `
 
-	if expected != res {
-		t.Errorf("f32 parse Error; expected: `%s`\nactual: `%s`", expected, res)
-	}
+	hasTestTemplate(t, src, expected)
 }
 
 func TestTypeErrorInVarDef(t *testing.T) {
@@ -41,41 +36,38 @@ func TestTypeErrorInVarDef(t *testing.T) {
 }
 
 func TestIntSuffix(t *testing.T) {
-	res := NewParse(`
+	src := `
 	a = 3'i8
 	b = 3'i16
 	c = 3'i32
 	d = 3'i64
 	e = 3'f32
 	f = 3'f64
-	`)
+	`
 
 	expected := `
-		@a = global i8 3
-		@b = global i16 3
-		@c = global i32 3
-		@d = global i64 3
-		@e = global float 3.000000e+00
-		@f = global double 3.000000e+00
+@a = global i8 3
+@b = global i16 3
+@c = global i32 3
+@d = global i64 3
+@e = global float 3.000000e+00
+@f = global double 3.000000e+00
 `
 
-	if strings.Contains(res, expected) {
-		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
-	}
+	hasTestTemplate(t, src, expected)
 }
 
 func TestFloatSuffix(t *testing.T) {
-	res := NewParse(`
+	src := `
 	a = 3.14'f32
 	b = 3.14'f64
-	`)
+	`
 
 	expected := `
-		@a = global float 0x40091EB860000000
-		@b = global double 3.140000e+00
+@a = global float 0x40091EB860000000
+@b = global double 3.140000e+00
 `
 
-	if strings.Contains(res, expected) {
-		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
-	}
+	hasTestTemplate(t, src, expected)
+
 }

@@ -10,19 +10,14 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	res := NewParse(`
-	a = 10
-	`)
+	src := `a = 10`
 
-	expected := `; ModuleID = 'main'
-source_filename = "main"
-
+	expected := `
 @a = global i32 10
 `
 
-	if res != expected {
-		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
-	}
+	hasTestTemplate(t, src, expected)
+
 }
 
 func TestVerifyModule(t *testing.T) {

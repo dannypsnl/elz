@@ -5,10 +5,10 @@ import (
 )
 
 func TestNumStrExpression(t *testing.T) {
-	res := NewParse(`
+	src := `
 	a = 3 * 2
 	b = "abcde"
-	`)
+	`
 
 	expected := `; ModuleID = 'main'
 source_filename = "main"
@@ -17,7 +17,5 @@ source_filename = "main"
 @b = global [5 x i8] c"abcde"
 `
 
-	if res != expected {
-		t.Errorf("expected: `%s`\nactual: `%s`", expected, res)
-	}
+	hasTestTemplate(t, src, expected)
 }
