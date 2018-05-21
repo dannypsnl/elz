@@ -59,7 +59,7 @@ func (s *ElzListener) ExitRef(ctx *parser.RefContext) {
 // ExitDeRef
 func (s *ElzListener) ExitDeRef(c *parser.DeRefContext) {
 	e := s.exprStack.Pop()
-	s.exprStack.Push(&ast.DeRef{E: e.(ast.Expr)})
+	s.exprStack.Push(&ast.UnaryExpr{E: e.(ast.Expr), Op: "*"})
 }
 
 // ExitStr listen string literal, like: `"hello world"`
