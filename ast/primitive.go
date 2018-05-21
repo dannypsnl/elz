@@ -42,7 +42,9 @@ type Str struct {
 	Val string
 }
 
-func (s *Str) Check(*Context) {}
+func (s *Str) Check(*Context) {
+	s.Val = s.Val + string('\x00')
+}
 func (s *Str) Codegen(ctx *Context) llvm.Value {
 	return llvm.ConstString(s.Val, false)
 }

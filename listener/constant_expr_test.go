@@ -14,7 +14,7 @@ func TestNumStrExpression(t *testing.T) {
 source_filename = "main"
 
 @a = global i32 6
-@b = global [5 x i8] c"abcde"
+@b = global [6 x i8] c"abcde\00"
 `
 
 	hasTestTemplate(t, src, expected)
