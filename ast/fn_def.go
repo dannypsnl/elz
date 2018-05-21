@@ -2,6 +2,9 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
+
+	"github.com/elz-lang/elz/util"
 
 	"llvm.org/llvm/bindings/go/llvm"
 )
@@ -18,7 +21,8 @@ type FnDef struct {
 	Body        []Stat
 	RetType     string
 	Ctx         *Context
-	IsExternDef bool
+	Notations   []util.Notation
+	isExternDef bool
 	fcache      string
 }
 
@@ -32,6 +36,18 @@ func (f *FnDef) Check(c *Context) {
 		Vars:     make(map[string]llvm.Value),
 		VarsType: make(map[string]string),
 		Builder:  llvm.NewBuilder(),
+	}
+
+	for _, nota := range f.Notations {
+		if nota.Leading == "extern" {
+			if nota.Content[0] == "c" {
+				f.isExternDef = true
+			} else {
+				c.Reporter.Emit(fmt.Sprintf("Not support #[extern(%s)] yet", nota.Content[0]))
+			}
+		} else {
+			c.Reporter.Emit(fmt.Sprintf("Not support notation #[%s] yet", nota.Leading))
+		}
 	}
 
 	buf := bytes.NewBuffer([]byte{})
@@ -65,7 +81,7 @@ func (f *FnDef) Codegen(c *Context) llvm.Value {
 	fc.value = fn
 
 	// is a declaration in extern block for ffi we don't generate the statement for it
-	if !f.IsExternDef {
+	if !f.isExternDef {
 		entryPoint := llvm.AddBasicBlock(fn, "entry")
 		f.Ctx.Builder.SetInsertPointAtEnd(entryPoint)
 

@@ -6,6 +6,7 @@ import (
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/collection/stack"
 	"github.com/elz-lang/elz/parser"
+	"github.com/elz-lang/elz/util"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 	"llvm.org/llvm/bindings/go/llvm"
@@ -20,6 +21,7 @@ type ElzListener struct {
 	AstList []ast.Ast
 	// exprStack help we implement expression percedence table.
 	exprStack *stack.Stack // Stack Pop nil is nothing in there
+	notations []util.Notation
 	// fnBuilder
 	fnBuilder *FnBuilder
 	// exportThis markup the reference Name should be public or not.
@@ -49,6 +51,7 @@ func New() *ElzListener {
 		context:   ast.NewContext(),
 		immutable: true,
 		exprStack: stack.New(),
+		notations: make([]util.Notation, 0),
 	}
 }
 

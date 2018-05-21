@@ -1,6 +1,5 @@
-extern "C" {
-  fn printf(ref<i8>) -> i32
-}
+#[extern(c)]
+fn printf(ref<i8>) -> i32
 
 fn main() {
   let a = "hello"

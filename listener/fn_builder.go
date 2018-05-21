@@ -2,6 +2,7 @@ package listener
 
 import (
 	"github.com/elz-lang/elz/ast"
+	"github.com/elz-lang/elz/util"
 )
 
 // FnBuilder is function's building recorder, help we generate function much more easier
@@ -11,6 +12,7 @@ type FnBuilder struct {
 	returnTyp string
 	params    []*ast.Param
 	statments []ast.Stat
+	notations []util.Notation
 }
 
 // create a null FnBuilder
@@ -26,6 +28,11 @@ func (fb *FnBuilder) Name(n string) *FnBuilder {
 
 func (fb *FnBuilder) RetType(typ string) *FnBuilder {
 	fb.returnTyp = typ
+	return fb
+}
+
+func (fb *FnBuilder) Notation(ns []util.Notation) *FnBuilder {
+	fb.notations = ns
 	return fb
 }
 
@@ -59,11 +66,11 @@ func (fb *FnBuilder) Stat(s ast.Stat) *FnBuilder {
 // generate return the final AST of function
 func (fb *FnBuilder) generate(extern bool) *ast.FnDef {
 	return &ast.FnDef{
-		Export:      fb.export,
-		Name:        fb.name,
-		Params:      fb.params,
-		Body:        fb.statments,
-		RetType:     fb.returnTyp,
-		IsExternDef: extern,
+		Export:    fb.export,
+		Name:      fb.name,
+		Params:    fb.params,
+		Body:      fb.statments,
+		RetType:   fb.returnTyp,
+		Notations: fb.notations,
 	}
 }

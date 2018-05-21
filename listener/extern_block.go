@@ -2,28 +2,31 @@ package listener
 
 import (
 	"github.com/elz-lang/elz/parser"
+	"github.com/elz-lang/elz/util"
 )
 
-func (s *ElzListener) EnterExternBlock(c *parser.ExternBlockContext) {
-	// support only C ffi now
-	if c.STRING().GetText() == `"C"` {
-		s.inExternBlock = true
-	} else {
-		s.context.Reporter.Emit("support extern C only now")
+func (s *ElzListener) EnterCompilerNotation(c *parser.CompilerNotationContext) {
+	nota := util.Notation{
+		Leading: c.ID(0).GetText(),
+		Content: make([]string, 0),
 	}
-}
-
-func (s *ElzListener) ExitExternBlock(c *parser.ExternBlockContext) {
-	if !s.inExternBlock {
-		panic("Some code broke the extern block expect, inExternBlock must be true when exit externBlock rule")
+	content := c.AllID()
+	if len(content) >= 2 {
+		for _, c := range content[1:] {
+			nota.Content = append(nota.Content, c.GetText())
+		}
 	}
-	s.inExternBlock = false
+	s.notations = append(s.notations, nota)
 }
 
 func (s *ElzListener) EnterDeclareFn(c *parser.DeclareFnContext) {
 	s.fnBuilder = NewFnBuilder().
 		Name(c.ID().GetText()).
-		RetType(c.ReturnType().GetText())
+		RetType(c.ReturnType().GetText()).
+		Notation(s.notations)
+
+	// take all notation in record
+	s.notations = make([]util.Notation, 0)
 }
 func (s *ElzListener) ExitDeclareFn(c *parser.DeclareFnContext) {
 	if s.fnBuilder == nil {
