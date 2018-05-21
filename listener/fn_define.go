@@ -2,13 +2,17 @@ package listener
 
 import (
 	"github.com/elz-lang/elz/parser"
+	"github.com/elz-lang/elz/util"
 )
 
 // EnterFnDefine listen FnDefine rule, when enter here, create a FnBuilder for following building routine
 func (s *ElzListener) EnterFnDefine(ctx *parser.FnDefineContext) {
 	s.fnBuilder = NewFnBuilder().
 		Name(ctx.ID().GetText()).
-		Export(s.exportThis)
+		Export(s.exportThis).
+		Notation(s.notations)
+
+	s.notations = make([]util.Notation, 0)
 }
 
 // EnterParamType listen parameter's type, emit it to FnBuilder
