@@ -11,7 +11,7 @@ type TypeDefineBuilder struct {
 }
 
 func (t *TypeDefineBuilder) generate() *ast.TypeDef {
-	&ast.TypeDef{
+	return &ast.TypeDef{
 		Name:  t.typeName,
 		Attrs: t.attrs,
 	}
