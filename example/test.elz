@@ -1,3 +1,7 @@
+type Foo (
+  i: i32
+)
+
 #[extern(c)]
 fn printf(ref<i8>) -> i32
 
