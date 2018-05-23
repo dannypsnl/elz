@@ -54,11 +54,11 @@ topStatList: (compilerNotation? topStat)+;
 
 topStat: fnDefine     // fn foo( $params ) { $stat... }
     | declareFn       // fn printf(ref<i8>) -> i32
-    | globalVarDef    // pi: num = $expr
     | typeDefine      // type Writer ( prop... )
     | implBlock       // impl Stack { $method... }
     | traitDefine     // trait DB { method... }
     | importStat      // import ( Module... )
+    | globalVarDef    // pi: num = $expr
     | stat            // Just for recognizing!
     ;
 
@@ -158,10 +158,10 @@ declareFn:
     'fn' ID '(' typeList? ')' returnType?
     ;
 
-attrList: attr+;
-attr: exportor ID ':' typeForm;
+attrList: attr (',' attr)*;
+attr: exportor? ID ':' typeForm;
 typeDefine:
-    'type' exportor? ID '(' attrList? ')'
+    'type' exportor? ID '(' attrList ')'
     ;
 
 tmethodList: tmethod+;
