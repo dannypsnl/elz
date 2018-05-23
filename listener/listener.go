@@ -24,6 +24,8 @@ type ElzListener struct {
 	notations []util.Notation
 	// fnBuilder
 	fnBuilder *FnBuilder
+	// typeDefineBuilder
+	typeDefineBuilder *TypeDefineBuilder
 	// exportThis markup the reference Name should be public or not.
 	exportThis bool
 	// variable default immutable.
