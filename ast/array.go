@@ -10,20 +10,14 @@ import (
 //
 // It is preparing for array literal
 type Array struct {
-	Elements    []Expr
+	Elements []Expr
+	Len      int
+
 	elementType string
-	Len         int
 	dontCompile bool
 }
 
-func (a *Array) Check(c *Context) {
-	// Everyone should invoke it's sub node's Check first
-	for _, e := range a.Elements {
-		e.Check(c)
-	}
-
-	a.elementType = a.Elements[0].Type(c)
-
+func (a *Array) reportIfAnyElementDoNotMatchElementType(c *Context) {
 	for _, e := range a.Elements {
 		if e.Type(c) != a.elementType {
 			a.dontCompile = true
@@ -34,6 +28,17 @@ func (a *Array) Check(c *Context) {
 				))
 		}
 	}
+}
+
+func (a *Array) Check(c *Context) {
+	// Everyone should invoke it's sub node's Check first
+	for _, e := range a.Elements {
+		e.Check(c)
+	}
+
+	a.elementType = a.Elements[0].Type(c)
+
+	a.reportIfAnyElementDoNotMatchElementType(c)
 }
 
 func (a *Array) Codegen(c *Context) llvm.Value {
@@ -51,11 +56,7 @@ func (a *Array) Codegen(c *Context) llvm.Value {
 		}
 		values = append(values, e.Codegen(c))
 	}
-	array := llvm.ConstArray(LLVMType(a.elementType), values)
-	//tmpGlobal := llvm.AddGlobal(c.Module, LLVMType(a.Type(c)), ".tmp_array")
-	//tmpGlobal.SetInitializer(array)
-	//return c.Builder.CreateLoad(tmpGlobal, ".load_tmp")
-	return array
+	return llvm.ConstArray(LLVMType(a.elementType), values)
 }
 
 func (a *Array) Type(*Context) string {
