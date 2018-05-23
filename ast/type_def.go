@@ -22,6 +22,6 @@ func (typ *TypeDef) Codegen(c *Context) llvm.Value {
 	for _, attr := range typ.Attrs {
 		types = append(types, LLVMType(attr.Type))
 	}
-	llvm.StructType(types, true)
-	return llvm.Value{}
+	t := llvm.StructType(types, true)
+	return llvm.AddGlobal(c.Module, t, typ.Name)
 }
