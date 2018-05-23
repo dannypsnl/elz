@@ -161,7 +161,7 @@ declareFn:
 attrList: attr (',' attr)*;
 attr: exportor? ID ':' typeForm;
 typeDefine:
-    'type' exportor? ID '(' attrList ')'
+    'type' exportor? ID '(' attrList? ')'
     ;
 
 tmethodList: tmethod+;
