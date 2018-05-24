@@ -14,7 +14,7 @@ func NewContext() *Context {
 		Context:   llvm.NewContext(),
 		Vars:      make(map[string]llvm.Value),
 		VarsType:  make(map[string]string),
-		Type:      make(map[string]llvm.Type),
+		Types:     make(map[string]llvm.Type),
 		functions: make(map[string]*Function),
 		Builder:   llvm.NewBuilder(),
 	}
