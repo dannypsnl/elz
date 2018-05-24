@@ -41,6 +41,10 @@ func (c *Context) NewType(name string, t llvm.Type) {
 	c.Types[name] = t
 }
 
+func (c *Context) Type(name string) llvm.Type {
+	return c.Module.GetTypeByName(name)
+}
+
 func (c *Context) funcRetTyp(signature string) *Function {
 	if f, ok := c.functions[signature]; ok {
 		return f
