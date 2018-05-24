@@ -17,11 +17,16 @@ type TypeDef struct {
 
 func (typ *TypeDef) Check(c *Context) {}
 
+// NOTE: TypeDef is a statement, so should not get value from this AST's Codegen
 func (typ *TypeDef) Codegen(c *Context) llvm.Value {
 	types := make([]llvm.Type, 0)
 	for _, attr := range typ.Attrs {
 		types = append(types, LLVMType(attr.Type))
 	}
-	t := llvm.StructType(types, true)
-	return llvm.AddGlobal(c.Module, t, typ.Name)
+	t := c.Context.StructCreateNamed(typ.Name)
+	t.StructSetBody(types, true)
+
+	c.NewType(typ.Name, t)
+
+	return llvm.Value{}
 }

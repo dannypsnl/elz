@@ -14,6 +14,7 @@ func NewContext() *Context {
 		Context:   llvm.NewContext(),
 		Vars:      make(map[string]llvm.Value),
 		VarsType:  make(map[string]string),
+		Type:      make(map[string]llvm.Type),
 		functions: make(map[string]*Function),
 		Builder:   llvm.NewBuilder(),
 	}
@@ -26,6 +27,7 @@ type Context struct {
 	Context   llvm.Context
 	Vars      map[string]llvm.Value
 	VarsType  map[string]string
+	Types     map[string]llvm.Type
 	functions map[string]*Function
 	Builder   llvm.Builder
 }
@@ -33,6 +35,10 @@ type Context struct {
 type Function struct {
 	value   llvm.Value
 	retType string
+}
+
+func (c *Context) NewType(name string, t llvm.Type) {
+	c.Types[name] = t
 }
 
 func (c *Context) funcRetTyp(signature string) *Function {
