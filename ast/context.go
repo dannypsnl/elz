@@ -45,6 +45,13 @@ func (c *Context) funcRetTyp(signature string) *Function {
 	return nil
 }
 
+func (c *Context) NewVar(name string, typ string, value llvm.Value) {
+	// FIXME: let vars contains Var Node only, then Var Node contains more info is better.
+	c.Vars[name] = value
+	c.VarsType[name] = typ
+	// FIXME: Missing export & mutable or not info
+}
+
 func (c *Context) Var(name string) (llvm.Value, bool) {
 	v, ok := c.Vars[name]
 	if ok {
