@@ -23,10 +23,9 @@ func LLVMType(t string) llvm.Type {
 		return llvm.FloatType() // f32
 	case "f64":
 		return llvm.DoubleType() // f64
+	case "any":
+		panic(fmt.Sprintf("not support type: `%s` yet", t))
 	default:
-		if len(t) == 3 && string(t[:3]) == "any" {
-			goto end
-		}
 		if t[0] == '[' && t[len(t)-1] == ']' {
 			for i, v := range t {
 				if v == ';' {
