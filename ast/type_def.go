@@ -13,11 +13,30 @@ type TypeAttr struct {
 }
 
 type TypeDef struct {
-	Name  string
-	Attrs []TypeAttr
+	Name      string
+	Attrs     []TypeAttr
+	signature string
 }
 
-func (typ *TypeDef) Check(c *Context) {}
+func (typ *TypeDef) Check(c *Context) {
+	signature := bytes.NewBuffer([]byte{})
+	signature.WriteString(typ.Name)
+	signature.WriteString("(")
+	for i, attr := range typ.Attrs {
+		signature.WriteString(attr.Type)
+		if i < len(typ.Attrs)-1 {
+			signature.WriteRune(',')
+		}
+	}
+	signature.WriteString(")")
+
+	typ.signature = signature.String()
+	println(typ.signature)
+	c.functions[typ.signature] = &Function{
+		value:   llvm.Value{},
+		retType: typ.Name,
+	}
+}
 
 // NOTE: TypeDef is a statement, so should not get value from this AST's Codegen
 func (typ *TypeDef) Codegen(c *Context) llvm.Value {
@@ -51,20 +70,6 @@ func (typ *TypeDef) Codegen(c *Context) llvm.Value {
 
 	c.Builder.ClearInsertionPoint()
 
-	signature := bytes.NewBuffer([]byte{})
-	signature.WriteString("(")
-	for i, attr := range typ.Attrs {
-		if i != 0 {
-			signature.WriteString("," + attr.Type)
-		} else {
-			signature.WriteString(attr.Type)
-		}
-	}
-	signature.WriteString(")")
-
-	c.functions[signature.String()] = &Function{
-		value:   f,
-		retType: typ.Name,
-	}
+	c.functions[typ.signature].value = f
 	return llvm.Value{}
 }
