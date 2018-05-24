@@ -23,7 +23,7 @@ func (typ *TypeDef) Codegen(c *Context) llvm.Value {
 	for _, attr := range typ.Attrs {
 		types = append(types, LLVMType(attr.Type))
 	}
-	t := c.Context.StructCreateNamed(typ.Name)
+	t := c.Module.Context().StructCreateNamed(typ.Name)
 	t.StructSetBody(types, true)
 
 	c.NewType(typ.Name, t)
