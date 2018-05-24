@@ -8,4 +8,5 @@ fn printf(ref<i8>) -> i32
 fn main() {
   let a = "hello"
   printf(a as ref<i8>)
+  let b = Foo(0)
 }
