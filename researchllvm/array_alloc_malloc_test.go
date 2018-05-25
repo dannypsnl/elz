@@ -53,6 +53,10 @@ func TestArrayAlloc(t *testing.T) {
 	arr1Value := ctx.builder.CreateLoad(arr1Addr, "arr[1]")
 	ctx.builder.CreateCall(printf, []llvm.Value{s, arr1Value}, "")
 
+	arrayLoad := ctx.builder.CreateLoad(arrayAlloc, "array.load")
+	arrValue0 := ctx.builder.CreateExtractValue(arrayLoad, 0, "arr.0")
+	ctx.builder.CreateCall(printf, []llvm.Value{s, arrValue0}, "")
+
 	ctx.builder.CreateRetVoid()
 
 	println(ctx.module.String())

@@ -63,19 +63,19 @@ var parserATN = []uint16{
 	40, 3, 40, 3, 40, 5, 40, 409, 10, 40, 3, 41, 5, 41, 412, 10, 41, 3, 41,
 	3, 41, 3, 41, 3, 41, 5, 41, 418, 10, 41, 3, 41, 3, 41, 3, 42, 3, 42, 3,
 	42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42,
-	3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3,
-	42, 3, 42, 3, 42, 5, 42, 448, 10, 42, 3, 42, 3, 42, 5, 42, 452, 10, 42,
-	3, 42, 3, 42, 5, 42, 456, 10, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3,
+	3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 5, 42, 444,
+	10, 42, 3, 42, 3, 42, 5, 42, 448, 10, 42, 3, 42, 3, 42, 5, 42, 452, 10,
 	42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42,
 	3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3,
-	42, 3, 42, 3, 42, 3, 42, 7, 42, 488, 10, 42, 12, 42, 14, 42, 491, 11, 42,
-	3, 42, 2, 3, 82, 43, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28,
-	30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64,
-	66, 68, 70, 72, 74, 76, 78, 80, 82, 2, 8, 3, 2, 4, 7, 3, 2, 6, 7, 4, 2,
-	39, 39, 42, 42, 4, 2, 32, 32, 43, 43, 4, 2, 24, 25, 44, 45, 3, 2, 48, 49,
-	2, 533, 2, 88, 3, 2, 2, 2, 4, 90, 3, 2, 2, 2, 6, 94, 3, 2, 2, 2, 8, 114,
-	3, 2, 2, 2, 10, 120, 3, 2, 2, 2, 12, 132, 3, 2, 2, 2, 14, 134, 3, 2, 2,
-	2, 16, 142, 3, 2, 2, 2, 18, 148, 3, 2, 2, 2, 20, 157, 3, 2, 2, 2, 22, 159,
+	42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42, 3, 42,
+	3, 42, 3, 42, 3, 42, 7, 42, 488, 10, 42, 12, 42, 14, 42, 491, 11, 42, 3,
+	42, 2, 3, 82, 43, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+	32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66,
+	68, 70, 72, 74, 76, 78, 80, 82, 2, 8, 3, 2, 4, 7, 3, 2, 6, 7, 4, 2, 39,
+	39, 42, 42, 4, 2, 32, 32, 43, 43, 4, 2, 24, 25, 44, 45, 3, 2, 48, 49, 2,
+	533, 2, 88, 3, 2, 2, 2, 4, 90, 3, 2, 2, 2, 6, 94, 3, 2, 2, 2, 8, 114, 3,
+	2, 2, 2, 10, 120, 3, 2, 2, 2, 12, 132, 3, 2, 2, 2, 14, 134, 3, 2, 2, 2,
+	16, 142, 3, 2, 2, 2, 18, 148, 3, 2, 2, 2, 20, 157, 3, 2, 2, 2, 22, 159,
 	3, 2, 2, 2, 24, 162, 3, 2, 2, 2, 26, 171, 3, 2, 2, 2, 28, 173, 3, 2, 2,
 	2, 30, 194, 3, 2, 2, 2, 32, 198, 3, 2, 2, 2, 34, 206, 3, 2, 2, 2, 36, 227,
 	3, 2, 2, 2, 38, 231, 3, 2, 2, 2, 40, 243, 3, 2, 2, 2, 42, 251, 3, 2, 2,
@@ -84,7 +84,7 @@ var parserATN = []uint16{
 	2, 58, 322, 3, 2, 2, 2, 60, 330, 3, 2, 2, 2, 62, 333, 3, 2, 2, 2, 64, 337,
 	3, 2, 2, 2, 66, 341, 3, 2, 2, 2, 68, 359, 3, 2, 2, 2, 70, 369, 3, 2, 2,
 	2, 72, 378, 3, 2, 2, 2, 74, 384, 3, 2, 2, 2, 76, 396, 3, 2, 2, 2, 78, 400,
-	3, 2, 2, 2, 80, 411, 3, 2, 2, 2, 82, 455, 3, 2, 2, 2, 84, 85, 7, 3, 2,
+	3, 2, 2, 2, 80, 411, 3, 2, 2, 2, 82, 451, 3, 2, 2, 2, 84, 85, 7, 3, 2,
 	2, 85, 89, 9, 2, 2, 2, 86, 87, 7, 8, 2, 2, 87, 89, 9, 3, 2, 2, 88, 84,
 	3, 2, 2, 2, 88, 86, 3, 2, 2, 2, 89, 3, 3, 2, 2, 2, 90, 91, 7, 8, 2, 2,
 	91, 92, 9, 3, 2, 2, 92, 5, 3, 2, 2, 2, 93, 95, 5, 10, 6, 2, 94, 93, 3,
@@ -208,39 +208,39 @@ var parserATN = []uint16{
 	413, 414, 7, 37, 2, 2, 414, 415, 7, 53, 2, 2, 415, 417, 7, 19, 2, 2, 416,
 	418, 5, 76, 39, 2, 417, 416, 3, 2, 2, 2, 417, 418, 3, 2, 2, 2, 418, 419,
 	3, 2, 2, 2, 419, 420, 7, 20, 2, 2, 420, 81, 3, 2, 2, 2, 421, 422, 8, 42,
-	1, 2, 422, 423, 7, 38, 2, 2, 423, 456, 5, 82, 42, 22, 424, 425, 7, 39,
-	2, 2, 425, 456, 5, 82, 42, 21, 426, 427, 7, 53, 2, 2, 427, 428, 7, 10,
-	2, 2, 428, 429, 7, 55, 2, 2, 429, 456, 7, 11, 2, 2, 430, 431, 7, 12, 2,
-	2, 431, 432, 5, 82, 42, 2, 432, 433, 7, 14, 2, 2, 433, 456, 3, 2, 2, 2,
-	434, 456, 5, 26, 14, 2, 435, 436, 7, 10, 2, 2, 436, 437, 5, 82, 42, 2,
-	437, 438, 7, 27, 2, 2, 438, 439, 7, 55, 2, 2, 439, 440, 7, 11, 2, 2, 440,
-	456, 3, 2, 2, 2, 441, 442, 7, 10, 2, 2, 442, 443, 5, 32, 17, 2, 443, 444,
-	7, 11, 2, 2, 444, 456, 3, 2, 2, 2, 445, 447, 7, 55, 2, 2, 446, 448, 5,
-	2, 2, 2, 447, 446, 3, 2, 2, 2, 447, 448, 3, 2, 2, 2, 448, 456, 3, 2, 2,
-	2, 449, 451, 7, 54, 2, 2, 450, 452, 5, 4, 3, 2, 451, 450, 3, 2, 2, 2, 451,
-	452, 3, 2, 2, 2, 452, 456, 3, 2, 2, 2, 453, 456, 7, 53, 2, 2, 454, 456,
-	7, 56, 2, 2, 455, 421, 3, 2, 2, 2, 455, 424, 3, 2, 2, 2, 455, 426, 3, 2,
-	2, 2, 455, 430, 3, 2, 2, 2, 455, 434, 3, 2, 2, 2, 455, 435, 3, 2, 2, 2,
-	455, 441, 3, 2, 2, 2, 455, 445, 3, 2, 2, 2, 455, 449, 3, 2, 2, 2, 455,
-	453, 3, 2, 2, 2, 455, 454, 3, 2, 2, 2, 456, 489, 3, 2, 2, 2, 457, 458,
-	12, 18, 2, 2, 458, 459, 7, 41, 2, 2, 459, 488, 5, 82, 42, 19, 460, 461,
-	12, 17, 2, 2, 461, 462, 9, 4, 2, 2, 462, 488, 5, 82, 42, 18, 463, 464,
-	12, 16, 2, 2, 464, 465, 9, 5, 2, 2, 465, 488, 5, 82, 42, 17, 466, 467,
-	12, 15, 2, 2, 467, 468, 9, 6, 2, 2, 468, 488, 5, 82, 42, 16, 469, 470,
-	12, 14, 2, 2, 470, 471, 7, 46, 2, 2, 471, 488, 5, 82, 42, 15, 472, 473,
-	12, 13, 2, 2, 473, 474, 7, 47, 2, 2, 474, 488, 5, 82, 42, 14, 475, 476,
-	12, 12, 2, 2, 476, 477, 9, 7, 2, 2, 477, 488, 5, 82, 42, 13, 478, 479,
-	12, 11, 2, 2, 479, 480, 7, 50, 2, 2, 480, 481, 5, 82, 42, 2, 481, 482,
-	7, 31, 2, 2, 482, 483, 5, 82, 42, 12, 483, 488, 3, 2, 2, 2, 484, 485, 12,
-	19, 2, 2, 485, 486, 7, 40, 2, 2, 486, 488, 5, 36, 19, 2, 487, 457, 3, 2,
-	2, 2, 487, 460, 3, 2, 2, 2, 487, 463, 3, 2, 2, 2, 487, 466, 3, 2, 2, 2,
-	487, 469, 3, 2, 2, 2, 487, 472, 3, 2, 2, 2, 487, 475, 3, 2, 2, 2, 487,
-	478, 3, 2, 2, 2, 487, 484, 3, 2, 2, 2, 488, 491, 3, 2, 2, 2, 489, 487,
-	3, 2, 2, 2, 489, 490, 3, 2, 2, 2, 490, 83, 3, 2, 2, 2, 491, 489, 3, 2,
-	2, 2, 57, 88, 94, 109, 114, 117, 122, 132, 139, 150, 157, 165, 171, 186,
-	190, 203, 209, 227, 231, 236, 240, 248, 257, 262, 265, 270, 275, 279, 287,
-	291, 298, 305, 312, 319, 327, 335, 341, 347, 351, 355, 363, 367, 374, 378,
-	386, 391, 398, 403, 408, 411, 417, 447, 451, 455, 487, 489,
+	1, 2, 422, 423, 7, 38, 2, 2, 423, 452, 5, 82, 42, 22, 424, 425, 7, 39,
+	2, 2, 425, 452, 5, 82, 42, 21, 426, 427, 7, 12, 2, 2, 427, 428, 5, 82,
+	42, 2, 428, 429, 7, 14, 2, 2, 429, 452, 3, 2, 2, 2, 430, 452, 5, 26, 14,
+	2, 431, 432, 7, 10, 2, 2, 432, 433, 5, 82, 42, 2, 433, 434, 7, 27, 2, 2,
+	434, 435, 7, 55, 2, 2, 435, 436, 7, 11, 2, 2, 436, 452, 3, 2, 2, 2, 437,
+	438, 7, 10, 2, 2, 438, 439, 5, 32, 17, 2, 439, 440, 7, 11, 2, 2, 440, 452,
+	3, 2, 2, 2, 441, 443, 7, 55, 2, 2, 442, 444, 5, 2, 2, 2, 443, 442, 3, 2,
+	2, 2, 443, 444, 3, 2, 2, 2, 444, 452, 3, 2, 2, 2, 445, 447, 7, 54, 2, 2,
+	446, 448, 5, 4, 3, 2, 447, 446, 3, 2, 2, 2, 447, 448, 3, 2, 2, 2, 448,
+	452, 3, 2, 2, 2, 449, 452, 7, 53, 2, 2, 450, 452, 7, 56, 2, 2, 451, 421,
+	3, 2, 2, 2, 451, 424, 3, 2, 2, 2, 451, 426, 3, 2, 2, 2, 451, 430, 3, 2,
+	2, 2, 451, 431, 3, 2, 2, 2, 451, 437, 3, 2, 2, 2, 451, 441, 3, 2, 2, 2,
+	451, 445, 3, 2, 2, 2, 451, 449, 3, 2, 2, 2, 451, 450, 3, 2, 2, 2, 452,
+	489, 3, 2, 2, 2, 453, 454, 12, 18, 2, 2, 454, 455, 7, 41, 2, 2, 455, 488,
+	5, 82, 42, 19, 456, 457, 12, 17, 2, 2, 457, 458, 9, 4, 2, 2, 458, 488,
+	5, 82, 42, 18, 459, 460, 12, 16, 2, 2, 460, 461, 9, 5, 2, 2, 461, 488,
+	5, 82, 42, 17, 462, 463, 12, 15, 2, 2, 463, 464, 9, 6, 2, 2, 464, 488,
+	5, 82, 42, 16, 465, 466, 12, 14, 2, 2, 466, 467, 7, 46, 2, 2, 467, 488,
+	5, 82, 42, 15, 468, 469, 12, 13, 2, 2, 469, 470, 7, 47, 2, 2, 470, 488,
+	5, 82, 42, 14, 471, 472, 12, 12, 2, 2, 472, 473, 9, 7, 2, 2, 473, 488,
+	5, 82, 42, 13, 474, 475, 12, 11, 2, 2, 475, 476, 7, 50, 2, 2, 476, 477,
+	5, 82, 42, 2, 477, 478, 7, 31, 2, 2, 478, 479, 5, 82, 42, 12, 479, 488,
+	3, 2, 2, 2, 480, 481, 12, 20, 2, 2, 481, 482, 7, 10, 2, 2, 482, 483, 7,
+	55, 2, 2, 483, 488, 7, 11, 2, 2, 484, 485, 12, 19, 2, 2, 485, 486, 7, 40,
+	2, 2, 486, 488, 5, 36, 19, 2, 487, 453, 3, 2, 2, 2, 487, 456, 3, 2, 2,
+	2, 487, 459, 3, 2, 2, 2, 487, 462, 3, 2, 2, 2, 487, 465, 3, 2, 2, 2, 487,
+	468, 3, 2, 2, 2, 487, 471, 3, 2, 2, 2, 487, 474, 3, 2, 2, 2, 487, 480,
+	3, 2, 2, 2, 487, 484, 3, 2, 2, 2, 488, 491, 3, 2, 2, 2, 489, 487, 3, 2,
+	2, 2, 489, 490, 3, 2, 2, 2, 490, 83, 3, 2, 2, 2, 491, 489, 3, 2, 2, 2,
+	57, 88, 94, 109, 114, 117, 122, 132, 139, 150, 157, 165, 171, 186, 190,
+	203, 209, 227, 231, 236, 240, 248, 257, 262, 265, 270, 275, 279, 287, 291,
+	298, 305, 312, 319, 327, 335, 341, 347, 351, 355, 363, 367, 374, 378, 386,
+	391, 398, 403, 408, 411, 417, 443, 447, 451, 487, 489,
 }
 var deserializer = antlr.NewATNDeserializer(nil)
 var deserializedATN = deserializer.DeserializeFromUInt16(parserATN)
@@ -6674,8 +6674,14 @@ func (s *AccessArrayElementContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
 
-func (s *AccessArrayElementContext) ID() antlr.TerminalNode {
-	return s.GetToken(ElzParserID, 0)
+func (s *AccessArrayElementContext) Expr() IExprContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExprContext)(nil)).Elem(), 0)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
 }
 
 func (s *AccessArrayElementContext) INT() antlr.TerminalNode {
@@ -6904,7 +6910,7 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(453)
+	p.SetState(449)
 	p.GetErrorHandler().Sync(p)
 	switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 52, p.GetParserRuleContext()) {
 	case 1:
@@ -6941,71 +6947,67 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 		}
 
 	case 3:
-		localctx = NewAccessArrayElementContext(p, localctx)
-		p.SetParserRuleContext(localctx)
-		_prevctx = localctx
-		{
-			p.SetState(424)
-			p.Match(ElzParserID)
-		}
-		{
-			p.SetState(425)
-			p.Match(ElzParserT__7)
-		}
-		{
-			p.SetState(426)
-			p.Match(ElzParserINT)
-		}
-		{
-			p.SetState(427)
-			p.Match(ElzParserT__8)
-		}
-
-	case 4:
 		localctx = NewSubExprContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(428)
+			p.SetState(424)
 			p.Match(ElzParserT__9)
 		}
 		{
-			p.SetState(429)
+			p.SetState(425)
 			p.expr(0)
 		}
 		{
-			p.SetState(430)
+			p.SetState(426)
 			p.Match(ElzParserT__11)
 		}
 
-	case 5:
+	case 4:
 		localctx = NewStatExprContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(432)
+			p.SetState(428)
 			p.ExprStat()
 		}
 
-	case 6:
+	case 5:
 		localctx = NewArrWithLenContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(433)
+			p.SetState(429)
 			p.Match(ElzParserT__7)
 		}
 		{
-			p.SetState(434)
+			p.SetState(430)
 			p.expr(0)
 		}
 		{
-			p.SetState(435)
+			p.SetState(431)
 			p.Match(ElzParserT__24)
 		}
 		{
-			p.SetState(436)
+			p.SetState(432)
 			p.Match(ElzParserINT)
+		}
+		{
+			p.SetState(433)
+			p.Match(ElzParserT__8)
+		}
+
+	case 6:
+		localctx = NewArrWithListContext(p, localctx)
+		p.SetParserRuleContext(localctx)
+		_prevctx = localctx
+		{
+			p.SetState(435)
+			p.Match(ElzParserT__7)
+		}
+		{
+			p.SetState(436)
+			p.ExprList()
 		}
 		{
 			p.SetState(437)
@@ -7013,75 +7015,58 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 		}
 
 	case 7:
-		localctx = NewArrWithListContext(p, localctx)
-		p.SetParserRuleContext(localctx)
-		_prevctx = localctx
-		{
-			p.SetState(439)
-			p.Match(ElzParserT__7)
-		}
-		{
-			p.SetState(440)
-			p.ExprList()
-		}
-		{
-			p.SetState(441)
-			p.Match(ElzParserT__8)
-		}
-
-	case 8:
 		localctx = NewIntContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(443)
+			p.SetState(439)
 			p.Match(ElzParserINT)
 		}
-		p.SetState(445)
+		p.SetState(441)
 		p.GetErrorHandler().Sync(p)
 
 		if p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 50, p.GetParserRuleContext()) == 1 {
 			{
-				p.SetState(444)
+				p.SetState(440)
 				p.IntSuffix()
 			}
 
 		}
 
-	case 9:
+	case 8:
 		localctx = NewFloatContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(447)
+			p.SetState(443)
 			p.Match(ElzParserFLOAT)
 		}
-		p.SetState(449)
+		p.SetState(445)
 		p.GetErrorHandler().Sync(p)
 
 		if p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 51, p.GetParserRuleContext()) == 1 {
 			{
-				p.SetState(448)
+				p.SetState(444)
 				p.FloatSuffix()
 			}
 
 		}
 
-	case 10:
+	case 9:
 		localctx = NewIdContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(451)
+			p.SetState(447)
 			p.Match(ElzParserID)
 		}
 
-	case 11:
+	case 10:
 		localctx = NewStrContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(452)
+			p.SetState(448)
 			p.Match(ElzParserSTRING)
 		}
 
@@ -7103,33 +7088,33 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 			case 1:
 				localctx = NewPowContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(455)
+				p.SetState(451)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 16)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 16)", ""))
 				}
 				{
-					p.SetState(456)
+					p.SetState(452)
 
 					var _m = p.Match(ElzParserT__38)
 
 					localctx.(*PowContext).op = _m
 				}
 				{
-					p.SetState(457)
+					p.SetState(453)
 					p.expr(17)
 				}
 
 			case 2:
 				localctx = NewMulOrDivContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(458)
+				p.SetState(454)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 15)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 15)", ""))
 				}
 				{
-					p.SetState(459)
+					p.SetState(455)
 
 					var _lt = p.GetTokenStream().LT(1)
 
@@ -7147,20 +7132,20 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(460)
+					p.SetState(456)
 					p.expr(16)
 				}
 
 			case 3:
 				localctx = NewAddOrSubContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(461)
+				p.SetState(457)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 14)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 14)", ""))
 				}
 				{
-					p.SetState(462)
+					p.SetState(458)
 
 					var _lt = p.GetTokenStream().LT(1)
 
@@ -7178,20 +7163,20 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(463)
+					p.SetState(459)
 					p.expr(15)
 				}
 
 			case 4:
 				localctx = NewCmpContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(464)
+				p.SetState(460)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 13)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 13)", ""))
 				}
 				{
-					p.SetState(465)
+					p.SetState(461)
 
 					var _lt = p.GetTokenStream().LT(1)
 
@@ -7209,60 +7194,60 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(466)
+					p.SetState(462)
 					p.expr(14)
 				}
 
 			case 5:
 				localctx = NewNotEqContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(467)
+				p.SetState(463)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 12)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 12)", ""))
 				}
 				{
-					p.SetState(468)
+					p.SetState(464)
 
 					var _m = p.Match(ElzParserT__43)
 
 					localctx.(*NotEqContext).op = _m
 				}
 				{
-					p.SetState(469)
+					p.SetState(465)
 					p.expr(13)
 				}
 
 			case 6:
 				localctx = NewEqContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(470)
+				p.SetState(466)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 11)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 11)", ""))
 				}
 				{
-					p.SetState(471)
+					p.SetState(467)
 
 					var _m = p.Match(ElzParserT__44)
 
 					localctx.(*EqContext).op = _m
 				}
 				{
-					p.SetState(472)
+					p.SetState(468)
 					p.expr(12)
 				}
 
 			case 7:
 				localctx = NewAndOrOrContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(473)
+				p.SetState(469)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 10)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 10)", ""))
 				}
 				{
-					p.SetState(474)
+					p.SetState(470)
 
 					var _lt = p.GetTokenStream().LT(1)
 
@@ -7280,36 +7265,57 @@ func (p *ElzParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(475)
+					p.SetState(471)
 					p.expr(11)
 				}
 
 			case 8:
 				localctx = NewThreeOpCmpContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
-				p.SetState(476)
+				p.SetState(472)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 9)) {
 					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 9)", ""))
 				}
 				{
-					p.SetState(477)
+					p.SetState(473)
 					p.Match(ElzParserT__47)
 				}
 				{
-					p.SetState(478)
+					p.SetState(474)
 					p.expr(0)
 				}
 				{
-					p.SetState(479)
+					p.SetState(475)
 					p.Match(ElzParserT__28)
 				}
 				{
-					p.SetState(480)
+					p.SetState(476)
 					p.expr(10)
 				}
 
 			case 9:
+				localctx = NewAccessArrayElementContext(p, NewExprContext(p, _parentctx, _parentState))
+				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
+				p.SetState(478)
+
+				if !(p.Precpred(p.GetParserRuleContext(), 18)) {
+					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 18)", ""))
+				}
+				{
+					p.SetState(479)
+					p.Match(ElzParserT__7)
+				}
+				{
+					p.SetState(480)
+					p.Match(ElzParserINT)
+				}
+				{
+					p.SetState(481)
+					p.Match(ElzParserT__8)
+				}
+
+			case 10:
 				localctx = NewAsContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ElzParserRULE_expr)
 				p.SetState(482)
@@ -7381,6 +7387,9 @@ func (p *ElzParser) Expr_Sempred(localctx antlr.RuleContext, predIndex int) bool
 		return p.Precpred(p.GetParserRuleContext(), 9)
 
 	case 8:
+		return p.Precpred(p.GetParserRuleContext(), 18)
+
+	case 9:
 		return p.Precpred(p.GetParserRuleContext(), 17)
 
 	default:

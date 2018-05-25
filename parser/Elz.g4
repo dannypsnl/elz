@@ -176,7 +176,7 @@ traitDefine:
 // So we don't have to consider that
 expr: op='&' expr                      # Ref // operation prec
     | op='*' expr                      # DeRef
-    | ID '[' INT ']'                   # AccessArrayElement
+    | expr '[' INT ']'                 # AccessArrayElement
     | expr op='as' typeForm            # As
     | expr op='^' expr                 # Pow
     | expr op=('*'|'/') expr           # MulOrDiv

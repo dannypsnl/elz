@@ -26,7 +26,7 @@ func LLVMType(t string) llvm.Type {
 	case "any":
 		panic(fmt.Sprintf("not support type: `%s` yet", t))
 	default:
-		if t[0] == '[' && t[len(t)-1] == ']' {
+		if len(t) > 1 && t[0] == '[' && t[len(t)-1] == ']' {
 			for i, v := range t {
 				if v == ';' {
 					lenS := t[i+1 : len(t)-1]
