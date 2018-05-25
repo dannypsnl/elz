@@ -3,7 +3,6 @@
 [![version badges](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/elz-lang/elz/releases)
 [![Build Status](https://travis-ci.org/elz-lang/elz.svg?branch=master)](https://travis-ci.org/elz-lang/elz)
 [![Coverage Status](https://coveralls.io/repos/github/elz-lang/elz/badge.svg)](https://coveralls.io/github/elz-lang/elz)
-
 [![GitHub license](https://img.shields.io/github/license/elz-lang/elz.svg)](https://github.com/elz-lang/elz/blob/master/LICENSE)
 [![Changelog](https://img.shields.io/badge/doc-changelog-orange.svg)](https://github.com/elz-lang/elz/blob/master/CHANGELOG.md)
 [![Contributing](https://img.shields.io/badge/doc-contributing-blue.svg)](https://github.com/elz-lang/elz/blob/master/CONTRIBUTING.md)
