@@ -12,7 +12,7 @@ func TestTypeDefine(t *testing.T) {
 	)
 	`
 
-	expected := `yee`
+	expected := `%Foo = type <{ i32, i8 }>`
 
 	hasTestTemplate(t, src, expected)
 }

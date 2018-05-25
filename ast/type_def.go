@@ -42,7 +42,6 @@ func (typ *TypeDef) Check(c *Context) {
 	signature.WriteString(")")
 
 	typ.signature = signature.String()
-	println(typ.signature)
 	c.functions[typ.signature] = &Function{
 		value:   llvm.Value{},
 		retType: typ.Name,
@@ -51,7 +50,6 @@ func (typ *TypeDef) Check(c *Context) {
 
 // NOTE: TypeDef is a statement, so should not get value from this AST's Codegen
 func (typ *TypeDef) Codegen(c *Context) llvm.Value {
-
 	ft := llvm.FunctionType(llvm.PointerType(typ.t, 0), typ.types, false)
 	f := llvm.AddFunction(c.Module, typ.Name, ft)
 
