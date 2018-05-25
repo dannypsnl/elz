@@ -4,6 +4,10 @@
 [![Build Status](https://travis-ci.org/elz-lang/elz.svg?branch=master)](https://travis-ci.org/elz-lang/elz)
 [![Coverage Status](https://coveralls.io/repos/github/elz-lang/elz/badge.svg)](https://coveralls.io/github/elz-lang/elz)
 
+[![GitHub license](https://img.shields.io/github/license/elz-lang/elz.svg)](https://github.com/elz-lang/elz/blob/master/LICENSE)
+[![Changelog](https://img.shields.io/badge/doc-changelog-orange.svg)](https://github.com/elz-lang/elz/blob/master/CHANGELOG.md)
+[![Contributing](https://img.shields.io/badge/doc-contributing-blue.svg)](https://github.com/elz-lang/elz/blob/master/CONTRIBUTING.md)
+
 Elz is a modern programming language focus on production. I hope it can change daily work of us.
 
 ## Install
@@ -34,7 +38,3 @@ Only for develop just now.
 ```bash
 $ elz source.elz  # elz will compile it to llvm ir then print it.
 ```
-
-## Contributing
-
-Watch [contributing.md](https://github.com/elz-lang/elz/blob/master/CONTRIBUTING.md)
