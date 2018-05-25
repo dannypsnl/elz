@@ -7,7 +7,7 @@ import (
 
 func (s *ElzListener) EnterDeclareFn(c *parser.DeclareFnContext) {
 	retTyp := ""
-	if !c.ReturnType().IsEmpty() {
+	if c.ReturnType() != nil {
 		retTyp = c.ReturnType().GetText()
 	}
 	s.fnBuilder = NewFnBuilder().
