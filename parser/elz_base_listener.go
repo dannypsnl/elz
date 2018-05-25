@@ -351,6 +351,12 @@ func (s *BaseElzListener) EnterAs(ctx *AsContext) {}
 // ExitAs is called when production As is exited.
 func (s *BaseElzListener) ExitAs(ctx *AsContext) {}
 
+// EnterAccessArrayElement is called when production AccessArrayElement is entered.
+func (s *BaseElzListener) EnterAccessArrayElement(ctx *AccessArrayElementContext) {}
+
+// ExitAccessArrayElement is called when production AccessArrayElement is exited.
+func (s *BaseElzListener) ExitAccessArrayElement(ctx *AccessArrayElementContext) {}
+
 // EnterStatExpr is called when production StatExpr is entered.
 func (s *BaseElzListener) EnterStatExpr(ctx *StatExprContext) {}
 

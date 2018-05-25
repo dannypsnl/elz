@@ -173,6 +173,9 @@ type ElzListener interface {
 	// EnterAs is called when entering the As production.
 	EnterAs(c *AsContext)
 
+	// EnterAccessArrayElement is called when entering the AccessArrayElement production.
+	EnterAccessArrayElement(c *AccessArrayElementContext)
+
 	// EnterStatExpr is called when entering the StatExpr production.
 	EnterStatExpr(c *StatExprContext)
 
@@ -349,6 +352,9 @@ type ElzListener interface {
 
 	// ExitAs is called when exiting the As production.
 	ExitAs(c *AsContext)
+
+	// ExitAccessArrayElement is called when exiting the AccessArrayElement production.
+	ExitAccessArrayElement(c *AccessArrayElementContext)
 
 	// ExitStatExpr is called when exiting the StatExpr production.
 	ExitStatExpr(c *StatExprContext)
