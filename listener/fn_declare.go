@@ -6,9 +6,13 @@ import (
 )
 
 func (s *ElzListener) EnterDeclareFn(c *parser.DeclareFnContext) {
+	retTyp := ""
+	if !c.ReturnType().IsEmpty() {
+		retTyp = c.ReturnType().GetText()
+	}
 	s.fnBuilder = NewFnBuilder().
 		Name(c.ID().GetText()).
-		RetType(c.ReturnType().GetText()).
+		RetType(retTyp).
 		Notation(s.notations)
 
 	// take all notation in record
