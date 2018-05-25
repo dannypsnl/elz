@@ -1,3 +1,2 @@
-extern "C" {
-    fn add(i32, i32) -> i32
-}
+#[extern(c)]
+fn add(i32, i32) -> i32
