@@ -1,5 +1,5 @@
 x = 1 // ignore type & unexport
-y: num = 2 // unexport
+y = 2 // unexport
 
 +N = 10000000 // export & ignore type
-+pi: num = 3.1415926 // complete form
++pi = 3.1415926 // complete form
