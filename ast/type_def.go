@@ -42,7 +42,7 @@ func (typ *TypeDef) Check(c *Context) {
 func (typ *TypeDef) Codegen(c *Context) llvm.Value {
 	types := make([]llvm.Type, 0)
 	for _, attr := range typ.Attrs {
-		types = append(types, LLVMType(attr.Type))
+		types = append(types, c.Type(attr.Type))
 	}
 	t := c.Module.Context().StructCreateNamed(typ.Name)
 	t.StructSetBody(types, true)

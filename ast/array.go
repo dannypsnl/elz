@@ -56,7 +56,7 @@ func (a *Array) Codegen(c *Context) llvm.Value {
 		}
 		values = append(values, e.Codegen(c))
 	}
-	return llvm.ConstArray(LLVMType(a.elementType), values)
+	return llvm.ConstArray(c.Type(a.elementType), values)
 }
 
 func (a *Array) Type(*Context) string {

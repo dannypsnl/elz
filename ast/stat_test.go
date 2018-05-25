@@ -109,7 +109,7 @@ func TestLocalVarDef(t *testing.T) {
 		t.Error("Build Engine Problem")
 	}
 	gres := engine.RunFunction(fn, []llvm.GenericValue{})
-	if gres.Float(LLVMType("f32"))-3.1415926 > 0.0000001 {
+	if gres.Float(context.Type("f32"))-3.1415926 > 0.0000001 {
 		t.Error("error", gres.Float(llvm.FloatType()))
 	}
 }

@@ -80,8 +80,8 @@ type I8 struct {
 }
 
 func (i8 *I8) Check(*Context) {}
-func (i8 *I8) Codegen(*Context) llvm.Value {
-	return llvm.ConstIntFromString(LLVMType("i8"), i8.Val, 10)
+func (i8 *I8) Codegen(c *Context) llvm.Value {
+	return llvm.ConstIntFromString(c.Type("i8"), i8.Val, 10)
 }
 func (i8 *I8) Type(*Context) string { return "i8" }
 
@@ -90,8 +90,8 @@ type I16 struct {
 }
 
 func (i16 *I16) Check(*Context) {}
-func (i16 *I16) Codegen(*Context) llvm.Value {
-	return llvm.ConstIntFromString(LLVMType("i16"), i16.Val, 10)
+func (i16 *I16) Codegen(c *Context) llvm.Value {
+	return llvm.ConstIntFromString(c.Type("i16"), i16.Val, 10)
 }
 func (i16 *I16) Type(*Context) string { return "i16" }
 
@@ -100,8 +100,8 @@ type I32 struct {
 }
 
 func (i32 *I32) Check(*Context) {}
-func (i32 *I32) Codegen(*Context) llvm.Value {
-	return llvm.ConstIntFromString(LLVMType("i32"), i32.Val, 10)
+func (i32 *I32) Codegen(c *Context) llvm.Value {
+	return llvm.ConstIntFromString(c.Type("i32"), i32.Val, 10)
 }
 func (i32 *I32) Type(*Context) string { return "i32" }
 

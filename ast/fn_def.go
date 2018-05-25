@@ -74,7 +74,7 @@ func (f *FnDef) Check(c *Context) {
 
 func (f *FnDef) Codegen(c *Context) llvm.Value {
 	fn := llvm.AddFunction(c.Module, f.Name,
-		llvm.FunctionType(f.returnType(c), f.paramsType(), false),
+		llvm.FunctionType(f.returnType(c), f.paramsType(c), false),
 	)
 
 	fc := c.functions[f.fcache]
@@ -105,7 +105,7 @@ func (f *FnDef) Codegen(c *Context) llvm.Value {
 
 func generateMainFn(builder llvm.Builder, entryPoint llvm.BasicBlock) {
 	builder.SetInsertPointAtEnd(entryPoint)
-	builder.CreateRet(llvm.ConstInt(LLVMType("i32"), 0, false))
+	builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
 	builder.ClearInsertionPoint()
 }
 
@@ -132,14 +132,14 @@ func (f *FnDef) returnType(c *Context) llvm.Type {
 			c.Reporter.Emit("you can't have return type for main function!")
 		}
 	}
-	retT := LLVMType(rt)
+	retT := c.Type(rt)
 	return retT
 }
 
-func (f *FnDef) paramsType() []llvm.Type {
+func (f *FnDef) paramsType(c *Context) []llvm.Type {
 	paramsT := []llvm.Type{}
 	for _, v := range f.Params {
-		paramsT = append(paramsT, LLVMType(v.Type))
+		paramsT = append(paramsT, c.Type(v.Type))
 	}
 	return paramsT
 }

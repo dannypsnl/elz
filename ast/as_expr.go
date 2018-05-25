@@ -76,7 +76,7 @@ func (a *As) Codegen(c *Context) llvm.Value {
 		return v // FIXME: tmp solution
 	}
 	a.op = makeOp(a.E.Type(c), a.T)
-	return c.Builder.CreateCast(v, a.op, LLVMType(a.T), ".as_tmp")
+	return c.Builder.CreateCast(v, a.op, c.Type(a.T), ".as_tmp")
 }
 func (a *As) Type(ctx *Context) string {
 	return a.T

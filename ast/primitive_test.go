@@ -23,7 +23,7 @@ func TestI8(t *testing.T) {
 	iVal := &I8{Val: "10"}
 	iVal.Check(context)
 	llvmIR := iVal.Codegen(context)
-	if llvmIR.Type() != LLVMType(iVal.Type(context)) {
+	if llvmIR.Type() != context.Type(iVal.Type(context)) {
 		t.Error("Bug in ast.I8")
 	}
 }
@@ -33,7 +33,7 @@ func TestI16(t *testing.T) {
 	iVal := &I16{Val: "10"}
 	iVal.Check(context)
 	llvmIR := iVal.Codegen(context)
-	if llvmIR.Type() != LLVMType(iVal.Type(context)) {
+	if llvmIR.Type() != context.Type(iVal.Type(context)) {
 		t.Error("Bug in ast.I16")
 	}
 }
@@ -43,7 +43,7 @@ func TestI32(t *testing.T) {
 	iVal := &I32{Val: "10"}
 	iVal.Check(context)
 	llvmIR := iVal.Codegen(context)
-	if llvmIR.Type() != LLVMType(iVal.Type(context)) {
+	if llvmIR.Type() != context.Type(iVal.Type(context)) {
 		t.Error("Bug in ast.I32")
 	}
 }
@@ -53,7 +53,7 @@ func TestI64(t *testing.T) {
 	iVal := &I64{Val: "10"}
 	iVal.Check(context)
 	llvmIR := iVal.Codegen(context)
-	if llvmIR.Type() != LLVMType(iVal.Type(context)) {
+	if llvmIR.Type() != context.Type(iVal.Type(context)) {
 		t.Error("Bug in ast.I64")
 	}
 }
@@ -63,7 +63,7 @@ func TestF32(t *testing.T) {
 	fVal := &F32{Val: "3.14"}
 	fVal.Check(context)
 	llvmIR := fVal.Codegen(context)
-	if llvmIR.Type() != LLVMType(fVal.Type(context)) {
+	if llvmIR.Type() != context.Type(fVal.Type(context)) {
 		t.Error("Bug in ast.F32")
 	}
 }
@@ -73,7 +73,7 @@ func TestF64(t *testing.T) {
 	fVal := &F64{Val: "3.14"}
 	fVal.Check(context)
 	llvmIR := fVal.Codegen(context)
-	if llvmIR.Type() != LLVMType(fVal.Type(context)) {
+	if llvmIR.Type() != context.Type(fVal.Type(context)) {
 		t.Error("Bug in ast.F64")
 	}
 }
