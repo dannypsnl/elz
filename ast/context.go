@@ -42,7 +42,11 @@ func (c *Context) NewType(name string, t llvm.Type) {
 }
 
 func (c *Context) Type(name string) llvm.Type {
-	return c.Module.GetTypeByName(name)
+	typ := LLVMType(name)
+	if typ.String() != "VoidType" {
+		return typ
+	}
+	return llvm.PointerType(c.Module.GetTypeByName(name), 0)
 }
 
 func (c *Context) funcRetTyp(signature string) *Function {

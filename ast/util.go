@@ -46,6 +46,6 @@ func LLVMType(t string) llvm.Type {
 			return LLVMType(t[3:])
 		}
 	end:
-		panic(fmt.Sprintf("not support type: `%s` yet", t))
+		return llvm.VoidType()
 	}
 }

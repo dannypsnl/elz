@@ -31,10 +31,8 @@ func (lv *LocalVarDef) Check(ctx *Context) {
 func (lv *LocalVarDef) Codegen(ctx *Context) llvm.Value {
 	if lv.generateIsSafe {
 		expr := lv.Expression.Codegen(ctx)
-		//typ := LLVMType(lv.VarType)
 		typ := ctx.Type(lv.VarType)
-		val := ctx.Builder.CreateMalloc(typ, lv.Name)
-		expr = ctx.Builder.CreateLoad(expr, "")
+		val := ctx.Builder.CreateAlloca(typ, lv.Name)
 		ctx.Builder.CreateStore(expr, val)
 		ctx.Vars[lv.Name] = val
 		return val
