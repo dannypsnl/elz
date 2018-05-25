@@ -46,6 +46,9 @@ func (c *Context) Type(name string) llvm.Type {
 	if typ.String() != "VoidType" {
 		return typ
 	}
+	if name == "()" {
+		return llvm.VoidType()
+	}
 	return llvm.PointerType(c.Module.GetTypeByName(name), 0)
 }
 

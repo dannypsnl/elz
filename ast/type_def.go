@@ -16,9 +16,20 @@ type TypeDef struct {
 	Name      string
 	Attrs     []TypeAttr
 	signature string
+	types     []llvm.Type
+	t         llvm.Type
 }
 
 func (typ *TypeDef) Check(c *Context) {
+	typ.types = make([]llvm.Type, 0)
+	for _, attr := range typ.Attrs {
+		typ.types = append(typ.types, c.Type(attr.Type))
+	}
+	typ.t = c.Module.Context().StructCreateNamed(typ.Name)
+	typ.t.StructSetBody(typ.types, true)
+
+	c.NewType(typ.Name, typ.t)
+
 	signature := bytes.NewBuffer([]byte{})
 	signature.WriteString(typ.Name)
 	signature.WriteString("(")
@@ -40,23 +51,15 @@ func (typ *TypeDef) Check(c *Context) {
 
 // NOTE: TypeDef is a statement, so should not get value from this AST's Codegen
 func (typ *TypeDef) Codegen(c *Context) llvm.Value {
-	types := make([]llvm.Type, 0)
-	for _, attr := range typ.Attrs {
-		types = append(types, c.Type(attr.Type))
-	}
-	t := c.Module.Context().StructCreateNamed(typ.Name)
-	t.StructSetBody(types, true)
 
-	c.NewType(typ.Name, t)
-
-	ft := llvm.FunctionType(llvm.PointerType(t, 0), types, false)
+	ft := llvm.FunctionType(llvm.PointerType(typ.t, 0), typ.types, false)
 	f := llvm.AddFunction(c.Module, typ.Name, ft)
 
 	entry := llvm.AddBasicBlock(f, "entry")
 
 	c.Builder.SetInsertPointAtEnd(entry)
 
-	object := c.Builder.CreateMalloc(t, "object")
+	object := c.Builder.CreateMalloc(typ.t, "object")
 
 	for i, attr := range typ.Attrs {
 		valueI := c.Builder.CreateGEP(object, []llvm.Value{
