@@ -96,20 +96,21 @@ func (s *ElzListener) ExitInt(ctx *parser.IntContext) {
 	if ctx.IntSuffix() != nil {
 		suffix = ctx.IntSuffix().GetText()
 	}
+	iVal := ctx.INT().GetText()
 	switch suffix {
 	case "'i8":
-		s.exprStack.Push(&ast.I8{Val: ctx.INT().GetText()})
+		s.exprStack.Push(&ast.I8{Val: iVal})
 	case "'i16":
-		s.exprStack.Push(&ast.I16{Val: ctx.INT().GetText()})
+		s.exprStack.Push(&ast.I16{Val: iVal})
 	case "'i32":
-		s.exprStack.Push(&ast.I32{Val: ctx.INT().GetText()})
+		s.exprStack.Push(&ast.I32{Val: iVal})
 	case "'i64":
-		s.exprStack.Push(&ast.I64{Val: ctx.INT().GetText()})
+		s.exprStack.Push(&ast.I64{Val: iVal})
 	case "'f32":
-		s.exprStack.Push(&ast.F32{Val: ctx.INT().GetText()})
+		s.exprStack.Push(&ast.F32{Val: iVal})
 	case "'f64":
-		s.exprStack.Push(&ast.F64{Val: ctx.INT().GetText()})
+		s.exprStack.Push(&ast.F64{Val: iVal})
 	default:
-		s.exprStack.Push(&ast.I32{Val: ctx.INT().GetText()})
+		s.exprStack.Push(&ast.I32{Val: iVal})
 	}
 }

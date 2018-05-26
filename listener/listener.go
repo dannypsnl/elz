@@ -79,3 +79,9 @@ func NewParse(source string) string {
 	antlr.ParseTreeWalkerDefault.Walk(listener, tree)
 	return fmt.Sprint(listener.Module())
 }
+
+func (s *ElzListener) TakeAllNotation() (result []util.Notation) {
+	result = s.notations
+	s.notations = make([]util.Notation, 0)
+	return
+}

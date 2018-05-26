@@ -2,7 +2,6 @@ package listener
 
 import (
 	"github.com/elz-lang/elz/parser"
-	"github.com/elz-lang/elz/util"
 )
 
 func (s *ElzListener) EnterDeclareFn(c *parser.DeclareFnContext) {
@@ -13,14 +12,11 @@ func (s *ElzListener) EnterDeclareFn(c *parser.DeclareFnContext) {
 	s.fnBuilder = NewFnBuilder().
 		Name(c.ID().GetText()).
 		RetType(retTyp).
-		Notation(s.notations)
-
-	// take all notation in record
-	s.notations = make([]util.Notation, 0)
+		Notation(s.TakeAllNotation())
 }
 func (s *ElzListener) ExitDeclareFn(c *parser.DeclareFnContext) {
 	if s.fnBuilder == nil {
-		panic("Compiler bug, declaration expect have function builder when parsing")
+		panic("Compiler bug, function define expect have function builder when parsing")
 	}
 
 	typ := ""
