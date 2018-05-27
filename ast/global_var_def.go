@@ -24,15 +24,17 @@ func (g *GlobalVarDef) Check(ctx *Context) {
 	if g.VarType != exprType {
 		ctx.Reporter.Emit(fmt.Sprintf("global var: %s, it's type is: %s, but receive: %s", g.Name, g.VarType, exprType))
 	}
-	ctx.VarsType[g.Name] = g.VarType
+
+	ctx.NewVar(g.Name, g.VarType)
 }
 
-func (varDef *GlobalVarDef) Codegen(ctx *Context) llvm.Value {
-	expr := varDef.Expression.Codegen(ctx)
-	val := llvm.AddGlobal(ctx.Module, expr.Type(), varDef.Name)
+func (g *GlobalVarDef) Codegen(ctx *Context) llvm.Value {
+	expr := g.Expression.Codegen(ctx)
+	val := llvm.AddGlobal(ctx.Module, expr.Type(), g.Name)
 	if expr.IsConstant() {
 		val.SetInitializer(expr)
 	}
-	ctx.Vars[varDef.Name] = val
+	ctx.Vars[g.Name] = val
+	ctx.VarValue(g.Name, val)
 	return val
 }
