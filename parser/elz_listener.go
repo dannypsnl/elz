@@ -173,6 +173,9 @@ type ElzListener interface {
 	// EnterAs is called when entering the As production.
 	EnterAs(c *AsContext)
 
+	// EnterBool is called when entering the Bool production.
+	EnterBool(c *BoolContext)
+
 	// EnterAccessArrayElement is called when entering the AccessArrayElement production.
 	EnterAccessArrayElement(c *AccessArrayElementContext)
 
@@ -352,6 +355,9 @@ type ElzListener interface {
 
 	// ExitAs is called when exiting the As production.
 	ExitAs(c *AsContext)
+
+	// ExitBool is called when exiting the Bool production.
+	ExitBool(c *BoolContext)
 
 	// ExitAccessArrayElement is called when exiting the AccessArrayElement production.
 	ExitAccessArrayElement(c *AccessArrayElementContext)

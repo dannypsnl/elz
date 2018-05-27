@@ -42,6 +42,8 @@ INT: Digit+;
 fragment
 Digit: [0-9];
 
+BOOLEAN: 'true' | 'false';
+
 STRING: '"' .*? '"';
 
 prog: topStatList?;
@@ -190,6 +192,7 @@ expr: op='&' expr                      # Ref // operation prec
     | exprStat                         # StatExpr
     | '[' expr ';' INT ']'             # ArrWithLen
     | '[' exprList ']'                 # ArrWithList
+    | BOOLEAN                          # Bool
     | INT intSuffix?                   # Int
     | FLOAT floatSuffix?               # Float
     | ID                               # Id
