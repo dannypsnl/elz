@@ -90,6 +90,10 @@ func (s *ElzListener) ExitFloat(ctx *parser.FloatContext) {
 	}
 }
 
+func (s *ElzListener) ExitBool(c *parser.BoolContext) {
+	s.exprStack.Push(&ast.Bool{Val: c.BOOLEAN().GetText()})
+}
+
 // ExitInt listen i32 literal, like: `1, 5, 321, 89`
 func (s *ElzListener) ExitInt(ctx *parser.IntContext) {
 	suffix := ""
