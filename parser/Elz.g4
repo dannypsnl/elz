@@ -7,6 +7,8 @@ options {
 WS: [ \t\r\n]+ -> channel(HIDDEN);
 COMMENT: '//' .*? '\n' -> channel(HIDDEN);
 
+BOOLEAN: 'true' | 'false';
+
 ID : StartLetter Letter*;
 fragment
 StartLetter: [a-zA-Z_]
@@ -41,8 +43,6 @@ FLOAT: Digit* '.' Digit+;
 INT: Digit+;
 fragment
 Digit: [0-9];
-
-BOOLEAN: 'true' | 'false';
 
 STRING: '"' .*? '"';
 
