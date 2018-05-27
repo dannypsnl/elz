@@ -11,6 +11,8 @@ func LLVMType(t string) llvm.Type {
 	switch t {
 	case "()":
 		return llvm.VoidType()
+	case "bool":
+		return llvm.Int1Type()
 	case "i8":
 		return llvm.Int8Type()
 	case "i16":

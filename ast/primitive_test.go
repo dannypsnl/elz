@@ -77,3 +77,14 @@ func TestF64(t *testing.T) {
 		t.Error("Bug in ast.F64")
 	}
 }
+
+func TestBool(t *testing.T) {
+	c := NewContext()
+	boolV := &Bool{Val: "true"}
+	boolV.Check(c)
+	llvmIR := boolV.Codegen(c)
+
+	if llvmIR.Type() != c.Type("bool") {
+		t.Error("bug in ast.Bool")
+	}
+}

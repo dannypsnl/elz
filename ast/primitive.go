@@ -53,6 +53,25 @@ func (s *Str) Type(*Context) string {
 	return fmt.Sprintf("[i8;%d]", len(s.Val))
 }
 
+type Bool struct {
+	Val string
+}
+
+func (b *Bool) Check(*Context) {}
+func (b *Bool) Codegen(c *Context) llvm.Value {
+	var v uint64
+	if b.Val == "true" {
+		v = 1
+	} else if b.Val == "false" {
+		v = 0
+	} else {
+		// Compiler bug mean should not happened at anytime, so we can panic it
+		panic(fmt.Sprintf("Compiler bug, boolean value should only receiving true/false, but receive: %s", b.Val))
+	}
+	return llvm.ConstInt(llvm.Int1Type(), v, false)
+}
+func (b *Bool) Type(*Context) string { return "bool" }
+
 type F32 struct {
 	Val string
 }
