@@ -14,7 +14,9 @@ Welcome to elz's documentation!
 Introduction
 ============
 
-Elz is a programming language for more productive
+Elz is a programming language for more productive!
+
+In nows day, our point from programming to engineering more and more.
 
 
 Indices and tables
