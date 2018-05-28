@@ -1,3 +1,3 @@
-# elz
+# Introduciton
 
-Say hello
+Elz is a programming language for more productive.
