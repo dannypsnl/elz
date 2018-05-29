@@ -10,6 +10,7 @@ Logging change of elz.
 - char literal
 - access field of user defined type
 - variant parameter list for function
+- Boolean value & compare operator
 
 ## v0.2.0
 
