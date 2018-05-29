@@ -43,6 +43,17 @@ func (s *ElzListener) ExitMulOrDiv(ctx *parser.MulOrDivContext) {
 	s.exprStack.Push(e)
 }
 
+func (s *ElzListener) ExitEq(c *parser.EqContext) {
+	le := s.exprStack.Pop()
+	re := s.exprStack.Pop()
+	e := &ast.BinaryExpr{
+		LeftE:  le.(ast.Expr),
+		RightE: re.(ast.Expr),
+		Op:     c.GetOp().GetText(),
+	}
+	s.exprStack.Push(e)
+}
+
 // ExitAs listen as expression, like: `3.1 as f64`
 func (s *ElzListener) ExitAs(ctx *parser.AsContext) {
 	e := s.exprStack.Pop()

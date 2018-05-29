@@ -9,6 +9,5 @@ fn main() {
   let b = Foo(0)
   let a = [1, 2, 3]
   let c = a[0]
-  let d = true
-  let e: bool = false
+  let d = c == 1
 }
