@@ -71,3 +71,20 @@ func TestFloatSuffix(t *testing.T) {
 	hasTestTemplate(t, src, expected)
 
 }
+
+func TestEq(t *testing.T) {
+	src := `
+	a = 1
+	b = 1
+
+	fn main() {
+	  c = a == b
+	}
+	`
+
+	expected := `
+  %.eq_tmp = icmp eq i32 %0, %1
+`
+
+	hasTestTemplate(t, src, expected)
+}
