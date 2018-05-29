@@ -13,7 +13,7 @@ type BinaryExpr struct {
 }
 
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
-	exprType := b.Type(ctx)
+	exprType := b.LeftE.Type(ctx)
 	if exprType == "i32" || exprType == "i64" {
 		switch b.Op {
 		case "+":
@@ -24,6 +24,13 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 			return ctx.Builder.CreateMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".mul_tmp")
 		case "/":
 			return ctx.Builder.CreateSDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".div_tmp")
+		case "==":
+			return ctx.Builder.CreateICmp(
+				llvm.IntEQ,
+				b.LeftE.Codegen(ctx),
+				b.RightE.Codegen(ctx),
+				".eq_tmp",
+			)
 		default:
 			// FIXME: wait for impl
 			// TODO: If have function implement by @Op, it can be a operator at here
@@ -72,6 +79,9 @@ func (b *BinaryExpr) Type(ctx *Context) string {
 		// TODO: if can't find Op-function support this operation, error report
 		// check `rightT != "type error"` for sure the error won't report again
 		return "type error"
+	}
+	if b.Op == "==" {
+		return "bool"
 	}
 	return leftT
 }
