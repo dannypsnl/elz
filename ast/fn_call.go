@@ -7,10 +7,8 @@ import (
 )
 
 type FnCall struct {
-	Name    string
-	Args    []Expr
-	fcache  string
-	retType string // Setting by parser
+	Name string
+	Args []Expr
 }
 
 func (fc *FnCall) Check(c *Context) {
@@ -18,6 +16,13 @@ func (fc *FnCall) Check(c *Context) {
 		at.Check(c)
 	}
 
+}
+
+func (fc *FnCall) Codegen(c *Context) llvm.Value {
+	return c.Call(fc.Name, fc.Args...)
+}
+
+func (fc *FnCall) Type(c *Context) string {
 	buf := bytes.NewBuffer([]byte{})
 	buf.WriteString(fc.Name)
 	buf.WriteRune('(')
@@ -28,21 +33,5 @@ func (fc *FnCall) Check(c *Context) {
 		}
 	}
 	buf.WriteRune(')')
-	fc.fcache = buf.String()
-	fc.retType = c.funcRetTyp(fc.fcache).retType
-}
-
-func (fc *FnCall) Codegen(c *Context) llvm.Value {
-	fn := c.funcRetTyp(fc.fcache).value
-
-	args := []llvm.Value{}
-	for _, a := range fc.Args {
-		args = append(args, a.Codegen(c))
-	}
-
-	return c.Builder.CreateCall(fn, args, "")
-}
-
-func (fc *FnCall) Type(*Context) string {
-	return fc.retType
+	return c.funcRetTyp(buf.String()).retType
 }

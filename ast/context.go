@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"bytes"
+
 	"github.com/elz-lang/elz/errors"
 
 	"llvm.org/llvm/bindings/go/llvm"
@@ -50,6 +52,32 @@ func (c *Context) Type(name string) llvm.Type {
 		return llvm.VoidType()
 	}
 	return llvm.PointerType(c.Module.GetTypeByName(name), 0)
+}
+
+func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
+	buf := bytes.NewBuffer([]byte{})
+	buf.WriteString(funcName)
+	buf.WriteRune('(')
+	for i, e := range exprs {
+		e.Type(c)
+		buf.WriteString(e.Type(c))
+		if len(exprs)-1 > i {
+			buf.WriteRune(',')
+		}
+	}
+	buf.WriteRune(')')
+	signature := buf.String()
+
+	args := []llvm.Value{}
+	for _, e := range exprs {
+		args = append(args, e.Codegen(c))
+	}
+
+	if c.funcRetTyp(signature) != nil {
+		fn := c.funcRetTyp(signature).value
+		return c.Builder.CreateCall(fn, args, "")
+	}
+	return llvm.Value{}
 }
 
 func (c *Context) funcRetTyp(signature string) *Function {
