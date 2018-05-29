@@ -10,7 +10,6 @@ Logging change of elz.
 - char literal
 - access field of user defined type
 - variant parameter list for function
-- Boolean value & compare operator
 
 ## v0.2.0
 
@@ -20,6 +19,7 @@ Logging change of elz.
 - assign statement
 - type define
 - extract array element
+- Boolean value & compare operator
 
 ## v0.1.0
 
