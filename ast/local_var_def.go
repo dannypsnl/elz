@@ -25,7 +25,7 @@ func (lv *LocalVarDef) Check(ctx *Context) {
 		ctx.Reporter.Emit(fmt.Sprintf("var: %s, it's type is: %s, but receive: %s", lv.Name, lv.VarType, exprType))
 		lv.generateIsSafe = false
 	}
-	ctx.VarsType[lv.Name] = lv.VarType
+	ctx.NewVar(lv.Name, lv.VarType)
 }
 
 func (lv *LocalVarDef) Codegen(ctx *Context) llvm.Value {
@@ -34,7 +34,7 @@ func (lv *LocalVarDef) Codegen(ctx *Context) llvm.Value {
 		typ := ctx.Type(lv.VarType)
 		val := ctx.Builder.CreateAlloca(typ, lv.Name)
 		ctx.Builder.CreateStore(expr, val)
-		ctx.Vars[lv.Name] = val
+		ctx.VarValue(lv.Name, val)
 		return val
 	}
 	return llvm.Value{}

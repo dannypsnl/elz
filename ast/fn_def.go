@@ -54,7 +54,7 @@ func (f *FnDef) Check(c *Context) {
 	buf.WriteString(f.Name)
 	buf.WriteRune('(')
 	for i, p := range f.Params {
-		f.Ctx.VarsType[p.Name] = p.Type
+		f.Ctx.NewVar(p.Name, p.Type)
 		buf.WriteString(p.Type)
 		if i != len(f.Params)-1 {
 			buf.WriteRune(',')
@@ -87,7 +87,7 @@ func (f *FnDef) Codegen(c *Context) llvm.Value {
 
 		for i, param := range fn.Params() {
 			param.SetName(f.Params[i].Name)
-			f.Ctx.Vars[f.Params[i].Name+" param"] = param
+			f.Ctx.VarValue(f.Params[i].Name+" param", param)
 		}
 
 		for _, stat := range f.Body {

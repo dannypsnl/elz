@@ -34,7 +34,6 @@ func (g *GlobalVarDef) Codegen(ctx *Context) llvm.Value {
 	if expr.IsConstant() {
 		val.SetInitializer(expr)
 	}
-	ctx.Vars[g.Name] = val
 	ctx.VarValue(g.Name, val)
 	return val
 }
