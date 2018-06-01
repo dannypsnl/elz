@@ -4,6 +4,12 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
+// Assign is AST for code like:
+//
+//  fn main() {
+//    let mut a = 1
+//    a = 2
+//  }
 type Assign struct {
 	VarName string
 	E       Expr
@@ -11,7 +17,6 @@ type Assign struct {
 
 func (a *Assign) Check(c *Context) {
 	a.E.Check(c)
-
 }
 
 func (a *Assign) Codegen(c *Context) llvm.Value {
