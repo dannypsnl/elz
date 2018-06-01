@@ -28,7 +28,7 @@ func (s *ElzListener) ExitAttr(c *parser.AttrContext) {
 	attr := ast.TypeAttr{
 		Export: s.exportThis,
 		Name:   c.ID().GetText(),
-		Type:   c.TypeForm().GetText(),
+		Typ:    c.TypeForm().GetText(),
 	}
 	s.typeDefineBuilder.attrs = append(s.typeDefineBuilder.attrs, attr)
 }

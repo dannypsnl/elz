@@ -6,12 +6,20 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
+// TypeAttr record attribute's name & type
 type TypeAttr struct {
 	Export bool
 	Name   string
-	Type   string
+	Typ    string
 }
 
+// TypeDef is AST for code like:
+//
+// ```
+// type Foo (
+//   attr: i32
+// )
+// ```
 type TypeDef struct {
 	Name      string
 	Attrs     []TypeAttr
@@ -20,10 +28,11 @@ type TypeDef struct {
 	t         llvm.Type
 }
 
+// Check for TypeDef
 func (typ *TypeDef) Check(c *Context) {
 	typ.types = make([]llvm.Type, 0)
 	for _, attr := range typ.Attrs {
-		typ.types = append(typ.types, c.Type(attr.Type))
+		typ.types = append(typ.types, c.Type(attr.Typ))
 	}
 	typ.t = c.Module.Context().StructCreateNamed(typ.Name)
 	typ.t.StructSetBody(typ.types, true)
@@ -34,7 +43,7 @@ func (typ *TypeDef) Check(c *Context) {
 	signature.WriteString(typ.Name)
 	signature.WriteString("(")
 	for i, attr := range typ.Attrs {
-		signature.WriteString(attr.Type)
+		signature.WriteString(attr.Typ)
 		if i < len(typ.Attrs)-1 {
 			signature.WriteRune(',')
 		}
@@ -42,9 +51,12 @@ func (typ *TypeDef) Check(c *Context) {
 	signature.WriteString(")")
 
 	typ.signature = signature.String()
-	c.NewFunc(typ.signature, typ.Name)
+	returnType := typ.Name
+	c.NewFunc(typ.signature, returnType)
 }
 
+// Codegen of TypeDef
+//
 // NOTE: TypeDef is a statement, so should not get value from this AST's Codegen
 func (typ *TypeDef) Codegen(c *Context) llvm.Value {
 	ft := llvm.FunctionType(llvm.PointerType(typ.t, 0), typ.types, false)
