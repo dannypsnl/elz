@@ -54,6 +54,17 @@ func (c *Context) Type(name string) llvm.Type {
 	return llvm.PointerType(c.Module.GetTypeByName(name), 0)
 }
 
+func (c *Context) NewFunc(signature string, retType string) {
+	c.functions[signature] = &Function{
+		value:   llvm.Value{},
+		retType: retType,
+	}
+}
+
+func (c *Context) FuncValue(signature string, val llvm.Value) {
+	c.functions[signature].value = val
+}
+
 func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
 	buf := bytes.NewBuffer([]byte{})
 	buf.WriteString(funcName)

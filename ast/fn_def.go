@@ -62,10 +62,7 @@ func (f *FnDef) Check(c *Context) {
 	}
 	buf.WriteRune(')')
 	f.fcache = buf.String()
-	c.functions[f.fcache] = &Function{
-		value:   llvm.Value{},
-		retType: f.RetType,
-	}
+	c.NewFunc(f.fcache, f.RetType)
 
 	for _, stat := range f.Body {
 		stat.Check(f.Ctx)
@@ -77,8 +74,7 @@ func (f *FnDef) Codegen(c *Context) llvm.Value {
 		llvm.FunctionType(f.returnType(c), f.paramsType(c), false),
 	)
 
-	fc := c.functions[f.fcache]
-	fc.value = fn
+	c.FuncValue(f.fcache, fn)
 
 	// is a declaration in extern block for ffi we don't generate the statement for it
 	if !f.isExternDef {
