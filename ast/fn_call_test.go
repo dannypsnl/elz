@@ -2,8 +2,6 @@ package ast
 
 import (
 	"testing"
-
-	"strings"
 )
 
 func TestFnCall(t *testing.T) {
@@ -66,7 +64,7 @@ entry:
   %0 = call i32 @add(i32 10, i32 10)
   ret i32 0
 }`
-	if !strings.Contains(actual, expected) {
-		t.Errorf("expected: `%s`, actual: `%s`", expected, actual)
-	}
+
+	testHas(t, actual, expected)
+	assertEq(t, fc.Type(context), "i32")
 }
