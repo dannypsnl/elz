@@ -1,8 +1,6 @@
 package ast
 
 import (
-	"bytes"
-
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
@@ -23,15 +21,5 @@ func (fc *FnCall) Codegen(c *Context) llvm.Value {
 }
 
 func (fc *FnCall) Type(c *Context) string {
-	buf := bytes.NewBuffer([]byte{})
-	buf.WriteString(fc.Name)
-	buf.WriteRune('(')
-	for i, at := range fc.Args {
-		buf.WriteString(at.Type(c))
-		if i < len(fc.Args)-1 {
-			buf.WriteRune(',')
-		}
-	}
-	buf.WriteRune(')')
-	return c.funcRetTyp(buf.String()).retType
+	return c.funcRetTyp(c.signature(fc.Name, fc.Args...)).retType
 }

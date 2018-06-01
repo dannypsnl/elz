@@ -65,7 +65,7 @@ func (c *Context) FuncValue(signature string, val llvm.Value) {
 	c.functions[signature].value = val
 }
 
-func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
+func (c *Context) signature(funcName string, exprs ...Expr) string {
 	buf := bytes.NewBuffer([]byte{})
 	buf.WriteString(funcName)
 	buf.WriteRune('(')
@@ -77,7 +77,11 @@ func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
 		}
 	}
 	buf.WriteRune(')')
-	signature := buf.String()
+	return buf.String()
+}
+
+func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
+	signature := c.signature(funcName, exprs...)
 
 	args := []llvm.Value{}
 	for _, e := range exprs {
