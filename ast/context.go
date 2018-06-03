@@ -9,29 +9,46 @@ import (
 )
 
 func NewContext() *Context {
-	return &Context{
-		Parent:    nil,
-		Reporter:  errors.NewReporter(),
-		Module:    llvm.NewModule("main"),
-		Context:   llvm.NewContext(),
-		Vars:      make(map[string]llvm.Value),
-		VarsType:  make(map[string]string),
-		Types:     make(map[string]llvm.Type),
-		functions: make(map[string]*Function),
-		Builder:   llvm.NewBuilder(),
+	c := &Context{
+		Parent:   nil,
+		Reporter: errors.NewReporter(),
+		Module:   llvm.NewModule("main"),
+		Context:  llvm.NewContext(),
+		Vars:     make(map[string]llvm.Value),
+		VarsType: make(map[string]string),
+		Types:    make(map[string]llvm.Type),
+		Builder:  llvm.NewBuilder(),
+
+		functions:        make(map[string]*Function),
+		builtInOperators: make(map[string]bool),
 	}
+
+	c.builtInOperators["+(i32,i32)"] = true
+	c.builtInOperators["+(i64,i64)"] = true
+	c.builtInOperators["-(i32,i32)"] = true
+	c.builtInOperators["-(i64,i64)"] = true
+	c.builtInOperators["*(i32,i32)"] = true
+	c.builtInOperators["*(i64,i64)"] = true
+	c.builtInOperators["/(i32,i32)"] = true
+	c.builtInOperators["/(i64,i64)"] = true
+	c.builtInOperators["==(i32,i32)"] = true
+	c.builtInOperators["==(i64,i64)"] = true
+
+	return c
 }
 
 type Context struct {
-	Parent    *Context
-	Reporter  *errors.Reporter
-	Module    llvm.Module
-	Context   llvm.Context
-	Vars      map[string]llvm.Value
-	VarsType  map[string]string
-	Types     map[string]llvm.Type
-	functions map[string]*Function
-	Builder   llvm.Builder
+	Parent   *Context
+	Reporter *errors.Reporter
+	Module   llvm.Module
+	Context  llvm.Context
+	Vars     map[string]llvm.Value
+	VarsType map[string]string
+	Types    map[string]llvm.Type
+	Builder  llvm.Builder
+
+	functions        map[string]*Function
+	builtInOperators map[string]bool
 }
 
 type Function struct {
@@ -80,12 +97,49 @@ func (c *Context) signature(funcName string, exprs ...Expr) string {
 	return buf.String()
 }
 
+// builtInOperation assumes signature is found already
+func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Value {
+	switch signature {
+	case "+(i32,i32)":
+		fallthrough
+	case "+(i64,i64)":
+		return c.Builder.CreateAdd(args[0], args[1], ".add_tmp")
+	case "-(i32,i32)":
+		fallthrough
+	case "-(i64,i64)":
+		return c.Builder.CreateSub(args[0], args[1], ".sub_tmp")
+	case "*(i32,i32)":
+		fallthrough
+	case "*(i64,i64)":
+		return c.Builder.CreateMul(args[0], args[1], ".mul_tmp")
+	case "/(i32,i32)":
+		fallthrough
+	case "/(i64,i64)":
+		return c.Builder.CreateMul(args[0], args[1], ".div_tmp")
+	case "==(i32,i32)":
+		fallthrough
+	case "==(i64,i64)":
+		return c.Builder.CreateICmp(
+			llvm.IntEQ,
+			args[0],
+			args[1],
+			".eq_tmp",
+		)
+	default:
+		panic("Compiler bug at Context::Call, builtInOperation assumes signature is built in operation")
+	}
+}
+
 func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
 	signature := c.signature(funcName, exprs...)
 
 	args := []llvm.Value{}
 	for _, e := range exprs {
 		args = append(args, e.Codegen(c))
+	}
+
+	if _, ok := c.builtInOperators[signature]; ok {
+		return c.builtInOperation(signature, args)
 	}
 
 	if c.funcRetTyp(signature) != nil {

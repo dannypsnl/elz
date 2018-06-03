@@ -28,15 +28,12 @@ type FnDef struct {
 
 func (f *FnDef) Check(c *Context) {
 	f.completeParamType()
-	f.Ctx = &Context{
-		Parent:   c,
-		Reporter: c.Reporter,
-		Module:   c.Module,
-		Context:  c.Context,
-		Vars:     make(map[string]llvm.Value),
-		VarsType: make(map[string]string),
-		Builder:  llvm.NewBuilder(),
-	}
+	f.Ctx = NewContext()
+	f.Ctx.Parent = c
+	f.Ctx.Reporter = c.Reporter
+	f.Ctx.Module = c.Module
+	f.Ctx.Context = c.Context
+	f.Ctx.Builder = llvm.NewBuilder()
 
 	for _, nota := range f.Notations {
 		if nota.Leading == "extern" {
