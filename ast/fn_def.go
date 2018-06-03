@@ -23,7 +23,7 @@ type FnDef struct {
 	Ctx         *Context
 	Notations   []util.Notation
 	isExternDef bool
-	fcache      string
+	fnSignature string
 }
 
 func (f *FnDef) Check(c *Context) {
@@ -61,8 +61,8 @@ func (f *FnDef) Check(c *Context) {
 		}
 	}
 	buf.WriteRune(')')
-	f.fcache = buf.String()
-	c.NewFunc(f.fcache, f.RetType)
+	f.fnSignature = buf.String()
+	c.NewFunc(f.fnSignature, f.RetType)
 
 	for _, stat := range f.Body {
 		stat.Check(f.Ctx)
@@ -74,7 +74,7 @@ func (f *FnDef) Codegen(c *Context) llvm.Value {
 		llvm.FunctionType(f.returnType(c), f.paramsType(c), false),
 	)
 
-	c.FuncValue(f.fcache, fn)
+	c.FuncValue(f.fnSignature, fn)
 
 	// is a declaration in extern block for ffi we don't generate the statement for it
 	if !f.isExternDef {
@@ -128,8 +128,7 @@ func (f *FnDef) returnType(c *Context) llvm.Type {
 			c.Reporter.Emit("you can't have return type for main function!")
 		}
 	}
-	retT := c.Type(rt)
-	return retT
+	return c.Type(rt)
 }
 
 func (f *FnDef) paramsType(c *Context) []llvm.Type {
