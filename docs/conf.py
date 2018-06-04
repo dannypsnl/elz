@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'elz'
+project = u'Elz'
 copyright = u'2018, dannypsnl'
 author = u'dannypsnl'
 
@@ -101,7 +101,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'elzdoc'
+htmlhelp_basename = 'Elzdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -128,7 +128,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'elz.tex', u'elz Documentation',
+    (master_doc, 'Elz.tex', u'Elz Documentation',
      u'dannypsnl', 'manual'),
 ]
 
@@ -138,7 +138,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'elz', u'elz Documentation',
+    (master_doc, 'elz', u'Elz Documentation',
      [author], 1)
 ]
 
@@ -149,7 +149,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'elz', u'elz Documentation',
-     author, 'elz', 'One line description of project.',
+    (master_doc, 'Elz', u'Elz Documentation',
+     author, 'Elz', 'One line description of project.',
      'Miscellaneous'),
 ]
