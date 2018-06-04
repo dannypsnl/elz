@@ -8,10 +8,10 @@ Welcome to Elz's documentation!
 
 .. toctree::
    :maxdepth: 2
-
-    quickstart
-
    :caption: Contents:
+
+.. include:: quickstart/index.rst
+
 
 Introduciton
 ============

@@ -10,12 +10,14 @@ Global variable be defined at module level.
 
 Here has a variable named **a**
 
-.. code:: rust
+.. code::
+
     a = 10
 
 Then local? Local variable available in function, method, macro.
 
-.. code-block:: rust
+.. code::
+
     fn main() {
       let a = 10
     }
@@ -25,7 +27,8 @@ Function
 
 Function in Elz is a procedure start with keyword `fn`.
 
-.. code-block:: rust
+.. code::
+
     fn add(l, r: i32) -> i32 { return l + r }
 
 This example show that Elz will trying to complete type if you do not define it. At here, `l` be completed by type of `r`.
@@ -33,7 +36,8 @@ This example show that Elz will trying to complete type if you do not define it.
 Array
 -----
 
-.. code-block:: rust
+.. code::
+
     fn main() {
       let a = [1, 2, 3]
       let b = [1; 10]
@@ -51,7 +55,8 @@ Type
 
 Define your type in Elz using keyword `type` following type's name and a tuple.
 
-.. code-block:: rust
+.. code::
+
     type Person (
       age: i32,
     )
