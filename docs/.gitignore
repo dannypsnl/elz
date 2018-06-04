@@ -1,4 +1,4 @@
-_build/
+build/
 _static/
 _templates/
 .cache/
