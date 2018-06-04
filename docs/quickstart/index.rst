@@ -8,7 +8,7 @@ We have two kinds of variable, global & local.
 
 Global variable be defined at module level.
 
-Here has a variable named **a**
+Here has a variable named `a`
 
 .. code::
 
