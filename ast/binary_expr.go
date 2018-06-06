@@ -17,9 +17,10 @@ func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 }
 
 func (b *BinaryExpr) Check(ctx *Context) {
-	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
 	b.LeftE.Check(ctx)
 	b.RightE.Check(ctx)
+
+	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
 	if leftT != rightT {
 		// TODO: If have function implement by @Op, it can be a operator at here
 

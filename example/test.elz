@@ -8,6 +8,5 @@ fn printf(ref<i8>) -> i32
 fn main() {
   let b = Foo(0)
   let a = [1, 2, 3]
-  let c = a[0]
-  let d = c == 1
+  let d = a[0] == 1
 }
