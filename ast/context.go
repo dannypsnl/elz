@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/elz-lang/elz/errors"
 
@@ -146,7 +147,7 @@ func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
 		fn := c.funcRetTyp(signature).value
 		return c.Builder.CreateCall(fn, args, "")
 	}
-	return llvm.Value{}
+	panic(fmt.Sprintf("`%s`, No this function or operator in current scope", signature))
 }
 
 func (c *Context) funcRetTyp(signature string) *Function {
