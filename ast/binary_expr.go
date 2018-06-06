@@ -13,7 +13,6 @@ type BinaryExpr struct {
 }
 
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
-	exprType := b.LeftE.Type(ctx)
 	return ctx.Call(b.Op, b.LeftE, b.RightE)
 }
 
