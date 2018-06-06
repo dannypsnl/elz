@@ -14,11 +14,7 @@ type BinaryExpr struct {
 
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	exprType := b.LeftE.Type(ctx)
-	if exprType == "i32" || exprType == "i64" || exprType == "f32" || exprType == "f64" {
-		return ctx.Call(b.Op, b.LeftE, b.RightE)
-	} else {
-		panic(fmt.Sprintf("BinaryExpr not support this type: %s yet", exprType))
-	}
+	return ctx.Call(b.Op, b.LeftE, b.RightE)
 }
 
 func (b *BinaryExpr) Check(ctx *Context) {
