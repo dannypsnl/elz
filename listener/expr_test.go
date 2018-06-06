@@ -83,7 +83,7 @@ func TestEq(t *testing.T) {
 	`
 
 	expected := `
-  %.eq_tmp = icmp eq i32 %0, %1
+  %2 = icmp eq i32 %0, %1
 `
 
 	hasTestTemplate(t, src, expected)

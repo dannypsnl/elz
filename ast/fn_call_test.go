@@ -55,8 +55,8 @@ func TestFnCall(t *testing.T) {
 	actual := context.Module.String()
 	expected := `define i32 @add(i32 %lv, i32 %rv) {
 entry:
-  %.add_tmp = add i32 %lv, %rv
-  ret i32 %.add_tmp
+  %0 = add i32 %lv, %rv
+  ret i32 %0
 }
 
 define i32 @main() {

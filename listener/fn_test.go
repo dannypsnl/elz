@@ -47,14 +47,14 @@ func TestOverloadingFunction(t *testing.T) {
 	expected := `
 define float @add(float %l, float %r) {
 entry:
-  %.fadd_tmp = fadd float %l, %r
-  ret float %.fadd_tmp
+  %0 = fadd float %l, %r
+  ret float %0
 }
 
 define i32 @add.1(i32 %l, i32 %r) {
 entry:
-  %.add_tmp = add i32 %l, %r
-  ret i32 %.add_tmp
+  %0 = add i32 %l, %r
+  ret i32 %0
 }
 `
 
@@ -84,8 +84,8 @@ func TestBasicComputingFunction(t *testing.T) {
 	expected := `
 define i32 @add(i32 %lv, i32 %rv) {
 entry:
-  %.add_tmp = add i32 %lv, %rv
-  ret i32 %.add_tmp
+  %0 = add i32 %lv, %rv
+  ret i32 %0
 }
 `
 
@@ -104,8 +104,8 @@ func TestAccessGlobalVarInFunction(t *testing.T) {
 define i32 @add_one(i32 %v) {
 entry:
   %0 = load i32, i32* @one
-  %.add_tmp = add i32 %v, %0
-  ret i32 %.add_tmp
+  %1 = add i32 %v, %0
+  ret i32 %1
 }
 `
 

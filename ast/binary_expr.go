@@ -14,23 +14,8 @@ type BinaryExpr struct {
 
 func (b *BinaryExpr) Codegen(ctx *Context) llvm.Value {
 	exprType := b.LeftE.Type(ctx)
-	if exprType == "i32" || exprType == "i64" {
+	if exprType == "i32" || exprType == "i64" || exprType == "f32" || exprType == "f64" {
 		return ctx.Call(b.Op, b.LeftE, b.RightE)
-	} else if exprType == "f32" || exprType == "f64" {
-		switch b.Op {
-		case "+":
-			return ctx.Builder.CreateFAdd(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".fadd_tmp")
-		case "-":
-			return ctx.Builder.CreateFSub(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".fsub_tmp")
-		case "*":
-			return ctx.Builder.CreateFMul(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".fmul_tmp")
-		case "/":
-			return ctx.Builder.CreateFDiv(b.LeftE.Codegen(ctx), b.RightE.Codegen(ctx), ".fdiv_tmp")
-		default:
-			// FIXME: wait for impl
-			// TODO: If have function implement by @Op, it can be a operator at here
-			panic(`Unsupport this operator`)
-		}
 	} else {
 		panic(fmt.Sprintf("BinaryExpr not support this type: %s yet", exprType))
 	}

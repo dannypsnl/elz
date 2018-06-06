@@ -35,6 +35,17 @@ func NewContext() *Context {
 	c.builtInOperators["==(i32,i32)"] = true
 	c.builtInOperators["==(i64,i64)"] = true
 
+	c.builtInOperators["+(f32,f32)"] = true
+	c.builtInOperators["+(f64,f64)"] = true
+	c.builtInOperators["-(f32,f32)"] = true
+	c.builtInOperators["-(f64,f64)"] = true
+	c.builtInOperators["*(f32,f32)"] = true
+	c.builtInOperators["*(f64,f64)"] = true
+	c.builtInOperators["/(f32,f32)"] = true
+	c.builtInOperators["/(f64,f64)"] = true
+	c.builtInOperators["==(f32,f32)"] = true
+	c.builtInOperators["==(f64,f64)"] = true
+
 	return c
 }
 
@@ -104,19 +115,19 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 	case "+(i32,i32)":
 		fallthrough
 	case "+(i64,i64)":
-		return c.Builder.CreateAdd(args[0], args[1], ".add_tmp")
+		return c.Builder.CreateAdd(args[0], args[1], "")
 	case "-(i32,i32)":
 		fallthrough
 	case "-(i64,i64)":
-		return c.Builder.CreateSub(args[0], args[1], ".sub_tmp")
+		return c.Builder.CreateSub(args[0], args[1], "")
 	case "*(i32,i32)":
 		fallthrough
 	case "*(i64,i64)":
-		return c.Builder.CreateMul(args[0], args[1], ".mul_tmp")
+		return c.Builder.CreateMul(args[0], args[1], "")
 	case "/(i32,i32)":
 		fallthrough
 	case "/(i64,i64)":
-		return c.Builder.CreateMul(args[0], args[1], ".div_tmp")
+		return c.Builder.CreateMul(args[0], args[1], "")
 	case "==(i32,i32)":
 		fallthrough
 	case "==(i64,i64)":
@@ -124,7 +135,32 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 			llvm.IntEQ,
 			args[0],
 			args[1],
-			".eq_tmp",
+			"",
+		)
+	case "+(f32,f32)":
+		fallthrough
+	case "+(f64,f64)":
+		return c.Builder.CreateFAdd(args[0], args[1], "")
+	case "-(f32,f32)":
+		fallthrough
+	case "-(f64,f64)":
+		return c.Builder.CreateSub(args[0], args[1], "")
+	case "*(f32,f32)":
+		fallthrough
+	case "*(f64,f64)":
+		return c.Builder.CreateMul(args[0], args[1], "")
+	case "/(f32,f32)":
+		fallthrough
+	case "/(f64,f64)":
+		return c.Builder.CreateMul(args[0], args[1], "")
+	case "==(f32,f32)":
+		fallthrough
+	case "==(f64,f64)":
+		return c.Builder.CreateFCmp(
+			llvm.FloatOEQ,
+			args[0],
+			args[1],
+			"",
 		)
 	default:
 		panic("Compiler bug at Context::Call, builtInOperation assumes signature is built in operation")
