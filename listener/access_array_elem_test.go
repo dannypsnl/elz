@@ -10,6 +10,7 @@ func TestAccessArrayElem(t *testing.T) {
 		let a = [1, 2, 3]
 		let b = a[0]
 		let c = a[1]
+		let d = 1 + a[0]
 	}
 	`
 
@@ -22,6 +23,11 @@ func TestAccessArrayElem(t *testing.T) {
   %3 = extractvalue [3 x i32] %2, 1
   %c = alloca i32
   store i32 %3, i32* %c
+  %4 = load [3 x i32], [3 x i32]* %a
+  %5 = extractvalue [3 x i32] %4, 0
+  %6 = add i32 1, %5
+  %d = alloca i32
+  store i32 %6, i32* %d
 `
 
 	hasTestTemplate(t, src, expected)
