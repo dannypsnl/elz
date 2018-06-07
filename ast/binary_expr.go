@@ -33,6 +33,5 @@ func (b *BinaryExpr) Check(ctx *Context) {
 }
 
 func (b *BinaryExpr) Type(ctx *Context) string {
-	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
-	return ctx.funcRetTyp(b.Op + "(" + leftT + "," + rightT + ")").retType
+	return ctx.funcRetTyp(ctx.signature(b.Op, b.LeftE, b.RightE)).retType
 }
