@@ -34,15 +34,5 @@ func (b *BinaryExpr) Check(ctx *Context) {
 
 func (b *BinaryExpr) Type(ctx *Context) string {
 	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
-	if leftT != rightT {
-		// TODO: If have function implement by @Op, it can be a operator at here
-
-		// TODO: if can't find Op-function support this operation, error report
-		// check `rightT != "type error"` for sure the error won't report again
-		return "type error"
-	}
-	if b.Op == "==" {
-		return "bool"
-	}
-	return leftT
+	return ctx.funcRetTyp(b.Op + "(" + leftT + "," + rightT + ")").retType
 }

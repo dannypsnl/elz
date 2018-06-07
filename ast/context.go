@@ -21,30 +21,30 @@ func NewContext() *Context {
 		Builder:  llvm.NewBuilder(),
 
 		functions:        make(map[string]*Function),
-		builtInOperators: make(map[string]bool),
+		builtInOperators: make(map[string]string),
 	}
 
-	c.builtInOperators["+(i32,i32)"] = true
-	c.builtInOperators["+(i64,i64)"] = true
-	c.builtInOperators["-(i32,i32)"] = true
-	c.builtInOperators["-(i64,i64)"] = true
-	c.builtInOperators["*(i32,i32)"] = true
-	c.builtInOperators["*(i64,i64)"] = true
-	c.builtInOperators["/(i32,i32)"] = true
-	c.builtInOperators["/(i64,i64)"] = true
-	c.builtInOperators["==(i32,i32)"] = true
-	c.builtInOperators["==(i64,i64)"] = true
+	c.builtInOperators["+(i32,i32)"] = "i32"
+	c.builtInOperators["+(i64,i64)"] = "i64"
+	c.builtInOperators["-(i32,i32)"] = "i32"
+	c.builtInOperators["-(i64,i64)"] = "i64"
+	c.builtInOperators["*(i32,i32)"] = "i32"
+	c.builtInOperators["*(i64,i64)"] = "i64"
+	c.builtInOperators["/(i32,i32)"] = "i32"
+	c.builtInOperators["/(i64,i64)"] = "i64"
+	c.builtInOperators["==(i32,i32)"] = "bool"
+	c.builtInOperators["==(i64,i64)"] = "bool"
 
-	c.builtInOperators["+(f32,f32)"] = true
-	c.builtInOperators["+(f64,f64)"] = true
-	c.builtInOperators["-(f32,f32)"] = true
-	c.builtInOperators["-(f64,f64)"] = true
-	c.builtInOperators["*(f32,f32)"] = true
-	c.builtInOperators["*(f64,f64)"] = true
-	c.builtInOperators["/(f32,f32)"] = true
-	c.builtInOperators["/(f64,f64)"] = true
-	c.builtInOperators["==(f32,f32)"] = true
-	c.builtInOperators["==(f64,f64)"] = true
+	c.builtInOperators["+(f32,f32)"] = "f32"
+	c.builtInOperators["+(f64,f64)"] = "f64"
+	c.builtInOperators["-(f32,f32)"] = "f32"
+	c.builtInOperators["-(f64,f64)"] = "f64"
+	c.builtInOperators["*(f32,f32)"] = "f32"
+	c.builtInOperators["*(f64,f64)"] = "f64"
+	c.builtInOperators["/(f32,f32)"] = "f32"
+	c.builtInOperators["/(f64,f64)"] = "f64"
+	c.builtInOperators["==(f32,f32)"] = "bool"
+	c.builtInOperators["==(f64,f64)"] = "bool"
 
 	return c
 }
@@ -60,7 +60,7 @@ type Context struct {
 	Builder  llvm.Builder
 
 	functions        map[string]*Function
-	builtInOperators map[string]bool
+	builtInOperators map[string]string
 }
 
 type Function struct {
@@ -187,6 +187,11 @@ func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
 }
 
 func (c *Context) funcRetTyp(signature string) *Function {
+	if retT, ok := c.builtInOperators[signature]; ok {
+		return &Function{
+			retType: retT,
+		}
+	}
 	if f, ok := c.functions[signature]; ok {
 		return f
 	}
