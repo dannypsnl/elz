@@ -50,6 +50,12 @@ type ElzListener interface {
 	// EnterMatchRule is called when entering the matchRule production.
 	EnterMatchRule(c *MatchRuleContext)
 
+	// EnterMatchExpr is called when entering the matchExpr production.
+	EnterMatchExpr(c *MatchExprContext)
+
+	// EnterMatchPattern is called when entering the matchPattern production.
+	EnterMatchPattern(c *MatchPatternContext)
+
 	// EnterAssign is called when entering the assign production.
 	EnterAssign(c *AssignContext)
 
@@ -232,6 +238,12 @@ type ElzListener interface {
 
 	// ExitMatchRule is called when exiting the matchRule production.
 	ExitMatchRule(c *MatchRuleContext)
+
+	// ExitMatchExpr is called when exiting the matchExpr production.
+	ExitMatchExpr(c *MatchExprContext)
+
+	// ExitMatchPattern is called when exiting the matchPattern production.
+	ExitMatchPattern(c *MatchPatternContext)
 
 	// ExitAssign is called when exiting the assign production.
 	ExitAssign(c *AssignContext)

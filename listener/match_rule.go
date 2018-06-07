@@ -5,11 +5,12 @@ import (
 )
 
 func (s *ElzListener) EnterMatchRule(c *parser.MatchRuleContext) {
-	println("match " + c.Expr(0).GetText())
+	println("match " + c.MatchExpr().GetText())
+}
+
+func (s *ElzListener) ExitMatchExpr(c *parser.MatchExprContext) {
+	s.exprStack.Pop()
 }
 
 func (s *ElzListener) ExitMatchRule(c *parser.MatchRuleContext) {
-	for i := 0; i < len(c.AllExpr()); i++ {
-		s.exprStack.Pop()
-	}
 }

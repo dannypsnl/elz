@@ -94,11 +94,16 @@ exprStat: matchRule
 //   _ => { i = i + 1 }
 // }
 matchRule:
-    'match' expr '{'
-        expr '=>' stat
-        (',' expr '=>' stat)*
+    'match' matchExpr '{'
+        matchPattern
+        (',' matchPattern)*
         ','?
     '}'
+    ;
+
+matchExpr: expr;
+matchPattern:
+    matchExpr '=>' stat
     ;
 
 // var = 1

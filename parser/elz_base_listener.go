@@ -105,6 +105,18 @@ func (s *BaseElzListener) EnterMatchRule(ctx *MatchRuleContext) {}
 // ExitMatchRule is called when production matchRule is exited.
 func (s *BaseElzListener) ExitMatchRule(ctx *MatchRuleContext) {}
 
+// EnterMatchExpr is called when production matchExpr is entered.
+func (s *BaseElzListener) EnterMatchExpr(ctx *MatchExprContext) {}
+
+// ExitMatchExpr is called when production matchExpr is exited.
+func (s *BaseElzListener) ExitMatchExpr(ctx *MatchExprContext) {}
+
+// EnterMatchPattern is called when production matchPattern is entered.
+func (s *BaseElzListener) EnterMatchPattern(ctx *MatchPatternContext) {}
+
+// ExitMatchPattern is called when production matchPattern is exited.
+func (s *BaseElzListener) ExitMatchPattern(ctx *MatchPatternContext) {}
+
 // EnterAssign is called when production assign is entered.
 func (s *BaseElzListener) EnterAssign(ctx *AssignContext) {}
 

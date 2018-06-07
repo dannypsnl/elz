@@ -6,4 +6,7 @@ fn main() {
   let a = 1
   let b = &a
   let c = *b
+  match a {
+    1 => add(1, 2)
+  }
 }
