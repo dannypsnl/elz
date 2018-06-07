@@ -1,12 +1,9 @@
-type Foo (
-  i: i32
-)
-
-#[extern(c)]
-fn printf(ref<i8>) -> i32
+fn add(l, r: i32) -> i32 {
+  return l + r
+}
 
 fn main() {
-  let b = Foo(0)
-  let a = [1, 2, 3]
-  let d = a[0] == 1
+  let a = 1
+  let b = &a
+  let c = *b
 }
