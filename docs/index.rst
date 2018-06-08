@@ -6,18 +6,16 @@
 Welcome to Elz's documentation!
 ===============================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Introduciton
-
-.. include:: quickstart/index.rst
-
-
 Introduciton
 ============
 
 Elz is a programming language for more productive.
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Introduciton
+
+.. include:: quickstart/index.rst
 
 Indices and tables
 ==================
