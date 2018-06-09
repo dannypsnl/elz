@@ -26,6 +26,8 @@ type ElzListener struct {
 	fnBuilder *FnBuilder
 	// typeDefineBuilder
 	typeDefineBuilder *TypeDefineBuilder
+	// matchRuleBuilder
+	matchRuleBuilder *MatchBuilder
 	// exportThis markup the reference Name should be public or not.
 	exportThis bool
 	// variable default immutable.

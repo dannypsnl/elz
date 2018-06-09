@@ -22,13 +22,37 @@ type MatchBuilder struct {
 	patterns []Pattern
 }
 
+func NewMatchBuilder() *MatchBuilder {
+	return &MatchBuilder{
+		expr:     nil,
+		patterns: make([]Pattern, 0),
+	}
+}
+
+func (m *MatchBuilder) NewPattern(e ast.Expr) {
+	m.patterns = append(m.patterns, Pattern{
+		expr: e,
+		stat: nil,
+	})
+}
+
 func (s *ElzListener) EnterMatchRule(c *parser.MatchRuleContext) {
+	s.matchRuleBuilder = NewMatchBuilder()
 	println("match " + c.MatchExpr().GetText())
 }
 
 func (s *ElzListener) ExitMatchExpr(c *parser.MatchExprContext) {
-	s.exprStack.Pop()
+	if s.matchRuleBuilder == nil {
+		panic("Match Rule's implementation has bug, matchRuleBuilder should not be nil")
+	}
+	expr := s.exprStack.Pop().(ast.Expr)
+	if s.matchRuleBuilder.expr == nil {
+		s.matchRuleBuilder.expr = expr
+	} else {
+		s.matchRuleBuilder.NewPattern(expr)
+	}
 }
 
 func (s *ElzListener) ExitMatchRule(c *parser.MatchRuleContext) {
+	s.matchRuleBuilder = nil
 }
