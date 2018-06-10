@@ -37,7 +37,8 @@ func (m *MatchBuilder) NewPattern(e ast.Expr) {
 }
 
 func (m *MatchBuilder) PushStat(stat ast.Stat) {
-	m.patterns[0].stat = stat
+	lastOne := len(m.patterns)
+	m.patterns[lastOne].stat = stat
 }
 
 func (s *ElzListener) EnterMatchRule(c *parser.MatchRuleContext) {
