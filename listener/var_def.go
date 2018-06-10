@@ -56,6 +56,13 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 			s.exportThis = false
 		}
 		// Record type for compiler
+	} else if s.matchRuleBuilder != nil {
+		s.matchRuleBuilder.PushStat(&ast.LocalVarDef{
+			Immutable:  s.immutable,
+			Name:       name,
+			VarType:    typ,
+			Expression: expr,
+		})
 	} else if s.fnBuilder != nil {
 		// local variable won't be exported
 		s.fnBuilder.Stat(&ast.LocalVarDef{

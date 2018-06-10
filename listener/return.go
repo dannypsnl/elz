@@ -7,11 +7,15 @@ import (
 
 func (s *ElzListener) ExitReturnStat(ctx *parser.ReturnStatContext) {
 	// get expr
-	expr := s.exprStack.Pop()
-	if s.fnBuilder != nil {
-		s.fnBuilder.Stat(&ast.Return{
-			Expr: expr.(ast.Expr),
-		})
+	expr := s.exprStack.Pop().(ast.Expr)
+	stat := &ast.Return{
+		Expr: expr,
+	}
+	// matchRule has higher level to combine a statement
+	if s.matchRuleBuilder != nil {
+		s.matchRuleBuilder.PushStat(stat)
+	} else if s.fnBuilder != nil {
+		s.fnBuilder.Stat(stat)
 	} else {
 		s.context.Reporter.Emit("return statement must in function")
 	}

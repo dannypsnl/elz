@@ -36,6 +36,10 @@ func (m *MatchBuilder) NewPattern(e ast.Expr) {
 	})
 }
 
+func (m *MatchBuilder) PushStat(stat ast.Stat) {
+	m.patterns[0].stat = stat
+}
+
 func (s *ElzListener) EnterMatchRule(c *parser.MatchRuleContext) {
 	s.matchRuleBuilder = NewMatchBuilder()
 	println("match " + c.MatchExpr().GetText())
