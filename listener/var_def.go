@@ -65,12 +65,15 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		})
 	} else if s.fnBuilder != nil {
 		// local variable won't be exported
-		s.fnBuilder.Stat(&ast.LocalVarDef{
-			Immutable:  s.immutable,
-			Name:       name,
-			VarType:    typ,
-			Expression: expr,
-		})
+		s.stats = append(
+			s.stats,
+			&ast.LocalVarDef{
+				Immutable:  s.immutable,
+				Name:       name,
+				VarType:    typ,
+				Expression: expr,
+			},
+		)
 	} else {
 		panic("A define should be Global Var else is Local Var, but both of this isn't")
 	}

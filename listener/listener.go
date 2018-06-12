@@ -22,6 +22,7 @@ type ElzListener struct {
 	// exprStack help we implement expression percedence table.
 	exprStack *stack.Stack // Stack Pop nil is nothing in there
 	notations []util.Notation
+	stats     []ast.Stat
 	// fnBuilder
 	fnBuilder *FnBuilder
 	// typeDefineBuilder
@@ -56,6 +57,7 @@ func New() *ElzListener {
 		immutable: true,
 		exprStack: stack.New(),
 		notations: make([]util.Notation, 0),
+		stats:     make([]ast.Stat, 0),
 	}
 }
 

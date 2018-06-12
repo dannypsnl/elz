@@ -7,7 +7,7 @@ import (
 
 func (s *ElzListener) ExitAssign(c *parser.AssignContext) {
 	if s.fnBuilder != nil {
-		s.fnBuilder.Stat(&ast.Assign{
+		s.stats = append(s.stats, &ast.Assign{
 			VarName: c.ID().GetText(),
 			E:       s.exprStack.Pop().(ast.Expr),
 		})

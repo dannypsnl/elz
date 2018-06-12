@@ -11,11 +11,10 @@ func (s *ElzListener) ExitReturnStat(ctx *parser.ReturnStatContext) {
 	stat := &ast.Return{
 		Expr: expr,
 	}
+	s.stats = append(s.stats, stat)
 	// matchRule has higher level to combine a statement
 	if s.matchRuleBuilder != nil {
-		s.matchRuleBuilder.PushStat(stat)
 	} else if s.fnBuilder != nil {
-		s.fnBuilder.Stat(stat)
 	} else {
 		s.context.Reporter.Emit("return statement must in function")
 	}
