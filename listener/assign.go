@@ -6,12 +6,11 @@ import (
 )
 
 func (s *ElzListener) ExitAssign(c *parser.AssignContext) {
-	if s.fnBuilder != nil {
-		s.stats = append(s.stats, &ast.Assign{
-			VarName: c.ID().GetText(),
-			E:       s.exprStack.Pop().(ast.Expr),
-		})
-	} else {
+	if s.fnBuilder == nil {
 		s.context.Reporter.Emit("assign statement should use in function")
 	}
+	s.stats = append(s.stats, &ast.Assign{
+		VarName: c.ID().GetText(),
+		E:       s.exprStack.Pop().(ast.Expr),
+	})
 }

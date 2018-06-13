@@ -6,16 +6,15 @@ import (
 )
 
 func (s *ElzListener) ExitReturnStat(ctx *parser.ReturnStatContext) {
+	// We can return some thing in match expression
+	// or in a function
+	if s.matchRuleBuilder == nil && s.fnBuilder == nil {
+		s.context.Reporter.Emit("return statement must in function")
+	}
 	// get expr
 	expr := s.exprStack.Pop().(ast.Expr)
 	stat := &ast.Return{
 		Expr: expr,
 	}
 	s.stats = append(s.stats, stat)
-	// matchRule has higher level to combine a statement
-	if s.matchRuleBuilder != nil {
-	} else if s.fnBuilder != nil {
-	} else {
-		s.context.Reporter.Emit("return statement must in function")
-	}
 }
