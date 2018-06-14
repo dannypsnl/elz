@@ -12,19 +12,20 @@ func (s *ElzListener) ExitStat(c *parser.StatContext) {
 			s.fnBuilder.Stat(v)
 		}
 	}
+
 	if s.matchRuleBuilder != nil {
 		if len(s.stats) != 0 {
 			for _, st := range s.stats {
 				s.matchRuleBuilder.PushStat(st)
 			}
-			s.stats = make([]ast.Stat, 0)
 		}
 	} else if s.fnBuilder != nil {
 		if len(s.stats) != 0 {
 			for _, st := range s.stats {
 				s.fnBuilder.Stat(st)
 			}
-			s.stats = make([]ast.Stat, 0)
 		}
 	}
+
+	s.stats = make([]ast.Stat, 0)
 }

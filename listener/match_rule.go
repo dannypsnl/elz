@@ -64,5 +64,6 @@ func (s *ElzListener) ExitMatchExpr(c *parser.MatchExprContext) {
 }
 
 func (s *ElzListener) ExitMatchRule(c *parser.MatchRuleContext) {
+	s.exprStack.Push(s.matchRuleBuilder.Generate())
 	s.matchRuleBuilder = nil
 }
