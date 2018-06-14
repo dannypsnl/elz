@@ -41,6 +41,11 @@ func (m *MatchBuilder) PushStat(stat ast.Stat) {
 	m.patterns[lastOne].stat = stat
 }
 
+func (m *MatchBuilder) Generate() ast.Expr {
+	// match rule could be a expression, so is Expr not Stat
+	return nil
+}
+
 func (s *ElzListener) EnterMatchRule(c *parser.MatchRuleContext) {
 	s.matchRuleBuilder = NewMatchBuilder()
 	println("match " + c.MatchExpr().GetText())
