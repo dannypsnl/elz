@@ -25,7 +25,7 @@ Make sure your `$GOPATH/bin` is one of `$PATH`
 
 - antlr-runtime for go<br>
 `go get github.com/antlr/antlr4/runtime/Go/antlr`
-- go-llvm<br>
+- go-llvm(with LLVM >= 6.0)<br>
 `go get -d llvm.org/llvm/bindings/go/llvm`<br>
 Then compile it. You can follow [Go bindings](http://llvm.org/svn/llvm-project/llvm/trunk/bindings/go/README.txt)<br>
 And see my [suggest](http://routedan.blogspot.com/2017/12/go-binding-llvm.html)
