@@ -2,9 +2,7 @@ package ast
 
 import (
 	"testing"
-)
 
-import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 

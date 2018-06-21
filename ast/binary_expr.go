@@ -21,7 +21,8 @@ func (b *BinaryExpr) Check(ctx *Context) {
 	b.RightE.Check(ctx)
 
 	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
-	if leftT != rightT {
+
+	if leftT != rightT && ctx.funcRetTyp(ctx.signature(b.Op, b.LeftE, b.RightE)) == nil {
 		// TODO: If have function implement by @Op, it can be a operator at here
 
 		// TODO: if can't find Op-function support this operation, error report

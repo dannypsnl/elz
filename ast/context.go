@@ -195,10 +195,10 @@ func (c *Context) funcRetTyp(signature string) *Function {
 	if f, ok := c.functions[signature]; ok {
 		return f
 	}
-	if c.Parent != nil {
-		return c.Parent.funcRetTyp(signature)
+	if c.Parent == nil {
+		return nil
 	}
-	return nil
+	return c.Parent.funcRetTyp(signature)
 }
 
 func (c *Context) VarValue(name string, value llvm.Value) {
