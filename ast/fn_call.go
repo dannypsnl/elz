@@ -27,7 +27,7 @@ func (fc *FnCall) Codegen(c *Context) llvm.Value {
 	return c.Call(fc.Name, fc.Args...)
 }
 
-// Type invoke c funcRetTyp & signature to get return type
+// Type invoke c Func & signature to get return type
 func (fc *FnCall) Type(c *Context) string {
-	return c.funcRetTyp(c.signature(fc.Name, fc.Args...)).retType
+	return c.Func(c.signature(fc.Name, fc.Args...)).retType
 }

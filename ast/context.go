@@ -179,14 +179,14 @@ func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
 		return c.builtInOperation(signature, args)
 	}
 
-	if c.funcRetTyp(signature) != nil {
-		fn := c.funcRetTyp(signature).value
+	if c.Func(signature) != nil {
+		fn := c.Func(signature).value
 		return c.Builder.CreateCall(fn, args, "")
 	}
 	panic(fmt.Sprintf("`%s`, No this function or operator in current scope", signature))
 }
 
-func (c *Context) funcRetTyp(signature string) *Function {
+func (c *Context) Func(signature string) *Function {
 	if retT, ok := c.builtInOperators[signature]; ok {
 		return &Function{
 			retType: retT,
@@ -198,7 +198,7 @@ func (c *Context) funcRetTyp(signature string) *Function {
 	if c.Parent == nil {
 		return nil
 	}
-	return c.Parent.funcRetTyp(signature)
+	return c.Parent.Func(signature)
 }
 
 func (c *Context) VarValue(name string, value llvm.Value) {
