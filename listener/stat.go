@@ -8,7 +8,9 @@ import (
 func (s *ElzListener) ExitStat(c *parser.StatContext) {
 	some := s.exprStack.Pop()
 	if v, ok := some.(*ast.FnCall); ok {
-		if s.fnBuilder != nil {
+		if s.matchRuleBuilder != nil {
+			s.matchRuleBuilder.PushStat(v)
+		} else if s.fnBuilder != nil {
 			s.fnBuilder.Stat(v)
 		}
 	}

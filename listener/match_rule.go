@@ -5,13 +5,13 @@ import (
 	"github.com/elz-lang/elz/parser"
 )
 
-// Pattern represents:
+// pattern represents:
 //
 //  match E {
-//    // Pattern
+//    // pattern
 //    expression => statement
 //  }
-type Pattern struct {
+type pattern struct {
 	expr ast.Expr
 	stat ast.Stat
 }
@@ -19,18 +19,18 @@ type Pattern struct {
 type MatchBuilder struct {
 	// match expr {}
 	expr     ast.Expr
-	patterns []Pattern
+	patterns []*pattern
 }
 
 func NewMatchBuilder() *MatchBuilder {
 	return &MatchBuilder{
 		expr:     nil,
-		patterns: make([]Pattern, 0),
+		patterns: make([]*pattern, 0),
 	}
 }
 
 func (m *MatchBuilder) NewPattern(e ast.Expr) {
-	m.patterns = append(m.patterns, Pattern{
+	m.patterns = append(m.patterns, &pattern{
 		expr: e,
 		stat: nil,
 	})
@@ -38,12 +38,19 @@ func (m *MatchBuilder) NewPattern(e ast.Expr) {
 
 func (m *MatchBuilder) PushStat(stat ast.Stat) {
 	lastOne := len(m.patterns)
-	m.patterns[lastOne].stat = stat
+	m.patterns[lastOne-1].stat = stat
 }
 
 func (m *MatchBuilder) Generate() ast.Expr {
 	// match rule could be a expression, so is Expr not Stat
-	return nil
+	ps := make([]*ast.Pattern, 0)
+	for _, p := range m.patterns {
+		ps = append(ps, &ast.Pattern{
+			E:p.expr,
+			S:p.stat,
+		})
+	}
+	return ast.NewMatch(m.expr, ps)
 }
 
 func (s *ElzListener) EnterMatchRule(c *parser.MatchRuleContext) {

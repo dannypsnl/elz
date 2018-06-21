@@ -4,7 +4,22 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
-type Match struct{}
+type Pattern struct {
+	E Expr
+	S Stat
+}
+
+type Match struct {
+	matchExpr Expr
+	patterns  []*Pattern
+}
+
+func NewMatch(e Expr, ps []*Pattern) *Match {
+	return &Match{
+		matchExpr: e,
+		patterns:  ps,
+	}
+}
 
 func (m *Match) Check(*Context) {
 }
