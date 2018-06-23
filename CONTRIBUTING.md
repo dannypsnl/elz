@@ -39,5 +39,5 @@ I will write a gitbook to describe more infomation.
     ```
 - compile example/test.elz
     ```bash
-    $ . ./run_test.sh
+    $ ./elz.sh example/test.elz
     ```
