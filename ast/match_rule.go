@@ -21,7 +21,12 @@ func NewMatch(e Expr, ps []*Pattern) *Match {
 	}
 }
 
-func (m *Match) Check(*Context) {
+func (m *Match) Check(c *Context) {
+	m.matchExpr.Check(c)
+
+	for _, p := range m.patterns {
+		p.E.Check(c)
+	}
 }
 
 func (m *Match) Codegen(*Context) llvm.Value {
