@@ -7,7 +7,16 @@ import (
 
 func (s *ElzListener) ExitStat(c *parser.StatContext) {
 	some := s.exprStack.Pop()
-	if v, ok := some.(*ast.FnCall); ok {
+	switch some.(type) {
+	case *ast.FnCall:
+		v := some.(*ast.FnCall)
+		if s.matchRuleBuilder != nil {
+			s.matchRuleBuilder.PushStat(v)
+		} else if s.fnBuilder != nil {
+			s.fnBuilder.Stat(v)
+		}
+	case *ast.Match:
+		v := some.(*ast.Match)
 		if s.matchRuleBuilder != nil {
 			s.matchRuleBuilder.PushStat(v)
 		} else if s.fnBuilder != nil {
