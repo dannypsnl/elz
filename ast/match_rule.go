@@ -29,7 +29,18 @@ func (m *Match) Check(c *Context) {
 	}
 }
 
-func (m *Match) Codegen(*Context) llvm.Value {
+func (m *Match) Codegen(c *Context) llvm.Value {
+	bb := c.Builder.GetInsertBlock()
+	expr := m.matchExpr.Codegen(c)
+	rest := llvm.InsertBasicBlock(bb, "rest")
+	switchBlock := c.Builder.CreateSwitch(expr, rest, len(m.patterns))
+	for _, p := range m.patterns {
+		pattern := llvm.InsertBasicBlock(bb, "p")
+		c.Builder.SetInsertPointAtEnd(pattern)
+		p.S.Codegen(c)
+		c.Builder.ClearInsertionPoint()
+		switchBlock.AddCase(p.E.Codegen(c), pattern)
+	}
 	return llvm.Value{}
 }
 
