@@ -32,36 +32,36 @@ func (m *Match) Check(c *Context) {
 func (m *Match) Codegen(c *Context) llvm.Value {
 	bb := c.Builder.GetInsertBlock()
 	expr := m.matchExpr.Codegen(c)
-	leave := llvm.InsertBasicBlock(bb, "switch_break")
-	rest := llvm.InsertBasicBlock(bb, "rest")
+	leave := llvm.InsertBasicBlock(bb, "")
+	rest := llvm.InsertBasicBlock(bb, "")
 
 	c.Builder.SetInsertPointAtEnd(rest)
 	c.Builder.CreateBr(leave)
-	c.Builder.ClearInsertionPoint()
 
 	c.Builder.SetInsertPointAtEnd(bb)
 	switchBlock := c.Builder.CreateSwitch(expr, rest, len(m.patterns))
-	var prevPattern *llvm.BasicBlock
+	prevPattern := bb
 	for _, p := range m.patterns {
 		c.Builder.SetInsertPointAtEnd(bb)
-		pattern := llvm.InsertBasicBlock(bb, "p")
 
+		pattern := llvm.InsertBasicBlock(bb, "")
 		switchBlock.AddCase(p.E.Codegen(c), pattern)
 
 		c.Builder.SetInsertPointAtEnd(pattern)
+
+		// each pattern at least have to do
 		p.S.Codegen(c)
 		c.Builder.CreateBr(leave)
+
 		c.Builder.ClearInsertionPoint()
 
-		if prevPattern != nil {
-			pattern.MoveAfter(*prevPattern)
-		} else {
-			pattern.MoveAfter(bb)
-		}
-		prevPattern = &pattern
+		pattern.MoveAfter(prevPattern)
+		prevPattern = pattern
 	}
-	rest.MoveAfter(*prevPattern)
+	rest.MoveAfter(prevPattern)
 	leave.MoveAfter(rest)
+
+	c.Builder.SetInsertPointAtEnd(leave)
 	return llvm.Value{}
 }
 

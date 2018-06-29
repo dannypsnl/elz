@@ -87,19 +87,12 @@ func (f *FnDef) Codegen(c *Context) llvm.Value {
 			stat.Codegen(f.Ctx)
 		}
 		if f.Name == "main" {
-			generateMainFn(f.Ctx.Builder, entryPoint)
+			f.Ctx.Builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
 		} else if f.RetType == "" {
 			f.Ctx.Builder.CreateRetVoid()
 		}
-		f.Ctx.Builder.ClearInsertionPoint()
 	}
 	return fn
-}
-
-func generateMainFn(builder llvm.Builder, entryPoint llvm.BasicBlock) {
-	builder.SetInsertPointAtEnd(entryPoint)
-	builder.CreateRet(llvm.ConstInt(llvm.Int32Type(), 0, false))
-	builder.ClearInsertionPoint()
 }
 
 func (f *FnDef) completeParamType() {
