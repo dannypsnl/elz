@@ -34,28 +34,33 @@ func (m *Match) Codegen(c *Context) llvm.Value {
 	expr := m.matchExpr.Codegen(c)
 	leave := llvm.InsertBasicBlock(bb, "switch_break")
 	rest := llvm.InsertBasicBlock(bb, "rest")
-	c.Builder.SetInsertPointAtEnd(leave)
+
+	c.Builder.SetInsertPointAtEnd(rest)
 	c.Builder.CreateBr(leave)
 	c.Builder.ClearInsertionPoint()
+
 	c.Builder.SetInsertPointAtEnd(bb)
 	switchBlock := c.Builder.CreateSwitch(expr, rest, len(m.patterns))
 	var prevPattern *llvm.BasicBlock
 	for _, p := range m.patterns {
 		c.Builder.SetInsertPointAtEnd(bb)
 		pattern := llvm.InsertBasicBlock(bb, "p")
+
 		switchBlock.AddCase(p.E.Codegen(c), pattern)
+
 		c.Builder.SetInsertPointAtEnd(pattern)
 		p.S.Codegen(c)
 		c.Builder.CreateBr(leave)
 		c.Builder.ClearInsertionPoint()
+
 		if prevPattern != nil {
 			pattern.MoveAfter(*prevPattern)
 		} else {
 			pattern.MoveAfter(bb)
 		}
 		prevPattern = &pattern
-		rest.MoveAfter(pattern)
 	}
+	rest.MoveAfter(*prevPattern)
 	leave.MoveAfter(rest)
 	return llvm.Value{}
 }
