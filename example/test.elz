@@ -1,13 +1,20 @@
+#[extern(c)]
+fn printf(ref<i8>) -> i32
+
+format = "match this"
+
 fn add(l, r: i32) -> i32 {
+  match l {
+    0 => return 10 + r
+  }
   return l + r
 }
 
 fn main() {
-  let a = 1
-  let b = &a
-  let c = *b
+  let a = add(0, 2)
+  let b = add(1, 2)
+
   match a {
-    1 => add(1, 2),
-    2 => add(1, 2)
+    12 => printf(format as ref<i8>)
   }
 }
