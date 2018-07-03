@@ -53,8 +53,6 @@ func (m *Match) Codegen(c *Context) llvm.Value {
 		p.S.Codegen(c)
 		c.Builder.CreateBr(leave)
 
-		c.Builder.ClearInsertionPoint()
-
 		pattern.MoveAfter(prevPattern)
 		prevPattern = pattern
 	}
