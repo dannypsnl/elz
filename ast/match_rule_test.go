@@ -19,16 +19,19 @@ func Test_match_rule(t *testing.T) {
 			&I32{Val: "1"},
 		},
 	}
-	m := NewMatch(&I32{Val: "10"}, []*Pattern{&p1})
-	nextStat := &Return{
-		&I32{Val: "0"},
+	rest := Pattern{
+		E: nil,
+		S: &Return{
+			&I32{Val: "0"},
+		},
 	}
+	m := NewMatch(&I32{Val: "10"}, []*Pattern{&p1}, &rest)
 
 	f := &FnDef{
 		Export:    false,
 		Name:      "foo",
 		Params:    []*Param{},
-		Body:      []Stat{m, nextStat},
+		Body:      []Stat{m},
 		RetType:   "i32",
 		Ctx:       c,
 		Notations: []util.Notation{},
