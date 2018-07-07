@@ -56,6 +56,9 @@ type ElzListener interface {
 	// EnterMatchPattern is called when entering the matchPattern production.
 	EnterMatchPattern(c *MatchPatternContext)
 
+	// EnterRestPattern is called when entering the restPattern production.
+	EnterRestPattern(c *RestPatternContext)
+
 	// EnterAssign is called when entering the assign production.
 	EnterAssign(c *AssignContext)
 
@@ -244,6 +247,9 @@ type ElzListener interface {
 
 	// ExitMatchPattern is called when exiting the matchPattern production.
 	ExitMatchPattern(c *MatchPatternContext)
+
+	// ExitRestPattern is called when exiting the restPattern production.
+	ExitRestPattern(c *RestPatternContext)
 
 	// ExitAssign is called when exiting the assign production.
 	ExitAssign(c *AssignContext)

@@ -117,6 +117,12 @@ func (s *BaseElzListener) EnterMatchPattern(ctx *MatchPatternContext) {}
 // ExitMatchPattern is called when production matchPattern is exited.
 func (s *BaseElzListener) ExitMatchPattern(ctx *MatchPatternContext) {}
 
+// EnterRestPattern is called when production restPattern is entered.
+func (s *BaseElzListener) EnterRestPattern(ctx *RestPatternContext) {}
+
+// ExitRestPattern is called when production restPattern is exited.
+func (s *BaseElzListener) ExitRestPattern(ctx *RestPatternContext) {}
+
 // EnterAssign is called when production assign is entered.
 func (s *BaseElzListener) EnterAssign(ctx *AssignContext) {}
 

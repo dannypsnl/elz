@@ -97,6 +97,7 @@ matchRule:
     'match' matchExpr '{'
         matchPattern
         (',' matchPattern)*
+        (restPattern)?
         ','?
     '}'
     ;
@@ -104,6 +105,9 @@ matchRule:
 matchExpr: expr;
 matchPattern:
     matchExpr '=>' stat
+    ;
+restPattern:
+    '_' '=>' stat
     ;
 
 // var = 1
