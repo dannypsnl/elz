@@ -46,11 +46,14 @@ func (m *MatchBuilder) Generate() ast.Expr {
 	ps := make([]*ast.Pattern, 0)
 	for _, p := range m.patterns {
 		ps = append(ps, &ast.Pattern{
-			E:p.expr,
-			S:p.stat,
+			E: p.expr,
+			S: p.stat,
 		})
 	}
-	return ast.NewMatch(m.expr, ps)
+	if ps[len(ps)-1].E == nil {
+		return ast.NewMatch(m.expr, ps[:len(ps)-1], ps[len(ps)-1])
+	}
+	return ast.NewMatch(m.expr, ps, nil)
 }
 
 func (s *ElzListener) EnterMatchRule(c *parser.MatchRuleContext) {
@@ -68,6 +71,14 @@ func (s *ElzListener) ExitMatchExpr(c *parser.MatchExprContext) {
 	} else {
 		s.matchRuleBuilder.NewPattern(expr)
 	}
+}
+
+func (s *ElzListener) EnterRestPattern(c *parser.RestPatternContext) {
+	if s.matchRuleBuilder == nil {
+		panic("Match Rule's implementation has bug, matchRuleBuilder should not be nil in rest pattern")
+	}
+	// FIXME: make rest pattern more explicated at here
+	s.matchRuleBuilder.NewPattern(nil)
 }
 
 func (s *ElzListener) ExitMatchRule(c *parser.MatchRuleContext) {

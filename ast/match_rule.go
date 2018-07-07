@@ -10,14 +10,16 @@ type Pattern struct {
 }
 
 type Match struct {
-	matchExpr Expr
-	patterns  []*Pattern
+	matchExpr   Expr
+	patterns    []*Pattern
+	restPattern *Pattern
 }
 
-func NewMatch(e Expr, ps []*Pattern) *Match {
+func NewMatch(e Expr, ps []*Pattern, restPattern *Pattern) *Match {
 	return &Match{
-		matchExpr: e,
-		patterns:  ps,
+		matchExpr:   e,
+		patterns:    ps,
+		restPattern: restPattern,
 	}
 }
 
@@ -36,6 +38,10 @@ func (m *Match) Codegen(c *Context) llvm.Value {
 	rest := llvm.InsertBasicBlock(bb, "")
 
 	c.Builder.SetInsertPointAtEnd(rest)
+
+	if m.restPattern != nil {
+		m.restPattern.S.Codegen(c)
+	}
 	c.Builder.CreateBr(leave)
 
 	c.Builder.SetInsertPointAtEnd(bb)

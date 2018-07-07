@@ -6,8 +6,8 @@ format = "match this"
 fn add(l, r: i32) -> i32 {
   match l {
     0 => return 10 + r
+    _ => return l + r
   }
-  return l + r
 }
 
 fn main() {
