@@ -41,20 +41,20 @@ func (m *Match) Codegen(c *Context) llvm.Value {
 	c.Builder.SetInsertPointAtEnd(bb)
 	switchBlock := c.Builder.CreateSwitch(expr, rest, len(m.patterns))
 	prevPattern := bb
-	for _, p := range m.patterns {
+	for _, pattern := range m.patterns {
 		c.Builder.SetInsertPointAtEnd(bb)
 
-		pattern := llvm.InsertBasicBlock(bb, "")
-		switchBlock.AddCase(p.E.Codegen(c), pattern)
+		patternBlock := llvm.InsertBasicBlock(bb, "")
+		switchBlock.AddCase(pattern.E.Codegen(c), patternBlock)
 
-		c.Builder.SetInsertPointAtEnd(pattern)
+		c.Builder.SetInsertPointAtEnd(patternBlock)
 
-		// each pattern at least have to do
-		p.S.Codegen(c)
+		// each patternBlock at least have to do
+		pattern.S.Codegen(c)
 		c.Builder.CreateBr(leave)
 
-		pattern.MoveAfter(prevPattern)
-		prevPattern = pattern
+		patternBlock.MoveAfter(prevPattern)
+		prevPattern = patternBlock
 	}
 	rest.MoveAfter(prevPattern)
 	leave.MoveAfter(rest)
