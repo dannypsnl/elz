@@ -170,7 +170,7 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
 	signature := c.signature(funcName, exprs...)
 
-	args := []llvm.Value{}
+	args := make([]llvm.Value, 0)
 	for _, e := range exprs {
 		args = append(args, e.Codegen(c))
 	}
