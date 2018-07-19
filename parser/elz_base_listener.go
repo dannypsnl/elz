@@ -87,6 +87,12 @@ func (s *BaseElzListener) EnterReturnStat(ctx *ReturnStatContext) {}
 // ExitReturnStat is called when production returnStat is exited.
 func (s *BaseElzListener) ExitReturnStat(ctx *ReturnStatContext) {}
 
+// EnterBreakStat is called when production breakStat is entered.
+func (s *BaseElzListener) EnterBreakStat(ctx *BreakStatContext) {}
+
+// ExitBreakStat is called when production breakStat is exited.
+func (s *BaseElzListener) ExitBreakStat(ctx *BreakStatContext) {}
+
 // EnterLoopStat is called when production loopStat is entered.
 func (s *BaseElzListener) EnterLoopStat(ctx *LoopStatContext) {}
 

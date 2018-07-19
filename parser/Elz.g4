@@ -8,6 +8,7 @@ WS: [ \t\r\n]+ -> channel(HIDDEN);
 COMMENT: '//' .*? '\n' -> channel(HIDDEN);
 
 BOOLEAN: 'true' | 'false';
+BREAK: 'break';
 
 ID : StartLetter Letter*;
 fragment
@@ -72,6 +73,7 @@ stat: localVarDef
     | loopStat // loop { stats }
     | returnStat // return expr
     | assign
+    | breakStat
     | exprStat
     ;
 
@@ -79,6 +81,7 @@ returnStat:
     'return' expr
     ;
 
+breakStat: BREAK;
 loopStat:
     'loop' '{'
         statList?

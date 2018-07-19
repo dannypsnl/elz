@@ -41,6 +41,9 @@ type ElzListener interface {
 	// EnterReturnStat is called when entering the returnStat production.
 	EnterReturnStat(c *ReturnStatContext)
 
+	// EnterBreakStat is called when entering the breakStat production.
+	EnterBreakStat(c *BreakStatContext)
+
 	// EnterLoopStat is called when entering the loopStat production.
 	EnterLoopStat(c *LoopStatContext)
 
@@ -232,6 +235,9 @@ type ElzListener interface {
 
 	// ExitReturnStat is called when exiting the returnStat production.
 	ExitReturnStat(c *ReturnStatContext)
+
+	// ExitBreakStat is called when exiting the breakStat production.
+	ExitBreakStat(c *BreakStatContext)
 
 	// ExitLoopStat is called when exiting the loopStat production.
 	ExitLoopStat(c *LoopStatContext)
