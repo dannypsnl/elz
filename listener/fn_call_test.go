@@ -2,22 +2,30 @@ package listener
 
 import (
 	"testing"
+	"github.com/dannypsnl/assert"
+
+	"llvm.org/llvm/bindings/go/llvm"
 )
 
 func TestFnCall(t *testing.T) {
+	assert := assert.NewTester(t)
+
 	src := `
 	fn add(l, r: i32) -> i32 { return l + r }
-	fn main() {
-		let a = add(1, 2)
-	}
 	`
 
-	expected := `
-  %0 = call i32 @add(i32 1, i32 2)
-  %a = alloca i32
-  store i32 %0, i32* %a`
+	l := listener(src)
+	ee, err := llvm.NewExecutionEngine(l.context.Module)
+	if err != nil {
+		panic(err)
+	}
+	gv := ee.RunFunction(ee.FindFunction("add"), []llvm.GenericValue{
+		llvm.NewGenericValueFromInt(llvm.Int32Type(), 20, true),
+		llvm.NewGenericValueFromInt(llvm.Int32Type(), 10, true),
+	})
 
-	hasTestTemplate(t, src, expected)
+	assert.Eq(gv.IntWidth(), 32)
+	assert.Eq(gv.Int(true), uint64(30))
 }
 
 func TestFnCallAsStatement(t *testing.T) {
