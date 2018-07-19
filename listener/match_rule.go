@@ -58,7 +58,6 @@ func (m *MatchBuilder) Generate() ast.Expr {
 
 func (s *ElzListener) EnterMatchRule(c *parser.MatchRuleContext) {
 	s.matchRuleBuilder = NewMatchBuilder()
-	println("match " + c.MatchExpr().GetText())
 }
 
 func (s *ElzListener) ExitMatchExpr(c *parser.MatchExprContext) {
