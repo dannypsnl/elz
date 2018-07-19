@@ -8,3 +8,8 @@ type Stat interface {
 	Codegen(*Context) llvm.Value
 	Check(*Context)
 }
+
+type ExprStat interface {
+	Stat
+	ExprStat()
+}

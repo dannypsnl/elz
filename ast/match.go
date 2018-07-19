@@ -74,3 +74,5 @@ func (m *Match) Type(*Context) string {
 	// FIXME: match should also be an expression
 	return "missing type now"
 }
+
+func (m *Match) ExprStat() {}

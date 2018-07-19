@@ -31,3 +31,5 @@ func (fc *FnCall) Codegen(c *Context) llvm.Value {
 func (fc *FnCall) Type(c *Context) string {
 	return c.Func(c.signature(fc.Name, fc.Args...)).retType
 }
+
+func (fc *FnCall) ExprStat() {}
