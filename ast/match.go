@@ -66,9 +66,11 @@ func (m *Match) Codegen(c *Context) llvm.Value {
 	leave.MoveAfter(rest)
 
 	c.Builder.SetInsertPointAtEnd(leave)
+	// FIXME: match should also be an expression
 	return llvm.Value{}
 }
 
 func (m *Match) Type(*Context) string {
+	// FIXME: match should also be an expression
 	return "missing type now"
 }
