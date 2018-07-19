@@ -66,3 +66,17 @@ Define your type in Elz using keyword `type` following type's name and a tuple.
     }
 
 Notice that in now version you have to fill whole type constructor function.
+
+Match
+-----
+
+Basic control flow in Elz is `match` keyword.
+
+.. code::
+
+    match var {
+      0 => return true,
+      _ => return false,
+    }
+
+`_` represents rest pattern, final `,` is optional, whatever you like.
