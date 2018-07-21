@@ -3,18 +3,13 @@ fn printf(ref<i8>) -> i32
 
 format = "match this"
 
-fn add(l, r: i32) -> i32 {
-  match l {
-    0 => return 10 + r
-    _ => return l + r
-  }
-}
-
 fn main() {
-  let a = add(0, 2)
-  let b = add(1, 2)
-
-  match a {
-    12 => printf(format as ref<i8>)
+  let mut i = 0
+  loop {
+    i = i + 1
+    match i {
+      10 => break,
+      _ => printf(format as ref<i8>),
+    }
   }
 }
