@@ -2,8 +2,8 @@
 package stack
 
 import (
-	"reflect"
 	"fmt"
+	"reflect"
 )
 
 // Stack is data structure: stack's implement
@@ -21,10 +21,9 @@ func New() *Stack {
 
 // Just like Stack<T> in a language has generic
 func (s *Stack) WithT(v interface{}) *Stack {
-	stack := New()
 	t := reflect.TypeOf(v).Elem()
-	stack.limitT = &t
-	return stack
+	s.limitT = &t
+	return s
 }
 
 // Len return the length of stack
