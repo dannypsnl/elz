@@ -55,7 +55,7 @@ func New() *ElzListener {
 		exprStack:   stack.New(),
 		notations:   make([]util.Notation, 0),
 		stats:       make([]ast.Stat, 0),
-		statBuilder: stack.New(),
+		statBuilder: stack.New().WithT((*StatContainer)(nil)),
 	}
 }
 

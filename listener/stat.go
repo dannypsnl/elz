@@ -5,7 +5,7 @@ import (
 	"github.com/elz-lang/elz/parser"
 )
 
-type PushStatement interface {
+type StatContainer interface {
 	PushStat(ast.Stat)
 }
 
@@ -13,7 +13,7 @@ func (s *ElzListener) ExitStat(c *parser.StatContext) {
 	// if fail, let it panic, that's compiler bug
 	statContainer := s.statBuilder.Last()
 	if statContainer != nil {
-		statContainer := statContainer.(PushStatement)
+		statContainer := statContainer.(StatContainer)
 		some := s.exprStack.Pop()
 		switch some.(type) {
 		case ast.ExprStat:

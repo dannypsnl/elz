@@ -1,9 +1,15 @@
 // Package stack is stack implementation
 package stack
 
+import (
+	"reflect"
+	"fmt"
+)
+
 // Stack is data structure: stack's implement
 type Stack struct {
-	stack []interface{}
+	stack  []interface{}
+	limitT *reflect.Type
 }
 
 // New create a new stack
@@ -11,6 +17,14 @@ func New() *Stack {
 	return &Stack{
 		stack: make([]interface{}, 0),
 	}
+}
+
+// Just like Stack<T> in a language has generic
+func (s *Stack) WithT(v interface{}) *Stack {
+	stack := New()
+	t := reflect.TypeOf(v).Elem()
+	stack.limitT = &t
+	return stack
 }
 
 // Len return the length of stack
@@ -32,6 +46,11 @@ func (s *Stack) Last() interface{} {
 
 // Push push new element into stack
 func (s *Stack) Push(element interface{}) {
+	if s.limitT != nil {
+		if !reflect.TypeOf(element).Implements(*s.limitT) {
+			panic(fmt.Sprintf("element must implement type: %s", *s.limitT))
+		}
+	}
 	s.stack = append(s.stack, element)
 }
 

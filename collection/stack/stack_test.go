@@ -68,6 +68,25 @@ func Test_getLastFromEmptyStackShouldBeSafe(t *testing.T) {
 	s.Last()
 }
 
+type foo interface {
+	Foo()
+}
+
+type fooImp struct{}
+
+func (fi *fooImp) Foo() {}
+
+func Test_stackT(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("should panic when push a value do not implement T into stack")
+		}
+	}()
+	s := New().WithT((*foo)(nil))
+	s.Push(&fooImp{})
+	s.Push(1)
+}
+
 func TestMockCalc(t *testing.T) {
 	s := New()
 	s.Push(1.1)
