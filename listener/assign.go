@@ -6,8 +6,8 @@ import (
 )
 
 func (s *ElzListener) ExitAssign(c *parser.AssignContext) {
-	if s.fnBuilder == nil {
-		s.context.Reporter.Emit("assign statement should use in function")
+	if s.statBuilder.Last() == nil {
+		s.context.Reporter.Emit("assign statement must in one of statement container that could be pushed into listener.statBuilder")
 	}
 	s.stats = append(s.stats, &ast.Assign{
 		VarName: c.ID().GetText(),

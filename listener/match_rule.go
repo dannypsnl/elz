@@ -57,30 +57,37 @@ func (m *MatchBuilder) Generate() ast.Expr {
 }
 
 func (s *ElzListener) EnterMatchRule(c *parser.MatchRuleContext) {
-	s.matchRuleBuilder = NewMatchBuilder()
+	s.statBuilder.Push(NewMatchBuilder())
 }
 
 func (s *ElzListener) ExitMatchExpr(c *parser.MatchExprContext) {
-	if s.matchRuleBuilder == nil {
+	if matchRuleBuilder, ok := s.statBuilder.Last().(*MatchBuilder); !ok {
 		panic("Match Rule's implementation has bug, matchRuleBuilder should not be nil")
-	}
-	expr := s.exprStack.Pop().(ast.Expr)
-	if s.matchRuleBuilder.expr == nil {
-		s.matchRuleBuilder.expr = expr
 	} else {
-		s.matchRuleBuilder.NewPattern(expr)
+		expr := s.exprStack.Pop().(ast.Expr)
+		if matchRuleBuilder.expr == nil {
+			matchRuleBuilder.expr = expr
+		} else {
+			matchRuleBuilder.NewPattern(expr)
+		}
 	}
+
 }
 
 func (s *ElzListener) EnterRestPattern(c *parser.RestPatternContext) {
-	if s.matchRuleBuilder == nil {
+	if matchRuleBuilder, ok := s.statBuilder.Last().(*MatchBuilder); !ok {
 		panic("Match Rule's implementation has bug, matchRuleBuilder should not be nil in rest pattern")
+	} else {
+		// FIXME: make rest pattern more explicated at here
+		matchRuleBuilder.NewPattern(nil)
 	}
-	// FIXME: make rest pattern more explicated at here
-	s.matchRuleBuilder.NewPattern(nil)
 }
 
 func (s *ElzListener) ExitMatchRule(c *parser.MatchRuleContext) {
-	s.exprStack.Push(s.matchRuleBuilder.Generate())
-	s.matchRuleBuilder = nil
+	if matchRuleBuilder, ok := s.statBuilder.Last().(*MatchBuilder); !ok {
+		panic("Match Rule's implementation has bug, matchRuleBuilder should not be nil in rest pattern")
+	} else {
+		s.exprStack.Push(matchRuleBuilder.Generate())
+		s.statBuilder.Pop()
+	}
 }

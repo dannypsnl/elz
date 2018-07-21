@@ -54,6 +54,20 @@ func TestEmptyAfterPush(t *testing.T) {
 	}
 }
 
+func TestLastElem(t *testing.T) {
+	s := New()
+	s.Push(1)
+	s.Push(2)
+	if s.Last() != 2 {
+		t.Errorf("expect: %v, actual: %v", 2, s.Last())
+	}
+}
+
+func Test_getLastFromEmptyStackShouldBeSafe(t *testing.T) {
+	s := New()
+	s.Last()
+}
+
 func TestMockCalc(t *testing.T) {
 	s := New()
 	s.Push(1.1)

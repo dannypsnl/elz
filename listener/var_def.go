@@ -39,6 +39,14 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 		typ = ctx.TypeForm().GetText()
 	}
 
+	lastBuilder := s.statBuilder.Last()
+	inFn := false
+	inMatchRule := false
+	if lastBuilder != nil {
+		_, inFn = lastBuilder.(*FnBuilder)
+		_, inMatchRule = lastBuilder.(*MatchBuilder)
+	}
+
 	// get expr
 	expr := s.exprStack.Pop().(ast.Expr)
 
@@ -56,7 +64,7 @@ func (s *ElzListener) ExitDefine(ctx *parser.DefineContext) {
 			s.exportThis = false
 		}
 		// Record type for compiler
-	} else if s.matchRuleBuilder != nil || s.fnBuilder != nil {
+	} else if inFn || inMatchRule {
 		// No need to affair it gone, because at here, stat.go will capture statement
 		// So we do not check order
 

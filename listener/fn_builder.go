@@ -5,7 +5,7 @@ import (
 	"github.com/elz-lang/elz/util"
 )
 
-// FnBuilder is function's building recorder, help we generate function much more easier
+// FnBuilder is function's building recorder, help we Generate function much more easier
 type FnBuilder struct {
 	export    bool
 	name      string
@@ -58,13 +58,12 @@ func (fb *FnBuilder) PushParamName(name string) *FnBuilder {
 	return fb
 }
 
-func (fb *FnBuilder) Stat(s ast.Stat) *FnBuilder {
+func (fb *FnBuilder) PushStat(s ast.Stat) {
 	fb.statments = append(fb.statments, s)
-	return fb
 }
 
-// generate return the final AST of function
-func (fb *FnBuilder) generate(extern bool) *ast.FnDef {
+// Generate return the final AST of function
+func (fb *FnBuilder) Generate(extern bool) *ast.FnDef {
 	return &ast.FnDef{
 		Export:    fb.export,
 		Name:      fb.name,

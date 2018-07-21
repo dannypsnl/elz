@@ -9,37 +9,38 @@ func (s *ElzListener) EnterDeclareFn(c *parser.DeclareFnContext) {
 	if c.ReturnType() != nil {
 		retTyp = c.ReturnType().GetText()
 	}
-	s.fnBuilder = NewFnBuilder().
+	fnBuilder := NewFnBuilder().
 		Name(c.ID().GetText()).
 		RetType(retTyp).
 		Notation(s.TakeAllNotation())
+	s.statBuilder.Push(fnBuilder)
 }
 func (s *ElzListener) ExitDeclareFn(c *parser.DeclareFnContext) {
-	if s.fnBuilder == nil {
+	if fnBuilder, ok := s.statBuilder.Last().(*FnBuilder); !ok {
 		panic("Compiler bug, function define expect have function builder when parsing")
-	}
-
-	typ := ""
-	escapeLevel := 0
-	for _, r := range c.TypeList().GetText() {
-		typ += string(r)
-		if r == '<' {
-			escapeLevel++
-		} else if r == '>' {
-			escapeLevel--
+	} else {
+		typ := ""
+		escapeLevel := 0
+		for _, r := range c.TypeList().GetText() {
+			typ += string(r)
+			if r == '<' {
+				escapeLevel++
+			} else if r == '>' {
+				escapeLevel--
+			}
+			if escapeLevel == 0 && r == ',' {
+				fnBuilder.PushParamName("")
+				fnBuilder.PushParamType(typ[:len(typ)-1])
+				typ = ""
+			}
 		}
-		if escapeLevel == 0 && r == ',' {
-			s.fnBuilder.PushParamName("")
-			s.fnBuilder.PushParamType(typ[:len(typ)-1])
-			typ = ""
-		}
-	}
-	s.fnBuilder.PushParamName("")
-	s.fnBuilder.PushParamType(typ)
+		fnBuilder.PushParamName("")
+		fnBuilder.PushParamType(typ)
 
-	s.AstList = append(s.AstList,
-		// generate extern declaration
-		s.fnBuilder.generate(true),
-	)
-	s.fnBuilder = nil
+		s.AstList = append(s.AstList,
+			// Generate extern declaration
+			fnBuilder.Generate(true),
+		)
+		s.statBuilder.Pop()
+	}
 }

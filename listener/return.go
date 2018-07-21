@@ -8,9 +8,17 @@ import (
 func (s *ElzListener) ExitReturnStat(ctx *parser.ReturnStatContext) {
 	// We can return some thing in match expression
 	// or in a function
-	if s.matchRuleBuilder == nil && s.fnBuilder == nil {
+	lastBuilder := s.statBuilder.Last()
+	if lastBuilder != nil {
+		_, inFn := lastBuilder.(*FnBuilder)
+		_, inMatchRule := lastBuilder.(*MatchBuilder)
+		if !inFn && !inMatchRule {
+			s.context.Reporter.Emit("return statement must in function")
+		}
+	} else {
 		s.context.Reporter.Emit("return statement must in function")
 	}
+
 	// get expr
 	expr := s.exprStack.Pop().(ast.Expr)
 	stat := &ast.Return{

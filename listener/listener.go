@@ -23,12 +23,9 @@ type ElzListener struct {
 	exprStack *stack.Stack // Stack Pop nil is nothing in there
 	notations []util.Notation
 	stats     []ast.Stat
-	// fnBuilder
-	fnBuilder *FnBuilder
 	// typeDefineBuilder
 	typeDefineBuilder *TypeDefineBuilder
-	// matchRuleBuilder
-	matchRuleBuilder *MatchBuilder
+	statBuilder       *stack.Stack
 	// exportThis markup the reference Name should be public or not.
 	exportThis bool
 	// variable default immutable.
@@ -41,7 +38,7 @@ type ElzListener struct {
 	isStatExpr bool
 }
 
-// Module return the llvm.Module generate by parse process
+// Module return the llvm.Module Generate by parse process
 func (s *ElzListener) Module() llvm.Module {
 	if s.context.Reporter.HasNoError() {
 		return s.context.Module
@@ -53,11 +50,12 @@ func (s *ElzListener) Module() llvm.Module {
 // New create a new listener
 func New() *ElzListener {
 	return &ElzListener{
-		context:   ast.NewContext(),
-		immutable: true,
-		exprStack: stack.New(),
-		notations: make([]util.Notation, 0),
-		stats:     make([]ast.Stat, 0),
+		context:     ast.NewContext(),
+		immutable:   true,
+		exprStack:   stack.New(),
+		notations:   make([]util.Notation, 0),
+		stats:       make([]ast.Stat, 0),
+		statBuilder: stack.New(),
 	}
 }
 

@@ -23,6 +23,13 @@ func (s *Stack) Empty() bool {
 	return len(s.stack) == 0
 }
 
+func (s *Stack) Last() interface{} {
+	if len(s.stack) == 0 {
+		return nil
+	}
+	return s.stack[len(s.stack)-1]
+}
+
 // Push push new element into stack
 func (s *Stack) Push(element interface{}) {
 	s.stack = append(s.stack, element)
