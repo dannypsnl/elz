@@ -27,7 +27,8 @@ func (s *ElzListener) EnterLoopStat(c *parser.LoopStatContext) {
 	s.statBuilder.Push(NewLoopBuilder())
 }
 func (s *ElzListener) ExitLoopStat(c *parser.LoopStatContext) {
-	s.statBuilder.Pop()
+	b := s.statBuilder.Pop().(*LoopBuilder)
+	s.stats = append(s.stats, b.Generate())
 }
 
 func (s *ElzListener) ExitBreakStat(c *parser.BreakStatContext) {
