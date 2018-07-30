@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/elz-lang/elz/errors"
-
 	"llvm.org/llvm/bindings/go/llvm"
+	"github.com/elz-lang/elz/collection/stack"
 )
 
 func NewContext() *Context {
@@ -20,6 +20,7 @@ func NewContext() *Context {
 		Types:    make(map[string]llvm.Type),
 		Builder:  llvm.NewBuilder(),
 
+		breaks:           stack.New(),
 		functions:        make(map[string]*Function),
 		builtInOperators: make(map[string]string),
 	}
@@ -59,6 +60,7 @@ type Context struct {
 	Types    map[string]llvm.Type
 	Builder  llvm.Builder
 
+	breaks           *stack.Stack
 	functions        map[string]*Function
 	builtInOperators map[string]string
 }

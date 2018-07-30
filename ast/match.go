@@ -34,15 +34,8 @@ func (m *Match) Check(c *Context) {
 func (m *Match) Codegen(c *Context) llvm.Value {
 	bb := c.Builder.GetInsertBlock()
 	expr := m.matchExpr.Codegen(c)
-	leave := llvm.InsertBasicBlock(bb, "")
-	rest := llvm.InsertBasicBlock(bb, "")
-
-	c.Builder.SetInsertPointAtEnd(rest)
-
-	if m.restPattern != nil {
-		m.restPattern.S.Codegen(c)
-	}
-	c.Builder.CreateBr(leave)
+	leave := llvm.InsertBasicBlock(bb, "match.end")
+	rest := llvm.InsertBasicBlock(bb, "pattern.rest")
 
 	c.Builder.SetInsertPointAtEnd(bb)
 	switchBlock := c.Builder.CreateSwitch(expr, rest, len(m.patterns))
@@ -50,7 +43,7 @@ func (m *Match) Codegen(c *Context) llvm.Value {
 	for _, pattern := range m.patterns {
 		c.Builder.SetInsertPointAtEnd(bb)
 
-		patternBlock := llvm.InsertBasicBlock(bb, "")
+		patternBlock := llvm.InsertBasicBlock(bb, "pattern")
 		switchBlock.AddCase(pattern.E.Codegen(c), patternBlock)
 
 		c.Builder.SetInsertPointAtEnd(patternBlock)
@@ -64,6 +57,13 @@ func (m *Match) Codegen(c *Context) llvm.Value {
 	}
 	rest.MoveAfter(prevPattern)
 	leave.MoveAfter(rest)
+
+	c.Builder.SetInsertPointAtEnd(rest)
+
+	if m.restPattern != nil {
+		m.restPattern.S.Codegen(c)
+	}
+	c.Builder.CreateBr(leave)
 
 	c.Builder.SetInsertPointAtEnd(leave)
 	// FIXME: match should also be an expression
