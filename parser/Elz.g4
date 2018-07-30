@@ -100,7 +100,7 @@ matchRule:
     'match' matchExpr '{'
         matchPattern
         (',' matchPattern)*
-        (restPattern)?
+        (',' restPattern)?
         ','?
     '}'
     ;
