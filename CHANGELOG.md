@@ -4,7 +4,6 @@ Logging change of elz.
 
 ## v0.2.0 ~> working on
 
-- loop statement
 - impl block
 - char literal
 - access field of user defined type
@@ -20,6 +19,7 @@ Logging change of elz.
 - extract array element
 - Boolean value & compare operator
 - match expression
+- loop statement
 
 ## v0.1.0
 
