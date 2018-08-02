@@ -139,7 +139,7 @@ annotation: '@' ID ('(' expr ')')? ;
 
 methodList: method+;
 method:
-    exportor? ID '(' paramList? ')' ('->' typeForm)? '{'
+    exporter? ID '(' paramList? ')' ('->' typeForm)? '{'
         statList?
     '}'
     ;
@@ -149,8 +149,8 @@ implBlock:
     '}'
     ;
 
-exportor: '+';
-globalVarDef: exportor? define;
+exporter: '+';
+globalVarDef: exporter? define;
 
 define: ID (':' typeForm)? '=' expr;
 localVarDef:
@@ -162,8 +162,8 @@ paramType: ':' typeForm;
 param: ID paramType?;
 returnType: '->' typeForm;
 fnDefine:
-    // because fn also handle operator, so if we use exportor after keyword fn will cause we hard to divide ++ && + +
-    exportor? 'fn' ID '(' paramList? ')' returnType? '{'
+    // because fn also handle operator, so if we use exporter after keyword fn will cause we hard to divide ++ && + +
+    exporter? 'fn' ID '(' paramList? ')' returnType? '{'
         statList?
     '}'
     ;
@@ -173,15 +173,15 @@ declareFn:
     ;
 
 attrList: attr (',' attr)*;
-attr: exportor? ID ':' typeForm;
+attr: exporter? ID ':' typeForm;
 typeDefine:
-    'type' exportor? ID '(' attrList? ')'
+    'type' exporter? ID '(' attrList? ')'
     ;
 
 tmethodList: tmethod+;
 tmethod: ID '(' typeList? ')' ('->' typeForm)?;
 traitDefine:
-    exportor? 'trait' ID '{'
+    exporter? 'trait' ID '{'
         tmethodList?
     '}'
     ;

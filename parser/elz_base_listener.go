@@ -189,11 +189,11 @@ func (s *BaseElzListener) EnterImplBlock(ctx *ImplBlockContext) {}
 // ExitImplBlock is called when production implBlock is exited.
 func (s *BaseElzListener) ExitImplBlock(ctx *ImplBlockContext) {}
 
-// EnterExportor is called when production exportor is entered.
-func (s *BaseElzListener) EnterExportor(ctx *ExportorContext) {}
+// EnterExporter is called when production exporter is entered.
+func (s *BaseElzListener) EnterExporter(ctx *ExporterContext) {}
 
-// ExitExportor is called when production exportor is exited.
-func (s *BaseElzListener) ExitExportor(ctx *ExportorContext) {}
+// ExitExporter is called when production exporter is exited.
+func (s *BaseElzListener) ExitExporter(ctx *ExporterContext) {}
 
 // EnterGlobalVarDef is called when production globalVarDef is entered.
 func (s *BaseElzListener) EnterGlobalVarDef(ctx *GlobalVarDefContext) {}

@@ -274,7 +274,7 @@ var ruleNames = []string{
 	"topStat", "importMod", "importStat", "statList", "stat", "returnStat",
 	"breakStat", "loopStat", "exprStat", "matchRule", "matchExpr", "matchPattern",
 	"restPattern", "assign", "exprList", "fnCall", "typeForm", "typeInfoList",
-	"typeList", "annotation", "methodList", "method", "implBlock", "exportor",
+	"typeList", "annotation", "methodList", "method", "implBlock", "exporter",
 	"globalVarDef", "define", "localVarDef", "paramList", "paramType", "param",
 	"returnType", "fnDefine", "declareFn", "attrList", "attr", "typeDefine",
 	"tmethodList", "tmethod", "traitDefine", "expr",
@@ -397,7 +397,7 @@ const (
 	ElzParserRULE_methodList       = 25
 	ElzParserRULE_method           = 26
 	ElzParserRULE_implBlock        = 27
-	ElzParserRULE_exportor         = 28
+	ElzParserRULE_exporter         = 28
 	ElzParserRULE_globalVarDef     = 29
 	ElzParserRULE_define           = 30
 	ElzParserRULE_localVarDef      = 31
@@ -3885,14 +3885,14 @@ func (s *MethodContext) ID() antlr.TerminalNode {
 	return s.GetToken(ElzParserID, 0)
 }
 
-func (s *MethodContext) Exportor() IExportorContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExportorContext)(nil)).Elem(), 0)
+func (s *MethodContext) Exporter() IExporterContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExporterContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(IExportorContext)
+	return t.(IExporterContext)
 }
 
 func (s *MethodContext) ParamList() IParamListContext {
@@ -3974,7 +3974,7 @@ func (p *ElzParser) Method() (localctx IMethodContext) {
 	if _la == ElzParserT__30 {
 		{
 			p.SetState(282)
-			p.Exportor()
+			p.Exporter()
 		}
 
 	}
@@ -4189,66 +4189,66 @@ func (p *ElzParser) ImplBlock() (localctx IImplBlockContext) {
 	return localctx
 }
 
-// IExportorContext is an interface to support dynamic dispatch.
-type IExportorContext interface {
+// IExporterContext is an interface to support dynamic dispatch.
+type IExporterContext interface {
 	antlr.ParserRuleContext
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
-	// IsExportorContext differentiates from other interfaces.
-	IsExportorContext()
+	// IsExporterContext differentiates from other interfaces.
+	IsExporterContext()
 }
 
-type ExportorContext struct {
+type ExporterContext struct {
 	*antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
-func NewEmptyExportorContext() *ExportorContext {
-	var p = new(ExportorContext)
+func NewEmptyExporterContext() *ExporterContext {
+	var p = new(ExporterContext)
 	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
-	p.RuleIndex = ElzParserRULE_exportor
+	p.RuleIndex = ElzParserRULE_exporter
 	return p
 }
 
-func (*ExportorContext) IsExportorContext() {}
+func (*ExporterContext) IsExporterContext() {}
 
-func NewExportorContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ExportorContext {
-	var p = new(ExportorContext)
+func NewExporterContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ExporterContext {
+	var p = new(ExporterContext)
 
 	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
 
 	p.parser = parser
-	p.RuleIndex = ElzParserRULE_exportor
+	p.RuleIndex = ElzParserRULE_exporter
 
 	return p
 }
 
-func (s *ExportorContext) GetParser() antlr.Parser { return s.parser }
-func (s *ExportorContext) GetRuleContext() antlr.RuleContext {
+func (s *ExporterContext) GetParser() antlr.Parser { return s.parser }
+func (s *ExporterContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
 
-func (s *ExportorContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+func (s *ExporterContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
 	return antlr.TreesStringTree(s, ruleNames, recog)
 }
 
-func (s *ExportorContext) EnterRule(listener antlr.ParseTreeListener) {
+func (s *ExporterContext) EnterRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.EnterExportor(s)
+		listenerT.EnterExporter(s)
 	}
 }
 
-func (s *ExportorContext) ExitRule(listener antlr.ParseTreeListener) {
+func (s *ExporterContext) ExitRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(ElzListener); ok {
-		listenerT.ExitExportor(s)
+		listenerT.ExitExporter(s)
 	}
 }
 
-func (p *ElzParser) Exportor() (localctx IExportorContext) {
-	localctx = NewExportorContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 56, ElzParserRULE_exportor)
+func (p *ElzParser) Exporter() (localctx IExporterContext) {
+	localctx = NewExporterContext(p, p.GetParserRuleContext(), p.GetState())
+	p.EnterRule(localctx, 56, ElzParserRULE_exporter)
 
 	defer func() {
 		p.ExitRule()
@@ -4323,14 +4323,14 @@ func (s *GlobalVarDefContext) Define() IDefineContext {
 	return t.(IDefineContext)
 }
 
-func (s *GlobalVarDefContext) Exportor() IExportorContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExportorContext)(nil)).Elem(), 0)
+func (s *GlobalVarDefContext) Exporter() IExporterContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExporterContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(IExportorContext)
+	return t.(IExporterContext)
 }
 
 func (s *GlobalVarDefContext) GetRuleContext() antlr.RuleContext {
@@ -4382,7 +4382,7 @@ func (p *ElzParser) GlobalVarDef() (localctx IGlobalVarDefContext) {
 	if _la == ElzParserT__30 {
 		{
 			p.SetState(315)
-			p.Exportor()
+			p.Exporter()
 		}
 
 	}
@@ -5177,14 +5177,14 @@ func (s *FnDefineContext) ID() antlr.TerminalNode {
 	return s.GetToken(ElzParserID, 0)
 }
 
-func (s *FnDefineContext) Exportor() IExportorContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExportorContext)(nil)).Elem(), 0)
+func (s *FnDefineContext) Exporter() IExporterContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExporterContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(IExportorContext)
+	return t.(IExporterContext)
 }
 
 func (s *FnDefineContext) ParamList() IParamListContext {
@@ -5266,7 +5266,7 @@ func (p *ElzParser) FnDefine() (localctx IFnDefineContext) {
 	if _la == ElzParserT__30 {
 		{
 			p.SetState(358)
-			p.Exportor()
+			p.Exporter()
 		}
 
 	}
@@ -5658,14 +5658,14 @@ func (s *AttrContext) TypeForm() ITypeFormContext {
 	return t.(ITypeFormContext)
 }
 
-func (s *AttrContext) Exportor() IExportorContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExportorContext)(nil)).Elem(), 0)
+func (s *AttrContext) Exporter() IExporterContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExporterContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(IExportorContext)
+	return t.(IExporterContext)
 }
 
 func (s *AttrContext) GetRuleContext() antlr.RuleContext {
@@ -5717,7 +5717,7 @@ func (p *ElzParser) Attr() (localctx IAttrContext) {
 	if _la == ElzParserT__30 {
 		{
 			p.SetState(395)
-			p.Exportor()
+			p.Exporter()
 		}
 
 	}
@@ -5779,14 +5779,14 @@ func (s *TypeDefineContext) ID() antlr.TerminalNode {
 	return s.GetToken(ElzParserID, 0)
 }
 
-func (s *TypeDefineContext) Exportor() IExportorContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExportorContext)(nil)).Elem(), 0)
+func (s *TypeDefineContext) Exporter() IExporterContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExporterContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(IExportorContext)
+	return t.(IExporterContext)
 }
 
 func (s *TypeDefineContext) AttrList() IAttrListContext {
@@ -5852,7 +5852,7 @@ func (p *ElzParser) TypeDefine() (localctx ITypeDefineContext) {
 	if _la == ElzParserT__30 {
 		{
 			p.SetState(403)
-			p.Exportor()
+			p.Exporter()
 		}
 
 	}
@@ -6192,14 +6192,14 @@ func (s *TraitDefineContext) ID() antlr.TerminalNode {
 	return s.GetToken(ElzParserID, 0)
 }
 
-func (s *TraitDefineContext) Exportor() IExportorContext {
-	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExportorContext)(nil)).Elem(), 0)
+func (s *TraitDefineContext) Exporter() IExporterContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExporterContext)(nil)).Elem(), 0)
 
 	if t == nil {
 		return nil
 	}
 
-	return t.(IExportorContext)
+	return t.(IExporterContext)
 }
 
 func (s *TraitDefineContext) TmethodList() ITmethodListContext {
@@ -6261,7 +6261,7 @@ func (p *ElzParser) TraitDefine() (localctx ITraitDefineContext) {
 	if _la == ElzParserT__30 {
 		{
 			p.SetState(428)
-			p.Exportor()
+			p.Exporter()
 		}
 
 	}

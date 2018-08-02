@@ -92,8 +92,8 @@ type ElzListener interface {
 	// EnterImplBlock is called when entering the implBlock production.
 	EnterImplBlock(c *ImplBlockContext)
 
-	// EnterExportor is called when entering the exportor production.
-	EnterExportor(c *ExportorContext)
+	// EnterExporter is called when entering the exporter production.
+	EnterExporter(c *ExporterContext)
 
 	// EnterGlobalVarDef is called when entering the globalVarDef production.
 	EnterGlobalVarDef(c *GlobalVarDefContext)
@@ -287,8 +287,8 @@ type ElzListener interface {
 	// ExitImplBlock is called when exiting the implBlock production.
 	ExitImplBlock(c *ImplBlockContext)
 
-	// ExitExportor is called when exiting the exportor production.
-	ExitExportor(c *ExportorContext)
+	// ExitExporter is called when exiting the exporter production.
+	ExitExporter(c *ExporterContext)
 
 	// ExitGlobalVarDef is called when exiting the globalVarDef production.
 	ExitGlobalVarDef(c *GlobalVarDefContext)
