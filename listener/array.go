@@ -42,3 +42,12 @@ func (s *ElzListener) ExitArrWithList(c *parser.ArrWithListContext) {
 		Len:      len(exprs),
 	})
 }
+
+// ExitAccessArrayElement handle the code like `arr[0]`
+func (s *ElzListener) ExitAccessArrayElement(c *parser.AccessArrayElementContext) {
+	index, _ := strconv.Atoi(c.INT().GetText())
+	s.exprStack.Push(&ast.ArrayElement{
+		E:     s.exprStack.Pop().(ast.Expr),
+		Index: index,
+	})
+}

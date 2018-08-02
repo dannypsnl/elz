@@ -1,2 +1,2 @@
-// elz is for CI
+// Package elz create doc.go is for CI
 package elz
