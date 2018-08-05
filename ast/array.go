@@ -8,7 +8,7 @@ import (
 
 // Array AST is a kind of Expr
 //
-// It is preparing for array literal
+// For syntax: [1, 2, 3, 4], [0; 10]
 type Array struct {
 	Elements []Expr
 	Len      int
@@ -61,4 +61,35 @@ func (a *Array) Codegen(c *Context) llvm.Value {
 
 func (a *Array) Type(*Context) string {
 	return fmt.Sprintf("[%s;%d]", a.elementType, a.Len)
+}
+
+// ArrayElement AST is a kind of Expr
+//
+// For syntax: array[index]
+type ArrayElement struct {
+	E     Expr
+	Index int
+
+	ok bool
+}
+
+func (ae *ArrayElement) Check(c *Context) {
+	ae.E.Check(c)
+
+	ae.ok = isArrayType(ae.E.Type(c))
+}
+
+func (ae *ArrayElement) Codegen(c *Context) llvm.Value {
+	if ae.ok {
+		expr := ae.E.Codegen(c)
+		return c.Builder.CreateExtractValue(expr, ae.Index, "")
+	}
+	return llvm.Value{}
+}
+
+func (ae *ArrayElement) Type(c *Context) string {
+	if ae.ok {
+		return elemType(ae.E.Type(c))
+	}
+	return ""
 }
