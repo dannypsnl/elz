@@ -22,11 +22,9 @@ I will write a gitbook to describe more infomation.
 - llvm tools(clang, lli, lld ...)
 - antlr4 ~4.7.1
     ```bash
-    $ cd /usr/local/lib
-    $ sudo curl -O http://www.antlr.org/download/antlr-4.7.1-complete.jar
-    $ export CLASSPATH=".:/usr/local/lib/antlr-4.7.1-complete.jar:$CLASSPATH"
-    $ alias antlr4='java -jar /usr/local/lib/antlr-4.7.1-complete.jar'
-    $ alias grun='java org.antlr.v4.gui.TestRig'
+	$ git submodule init
+	$ git submodule update
+	$ go generate ./... # use this command to generate new antlr4 parser!
     ```
 
 ## Test in Development
