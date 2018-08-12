@@ -16,6 +16,9 @@ Elz is a modern programming language focus on production. I hope it can change d
 $ go get -d github.com/elz-lang/elz # -d help you don't check compile
 $ go get -d github.com/antlr/antlr4/runtime/Go/antlr
 $ go get -d llvm.org/llvm/bindings/go/llvm # Goto see Dependencies
+$ git submodule init
+$ git submodule update
+$ go generate ./...
 $ cd $GOPATH/src/github.com/elz-lang/elz/cmd/elz && go install
 ```
 
