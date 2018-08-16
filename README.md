@@ -10,6 +10,10 @@
 
 Elz is a modern programming language focus on production. I hope it can change daily work of us.
 
+## Use
+
+[![asciicast](https://asciinema.org/a/PzTDQQbkMDOGxiq0656dHON3y.png)](https://asciinema.org/a/PzTDQQbkMDOGxiq0656dHON3y)
+
 ## Install
 
 ```bash
