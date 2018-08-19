@@ -43,6 +43,7 @@ func (s *ElzListener) ExitMulOrDiv(ctx *parser.MulOrDivContext) {
 	s.exprStack.Push(e)
 }
 
+// ExitEq listen expression `expr == expr`
 func (s *ElzListener) ExitEq(c *parser.EqContext) {
 	le := s.exprStack.Pop()
 	re := s.exprStack.Pop()
@@ -101,6 +102,7 @@ func (s *ElzListener) ExitFloat(ctx *parser.FloatContext) {
 	}
 }
 
+// ExitBool listen boolean literial like: `true`, `false`
 func (s *ElzListener) ExitBool(c *parser.BoolContext) {
 	s.exprStack.Push(&ast.Bool{Val: c.BOOLEAN().GetText()})
 }
@@ -113,17 +115,17 @@ func (s *ElzListener) ExitInt(ctx *parser.IntContext) {
 	}
 	iVal := ctx.INT().GetText()
 	switch suffix {
-	case "'i8":
+	case `'i8`:
 		s.exprStack.Push(&ast.I8{Val: iVal})
-	case "'i16":
+	case `'i16`:
 		s.exprStack.Push(&ast.I16{Val: iVal})
-	case "'i32":
+	case `'i32`:
 		s.exprStack.Push(&ast.I32{Val: iVal})
-	case "'i64":
+	case `'i64`:
 		s.exprStack.Push(&ast.I64{Val: iVal})
-	case "'f32":
+	case `'f32`:
 		s.exprStack.Push(&ast.F32{Val: iVal})
-	case "'f64":
+	case `'f64`:
 		s.exprStack.Push(&ast.F64{Val: iVal})
 	default:
 		s.exprStack.Push(&ast.I32{Val: iVal})
