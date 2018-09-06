@@ -17,7 +17,7 @@ type Array struct {
 	dontCompile bool
 }
 
-func (a *Array) reportIfAnyElementDoNotMatchElementType(c *Context) {
+func (a *Array) reportIfAnyElementTypeIsDifferent(c *Context) {
 	for _, e := range a.Elements {
 		if e.Type(c) != a.elementType {
 			a.dontCompile = true
@@ -38,7 +38,7 @@ func (a *Array) Check(c *Context) {
 
 	a.elementType = a.Elements[0].Type(c)
 
-	a.reportIfAnyElementDoNotMatchElementType(c)
+	a.reportIfAnyElementTypeIsDifferent(c)
 }
 
 func (a *Array) Codegen(c *Context) llvm.Value {
@@ -47,11 +47,9 @@ func (a *Array) Codegen(c *Context) llvm.Value {
 	}
 
 	values := make([]llvm.Value, 0)
+	e := a.Elements[0]
 	for i := 0; i < a.Len; i++ {
-		var e Expr
-		if len(a.Elements) == 1 {
-			e = a.Elements[0]
-		} else {
+		if len(a.Elements) != 1 {
 			e = a.Elements[i]
 		}
 		values = append(values, e.Codegen(c))
@@ -70,17 +68,17 @@ type ArrayElement struct {
 	E     Expr
 	Index int
 
-	ok bool
+	isArray bool
 }
 
 func (ae *ArrayElement) Check(c *Context) {
 	ae.E.Check(c)
 
-	ae.ok = isArrayType(ae.E.Type(c))
+	ae.isArray = isArrayType(ae.E.Type(c))
 }
 
 func (ae *ArrayElement) Codegen(c *Context) llvm.Value {
-	if ae.ok {
+	if ae.isArray {
 		expr := ae.E.Codegen(c)
 		return c.Builder.CreateExtractValue(expr, ae.Index, "")
 	}
@@ -88,7 +86,7 @@ func (ae *ArrayElement) Codegen(c *Context) llvm.Value {
 }
 
 func (ae *ArrayElement) Type(c *Context) string {
-	if ae.ok {
+	if ae.isArray {
 		return elemType(ae.E.Type(c))
 	}
 	return ""
