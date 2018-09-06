@@ -27,9 +27,7 @@ func makeOp(exprType, toType string) llvm.Opcode {
 		} else {
 			return llvm.SExt
 		}
-	}
-
-	if exprType[0] == 'f' && toType[0] == 'f' {
+	} else if exprType[0] == 'f' && toType[0] == 'f' {
 		src := exprType[1:]
 		from, err := strconv.ParseInt(src, 10, 32)
 		panicIfErr(err, exprType, toType)
