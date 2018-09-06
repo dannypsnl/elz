@@ -9,6 +9,15 @@ type Pattern struct {
 	S Stat
 }
 
+func (p *Pattern) IsBr() bool {
+	switch p.S.(type) {
+	case *BreakStat:
+		return true
+	default:
+		return false
+	}
+}
+
 type Match struct {
 	matchExpr   Expr
 	patterns    []*Pattern
@@ -50,7 +59,9 @@ func (m *Match) Codegen(c *Context) llvm.Value {
 
 		// each patternBlock at least have to do
 		pattern.S.Codegen(c)
-		c.Builder.CreateBr(leave)
+		if !pattern.IsBr() {
+			c.Builder.CreateBr(leave)
+		}
 
 		patternBlock.MoveAfter(prevPattern)
 		prevPattern = patternBlock
