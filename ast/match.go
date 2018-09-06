@@ -9,8 +9,8 @@ type Pattern struct {
 	S Stat
 }
 
-func (p *Pattern) IsBr() bool {
-	switch p.S.(type) {
+func IsBr(stat Stat) bool {
+	switch stat.(type) {
 	case *BreakStat:
 		return true
 	default:
@@ -59,7 +59,7 @@ func (m *Match) Codegen(c *Context) llvm.Value {
 
 		// each patternBlock at least have to do
 		pattern.S.Codegen(c)
-		if !pattern.IsBr() {
+		if !IsBr(pattern.S) {
 			c.Builder.CreateBr(leave)
 		}
 
