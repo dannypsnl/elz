@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"llvm.org/llvm/bindings/go/llvm"
@@ -14,49 +15,42 @@ type As struct {
 }
 
 func makeOp(exprType, toType string) llvm.Opcode {
-	if exprType == "i32" {
-		switch toType {
-		case "i64":
-			return llvm.SExt
-		case "i8":
-			fallthrough
-		case "i16":
+	if exprType[0] == 'i' && toType[0] == 'i' {
+		src := exprType[1:]
+		from, err := strconv.ParseInt(src, 10, 32)
+		panicIfErr(err, exprType, toType)
+		dest := toType[1:]
+		to, err := strconv.ParseInt(dest, 10, 32)
+		panicIfErr(err, exprType, toType)
+		if from > to {
 			return llvm.Trunc
-		}
-	} else if exprType == "i8" {
-		switch toType {
-		case "i16":
-			fallthrough
-		case "i32":
-			fallthrough
-		case "i64":
+		} else {
 			return llvm.SExt
-		}
-	} else if exprType == "i16" {
-		switch toType {
-		case "i8":
-			return llvm.Trunc
-		case "i32":
-			fallthrough
-		case "i64":
-			return llvm.SExt
-		}
-	} else if exprType == "f32" && toType == "f64" {
-		return llvm.FPExt
-	} else if exprType == "f64" && toType == "f32" {
-		return llvm.FPTrunc
-	} else if exprType == "i64" {
-		switch toType {
-		case "i32":
-			fallthrough
-		case "i16":
-			fallthrough
-		case "i8":
-			return llvm.Trunc
 		}
 	}
+
+	if exprType[0] == 'f' && toType[0] == 'f' {
+		src := exprType[1:]
+		from, err := strconv.ParseInt(src, 10, 32)
+		panicIfErr(err, exprType, toType)
+		dest := toType[1:]
+		to, err := strconv.ParseInt(dest, 10, 32)
+		panicIfErr(err, exprType, toType)
+		if from > to {
+			return llvm.FPTrunc
+		} else {
+			return llvm.FPExt
+		}
+	}
+
 	// This part need to call function to complete
 	panic(fmt.Sprintf("Not yet impl other as expr, %s, %s", exprType, toType))
+}
+
+func panicIfErr(err error, exprType, toType string) {
+	if err != nil {
+		panic(fmt.Sprintf("Not yet impl other as expr, %s, %s", exprType, toType))
+	}
 }
 
 func (a *As) Check(ctx *Context) {
