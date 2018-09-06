@@ -112,17 +112,16 @@ func (f *FnDef) returnType(c *Context) llvm.Type {
 		rt = "()"
 	}
 	if f.Name == "main" {
-		if rt == "()" {
-			rt = "i32"
-		} else {
+		if rt != "()" {
 			c.Reporter.Emit("you can't have return type for main function!")
 		}
+		rt = "i32"
 	}
 	return c.Type(rt)
 }
 
 func (f *FnDef) paramsType(c *Context) []llvm.Type {
-	paramsT := []llvm.Type{}
+	paramsT := make([]llvm.Type, 0)
 	for _, v := range f.Params {
 		paramsT = append(paramsT, c.Type(v.Type))
 	}

@@ -13,14 +13,8 @@ func TestFnDef(t *testing.T) {
 		Export: false,
 		Name:   "add",
 		Params: []*Param{
-			&Param{
-				Name: "lv",
-				Type: "f32",
-			},
-			&Param{
-				Name: "rv",
-				Type: "f32",
-			},
+			{Name: "lv", Type: "f32"},
+			{Name: "rv", Type: "f32"},
 		},
 		Body:    []Stat{},
 		RetType: "f32",
@@ -41,8 +35,8 @@ func TestFnDefParamMissingType(t *testing.T) {
 		Export: false,
 		Name:   "add",
 		Params: []*Param{
-			&Param{Name: "lv", Type: ""},
-			&Param{Name: "rv", Type: "i32"},
+			{Name: "lv", Type: ""},
+			{Name: "rv", Type: "i32"},
 		},
 		RetType: "i32",
 	}
