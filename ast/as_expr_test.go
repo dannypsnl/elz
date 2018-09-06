@@ -63,6 +63,8 @@ func convertTemplate(t *testing.T, from, targetType string) {
 	from = convertToLLVMType(from)
 	targetType = convertToLLVMType(targetType)
 
+	op := makeOp(as.E.Type(context), as.T)
+
 	expected := `; ModuleID = 'main'
 source_filename = "main"
 
@@ -71,7 +73,7 @@ entry:
   %a = alloca ` + from + `
   store ` + from + ` ` + constValueDecideBy(from) + `, ` + from + `* %a
   %0 = load ` + from + `, ` + from + `* %a
-  %.as_tmp = ` + opcode2String(as.op) + ` ` + from + ` %0 to ` + targetType + `
+  %.as_tmp = ` + opcode2String(op) + ` ` + from + ` %0 to ` + targetType + `
   %b = alloca ` + targetType + `
   store ` + targetType + ` %.as_tmp, ` + targetType + `* %b
 }

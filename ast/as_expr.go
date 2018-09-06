@@ -9,9 +9,8 @@ import (
 )
 
 type As struct {
-	E  Expr
-	T  string
-	op llvm.Opcode
+	E Expr
+	T string
 }
 
 func makeOp(exprType, toType string) llvm.Opcode {
@@ -67,8 +66,8 @@ func (a *As) Codegen(c *Context) llvm.Value {
 		}
 		return v // FIXME: tmp solution
 	}
-	a.op = makeOp(a.E.Type(c), a.T)
-	return c.Builder.CreateCast(v, a.op, c.Type(a.T), ".as_tmp")
+	op := makeOp(a.E.Type(c), a.T)
+	return c.Builder.CreateCast(v, op, c.Type(a.T), ".as_tmp")
 }
 func (a *As) Type(ctx *Context) string {
 	return a.T
