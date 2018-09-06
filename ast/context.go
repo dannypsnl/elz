@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/elz-lang/elz/errors"
-	"llvm.org/llvm/bindings/go/llvm"
 	"github.com/elz-lang/elz/collection/stack"
+	"github.com/elz-lang/elz/errors"
+
+	"llvm.org/llvm/bindings/go/llvm"
 )
 
 func NewContext() *Context {
