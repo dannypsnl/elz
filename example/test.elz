@@ -1,15 +1,8 @@
-#[extern(c)]
-fn printf(ref<i8>) -> i32
-
-format = "match this"
+type Foo (
+  i: i32
+)
 
 fn main() {
-  let mut i = 0
-  loop {
-    i = i + 1
-    match i {
-      10 => break,
-      _ => printf(format as ref<i8>),
-    }
-  }
+  let f = Foo(10)
+  f.i
 }

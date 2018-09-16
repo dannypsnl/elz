@@ -327,6 +327,12 @@ func (s *BaseElzListener) EnterArrWithLen(ctx *ArrWithLenContext) {}
 // ExitArrWithLen is called when production ArrWithLen is exited.
 func (s *BaseElzListener) ExitArrWithLen(ctx *ArrWithLenContext) {}
 
+// EnterAccessChain is called when production AccessChain is entered.
+func (s *BaseElzListener) EnterAccessChain(ctx *AccessChainContext) {}
+
+// ExitAccessChain is called when production AccessChain is exited.
+func (s *BaseElzListener) ExitAccessChain(ctx *AccessChainContext) {}
+
 // EnterAndOrOr is called when production AndOrOr is entered.
 func (s *BaseElzListener) EnterAndOrOr(ctx *AndOrOrContext) {}
 

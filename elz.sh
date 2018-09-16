@@ -1,3 +1,2 @@
-go build ./cmd/elz/
+go build .
 ./elz $1
-rm elz

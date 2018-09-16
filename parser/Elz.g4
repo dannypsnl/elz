@@ -188,7 +188,9 @@ traitDefine:
 
 // Explain for expr, because Antlr support the operation precedence by declared order
 // So we don't have to consider that
-expr: op='&' expr                      # Ref // operation prec
+expr: exprStat                         # StatExpr
+    | expr '.' expr                    # AccessChain // user.get_name()
+    | op='&' expr                      # Ref // operation prec
     | op='*' expr                      # DeRef
     | expr '[' INT ']'                 # AccessArrayElement
     | expr op='as' typeForm            # As
@@ -201,7 +203,6 @@ expr: op='&' expr                      # Ref // operation prec
     | expr op=('&&'|'||') expr         # AndOrOr
     | expr '?' expr ':' expr           # ThreeOpCmp
     | '(' expr ')'                     # SubExpr
-    | exprStat                         # StatExpr
     | '[' expr ';' INT ']'             # ArrWithLen
     | '[' exprList ']'                 # ArrWithList
     | BOOLEAN                          # Bool
