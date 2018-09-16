@@ -22,7 +22,7 @@ func (b *BinaryExpr) Check(ctx *Context) {
 
 	leftT, rightT := b.LeftE.Type(ctx), b.RightE.Type(ctx)
 
-	if leftT != rightT && ctx.Func(ctx.signature(b.Op, b.LeftE, b.RightE)) == nil {
+	if leftT != rightT && ctx.Func(ctx.calcSignature(b.Op, b.LeftE, b.RightE)) == nil {
 		// TODO: If have function implement by @Op, it can be a operator at here
 
 		// TODO: if can't find Op-function support this operation, error report
@@ -34,5 +34,5 @@ func (b *BinaryExpr) Check(ctx *Context) {
 }
 
 func (b *BinaryExpr) Type(ctx *Context) string {
-	return ctx.Func(ctx.signature(b.Op, b.LeftE, b.RightE)).retType
+	return ctx.Func(ctx.calcSignature(b.Op, b.LeftE, b.RightE)).retType
 }

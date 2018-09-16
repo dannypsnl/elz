@@ -29,7 +29,7 @@ func (fc *FnCall) Codegen(c *Context) llvm.Value {
 
 // Type invoke c Func & signature to get return type
 func (fc *FnCall) Type(c *Context) string {
-	return c.Func(c.signature(fc.Name, fc.Args...)).retType
+	return c.Func(c.calcSignature(fc.Name, fc.Args...)).retType
 }
 
 func (fc *FnCall) ExprStat() {}
