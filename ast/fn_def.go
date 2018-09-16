@@ -15,15 +15,17 @@ type Param struct {
 }
 
 type FnDef struct {
-	Export      bool
-	Name        string
-	Params      []*Param
-	Body        []Stat
-	RetType     string
-	Ctx         *Context
-	Notations   []util.Notation
-	isExternDef bool
+	Export    bool
+	Name      string
+	Body      []Stat
+	RetType   string
+	Notations []util.Notation
+
+	// cache layer
 	fnSignature string
+	Params      []*Param
+	Ctx         *Context
+	isExternDef bool
 }
 
 func (f *FnDef) Check(c *Context) {
@@ -47,19 +49,7 @@ func (f *FnDef) Check(c *Context) {
 		}
 	}
 
-	buf := bytes.NewBuffer([]byte{})
-	buf.WriteString(f.Name)
-	buf.WriteRune('(')
-	for i, p := range f.Params {
-		f.Ctx.NewVar(p.Name, p.Type)
-		buf.WriteString(p.Type)
-		if i != len(f.Params)-1 {
-			buf.WriteRune(',')
-		}
-	}
-	buf.WriteRune(')')
-	f.fnSignature = buf.String()
-	c.NewFunc(f.fnSignature, f.RetType)
+	c.NewFunc(f.calcSignature(), f.RetType)
 
 	for _, stat := range f.Body {
 		stat.Check(f.Ctx)
@@ -71,7 +61,7 @@ func (f *FnDef) Codegen(c *Context) llvm.Value {
 		llvm.FunctionType(f.returnType(c), f.paramsType(c), false),
 	)
 
-	c.FuncValue(f.fnSignature, fn)
+	c.FuncValue(f.calcSignature(), fn)
 
 	// is a declaration in extern block for ffi we don't generate the statement for it
 	if !f.isExternDef {
@@ -104,6 +94,25 @@ func (f *FnDef) completeParamType() {
 			f.Params[i-1].Type = cache
 		}
 	}
+}
+
+func (f *FnDef) calcSignature() string {
+	if f.fnSignature != "" {
+		return f.fnSignature
+	}
+	buf := bytes.NewBuffer([]byte{})
+	buf.WriteString(f.Name)
+	buf.WriteRune('(')
+	for i, p := range f.Params {
+		f.Ctx.NewVar(p.Name, p.Type)
+		buf.WriteString(p.Type)
+		if i != len(f.Params)-1 {
+			buf.WriteRune(',')
+		}
+	}
+	buf.WriteRune(')')
+	f.fnSignature = buf.String()
+	return f.fnSignature
 }
 
 func (f *FnDef) returnType(c *Context) llvm.Type {

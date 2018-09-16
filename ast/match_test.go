@@ -1,8 +1,8 @@
 package ast
 
 import (
-	"testing"
 	"github.com/dannypsnl/assert"
+	"testing"
 
 	"github.com/elz-lang/elz/util"
 
@@ -33,7 +33,7 @@ func Test_match_rule(t *testing.T) {
 		Params:    []*Param{},
 		Body:      []Stat{m},
 		RetType:   "i32",
-		Ctx:       c,
+		Ctx:       NewContext(),
 		Notations: []util.Notation{},
 	}
 

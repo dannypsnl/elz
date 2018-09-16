@@ -3,8 +3,6 @@ package ast
 import (
 	"strings"
 	"testing"
-
-	_ "llvm.org/llvm/bindings/go/llvm"
 )
 
 func TestFnDef(t *testing.T) {
