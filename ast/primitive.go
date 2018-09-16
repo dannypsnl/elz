@@ -11,11 +11,11 @@ type Id struct {
 }
 
 func (i *Id) Codegen(c *Context) llvm.Value {
-	v, ok := c.Var(i.Val)
+	v, ok := c.LLVMValueOfVar(i.Val)
 	if ok {
 		return c.Builder.CreateLoad(v, "")
 	}
-	v, ok = c.Var(i.Val + " param")
+	v, ok = c.LLVMValueOfVar(i.Val + " param")
 	if ok {
 		return v
 	}
@@ -30,7 +30,7 @@ func (i *Id) Check(c *Context) {
 }
 
 // At here we can see, ident's type need to logging in Context
-// So Context should send into Type method and Context::Vars
+// So Context should send into Type method and Context::variables
 // need a new structure for usage
 func (i *Id) Type(c *Context) string {
 	// FIXME: id should not only be a global var

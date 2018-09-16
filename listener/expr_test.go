@@ -8,6 +8,23 @@ import (
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 )
 
+func TestAccessChain(t *testing.T) {
+	src := `
+type Bar (
+	i: i32
+)
+
+fn main() {
+	let b = Bar(10)
+	let i = b.i
+}
+`
+
+	expected := `getelementptr inbounds %Bar, %Bar* %1, i32 0, i32 0`
+
+	hasTestTemplate(t, src, expected)
+}
+
 func TestF32(t *testing.T) {
 	src := `
 	x = 3.2
@@ -72,8 +89,9 @@ func TestFloatSuffix(t *testing.T) {
 
 }
 
-func TestEq(t *testing.T) {
-	src := `
+func TestBinaryOperator(t *testing.T) {
+	t.Run("Eq, ==", func(t *testing.T) {
+		src := `
 	a = 1
 	b = 1
 
@@ -82,9 +100,10 @@ func TestEq(t *testing.T) {
 	}
 	`
 
-	expected := `
+		expected := `
   %2 = icmp eq i32 %0, %1
 `
 
-	hasTestTemplate(t, src, expected)
+		hasTestTemplate(t, src, expected)
+	})
 }

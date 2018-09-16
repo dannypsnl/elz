@@ -19,7 +19,7 @@ func (r *Ref) Check(c *Context) {
 func (r *Ref) Codegen(c *Context) llvm.Value {
 	if r.compilable {
 		e := r.E.(*Id)
-		v, ok := c.Var(e.Val)
+		v, ok := c.LLVMValueOfVar(e.Val)
 		if ok {
 			return c.Builder.CreateGEP(v, []llvm.Value{
 				llvm.ConstInt(llvm.Int32Type(), 0, true),

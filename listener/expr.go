@@ -6,8 +6,8 @@ import (
 )
 
 func (s *ElzListener) ExitAccessChain(c *parser.AccessChainContext) {
-	from := s.exprStack.Pop().(ast.Expr)
 	get := s.exprStack.Pop().(ast.Expr)
+	from := s.exprStack.Pop().(ast.Expr)
 
 	s.exprStack.Push(&ast.Access{
 		From: from,

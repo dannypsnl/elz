@@ -21,8 +21,9 @@ type TypeAttr struct {
 // )
 // ```
 type TypeDef struct {
-	Name      string
-	Attrs     []TypeAttr
+	Name  string
+	Attrs []TypeAttr
+	// cache layer
 	signature string
 	types     []llvm.Type
 	llvmType  llvm.Type
@@ -37,7 +38,7 @@ func (typ *TypeDef) Check(c *Context) {
 	typ.llvmType = c.Module.Context().StructCreateNamed(typ.Name)
 	typ.llvmType.StructSetBody(typ.types, true)
 
-	c.NewType(typ.Name, typ.llvmType)
+	c.NewType(typ.Name, typ.llvmType, typ.Attrs)
 
 	signature := bytes.NewBuffer([]byte{})
 	signature.WriteString(typ.Name)

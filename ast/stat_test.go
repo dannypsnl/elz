@@ -56,7 +56,7 @@ func TestGlobalVarDef(t *testing.T) {
 	}
 	v.Codegen(context)
 	expected := "PointerType(FloatType)"
-	ir, ok := context.Var("pi")
+	ir, ok := context.LLVMValueOfVar("pi")
 	if !ok || ir.Type().String() != expected {
 		t.Errorf("var: %s, expected: %s",
 			ir.Type().String(),
@@ -77,7 +77,7 @@ func TestStrGlobalVarDef(t *testing.T) {
 	v.Codegen(context)
 
 	expected := "PointerType(ArrayType(IntegerType(8 bits)[10]))"
-	ir, ok := context.Var("string1")
+	ir, ok := context.LLVMValueOfVar("string1")
 	if !ok || ir.Type().String() != expected {
 		t.Errorf("var: %s, expected: %s",
 			ir.Type().String(),
