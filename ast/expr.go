@@ -13,3 +13,16 @@ type Expr interface {
 	Type(*Context) string
 	Check(*Context)
 }
+
+type Access struct {
+	From Expr
+	Get  Expr
+}
+
+func (a *Access) Check(c *Context) {}
+func (a *Access) Codegen(c *Context) llvm.Value {
+	return llvm.Value{}
+}
+func (a *Access) Type(*Context) string {
+	return "fail"
+}
