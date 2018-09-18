@@ -1,8 +1,15 @@
+#[extern(c)]
+fn printf(ref<i8>) -> i32
+
+matched = "matched"
+
 type Foo (
   i: i32
 )
 
 fn main() {
   let f = Foo(10)
-  f.i
+  match f.i {
+    10 => printf(matched as ref<i8>)
+  }
 }
