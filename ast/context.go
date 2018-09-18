@@ -10,16 +10,42 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
+type elzTypeField struct {
+	name, typ string
+	export    bool
+	offset    int
+}
+type elzType struct {
+	llvmType llvm.Type
+	typeName string
+	// llvm use offset instead of field name to save fields
+	field map[string]*elzTypeField // offset map of field, fieldName => offset
+}
+
+func newElzType(typeName string, t llvm.Type, attrs []TypeAttr) *elzType {
+	newT := &elzType{
+		typeName: typeName,
+		llvmType: t,
+		field:    make(map[string]*elzTypeField),
+	}
+
+	for i, a := range attrs {
+		newT.field[a.Name] = &elzTypeField{name: a.Name, typ: a.Typ, export: a.Export, offset: i}
+	}
+
+	return newT
+}
+
 func NewContext() *Context {
 	c := &Context{
-		Parent:   nil,
-		Reporter: errors.NewReporter(),
-		Module:   llvm.NewModule("main"),
-		Context:  llvm.NewContext(),
-		Vars:     make(map[string]llvm.Value),
-		VarsType: make(map[string]string),
-		Types:    make(map[string]llvm.Type),
-		Builder:  llvm.NewBuilder(),
+		Parent:    nil,
+		Reporter:  errors.NewReporter(),
+		Module:    llvm.NewModule("main"),
+		Context:   llvm.NewContext(),
+		variables: make(map[string]llvm.Value),
+		VarsType:  make(map[string]string),
+		types:     make(map[string]*elzType),
+		Builder:   llvm.NewBuilder(),
 
 		breaks:           stack.New(),
 		functions:        make(map[string]*Function),
@@ -52,14 +78,14 @@ func NewContext() *Context {
 }
 
 type Context struct {
-	Parent   *Context
-	Reporter *errors.Reporter
-	Module   llvm.Module
-	Context  llvm.Context
-	Vars     map[string]llvm.Value
-	VarsType map[string]string
-	Types    map[string]llvm.Type
-	Builder  llvm.Builder
+	Parent    *Context
+	Reporter  *errors.Reporter
+	Module    llvm.Module
+	Context   llvm.Context
+	variables map[string]llvm.Value
+	VarsType  map[string]string
+	types     map[string]*elzType
+	Builder   llvm.Builder
 
 	breaks           *stack.Stack
 	functions        map[string]*Function
@@ -71,19 +97,15 @@ type Function struct {
 	retType string
 }
 
-func (c *Context) NewType(name string, t llvm.Type) {
-	c.Types[name] = t
-}
-
-func (c *Context) Type(name string) llvm.Type {
-	typ := LLVMType(name)
+func (c *Context) Type(elzTypeName string) llvm.Type {
+	typ := LLVMType(elzTypeName)
 	if typ.String() != "VoidType" {
 		return typ
 	}
-	if name == "()" {
+	if elzTypeName == "()" {
 		return llvm.VoidType()
 	}
-	return llvm.PointerType(c.Module.GetTypeByName(name), 0)
+	return llvm.PointerType(c.Module.GetTypeByName(elzTypeName), 0)
 }
 
 func (c *Context) NewFunc(signature string, retType string) {
@@ -205,7 +227,7 @@ func (c *Context) Func(signature string) *Function {
 }
 
 func (c *Context) VarValue(name string, value llvm.Value) {
-	c.Vars[name] = value
+	c.variables[name] = value
 }
 
 func (c *Context) NewVar(name string, typ string) {
@@ -214,13 +236,13 @@ func (c *Context) NewVar(name string, typ string) {
 	// FIXME: Missing export & mutable or not info
 }
 
-func (c *Context) Var(name string) (llvm.Value, bool) {
-	v, ok := c.Vars[name]
+func (c *Context) LLVMValueOfVar(name string) (llvm.Value, bool) {
+	v, ok := c.variables[name]
 	if ok {
 		return v, true
 	}
 	if c.Parent != nil {
-		return c.Parent.Var(name)
+		return c.Parent.LLVMValueOfVar(name)
 	}
 	return llvm.Value{}, false
 	// It will cause easy panic in llvm system
@@ -237,4 +259,27 @@ func (c *Context) VarType(name string) (string, bool) {
 		return c.Parent.VarType(name)
 	}
 	return "no this var", false
+}
+
+func (c *Context) NewType(name string, t llvm.Type, attrs []TypeAttr) {
+	if c.Parent != nil {
+		panic("Elz only allow you add type at root scope")
+	}
+	c.types[name] = newElzType(name, t, attrs)
+}
+
+func (c *Context) FindFieldIndexOfType(typeName, fieldName string) int {
+	root := c
+	for root.Parent != nil {
+		root = c.Parent
+	}
+	t := root.types[typeName]
+	return t.field[fieldName].offset
+}
+func (c *Context) FieldTypeOf(typeName, fieldName string) string {
+	root := c
+	for root.Parent != nil {
+		root = c.Parent
+	}
+	return root.types[typeName].field[fieldName].typ
 }

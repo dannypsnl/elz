@@ -10,6 +10,8 @@ import (
 )
 
 func hasTestTemplate(t *testing.T, source, expectedIn string) {
+	t.Helper()
+
 	res := NewParse(source)
 
 	if !strings.Contains(res, expectedIn) {

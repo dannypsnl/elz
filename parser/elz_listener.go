@@ -161,6 +161,9 @@ type ElzListener interface {
 	// EnterArrWithLen is called when entering the ArrWithLen production.
 	EnterArrWithLen(c *ArrWithLenContext)
 
+	// EnterAccessChain is called when entering the AccessChain production.
+	EnterAccessChain(c *AccessChainContext)
+
 	// EnterAndOrOr is called when entering the AndOrOr production.
 	EnterAndOrOr(c *AndOrOrContext)
 
@@ -355,6 +358,9 @@ type ElzListener interface {
 
 	// ExitArrWithLen is called when exiting the ArrWithLen production.
 	ExitArrWithLen(c *ArrWithLenContext)
+
+	// ExitAccessChain is called when exiting the AccessChain production.
+	ExitAccessChain(c *AccessChainContext)
 
 	// ExitAndOrOr is called when exiting the AndOrOr production.
 	ExitAndOrOr(c *AndOrOrContext)

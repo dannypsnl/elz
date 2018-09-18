@@ -10,5 +10,4 @@ RUN rm -r *
 
 ENV PATH=$PATH:$GOPATH/bin/
 
-CMD cd cmd/elz && go build && cd ../.. && \
-    overalls -project=github.com/elz-lang/elz
+CMD go build && overalls -project=github.com/elz-lang/elz

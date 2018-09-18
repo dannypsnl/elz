@@ -58,7 +58,7 @@ func (a *As) Codegen(c *Context) llvm.Value {
 	if isArrayType(a.E.Type(c)) && isRefType(a.T) {
 		_, ok := a.E.(*Id)
 		if elemType(a.E.Type(c)) == elemType(a.T) && ok {
-			v, _ = c.Var(a.E.(*Id).Val)
+			v, _ = c.LLVMValueOfVar(a.E.(*Id).Val)
 			return c.Builder.CreateGEP(v, []llvm.Value{
 				llvm.ConstInt(llvm.Int32Type(), 0, false),
 				llvm.ConstInt(llvm.Int32Type(), 0, false),

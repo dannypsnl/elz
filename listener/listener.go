@@ -9,6 +9,7 @@ import (
 	"github.com/elz-lang/elz/util"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
+
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
@@ -52,7 +53,7 @@ func New() *ElzListener {
 	return &ElzListener{
 		context:     ast.NewContext(),
 		immutable:   true,
-		exprStack:   stack.New(),
+		exprStack:   stack.New().WithT((*ast.Expr)(nil)),
 		notations:   make([]util.Notation, 0),
 		stats:       make([]ast.Stat, 0),
 		statBuilder: stack.New().WithT((*StatContainer)(nil)),

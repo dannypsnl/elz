@@ -5,6 +5,16 @@ import (
 	"github.com/elz-lang/elz/parser"
 )
 
+func (s *ElzListener) ExitAccessChain(c *parser.AccessChainContext) {
+	get := s.exprStack.Pop().(ast.Expr)
+	from := s.exprStack.Pop().(ast.Expr)
+
+	s.exprStack.Push(&ast.Access{
+		From: from,
+		Get:  get,
+	})
+}
+
 // ExitAddOrSub listen expression `expr + expr` or `expr - expr`
 func (s *ElzListener) ExitAddOrSub(ctx *parser.AddOrSubContext) {
 	re := s.exprStack.Pop()
