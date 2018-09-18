@@ -20,7 +20,7 @@ Elz is a modern programming language focus on production. I hope it can change d
 $ go get -d github.com/elz-lang/elz # -d help you don't check compile
 $ go get -d github.com/antlr/antlr4/runtime/Go/antlr
 $ go get -d llvm.org/llvm/bindings/go/llvm # Goto see Dependencies
-$ cd $GOPATH/src/github.com/elz-lang/elz/cmd/elz && go install
+$ cd $GOPATH/src/github.com/elz-lang/elz/ && go install
 ```
 
 Make sure your `$GOPATH/bin` is one of `$PATH`
