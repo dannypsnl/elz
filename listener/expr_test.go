@@ -6,7 +6,28 @@ import (
 	"github.com/elz-lang/elz/parser"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
+	"github.com/dannypsnl/assert"
+
+	"llvm.org/llvm/bindings/go/llvm"
 )
+
+func Test_compare_operator(t *testing.T) {
+	assert := assert.NewTester(t)
+
+	l := listener(`
+fn greater() -> bool {
+	return 1 > 0
+}`)
+
+	ee, err := llvm.NewExecutionEngine(l.context.Module)
+	if err != nil {
+		panic(err)
+	}
+	gv := ee.RunFunction(ee.FindFunction("greater"), []llvm.GenericValue{})
+
+	assert.Eq(gv.IntWidth(), 1)
+	assert.Eq(gv.Int(false), uint64(1))
+}
 
 func TestAccessChain(t *testing.T) {
 	src := `

@@ -53,6 +53,22 @@ func (s *ElzListener) ExitMulOrDiv(ctx *parser.MulOrDivContext) {
 	s.exprStack.Push(e)
 }
 
+// ExitCmp listen expression:
+// - `expr < expr`
+// - `expr > expr`
+// - `expr <= expr`
+// - `expr >= expr`
+func (s *ElzListener) ExitCmp(c *parser.CmpContext) {
+	re := s.exprStack.Pop().(ast.Expr)
+	le := s.exprStack.Pop().(ast.Expr)
+	e := &ast.BinaryExpr{
+		LeftE:  le,
+		RightE: re,
+		Op:     c.GetOp().GetText(),
+	}
+	s.exprStack.Push(e)
+}
+
 // ExitEq listen expression `expr == expr`
 func (s *ElzListener) ExitEq(c *parser.EqContext) {
 	le := s.exprStack.Pop()

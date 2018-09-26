@@ -10,6 +10,38 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
+var builtInOps = map[string]string{
+	"+(i32,i32)":  "i32",
+	"+(i64,i64)":  "i64",
+	"-(i32,i32)":  "i32",
+	"-(i64,i64)":  "i64",
+	"*(i32,i32)":  "i32",
+	"*(i64,i64)":  "i64",
+	"/(i32,i32)":  "i32",
+	"/(i64,i64)":  "i64",
+	"==(i32,i32)": "bool",
+	"==(i64,i64)": "bool",
+	"<(i32,i32)":  "bool",
+	"<(i64,i64)":  "bool",
+	"<=(i32,i32)": "bool",
+	"<=(i64,i64)": "bool",
+	">(i32,i32)":  "bool",
+	">(i64,i64)":  "bool",
+	">=(i32,i32)": "bool",
+	">=(i64,i64)": "bool",
+
+	"+(f32,f32)":  "f32",
+	"+(f64,f64)":  "f64",
+	"-(f32,f32)":  "f32",
+	"-(f64,f64)":  "f64",
+	"*(f32,f32)":  "f32",
+	"*(f64,f64)":  "f64",
+	"/(f32,f32)":  "f32",
+	"/(f64,f64)":  "f64",
+	"==(f32,f32)": "bool",
+	"==(f64,f64)": "bool",
+}
+
 type elzTypeField struct {
 	name, typ string
 	export    bool
@@ -47,32 +79,9 @@ func NewContext() *Context {
 		types:     make(map[string]*elzType),
 		Builder:   llvm.NewBuilder(),
 
-		breaks:           stack.New(),
-		functions:        make(map[string]*Function),
-		builtInOperators: make(map[string]string),
+		breaks:    stack.New(),
+		functions: make(map[string]*Function),
 	}
-
-	c.builtInOperators["+(i32,i32)"] = "i32"
-	c.builtInOperators["+(i64,i64)"] = "i64"
-	c.builtInOperators["-(i32,i32)"] = "i32"
-	c.builtInOperators["-(i64,i64)"] = "i64"
-	c.builtInOperators["*(i32,i32)"] = "i32"
-	c.builtInOperators["*(i64,i64)"] = "i64"
-	c.builtInOperators["/(i32,i32)"] = "i32"
-	c.builtInOperators["/(i64,i64)"] = "i64"
-	c.builtInOperators["==(i32,i32)"] = "bool"
-	c.builtInOperators["==(i64,i64)"] = "bool"
-
-	c.builtInOperators["+(f32,f32)"] = "f32"
-	c.builtInOperators["+(f64,f64)"] = "f64"
-	c.builtInOperators["-(f32,f32)"] = "f32"
-	c.builtInOperators["-(f64,f64)"] = "f64"
-	c.builtInOperators["*(f32,f32)"] = "f32"
-	c.builtInOperators["*(f64,f64)"] = "f64"
-	c.builtInOperators["/(f32,f32)"] = "f32"
-	c.builtInOperators["/(f64,f64)"] = "f64"
-	c.builtInOperators["==(f32,f32)"] = "bool"
-	c.builtInOperators["==(f64,f64)"] = "bool"
 
 	return c
 }
@@ -87,9 +96,8 @@ type Context struct {
 	types     map[string]*elzType
 	Builder   llvm.Builder
 
-	breaks           *stack.Stack
-	functions        map[string]*Function
-	builtInOperators map[string]string
+	breaks    *stack.Stack
+	functions map[string]*Function
 }
 
 type Function struct {
@@ -162,6 +170,13 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 			args[1],
 			"",
 		)
+	case ">(i32,i32)":
+		return c.Builder.CreateICmp(
+			llvm.IntSGT,
+			args[0],
+			args[1],
+			"",
+		)
 	case "+(f32,f32)":
 		fallthrough
 	case "+(f64,f64)":
@@ -200,7 +215,7 @@ func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
 		args = append(args, e.Codegen(c))
 	}
 
-	if _, ok := c.builtInOperators[signature]; ok {
+	if _, ok := builtInOps[signature]; ok {
 		return c.builtInOperation(signature, args)
 	}
 
@@ -212,17 +227,21 @@ func (c *Context) Call(funcName string, exprs ...Expr) llvm.Value {
 }
 
 func (c *Context) Func(signature string) *Function {
-	if retT, ok := c.builtInOperators[signature]; ok {
+	// check is it is the built-in operator?
+	if retT, ok := builtInOps[signature]; ok {
 		return &Function{
 			retType: retT,
 		}
 	}
+	// Have function in this context
 	if f, ok := c.functions[signature]; ok {
 		return f
 	}
+	// if it's root & not found ~> global not found
 	if c.Parent == nil {
 		return nil
 	}
+	// search to parent
 	return c.Parent.Func(signature)
 }
 
