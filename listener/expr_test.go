@@ -11,6 +11,13 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
+func (s *ElzListener) runElzFunction(name string) llvm.GenericValue {
+	ee, err := llvm.NewExecutionEngine(s.context.Module)
+	if err != nil {
+		panic(err)
+	}
+	return ee.RunFunction(ee.FindFunction(name), []llvm.GenericValue{})
+}
 func Test_compare_operator(t *testing.T) {
 	assert := assert.NewTester(t)
 
@@ -19,12 +26,7 @@ fn greater() -> bool {
 	return 1 > 0
 }`)
 
-	ee, err := llvm.NewExecutionEngine(l.context.Module)
-	if err != nil {
-		panic(err)
-	}
-	gv := ee.RunFunction(ee.FindFunction("greater"), []llvm.GenericValue{})
-
+	gv := l.runElzFunction("greater")
 	assert.Eq(gv.IntWidth(), 1)
 	assert.Eq(gv.Int(false), uint64(1))
 }
