@@ -18,18 +18,6 @@ func (s *ElzListener) runElzFunction(name string) llvm.GenericValue {
 	}
 	return ee.RunFunction(ee.FindFunction(name), []llvm.GenericValue{})
 }
-func Test_compare_operator(t *testing.T) {
-	assert := assert.NewTester(t)
-
-	l := listener(`
-fn greater() -> bool {
-	return 1 > 0
-}`)
-
-	gv := l.runElzFunction("greater")
-	assert.Eq(gv.IntWidth(), 1)
-	assert.Eq(gv.Int(false), uint64(1))
-}
 
 func TestAccessChain(t *testing.T) {
 	src := `
@@ -113,20 +101,36 @@ func TestFloatSuffix(t *testing.T) {
 }
 
 func TestBinaryOperator(t *testing.T) {
-	t.Run("Eq, ==", func(t *testing.T) {
-		src := `
-	a = 1
-	b = 1
+	assert := assert.NewTester(t)
 
-	fn main() {
-	  c = a == b
+	assertIsTrue := func(t *testing.T, value llvm.GenericValue) {
+		t.Helper()
+		assert.Eq(value.IntWidth(), 1)
+		assert.Eq(value.Int(false), uint64(1))
 	}
-	`
 
-		expected := `
-  %2 = icmp eq i32 %0, %1
-`
+	t.Run("Eq, ==", func(t *testing.T) {
+		l := listener(`
+		fn equal() -> bool {
+			return 1 == 1
+		}
+		`)
 
-		hasTestTemplate(t, src, expected)
+		assertIsTrue(t, l.runElzFunction("equal"))
+	})
+	t.Run("Greater, >", func(t *testing.T) {
+
+		l := listener(`
+		fn greater() -> bool {
+			return 1 > 0
+		}
+
+		fn greater_64() -> bool {
+    		return 30'i64 > 0'i64
+		}
+		`)
+
+		assertIsTrue(t, l.runElzFunction("greater"))
+		assertIsTrue(t, l.runElzFunction("greater_64"))
 	})
 }

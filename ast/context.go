@@ -171,6 +171,8 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 			"",
 		)
 	case ">(i32,i32)":
+		fallthrough
+	case ">(i64,i64)":
 		return c.Builder.CreateICmp(
 			llvm.IntSGT,
 			args[0],
