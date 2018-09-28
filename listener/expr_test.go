@@ -110,22 +110,31 @@ func TestBinaryOperator(t *testing.T) {
 	}
 
 	l := listener(`
-	fn equal() -> bool {
+	fn equal_i32() -> bool {
 		return 1 == 1
 	}
 
-	fn greater() -> bool {
+	fn greater_i32() -> bool {
 		return 1 > 0
 	}
 
-	fn greater_64() -> bool {
+	fn greater_i64() -> bool {
     	return 30'i64 > 0'i64
+	}
+
+	fn greater_equal_i32() -> bool {
+		return 20 >= 10
+	}
+
+	fn greater_equal_i64() -> bool {
+		return 33'i64 >= 31'i64
 	}
 	`)
 
 	testCases := map[string][]string{
-		"Eq(==)":     {"equal"},
-		"Greater(>)": {"greater", "greater_64"},
+		"Eq(==)":           {"equal_i32"},
+		"Greater(>)":       {"greater_i32", "greater_i64"},
+		"GreaterEqual(>=)": {"greater_equal_i32", "greater_equal_i64"},
 	}
 
 	for tName, funcNames := range testCases {
