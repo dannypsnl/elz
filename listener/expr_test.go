@@ -109,28 +109,30 @@ func TestBinaryOperator(t *testing.T) {
 		assert.Eq(value.Int(false), uint64(1))
 	}
 
-	t.Run("Eq, ==", func(t *testing.T) {
-		l := listener(`
-		fn equal() -> bool {
-			return 1 == 1
-		}
-		`)
+	l := listener(`
+	fn equal() -> bool {
+		return 1 == 1
+	}
 
-		assertIsTrue(t, l.runElzFunction("equal"))
-	})
-	t.Run("Greater, >", func(t *testing.T) {
+	fn greater() -> bool {
+		return 1 > 0
+	}
 
-		l := listener(`
-		fn greater() -> bool {
-			return 1 > 0
-		}
+	fn greater_64() -> bool {
+    	return 30'i64 > 0'i64
+	}
+	`)
 
-		fn greater_64() -> bool {
-    		return 30'i64 > 0'i64
-		}
-		`)
+	testCases := map[string][]string{
+		"Eq(==)":     {"equal"},
+		"Greater(>)": {"greater", "greater_64"},
+	}
 
-		assertIsTrue(t, l.runElzFunction("greater"))
-		assertIsTrue(t, l.runElzFunction("greater_64"))
-	})
+	for tName, funcNames := range testCases {
+		t.Run(tName, func(t *testing.T) {
+			for _, funcName := range funcNames {
+				assertIsTrue(t, l.runElzFunction(funcName))
+			}
+		})
+	}
 }
