@@ -42,6 +42,16 @@ var builtInOps = map[string]string{
 	"/(f64,f64)":  "f64",
 	"==(f32,f32)": "bool",
 	"==(f64,f64)": "bool",
+	"!=(f32,f32)": "bool",
+	"!=(f64,f64)": "bool",
+	">(f32,f32)":  "bool",
+	">(f64,f64)":  "bool",
+	">=(f32,f32)": "bool",
+	">=(f64,f64)": "bool",
+	"<(f32,f32)":  "bool",
+	"<(f64,f64)":  "bool",
+	"<=(f32,f32)": "bool",
+	"<=(f64,f64)": "bool",
 }
 
 type elzTypeField struct {
@@ -238,6 +248,15 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 	case "==(f64,f64)":
 		return c.Builder.CreateFCmp(
 			llvm.FloatOEQ,
+			args[0],
+			args[1],
+			"",
+		)
+	case "!=(f32,f32)":
+		fallthrough
+	case "!=(f64,f64)":
+		return c.Builder.CreateFCmp(
+			llvm.FloatONE,
 			args[0],
 			args[1],
 			"",

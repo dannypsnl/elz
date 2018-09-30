@@ -144,12 +144,18 @@ func TestBinaryOperator(t *testing.T) {
 	fn not_equal_i64() -> bool {
 		return 1'i64 != 0'i64
 	}
+	fn not_equal_f32() -> bool {
+		return 1.0 != 0.0
+	}
+	fn not_equal_f64() -> bool {
+		return 1'f64 != 0'f64
+	}
 	`)
 
 	// Operator => Functions
 	testCases := map[string][]string{
 		"Eq(==)":           {"equal_i32"},
-		"NotEq(!=)":        {"not_equal_i32", "not_equal_i64"},
+		"NotEq(!=)":        {"not_equal_i32", "not_equal_i64", "not_equal_f32", "not_equal_f64"},
 		"Greater(>)":       {"greater_i32", "greater_i64"},
 		"GreaterEqual(>=)": {"greater_equal_i32", "greater_equal_i64"},
 		"Less(<)":          {"less_than_i32"},
