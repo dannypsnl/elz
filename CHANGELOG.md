@@ -18,6 +18,8 @@ Logging change of elz.
 - type define
 - extract array element
 - Boolean value & compare operator
+	- `true`, `false` literal
+	- `>`, `>=`, `<`, `<=`, `!=` for `i32`, `i64`, `f32`, `f64`
 - match expression
 - loop statement
 
