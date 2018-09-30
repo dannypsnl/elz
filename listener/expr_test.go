@@ -97,7 +97,6 @@ func TestFloatSuffix(t *testing.T) {
 `
 
 	hasTestTemplate(t, src, expected)
-
 }
 
 func TestBinaryOperator(t *testing.T) {

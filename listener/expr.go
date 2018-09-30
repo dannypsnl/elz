@@ -5,6 +5,8 @@ import (
 	"github.com/elz-lang/elz/parser"
 )
 
+// ExitAccessChain listen expression
+// `expr.expr`
 func (s *ElzListener) ExitAccessChain(c *parser.AccessChainContext) {
 	get := s.exprStack.Pop().(ast.Expr)
 	from := s.exprStack.Pop().(ast.Expr)
@@ -82,11 +84,11 @@ func (s *ElzListener) ExitNotEq(c *parser.NotEqContext) {
 
 // ExitEq listen expression `expr == expr`
 func (s *ElzListener) ExitEq(c *parser.EqContext) {
-	le := s.exprStack.Pop()
-	re := s.exprStack.Pop()
+	re := s.exprStack.Pop().(ast.Expr)
+	le := s.exprStack.Pop().(ast.Expr)
 	e := &ast.BinaryExpr{
-		LeftE:  le.(ast.Expr),
-		RightE: re.(ast.Expr),
+		LeftE:  le,
+		RightE: re,
 		Op:     c.GetOp().GetText(),
 	}
 	s.exprStack.Push(e)
@@ -112,9 +114,9 @@ func (s *ElzListener) ExitDeRef(c *parser.DeRefContext) {
 }
 
 // ExitStr listen string literal, like: `"hello world"`
-func (s *ElzListener) ExitStr(ctx *parser.StrContext) {
-	value := ctx.STRING().GetText()
-	value = value[1 : len(value)-1]
+func (s *ElzListener) ExitStr(c *parser.StrContext) {
+	value := c.STRING().GetText()
+	value = value[1 : len(value)-1] // remove `"`
 	s.exprStack.Push(&ast.Str{Val: value})
 }
 
