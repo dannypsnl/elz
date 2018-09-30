@@ -11,14 +11,6 @@ import (
 	"llvm.org/llvm/bindings/go/llvm"
 )
 
-func (s *ElzListener) runElzFunction(name string) llvm.GenericValue {
-	ee, err := llvm.NewExecutionEngine(s.context.Module)
-	if err != nil {
-		panic(err)
-	}
-	return ee.RunFunction(ee.FindFunction(name), []llvm.GenericValue{})
-}
-
 func TestAccessChain(t *testing.T) {
 	src := `
 type Bar (
