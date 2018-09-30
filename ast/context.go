@@ -197,6 +197,15 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 			args[1],
 			"",
 		)
+	case "<=(i32,i32)":
+		fallthrough
+	case "<=(i64,i64)":
+		return c.Builder.CreateICmp(
+			llvm.IntSLE, // Int less equal(<=)
+			args[0],
+			args[1],
+			"",
+		)
 	case "+(f32,f32)":
 		fallthrough
 	case "+(f64,f64)":

@@ -117,7 +117,6 @@ func TestBinaryOperator(t *testing.T) {
 	fn greater_i32() -> bool {
 		return 1 > 0
 	}
-
 	fn greater_i64() -> bool {
     	return 30'i64 > 0'i64
 	}
@@ -125,13 +124,19 @@ func TestBinaryOperator(t *testing.T) {
 	fn greater_equal_i32() -> bool {
 		return 20 >= 10
 	}
-
 	fn greater_equal_i64() -> bool {
 		return 33'i64 >= 31'i64
 	}
 
 	fn less_than_i32() -> bool {
 		return 13 < 15
+	}
+
+	fn less_equal_i32() -> bool {
+		return 14 <= 15
+	}
+	fn less_equal_i32_equal() -> bool {
+		return 14 <= 14
 	}
 	`)
 
@@ -141,6 +146,7 @@ func TestBinaryOperator(t *testing.T) {
 		"Greater(>)":       {"greater_i32", "greater_i64"},
 		"GreaterEqual(>=)": {"greater_equal_i32", "greater_equal_i64"},
 		"Less(<)":          {"less_than_i32"},
+		"LessEqual(<=)":    {"less_equal_i32", "less_equal_i32_equal"},
 	}
 
 	for tName, funcNames := range testCases {
