@@ -21,6 +21,8 @@ var builtInOps = map[string]string{
 	"/(i64,i64)":  "i64",
 	"==(i32,i32)": "bool",
 	"==(i64,i64)": "bool",
+	"!=(i32,i32)": "bool",
+	"!=(i64,i64)": "bool",
 	"<(i32,i32)":  "bool",
 	"<(i64,i64)":  "bool",
 	"<=(i32,i32)": "bool",
@@ -166,6 +168,15 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 	case "==(i64,i64)":
 		return c.Builder.CreateICmp(
 			llvm.IntEQ,
+			args[0],
+			args[1],
+			"",
+		)
+	case "!=(i32,i32)":
+		fallthrough
+	case "!=(i64,i64)":
+		return c.Builder.CreateICmp(
+			llvm.IntNE,
 			args[0],
 			args[1],
 			"",
