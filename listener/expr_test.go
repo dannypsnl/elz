@@ -129,12 +129,18 @@ func TestBinaryOperator(t *testing.T) {
 	fn greater_equal_i64() -> bool {
 		return 33'i64 >= 31'i64
 	}
+
+	fn less_than_i32() -> bool {
+		return 13 < 15
+	}
 	`)
 
+	// Operator => Functions
 	testCases := map[string][]string{
 		"Eq(==)":           {"equal_i32"},
 		"Greater(>)":       {"greater_i32", "greater_i64"},
 		"GreaterEqual(>=)": {"greater_equal_i32", "greater_equal_i64"},
+		"Less(<)":          {"less_than_i32"},
 	}
 
 	for tName, funcNames := range testCases {

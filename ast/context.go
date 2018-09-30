@@ -174,7 +174,7 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 		fallthrough
 	case ">(i64,i64)":
 		return c.Builder.CreateICmp(
-			llvm.IntSGT,
+			llvm.IntSGT, // Int greater than(>)
 			args[0],
 			args[1],
 			"",
@@ -183,7 +183,16 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 		fallthrough
 	case ">=(i64,i64)":
 		return c.Builder.CreateICmp(
-			llvm.IntSGE,
+			llvm.IntSGE, // Int greater equal(>=)
+			args[0],
+			args[1],
+			"",
+		)
+	case "<(i32,i32)":
+		fallthrough
+	case "<(i64,i64)":
+		return c.Builder.CreateICmp(
+			llvm.IntSLT, // Int less than(<)
 			args[0],
 			args[1],
 			"",
