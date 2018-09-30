@@ -7,6 +7,8 @@ import (
 	"github.com/elz-lang/elz/parser"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
+
+	"llvm.org/llvm/bindings/go/llvm"
 )
 
 func hasTestTemplate(t *testing.T, source, expectedIn string) {
@@ -30,4 +32,12 @@ func listener(code string) *ElzListener {
 	antlr.ParseTreeWalkerDefault.Walk(listener, tree)
 
 	return listener
+}
+
+func (s *ElzListener) runElzFunction(name string, values ...llvm.GenericValue) llvm.GenericValue {
+	ee, err := llvm.NewExecutionEngine(s.context.Module)
+	if err != nil {
+		panic(err)
+	}
+	return ee.RunFunction(ee.FindFunction(name), values)
 }
