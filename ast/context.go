@@ -261,6 +261,42 @@ func (c *Context) builtInOperation(signature string, args []llvm.Value) llvm.Val
 			args[1],
 			"",
 		)
+	case ">(f32,f32)":
+		fallthrough
+	case ">(f64,f64)":
+		return c.Builder.CreateFCmp(
+			llvm.FloatOGT, // Float greater than(>)
+			args[0],
+			args[1],
+			"",
+		)
+	case ">=(f32,f32)":
+		fallthrough
+	case ">=(f64,f64)":
+		return c.Builder.CreateFCmp(
+			llvm.FloatOGE, // Float greater equal(>=)
+			args[0],
+			args[1],
+			"",
+		)
+	case "<(f32,f32)":
+		fallthrough
+	case "<(f64,f64)":
+		return c.Builder.CreateFCmp(
+			llvm.FloatOLT, // Float less than(<)
+			args[0],
+			args[1],
+			"",
+		)
+	case "<=(f32,f32)":
+		fallthrough
+	case "<=(f64,f64)":
+		return c.Builder.CreateFCmp(
+			llvm.FloatOLE, // Float less equal(<=)
+			args[0],
+			args[1],
+			"",
+		)
 	default:
 		panic("Compiler bug at Context::Call, builtInOperation assumes signature is built in operation")
 	}

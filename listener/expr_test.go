@@ -112,12 +112,18 @@ func TestBinaryOperator(t *testing.T) {
 	fn equal_i32() -> bool {
 		return 1 == 1
 	}
+	fn equal_float() -> bool {
+		return 3.4 == 3.4
+	}
 
 	fn greater_i32() -> bool {
 		return 1 > 0
 	}
 	fn greater_i64() -> bool {
     	return 30'i64 > 0'i64
+	}
+	fn greater_float() -> bool {
+		return 9.14 > 3.45
 	}
 
 	fn greater_equal_i32() -> bool {
@@ -126,9 +132,15 @@ func TestBinaryOperator(t *testing.T) {
 	fn greater_equal_i64() -> bool {
 		return 33'i64 >= 31'i64
 	}
+	fn greater_equal_float() -> bool {
+		return 3.4 >= 1.2
+	}
 
 	fn less_than_i32() -> bool {
 		return 13 < 15
+	}
+	fn less_than_float() -> bool {
+		return 1.0 < 3.4
 	}
 
 	fn less_equal_i32() -> bool {
@@ -136,6 +148,9 @@ func TestBinaryOperator(t *testing.T) {
 	}
 	fn less_equal_i32_equal() -> bool {
 		return 14 <= 14
+	}
+	fn less_equal_float() -> bool {
+		return 1.0 <= 3.0
 	}
 
 	fn not_equal_i32() -> bool {
@@ -154,12 +169,12 @@ func TestBinaryOperator(t *testing.T) {
 
 	// Operator => Functions
 	testCases := map[string][]string{
-		"Eq(==)":           {"equal_i32"},
+		"Eq(==)":           {"equal_i32", "equal_float"},
 		"NotEq(!=)":        {"not_equal_i32", "not_equal_i64", "not_equal_f32", "not_equal_f64"},
-		"Greater(>)":       {"greater_i32", "greater_i64"},
-		"GreaterEqual(>=)": {"greater_equal_i32", "greater_equal_i64"},
-		"Less(<)":          {"less_than_i32"},
-		"LessEqual(<=)":    {"less_equal_i32", "less_equal_i32_equal"},
+		"Greater(>)":       {"greater_i32", "greater_i64", "greater_float"},
+		"GreaterEqual(>=)": {"greater_equal_i32", "greater_equal_i64", "greater_equal_float"},
+		"Less(<)":          {"less_than_i32", "less_than_float"},
+		"LessEqual(<=)":    {"less_equal_i32", "less_equal_i32_equal", "less_equal_float"},
 	}
 
 	for tName, funcNames := range testCases {
