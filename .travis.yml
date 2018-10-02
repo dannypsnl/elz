@@ -15,6 +15,8 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
+      env:
+        - CGO_CXXFLAGS=-std=c++11
       before_script:
         - sudo echo 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main' >> /etc/apt/sources.list
         - sudo echo 'deb-src http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main' >> /etc/apt/sources.list
@@ -25,6 +27,8 @@ matrix:
         - sudo apt-get install libfuzzer-6.0-dev
         - sudo apt-get install lldb-6.0
         - sudo apt-get install lld-6.0
+        - export CGO_CPPFLAGS="`llvm-config --cppflags`"
+        - export CGO_LDFLAGS="`llvm-config --ldflags --libs --system-libs all`"
         - go get -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
