@@ -14,6 +14,17 @@ matrix:
     - go: master
   # This mean if stable go version pass the test, will mark test green
   fast_finish: true
+  include:
+    - go: "1.10.x"
+      before_script:
+        - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+        - apt-get install libllvm-7-ocaml-dev libllvm7 llvm-7 llvm-7-dev llvm-7-doc llvm-7-examples llvm-7-runtime
+        - apt-get install clang-7 clang-tools-7 clang-7-doc libclang-common-7-dev libclang-7-dev libclang1-7 clang-format-7 python-clang-7
+        - apt-get install libfuzzer-7-dev
+        - apt-get install lldb-7 lld-7
+        - apt-get install libc++-7-dev libc++abi-7-dev
+      script:
+        - go test -coverprofile=coverage.txt -v ./...
 
 services:
   - docker
