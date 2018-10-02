@@ -19,15 +19,15 @@ matrix:
         - CGO_CXXFLAGS=-std=c++11
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
       before_script:
-        - sudo echo 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main' >> /etc/apt/sources.list
-        - sudo echo 'deb-src http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main' >> /etc/apt/sources.list
+        - sudo echo 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main' >> /etc/apt/sources.list
+        - sudo echo 'deb-src http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main' >> /etc/apt/sources.list
         - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
         - sudo apt update
-        - sudo apt-get install clang-6.0 clang-tools-6.0 clang-6.0-doc libclang-common-6.0-dev libclang-6.0-dev libclang1-6.0 clang-format-6.0 python-clang-6.0
-        - sudo apt-get install libllvm6.0 llvm-6.0 llvm-6.0-dev llvm-6.0-doc llvm-6.0-examples llvm-6.0-runtime
-        - sudo apt-get install libfuzzer-6.0-dev
-        - sudo apt-get install lldb-6.0
-        - sudo apt-get install lld-6.0
+        - sudo apt-get install clang-7 clang-tools-7 clang-7-doc libclang-common-7-dev libclang-7-dev libclang1-7 clang-format-7 python-clang-7
+        - sudo apt-get install libllvm7 llvm-7 llvm-7-dev llvm-7-doc llvm-7-examples llvm-7-runtime
+        - sudo apt-get install libfuzzer-7-dev
+        - sudo apt-get install lldb-7
+        - sudo apt-get install lld-7
         - export CGO_CPPFLAGS="`llvm-config --cppflags`"
         - export CGO_LDFLAGS="`llvm-config --ldflags --libs --system-libs all`"
         - go get -t -v ./...
