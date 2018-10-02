@@ -2,17 +2,10 @@ sudo: true
 
 language: go
 
-go:
-  - 1.9
-  - master
-
 # Skip install step. Control by ourself
 install: true
 
 matrix:
-  allow_failures:
-    - go: master
-  # This mean if stable go version pass the test, will mark test green
   fast_finish: true
   include:
     - go: "1.10.x"
@@ -28,18 +21,3 @@ matrix:
       script:
         - go test -coverprofile=coverage.txt -v ./...
 
-services:
-  - docker
-
-before_script:
-  - go get github.com/mattn/goveralls
-  - go get -d github.com/elz-lang/elz
-  - cd $GOPATH/src/github.com/elz-lang/elz/
-  - docker build -t runtest .
-
-script:
-  # Cover default test command
-  - go test ./collection/stack/
-  - docker run --name elztest -v $GOPATH/src/github.com/elz-lang/elz:/go/src/github.com/elz-lang/elz runtest
-  - goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken q1SjUrwywcLURT4eok5Ki37gXZeGZiwg4
-  - docker rm elztest
