@@ -23,6 +23,7 @@ matrix:
         - apt-get install libfuzzer-7-dev
         - apt-get install lldb-7 lld-7
         - apt-get install libc++-7-dev libc++abi-7-dev
+        - go get -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
 
