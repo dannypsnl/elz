@@ -28,7 +28,7 @@ matrix:
         - sudo apt-get install libfuzzer-7-dev
         - sudo apt-get install lldb-7
         - sudo apt-get install lld-7
-        - export CGO_CPPFLAGS="`llvm-config --cppflags`"
+        - export CGO_CPPFLAGS="`llvm-config --cxxflags`"
         - export CGO_LDFLAGS="`llvm-config --ldflags --libs --system-libs all`"
         - go get -t -v ./...
       script:
