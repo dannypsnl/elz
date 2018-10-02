@@ -17,7 +17,7 @@ matrix:
             - g++-4.9
       env:
         - CGO_CXXFLAGS=-std=c++11
-        - CGO_CPPFLAGS="`llvm-config --cxxflags`"
+        - CGO_CPPFLAGS="`llvm-config --cppflags`"
         - CGO_LDFLAGS="`llvm-config --ldflags --libs --system-libs all`"
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang
@@ -32,7 +32,10 @@ matrix:
         - sudo apt-get install libfuzzer-7-dev
         - sudo apt-get install lldb-7
         - sudo apt-get install lld-7
+        - llvm-config --cppflags
+        - ls -la $(llvm-config --includedir)
         - go get -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
+
 
