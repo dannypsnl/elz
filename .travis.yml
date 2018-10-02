@@ -10,8 +10,8 @@ matrix:
   include:
     - go: "1.10.x"
       before_script:
-        - deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main
-        - deb-src http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main
+        - sudo echo 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main' >> /etc/apt/sources.list
+        - sudo echo 'deb-src http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main' >> /etc/apt/sources.list
         - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
         - sudo apt update
         - sudo apt-get install libllvm-6.0-ocaml-dev libllvm6.0 llvm-6.0 llvm-6.0-dev llvm-6.0-doc llvm-6.0-examples llvm-6.0-runtime
