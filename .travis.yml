@@ -36,9 +36,11 @@ matrix:
         - ls -a /usr/local/clang
         - ls -a /usr/local/clang/bin
         - ls -a /usr/local/clang/include
+        - ls -a /usr/local/clang/include/llvm-c
         - llvm-config --cppflags
         - llvm-config --includedir
         - ls -la $(llvm-config --includedir)
+        - ls -la $(llvm-config --includedir)/llvm-c
         - go get -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
