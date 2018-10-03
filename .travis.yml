@@ -17,11 +17,11 @@ matrix:
             - g++-4.9
       env:
         - CGO_CXXFLAGS=-std=c++11
-        - CGO_CPPFLAGS="`llvm-config --cppflags`"
-        - CGO_LDFLAGS="`llvm-config --ldflags --libs --system-libs all`"
+        - CGO_CPPFLAGS="`llvm-config-7 --cppflags`"
+        - CGO_LDFLAGS="`llvm-config-7 --ldflags --libs --system-libs all`"
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
-        - CC=clang
-        - CXX=clang++
+        - CC=clang-7
+        - CXX=clang++-7
       before_script:
         - sudo echo 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main' >> /etc/apt/sources.list
         - sudo echo 'deb-src http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main' >> /etc/apt/sources.list
@@ -32,12 +32,7 @@ matrix:
         - sudo apt-get install libfuzzer-7-dev
         - sudo apt-get install lldb-7
         - sudo apt-get install lld-7
-        - clang --version
-        - ls -a /usr/bin
-        - ls -a /usr/include
-        - ls -a /usr/local/bin
-        - ls -a /usr/local/include
-        - ls -a $(llvm-config --includedir)/llvm-c
+        - clang-7 --version
         - go get -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
