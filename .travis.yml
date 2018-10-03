@@ -15,6 +15,39 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty
+          packages:
+            - g++-4.9
+            - clang-8
+            - clang-tools-8
+            - clang-8-doc
+            - libclang-common-8-dev
+            - libclang-8-dev
+            - libclang1-8
+            - libllvm8
+            - llvm-8
+            - llvm-8-dev
+            - llvm-8-runtime
+            - libfuzzer-8-dev
+            - lldb-8
+            - lld-8
+      env:
+        - CGO_CXXFLAGS=-std=c++11
+        - CGO_CPPFLAGS="`llvm-config-8 --cppflags`"
+        - CGO_LDFLAGS="`llvm-config-8 --ldflags --libs --system-libs all`"
+        - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
+        - CC=clang-8
+      before_script:
+        - go get -t -v ./...
+      script:
+        - go test -coverprofile=coverage.txt -v ./...
+    - go: "1.10.x"
+      os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-6.0
           packages:
             - g++-4.9
@@ -39,8 +72,6 @@ matrix:
         - CC=clang-6.0
         - CXX=clang++-6.0
       before_script:
-        - export CGO_CPPFLAGS="`llvm-config-6.0 --cppflags`"
-        - export CGO_LDFLAGS="`llvm-config-6.0 --ldflags --libs --system-libs all`"
         - go get -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
