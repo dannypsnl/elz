@@ -32,15 +32,17 @@ matrix:
         - sudo apt-get install libfuzzer-7-dev
         - sudo apt-get install lldb-7
         - sudo apt-get install lld-7
+        - clang --version
         - ls -a /usr/local/bin
         - ls -a /usr/local/clang
         - ls -a /usr/local/clang/bin
         - ls -a /usr/local/clang/include
         - ls -a /usr/local/clang/include/llvm-c
         - llvm-config --cppflags
+        - llvm-config --cxxflags
         - llvm-config --includedir
-        - ls -la $(llvm-config --includedir)
-        - ls -la $(llvm-config --includedir)/llvm-c
+        - ls -a $(llvm-config --includedir)
+        - ls -a $(llvm-config --includedir)/llvm-c
         - go get -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
