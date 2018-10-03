@@ -34,8 +34,11 @@ matrix:
         - sudo apt-get install lld-7
         - clang --version
         - ls -a /usr/local/bin
-        - ls -a /usr/local/clang
         - ls -a /usr/local/clang/bin
+        - /usr/local/clang/bin/clang --version
+        - /usr/local/clang/bin/llvm-config --cxxflags
+        - /usr/local/clang/bin/llvm-config --cppflags
+        - /usr/local/clang/bin/llvm-config --includedir
         - ls -a /usr/local/clang/include
         - ls -a /usr/local/clang/include/llvm-c
         - llvm-config --cppflags
