@@ -9,6 +9,42 @@ matrix:
   fast_finish: true
   include:
     - go: "1.10.x"
+      os: linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - g++-4.9
+            - clang-6.0
+            - clang-tools-6.0
+            - clang-6.0-doc
+            - libclang-common-6.0-dev
+            - libclang-6.0-dev
+            - libclang1-6.0
+            - libllvm6.0
+            - llvm-6.0
+            - llvm-6.0-dev
+            - llvm-6.0-runtime
+            - libfuzzer-6.0-dev
+            - lldb-6.0
+            - lld-6.0
+      env:
+        - CGO_CXXFLAGS=-std=c++11
+        - CGO_CPPFLAGS="`llvm-config-6.0 --cppflags`"
+        - CGO_LDFLAGS="`llvm-config-6.0 --ldflags --libs --system-libs all`"
+        - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
+        - CC=clang-6.0
+        - CXX=clang++-6.0
+      before_script:
+        - export CGO_CPPFLAGS="`llvm-config-6.0 --cppflags`"
+        - export CGO_LDFLAGS="`llvm-config-6.0 --ldflags --libs --system-libs all`"
+        - go get -t -v ./...
+      script:
+        - go test -coverprofile=coverage.txt -v ./...
+    - go: "1.10.x"
       addons:
         apt:
           sources:
@@ -17,8 +53,6 @@ matrix:
             - g++-4.9
       env:
         - CGO_CXXFLAGS=-std=c++11
-        - CGO_CPPFLAGS="`llvm-config-7 --cppflags`"
-        - CGO_LDFLAGS="`llvm-config-7 --ldflags --libs --system-libs all`"
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-7
         - CXX=clang++-7
@@ -33,6 +67,8 @@ matrix:
         - sudo apt-get install lldb-7
         - sudo apt-get install lld-7
         - clang-7 --version
+        - export CGO_CPPFLAGS="`llvm-config-7 --cppflags`"
+        - export CGO_LDFLAGS="`llvm-config-7 --ldflags --libs --system-libs all`"
         - go get -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
