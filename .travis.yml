@@ -38,7 +38,9 @@ matrix:
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-8
       before_script:
-        - go get -t -v ./...
+        - go get -d llvm.org/llvm/bindings/go/llvm
+        - llvm-go-8 print-config > /go/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
+        - go get -u -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
     - go: "1.10.x"
