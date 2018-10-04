@@ -37,7 +37,6 @@ matrix:
         - CGO_LDFLAGS="`llvm-config-8 --ldflags --libs --system-libs all`"
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-8
-        - LLVM_BINDING_PKG=llvm.org/llvm/bindings/go/llvm
     - go: "1.10.x"
       os: linux
       dist: trusty
@@ -68,39 +67,15 @@ matrix:
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-6.0
         - CXX=clang++-6.0
-        - LLVM_BINDING_PKG=llvm.org/llvm.v60/bindings/go/llvm
-    - go: "1.10.x"
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-7
-          packages:
-            - g++-4.9
-            - clang-7
-            - clang-tools-7
-            - clang-7-doc
-            - libclang-common-7-dev
-            - libclang-7-dev
-            - libclang1-7
-            - libllvm7
-            - llvm-7
-            - llvm-7-dev
-            - llvm-7-runtime
-            - libfuzzer-7-dev
-            - lldb-7
-            - lld-7
-      env:
-        - CGO_CXXFLAGS=-std=c++11
-        - CGO_CPPFLAGS="`llvm-config-7 --cppflags`"
-        - CGO_LDFLAGS="`llvm-config-7 --ldflags --libs --system-libs all`"
-        - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
-        - CC=clang-7
-        - CXX=clang++-7
-        - LLVM_BINDING_PKG=llvm.org/llvm.v70/bindings/go/llvm
+      before_script:
+        - mkdir -p $GOPATH/src/llvm.org
+        - cd $GOPATH/src/llvm.org
+        - curl -XGET http://releases.llvm.org/6.0.0/llvm-6.0.0.src.tar.xz >> llvm.tar.xz
+        - tar -zxf llvm.tar.xz
+        - mv llvm-6.0.0.src llvm
 
 before_script:
-  - go get -d $LLVM_BINDING_PKG
+  - go get -d llvm.org/llvm/bindings/go/llvm
   - go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
   - ./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
   # use `-u` to avoid update llvm
