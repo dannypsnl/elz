@@ -37,12 +37,6 @@ matrix:
             - libfuzzer-8-dev
             - lldb-8
             - lld-8
-      env:
-        - CGO_CXXFLAGS=-std=c++11
-        - CGO_CPPFLAGS="`llvm-config-8 --cppflags`"
-        - CGO_LDFLAGS="`llvm-config-8 --ldflags --libs --system-libs all`"
-        - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
-        - CC=clang-8
     - os: linux
       dist: trusty
       addons:
@@ -66,20 +60,10 @@ matrix:
             - lldb-6.0
             - lld-6.0
       env:
-        - CGO_CXXFLAGS=-std=c++11
-        - CGO_CPPFLAGS="`llvm-config-6.0 --cppflags`"
-        - CGO_LDFLAGS="`llvm-config-6.0 --ldflags --libs --system-libs all`"
-        - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
-        - CC=clang-6.0
-        - CXX=clang++-6.0
         - LLVM_VER=60
 
 before_script:
   - ./get-llvm-source.sh
-  - go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
-  - ./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
-  # use `-u` to avoid update llvm
-  - go get -u -t -v ./...
 script:
   - go test -coverprofile=coverage.txt -v ./...
 after_success:
