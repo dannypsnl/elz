@@ -67,15 +67,10 @@ matrix:
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-6.0
         - CXX=clang++-6.0
-      before_script:
-        - mkdir -p $GOPATH/src/llvm.org
-        - cd $GOPATH/src/llvm.org
-        - curl -XGET http://releases.llvm.org/6.0.0/llvm-6.0.0.src.tar.xz >> llvm.tar.xz
-        - tar -xf llvm.tar.xz
-        - mv llvm-6.0.0.src llvm
+        - LLVM_VER=60
 
 before_script:
-  - go get -d llvm.org/llvm/bindings/go/llvm
+  - ./get-llvm-source.sh
   - go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
   - ./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
   # use `-u` to avoid update llvm
@@ -84,3 +79,4 @@ script:
   - go test -coverprofile=coverage.txt -v ./...
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+
