@@ -39,7 +39,8 @@ matrix:
         - CC=clang-8
       before_script:
         - go get -d llvm.org/llvm/bindings/go/llvm
-        - llvm-go-8 print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
+        - go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
+        - ./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
         - go get -u -t -v ./...
       script:
         - go test -coverprofile=coverage.txt -v ./...
