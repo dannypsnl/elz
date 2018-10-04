@@ -2,14 +2,20 @@ sudo: true
 
 language: go
 
+go:
+  - 1.10.x
+  - 1.11.x
+  - master
+
 # Skip install step. Control by ourself
 install: true
 
 matrix:
+  allow_failures:
+    - go: master
   fast_finish: true
   include:
-    - go: "1.10.x"
-      os: linux
+    - os: linux
       dist: trusty
       addons:
         apt:
@@ -37,8 +43,7 @@ matrix:
         - CGO_LDFLAGS="`llvm-config-8 --ldflags --libs --system-libs all`"
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-8
-    - go: "1.10.x"
-      os: linux
+    - os: linux
       dist: trusty
       addons:
         apt:
