@@ -37,13 +37,6 @@ matrix:
         - CGO_LDFLAGS="`llvm-config-8 --ldflags --libs --system-libs all`"
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-8
-      before_script:
-        - go get -d llvm.org/llvm/bindings/go/llvm
-        - go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
-        - ./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
-        - go get -u -t -v ./...
-      script:
-        - go test -coverprofile=coverage.txt -v ./...
     - go: "1.10.x"
       os: linux
       dist: trusty
@@ -74,37 +67,41 @@ matrix:
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-6.0
         - CXX=clang++-6.0
-      before_script:
-        - go get -t -v ./...
-      script:
-        - go test -coverprofile=coverage.txt -v ./...
     - go: "1.10.x"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-7
           packages:
             - g++-4.9
+            - clang-7
+            - clang-tools-7
+            - clang-7-doc
+            - libclang-common-7-dev
+            - libclang-7-dev
+            - libclang1-7
+            - libllvm7
+            - llvm-7
+            - llvm-7-dev
+            - llvm-7-runtime
+            - libfuzzer-7-dev
+            - lldb-7
+            - lld-7
       env:
         - CGO_CXXFLAGS=-std=c++11
+        - CGO_CPPFLAGS="`llvm-config-7 --cppflags`"
+        - CGO_LDFLAGS="`llvm-config-7 --ldflags --libs --system-libs all`"
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-7
         - CXX=clang++-7
-      before_script:
-        - sudo echo 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main' >> /etc/apt/sources.list
-        - sudo echo 'deb-src http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main' >> /etc/apt/sources.list
-        - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
-        - sudo apt update
-        - sudo apt-get install clang-7 clang-tools-7 clang-7-doc libclang-common-7-dev libclang-7-dev libclang1-7
-        - sudo apt-get install libllvm7 llvm-7 llvm-7-dev llvm-7-doc llvm-7-examples llvm-7-runtime
-        - sudo apt-get install libfuzzer-7-dev
-        - sudo apt-get install lldb-7
-        - sudo apt-get install lld-7
-        - clang-7 --version
-        - export CGO_CPPFLAGS="`llvm-config-7 --cppflags`"
-        - export CGO_LDFLAGS="`llvm-config-7 --ldflags --libs --system-libs all`"
-        - go get -t -v ./...
-      script:
-        - go test -coverprofile=coverage.txt -v ./...
 
+before_script:
+  - go get -d llvm.org/llvm/bindings/go/llvm
+  - go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
+  - ./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
+  # use `-u` to avoid update llvm
+  - go get -u -t -v ./...
+script:
+  - go test -coverprofile=coverage.txt -v ./...
 
