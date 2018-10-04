@@ -37,6 +37,7 @@ matrix:
         - CGO_LDFLAGS="`llvm-config-8 --ldflags --libs --system-libs all`"
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-8
+        - LLVM_BINDING_PKG=llvm.org/llvm/bindings/go/llvm
     - go: "1.10.x"
       os: linux
       dist: trusty
@@ -67,6 +68,7 @@ matrix:
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-6.0
         - CXX=clang++-6.0
+        - LLVM_BINDING_PKG=llvm.org/llvm.v60/bindings/go/llvm
     - go: "1.10.x"
       addons:
         apt:
@@ -95,9 +97,10 @@ matrix:
         - CGO_LDFLAGS_ALLOW='-Wl,(-search_paths_first|-headerpad_max_install_names)'
         - CC=clang-7
         - CXX=clang++-7
+        - LLVM_BINDING_PKG=llvm.org/llvm.v70/bindings/go/llvm
 
 before_script:
-  - go get -d llvm.org/llvm/bindings/go/llvm
+  - go get -d $LLVM_BINDING_PKG
   - go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
   - ./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
   # use `-u` to avoid update llvm
