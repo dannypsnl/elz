@@ -10,7 +10,8 @@ case "${LLVM_VER}" in
         curl -XGET http://releases.llvm.org/6.0.0/llvm-6.0.0.src.tar.xz >> llvm.tar.xz
         tar -xf llvm.tar.xz
         mv llvm-6.0.0.src llvm
-        cd llvm && git init && git remote add origin https://github.com/llvm-mirror/llvm.git
+        go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
+        ./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
         go get github.com/dannypsnl/assert
         go get github.com/antlr/antlr4/runtime/Go/antlr
         ;;
@@ -19,10 +20,10 @@ case "${LLVM_VER}" in
         export CGO_CPPFLAGS="`llvm-config-8 --cppflags`"
         export CGO_LDFLAGS="`llvm-config-8 --ldflags --libs --system-libs all`"
         go get -d llvm.org/llvm/bindings/go/llvm
+        go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
+        ./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go
         # use `-u` to avoid update llvm
         go get -u -t -v ./...
         ;;
 esac
 
-go build $GOPATH/src/llvm.org/llvm/tools/llvm-go/llvm-go.go
-./llvm-go print-config > $GOPATH/src/llvm.org/llvm/bindings/go/llvm/llvm_config.go

@@ -2,11 +2,6 @@ sudo: true
 
 language: go
 
-go:
-  - 1.10.x
-  - 1.11.x
-  - master
-
 # Skip install step. Control by ourself
 install: true
 
@@ -16,6 +11,10 @@ matrix:
   fast_finish: true
   include:
     - os: linux
+      go:
+        - 1.10.x
+        - 1.11.x
+        - master
       dist: trusty
       addons:
         apt:
@@ -38,6 +37,9 @@ matrix:
             - lldb-8
             - lld-8
     - os: linux
+      go:
+        - 1.10.x
+        - 1.11.x
       dist: trusty
       addons:
         apt:
