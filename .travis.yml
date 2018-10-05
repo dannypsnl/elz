@@ -39,8 +39,7 @@ matrix:
     - go: master
   fast_finish: true
   include:
-    - go: 1.10.x
-      os: linux
+    - os: linux
       addons:
         apt:
           sources:
