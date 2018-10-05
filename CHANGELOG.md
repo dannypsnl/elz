@@ -6,11 +6,11 @@ Logging change of elz.
 
 - impl block
 - char literal
-- access field of user defined type
 - variant parameter list for function
 
 ## v0.2.0
 
+- access field of user defined type
 - dereference operating #64
 - convert [T; len] to ref<T>
 - compiler notation, external using notation now
