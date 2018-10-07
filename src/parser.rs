@@ -15,6 +15,7 @@ enum Expr {
 }
 #[derive(Clone, PartialEq, Debug)]
 enum Top {
+    // export, name, expression
     GlobalBind(bool, String, Expr),
 }
 
@@ -114,10 +115,16 @@ mod tests {
                 ])
             ]
         }
-        let test_cases: HashMap<&str, Top> = vec![(
-            "_ab_c1 =1",
-            Top::GlobalBind(false, "_ab_c1".to_string(), Expr::Number(1.0)),
-        )].into_iter()
+        let test_cases: HashMap<&str, Top> = vec![
+            (
+                "_ab_c1 =1",
+                Top::GlobalBind(false, "_ab_c1".to_string(), Expr::Number(1.0)),
+            ),
+            (
+                "+a= 3.1415926",
+                Top::GlobalBind(true, "a".to_string(), Expr::Number(3.1415926)),
+            ),
+        ].into_iter()
         .collect();
         for (input, ast) in test_cases {
             let r = ElzParser::parse(Rule::global_binding, input)
