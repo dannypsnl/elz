@@ -1,2 +1,4 @@
 .idea
 elz
+/target
+**/*.rs.bk

@@ -1,0 +1,9 @@
+[package]
+name = "elz"
+version = "0.1.0"
+authors = ["dannypsnl <dannypsnl@gmail.com>"]
+
+[dependencies]
+pest = "2.0.1"
+pest_derive = "2.0.1"
+clap = "2.32"
