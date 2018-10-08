@@ -17,6 +17,31 @@ enum Expr {
 enum Top {
     // export, name, expression
     GlobalBind(bool, String, Expr),
+    // import lib::sub::{block0, block1, block2}
+    // chain, block
+    Import(Vec<String>, Vec<String>),
+}
+
+fn parse_import_stmt(rule: Pair<Rule>) -> Top {
+    let pairs = rule.into_inner();
+    let mut chain = vec![];
+    let mut block = vec![];
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::ident => chain.push(pair.as_str().to_string()),
+            Rule::import_block => {
+                let mut pairs = pair.into_inner();
+                for pair in pairs {
+                    match pair.as_rule() {
+                        Rule::ident => block.push(pair.as_str().to_string()),
+                        _ => panic!("import block expect ident only"),
+                    }
+                }
+            }
+            _ => panic!("import statement expect ident & import block only"),
+        }
+    }
+    Top::Import(chain, block)
 }
 
 fn parse_expr(rule: Pair<Rule>) -> Expr {
@@ -56,7 +81,8 @@ pub fn parse_elz_program(file_name: &str) {
     for rule in program.into_inner() {
         match rule.as_rule() {
             Rule::import_stmt => {
-                println!("import statement");
+                let ast = parse_import_stmt(rule);
+                println!("ast: {:?}", ast);
             }
             Rule::global_binding => {
                 let ast = parse_global_binding(rule);
@@ -78,7 +104,36 @@ mod tests {
     use std::collections::HashMap;
 
     #[test]
-    fn parse_import_stmt() {
+    fn test_import_stmt() {
+        let test_cases: HashMap<&str, Top> = vec![
+            ("import lib", Top::Import(vec!["lib".to_string()], vec![])),
+            (
+                "import lib::sub",
+                Top::Import(vec!["lib".to_string(), "sub".to_string()], vec![]),
+            ),
+            (
+                "import lib::sub::sub",
+                Top::Import(
+                    vec!["lib".to_string(), "sub".to_string(), "sub".to_string()],
+                    vec![],
+                ),
+            ),
+            (
+                "import lib::sub::{block0, block1}",
+                Top::Import(
+                    vec!["lib".to_string(), "sub".to_string()],
+                    vec!["block0".to_string(), "block1".to_string()],
+                ),
+            ),
+        ].into_iter()
+        .collect();
+        for (input, ast) in test_cases {
+            let r = ElzParser::parse(Rule::import_stmt, input)
+                .unwrap()
+                .next()
+                .unwrap();
+            assert_eq!(ast, parse_import_stmt(r));
+        }
         parses_to!{
             parser: ElzParser,
             input: "import lib",
