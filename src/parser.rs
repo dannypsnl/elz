@@ -20,6 +20,52 @@ enum Top {
     // import lib::sub::{block0, block1, block2}
     // chain, block
     Import(Vec<String>, Vec<String>),
+    // name
+    TypeDefine(String, Vec<String>, Vec<Type>),
+}
+#[derive(Clone, PartialEq, Debug)]
+enum Type {
+    T(String, Vec<Type>),
+    Field(String, Box<Type>),
+}
+
+fn parse_elz_type(elz_type: Pair<Rule>) -> Option<Type> {
+    let mut pairs = elz_type.into_inner();
+    if let Some(type_name) = pairs.next() {
+        let mut templates = vec![];
+        while let Some(typ) = pairs.next() {
+            match parse_elz_type(typ) {
+                Some(t) => templates.push(t),
+                None => (),
+            }
+        }
+        Some(Type::T(type_name.as_str().to_string(), templates))
+    } else {
+        None
+    }
+}
+fn parse_type_field(rule: Pair<Rule>) -> Type {
+    let mut pairs = rule.into_inner();
+    let field_name = pairs.next().unwrap();
+    let field_type = parse_elz_type(pairs.next().unwrap()).unwrap();
+    Type::Field(field_name.as_str().to_string(), Box::new(field_type))
+}
+fn parse_type_define(rule: Pair<Rule>) -> Top {
+    let mut pairs = rule.into_inner();
+    let type_name = pairs.next().unwrap();
+    let mut templates = vec![];
+    let mut fields = vec![];
+    while let Some(r) = pairs.next() {
+        if r.as_rule() != Rule::ident {
+            fields.push(parse_type_field(r));
+            break;
+        }
+        templates.push(r.as_str().to_string());
+    }
+    for field in pairs {
+        fields.push(parse_type_field(field));
+    }
+    Top::TypeDefine(type_name.as_str().to_string(), templates, fields)
 }
 
 fn parse_import_stmt(rule: Pair<Rule>) -> Top {
@@ -88,6 +134,10 @@ pub fn parse_elz_program(file_name: &str) {
                 let ast = parse_global_binding(rule);
                 println!("ast: {:?}", ast);
             }
+            Rule::type_define => {
+                let ast = parse_type_define(rule);
+                println!("ast: {:?}", ast);
+            }
             Rule::EOI => {
                 println!("end of file");
             }
@@ -134,42 +184,9 @@ mod tests {
                 .unwrap();
             assert_eq!(ast, parse_import_stmt(r));
         }
-        parses_to!{
-            parser: ElzParser,
-            input: "import lib",
-            rule: Rule::import_stmt,
-            tokens: [ import_stmt(0, 10, [ ident(7, 10) ]) ]
-        }
-        parses_to!{
-            parser: ElzParser,
-            input: "import lib::one",
-            rule: Rule::import_stmt,
-            tokens: [ import_stmt(0, 15, [ ident(7, 10), ident(12, 15) ]) ]
-        }
-        parses_to!{
-            parser:ElzParser,
-            input: "import lib::sub::{block}",
-            rule: Rule::import_stmt,
-            tokens: [ import_stmt(0, 24, [
-                ident(7, 10),
-                ident(12, 15),
-                import_block(17, 24, [ ident(18, 23) ])
-            ]) ]
-        }
     }
     #[test]
     fn test_global_binding() {
-        parses_to! {
-            parser: ElzParser,
-            input: "_ab_c1 = 1",
-            rule: Rule::global_binding,
-            tokens: [
-                global_binding(0, 10, [
-                    ident(0, 6),
-                    number(9, 10)
-                ])
-            ]
-        }
         let test_cases: HashMap<&str, Top> = vec![
             (
                 "_ab_c1 =1",
@@ -207,18 +224,44 @@ mod tests {
         }
     }
     #[test]
-    fn parse_type_define() {
-        parses_to!{
-            parser: ElzParser,
-            input: "type Test (\n  field1: i32,\n  field2: f32\n)",
-            rule: Rule::type_define,
-            tokens: [
-                type_define(0, 42, [
-                    ident(5, 9),
-                    type_field(14, 25, [ident(14, 20), elz_type(22, 25, [ident(22, 25)])]),
-                    type_field(29, 40, [ident(29, 35), elz_type(37, 40, [ident(37, 40)])])
-                ])
-            ]
+    fn test_type_define() {
+        let test_cases: HashMap<&str, Top> = vec![
+            (
+                "type A ()",
+                Top::TypeDefine("A".to_string(), vec![], vec![]),
+            ),
+            (
+                "type List<Elem> ()",
+                Top::TypeDefine("List".to_string(), vec!["Elem".to_string()], vec![]),
+            ),
+            (
+                "type Node<Elem> ( next: Node<Elem>, elem: Elem )",
+                Top::TypeDefine(
+                    "Node".to_string(),
+                    vec!["Elem".to_string()],
+                    vec![
+                        Type::Field(
+                            "next".to_string(),
+                            Box::new(Type::T(
+                                "Node".to_string(),
+                                vec![Type::T("Elem".to_string(), vec![])],
+                            )),
+                        ),
+                        Type::Field(
+                            "elem".to_string(),
+                            Box::new(Type::T("Elem".to_string(), vec![])),
+                        ),
+                    ],
+                ),
+            ),
+        ].into_iter()
+        .collect();
+        for (input, ast) in test_cases {
+            let r = ElzParser::parse(Rule::type_define, input)
+                .unwrap()
+                .next()
+                .unwrap();
+            assert_eq!(ast, parse_type_define(r));
         }
     }
     #[test]
@@ -229,7 +272,7 @@ mod tests {
             rule: Rule::impl_block,
             tokens: [
                 impl_block(0, 28, [
-                    elz_type(5, 9, [ident(5, 9)]),
+                    ident(5, 9),
                     method(14, 26, [ident(14, 21)])
                 ])
             ]

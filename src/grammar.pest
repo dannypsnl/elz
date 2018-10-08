@@ -45,15 +45,14 @@ type_field = {
   ident ~ ":" ~ elz_type
 }
 elz_type = {
-  ident
-  | ident ~ "<" ~ elz_type ~ ("," ~ elz_type)* ~ ">"
+  ident ~ ("<" ~ elz_type ~ ("," ~ elz_type)* ~ ">")?
 }
 // impl Type {
 //   method() {}
 //   fn f_under_this_scope() {}
 // }
 impl_block = {
-  "impl" ~ elz_type ~ "{" ~
+  "impl" ~ ident ~ "{" ~
     (method|function_define)+
   ~ "}"
 }
