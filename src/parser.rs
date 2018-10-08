@@ -139,7 +139,7 @@ pub fn parse_elz_program(file_name: &str) {
                 println!("ast: {:?}", ast);
             }
             Rule::EOI => {
-                println!("end of file");
+                println!("end of compiling");
             }
             _ => {
                 println!("unhandled rule");
