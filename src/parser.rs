@@ -20,13 +20,32 @@ enum Top {
     // import lib::sub::{block0, block1, block2}
     // chain, block
     Import(Vec<String>, Vec<String>),
-    // name
+    // name, template types, type fields
     TypeDefine(String, Vec<String>, Vec<Type>),
+    // function proto
+    FnDefine(Function),
 }
 #[derive(Clone, PartialEq, Debug)]
 enum Type {
     T(String, Vec<Type>),
     Field(String, Box<Type>),
+}
+#[derive(Clone, PartialEq, Debug)]
+enum Function {
+    // name
+    Proto(String),
+}
+
+fn parse_method(method: Pair<Rule>) -> Function {
+    let mut pairs = method.into_inner();
+    let name = pairs.next().unwrap();
+    // TODO: parse parameters
+    Function::Proto(name.as_str().to_string())
+}
+fn parse_function_define(fn_def: Pair<Rule>) -> Top {
+    let mut pairs = fn_def.into_inner();
+    let method = pairs.next().unwrap();
+    Top::FnDefine(parse_method(method))
 }
 
 fn parse_elz_type(elz_type: Pair<Rule>) -> Option<Type> {
@@ -138,6 +157,10 @@ pub fn parse_elz_program(file_name: &str) {
                 let ast = parse_type_define(rule);
                 println!("ast: {:?}", ast);
             }
+            Rule::function_define => {
+                let ast = parse_function_define(rule);
+                println!("ast: {:?}", ast);
+            }
             Rule::EOI => {
                 println!("end of compiling");
             }
@@ -207,7 +230,19 @@ mod tests {
         }
     }
     #[test]
-    fn parse_function_define() {
+    fn test_function_define() {
+        let test_cases: HashMap<&str, Top> = vec![(
+            "fn test() {}",
+            Top::FnDefine(Function::Proto("test".to_string())),
+        )].into_iter()
+        .collect();
+        for (input, ast) in test_cases {
+            let r = ElzParser::parse(Rule::function_define, input)
+                .unwrap()
+                .next()
+                .unwrap();
+            assert_eq!(ast, parse_function_define(r));
+        }
         parses_to! {
             parser: ElzParser,
             input: "fn test(a, b: i32) {}",
