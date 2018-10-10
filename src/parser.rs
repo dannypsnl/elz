@@ -3,38 +3,13 @@ use std::io::prelude::*;
 
 use pest::Parser;
 
+use super::ast::*;
+
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
 pub struct ElzParser;
 
 use pest::iterators::Pair;
-
-#[derive(Clone, PartialEq, Debug)]
-enum Expr {
-    Number(f64),
-}
-#[derive(Clone, PartialEq, Debug)]
-enum Top {
-    // export, name, expression
-    GlobalBind(bool, String, Expr),
-    // import lib::sub::{block0, block1, block2}
-    // chain, block
-    Import(Vec<String>, Vec<String>),
-    // name, template types, type fields
-    TypeDefine(String, Vec<String>, Vec<TypeField>),
-    // function proto
-    FnDefine(Function),
-}
-#[derive(Clone, PartialEq, Debug)]
-struct Type(String, Vec<Type>);
-#[derive(Clone, PartialEq, Debug)]
-struct TypeField(String, Type);
-
-#[derive(Clone, PartialEq, Debug)]
-enum Function {
-    // name
-    Proto(String),
-}
 
 fn parse_method(method: Pair<Rule>) -> Function {
     let mut pairs = method.into_inner();
