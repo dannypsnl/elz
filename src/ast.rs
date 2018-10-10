@@ -22,5 +22,7 @@ pub struct TypeField(pub String, pub Type);
 #[derive(Clone, PartialEq, Debug)]
 pub enum Function {
     // name
-    Proto(String),
+    Proto(String, Vec<Parameter>),
 }
+#[derive(Clone, PartialEq, Debug)]
+pub struct Parameter(pub String, pub Option<Type>);

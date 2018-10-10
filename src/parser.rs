@@ -14,8 +14,20 @@ use pest::iterators::Pair;
 fn parse_method(method: Pair<Rule>) -> Function {
     let mut pairs = method.into_inner();
     let name = pairs.next().unwrap();
-    // TODO: parse parameters
-    Function::Proto(name.as_str().to_string())
+    let mut params = vec![];
+    while let Some(p) = pairs.next() {
+        if p.as_rule() != Rule::parameter {
+            break;
+        }
+        let mut pairs = p.into_inner();
+        let p_name = pairs.next().unwrap();
+        let mut p_type = None;
+        if let Some(typ) = pairs.next() {
+            p_type = parse_elz_type(typ);
+        }
+        params.push(Parameter(p_name.as_str().to_string(), p_type));
+    }
+    Function::Proto(name.as_str().to_string(), params)
 }
 fn parse_function_define(fn_def: Pair<Rule>) -> Top {
     let mut pairs = fn_def.into_inner();
@@ -206,10 +218,22 @@ mod tests {
     }
     #[test]
     fn test_function_define() {
-        let test_cases: HashMap<&str, Top> = vec![(
-            "fn test() {}",
-            Top::FnDefine(Function::Proto("test".to_string())),
-        )].into_iter()
+        let test_cases: HashMap<&str, Top> = vec![
+            (
+                "fn test() {}",
+                Top::FnDefine(Function::Proto("test".to_string(), vec![])),
+            ),
+            (
+                "fn add(l, r: i32) {}",
+                Top::FnDefine(Function::Proto(
+                    "add".to_string(),
+                    vec![
+                        Parameter("l".to_string(), None),
+                        Parameter("r".to_string(), Some(Type("i32".to_string(), vec![]))),
+                    ],
+                )),
+            ),
+        ].into_iter()
         .collect();
         for (input, ast) in test_cases {
             let r = ElzParser::parse(Rule::function_define, input)
