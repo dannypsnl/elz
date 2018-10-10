@@ -21,15 +21,15 @@ enum Top {
     // chain, block
     Import(Vec<String>, Vec<String>),
     // name, template types, type fields
-    TypeDefine(String, Vec<String>, Vec<Type>),
+    TypeDefine(String, Vec<String>, Vec<TypeField>),
     // function proto
     FnDefine(Function),
 }
 #[derive(Clone, PartialEq, Debug)]
-enum Type {
-    T(String, Vec<Type>),
-    Field(String, Box<Type>),
-}
+struct Type(String, Vec<Type>);
+#[derive(Clone, PartialEq, Debug)]
+struct TypeField(String, Type);
+
 #[derive(Clone, PartialEq, Debug)]
 enum Function {
     // name
@@ -58,16 +58,16 @@ fn parse_elz_type(elz_type: Pair<Rule>) -> Option<Type> {
                 None => (),
             }
         }
-        Some(Type::T(type_name.as_str().to_string(), templates))
+        Some(Type(type_name.as_str().to_string(), templates))
     } else {
         None
     }
 }
-fn parse_type_field(rule: Pair<Rule>) -> Type {
+fn parse_type_field(rule: Pair<Rule>) -> TypeField {
     let mut pairs = rule.into_inner();
     let field_name = pairs.next().unwrap();
     let field_type = parse_elz_type(pairs.next().unwrap()).unwrap();
-    Type::Field(field_name.as_str().to_string(), Box::new(field_type))
+    TypeField(field_name.as_str().to_string(), field_type)
 }
 fn parse_type_define(rule: Pair<Rule>) -> Top {
     let mut pairs = rule.into_inner();
@@ -275,17 +275,11 @@ mod tests {
                     "Node".to_string(),
                     vec!["Elem".to_string()],
                     vec![
-                        Type::Field(
+                        TypeField(
                             "next".to_string(),
-                            Box::new(Type::T(
-                                "Node".to_string(),
-                                vec![Type::T("Elem".to_string(), vec![])],
-                            )),
+                            Type("Node".to_string(), vec![Type("Elem".to_string(), vec![])]),
                         ),
-                        Type::Field(
-                            "elem".to_string(),
-                            Box::new(Type::T("Elem".to_string(), vec![])),
-                        ),
+                        TypeField("elem".to_string(), Type("Elem".to_string(), vec![])),
                     ],
                 ),
             ),
