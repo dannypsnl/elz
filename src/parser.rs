@@ -11,7 +11,7 @@ pub struct ElzParser;
 
 use pest::iterators::Pair;
 
-fn parse_method(method: Pair<Rule>) -> Function {
+fn parse_method(method: Pair<Rule>) -> Method {
     let mut pairs = method.into_inner();
     let name = pairs.next().unwrap();
     let mut params = vec![];
@@ -27,7 +27,7 @@ fn parse_method(method: Pair<Rule>) -> Function {
         }
         params.push(Parameter(p_name.as_str().to_string(), p_type));
     }
-    Function::Proto(name.as_str().to_string(), params)
+    Method(name.as_str().to_string(), params)
 }
 fn parse_function_define(fn_def: Pair<Rule>) -> Top {
     let mut pairs = fn_def.into_inner();
@@ -221,11 +221,11 @@ mod tests {
         let test_cases: HashMap<&str, Top> = vec![
             (
                 "fn test() {}",
-                Top::FnDefine(Function::Proto("test".to_string(), vec![])),
+                Top::FnDefine(Method("test".to_string(), vec![])),
             ),
             (
                 "fn add(l, r: i32) {}",
-                Top::FnDefine(Function::Proto(
+                Top::FnDefine(Method(
                     "add".to_string(),
                     vec![
                         Parameter("l".to_string(), None),

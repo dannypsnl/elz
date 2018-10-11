@@ -12,7 +12,7 @@ pub enum Top {
     // name, template types, type fields
     TypeDefine(String, Vec<String>, Vec<TypeField>),
     // function proto
-    FnDefine(Function),
+    FnDefine(Method),
 }
 #[derive(Clone, PartialEq, Debug)]
 pub struct Type(pub String, pub Vec<Type>);
@@ -20,9 +20,6 @@ pub struct Type(pub String, pub Vec<Type>);
 pub struct TypeField(pub String, pub Type);
 
 #[derive(Clone, PartialEq, Debug)]
-pub enum Function {
-    // name
-    Proto(String, Vec<Parameter>),
-}
+pub struct Method(pub String, pub Vec<Parameter>);
 #[derive(Clone, PartialEq, Debug)]
 pub struct Parameter(pub String, pub Option<Type>);
