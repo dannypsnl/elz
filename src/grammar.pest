@@ -1,0 +1,112 @@
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+COMMENT = _{ "//" ~ (!NEWLINE ~ ANY)* }
+
+elz_program = {
+  SOI ~ (
+  import_stmt
+  | global_binding
+  | type_define
+  | impl_block
+  | function_define
+  )* ~ EOI
+}
+// Top level grammar
+// import statement
+// import lib::sub_lib::sub_sub_lib
+import_stmt = {
+  "import" ~ ident ~ ("::" ~ ident)* ~ ("::" ~ (ident|import_block))?
+}
+// import lib::{sub1, sub2}
+import_block = {
+  "{" ~
+    ident ~
+    ("," ~ ident)*
+  ~ "}"
+}
+// global_var = 0
+// global_var1: i32 = 1
+global_binding = {
+  symbol_export? ~ ident ~ (":" ~ ident)? ~ "=" ~ expression
+}
+// type NewType<Generic> (
+//   field1: field1_type,
+//   field2: field1_type,
+// )
+// last ',' is omissible
+type_define = {
+  "type" ~ ident ~ ("<" ~ ident ~ ("," ~ ident)* ~ ">")? ~ "("  ~
+    type_field?         ~
+    ("," ~ type_field)* ~
+    ","?                ~
+  ")"
+}
+// field: field_type
+type_field = {
+  ident ~ ":" ~ elz_type
+}
+elz_type = {
+  ident ~ ("<" ~ elz_type ~ ("," ~ elz_type)* ~ ">")?
+}
+// impl Type {
+//   method() {}
+//   fn f_under_this_scope() {}
+// }
+impl_block = {
+  "impl" ~ ident ~ "{" ~
+    (method|function_define)+
+  ~ "}"
+}
+// fn test() {}
+function_define = {
+  "fn" ~ method
+}
+method = {
+  ident ~ "("          ~
+    parameter?         ~
+    ("," ~ parameter)* ~
+  ")"                  ~
+  "{"                  ~
+  "}"
+}
+parameter = {
+  ident ~ (":" ~ elz_type)?
+}
+
+// Literial
+digit = _{ '0'..'9' }
+alpha = _{ 'a'..'z' | 'A'..'Z' | "_" }
+ident = @{ alpha ~ (alpha|digit)* }
+number = @{ digit+ ~ ("." ~ digit*)? }
+string = @{ "\"" ~ ANY* ~ "\"" }
+symbol_export = @{ "+" }
+// Expression
+expression = _{
+  string
+  | number
+  | ident
+  | access_chain
+}
+// Local Statement
+// Local define
+let_define = {
+  "let" ~ local_define
+}
+let_mut_define = {
+  "let" ~ "mut" ~ local_define
+}
+local_define = _{
+  ident ~ (":" ~ elz_type)? ~ "=" ~ expression
+}
+assign = {
+  access_chain ~ "=" ~ expression
+}
+access_chain = {
+  ident ~ ("::" ~ ident)* ~
+  (access_field|access_element)*
+}
+access_field = {
+  "." ~ ident
+}
+access_element = {
+  "[" ~ expression ~ "]"
+}
