@@ -4,6 +4,7 @@ use clap::{App, Arg, SubCommand};
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
+extern crate inkwell;
 
 mod ast;
 mod parser;
@@ -30,6 +31,7 @@ fn main() {
 
         // FIXME: return AST tree here
         let ast_tree = parser::parse_elz_program(file_name);
-        visit::visit_program(ast_tree);
+        let mut visitor = visit::Visitor::new();
+        visitor.visit_program(ast_tree);
     }
 }
