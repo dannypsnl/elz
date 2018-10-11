@@ -119,13 +119,14 @@ fn parse_global_binding(rule: Pair<Rule>) -> Top {
     )
 }
 
-pub fn parse_elz_program(file_name: &str) {
+pub fn parse_elz_program(file_name: &str) -> Vec<Top> {
     let mut f = File::open(file_name).expect("file not found");
     let mut program_content = String::new();
     f.read_to_string(&mut program_content)
         .expect("failed at read file");
 
-    println!("start compiling");
+    let mut tree = vec![];
+
     let program = ElzParser::parse(Rule::elz_program, program_content.as_str())
         .expect("unsuccesful compile")
         .next()
@@ -134,28 +135,28 @@ pub fn parse_elz_program(file_name: &str) {
         match rule.as_rule() {
             Rule::import_stmt => {
                 let ast = parse_import_stmt(rule);
-                println!("ast: {:?}", ast);
+                tree.push(ast);
             }
             Rule::global_binding => {
                 let ast = parse_global_binding(rule);
-                println!("ast: {:?}", ast);
+                tree.push(ast);
             }
             Rule::type_define => {
                 let ast = parse_type_define(rule);
-                println!("ast: {:?}", ast);
+                tree.push(ast);
             }
             Rule::function_define => {
                 let ast = parse_function_define(rule);
-                println!("ast: {:?}", ast);
+                tree.push(ast);
             }
-            Rule::EOI => {
-                println!("end of compiling");
-            }
+            Rule::EOI => {}
             _ => {
                 println!("unhandled rule");
             }
         }
     }
+
+    return tree;
 }
 
 #[cfg(test)]

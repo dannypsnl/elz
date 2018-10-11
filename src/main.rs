@@ -7,6 +7,7 @@ extern crate pest_derive;
 
 mod ast;
 mod parser;
+mod visit;
 
 fn main() {
     let matches = App::new("elz")
@@ -28,6 +29,7 @@ fn main() {
         let file_name = matches.value_of("INPUT").unwrap(); // missing at is fine, just panic.
 
         // FIXME: return AST tree here
-        parser::parse_elz_program(file_name);
+        let ast_tree = parser::parse_elz_program(file_name);
+        visit::visit_program(ast_tree);
     }
 }
