@@ -28,7 +28,7 @@ addons:
       - lldb-6.0
       - lld-6.0
 env:
-  - LLVM_SYS_60_PREFIX=`llvm-config-6.0 -prefix`
+  - LLVM_SYS_60_PREFIX=`llvm-config-6.0 --prefix`
 
 matrix:
   allow_failures:
