@@ -28,10 +28,7 @@ addons:
       - lldb-6.0
       - lld-6.0
 env:
-  - CC=clang-6.0
-  - CGO_CXXFLAGS=-std=c++11
-  - CGO_CPPFLAGS="`llvm-config-6.0 --cppflags`"
-  - CGO_LDFLAGS="`llvm-config-6.0 --ldflags --libs --system-libs all`"
+  - LLVM_SYS_60_PREFIX=llvm-config-6.0 -prefix
 
 matrix:
   allow_failures:
