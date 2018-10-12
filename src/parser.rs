@@ -27,7 +27,12 @@ fn parse_method(method: Pair<Rule>) -> Method {
         }
         params.push(Parameter(p_name.as_str().to_string(), p_type));
     }
-    Method(name.as_str().to_string(), params)
+    let return_type = if let Some(t) = pairs.next() {
+        parse_elz_type(t)
+    } else {
+        None
+    };
+    Method(return_type, name.as_str().to_string(), params)
 }
 fn parse_function_define(fn_def: Pair<Rule>) -> Top {
     let mut pairs = fn_def.into_inner();
@@ -229,11 +234,12 @@ mod tests {
         let test_cases: HashMap<&str, Top> = vec![
             (
                 "fn test() {}",
-                Top::FnDefine(Method("test".to_string(), vec![])),
+                Top::FnDefine(Method(None, "test".to_string(), vec![])),
             ),
             (
                 "fn add(l, r: i32) {}",
                 Top::FnDefine(Method(
+                    None,
                     "add".to_string(),
                     vec![
                         Parameter("l".to_string(), None),

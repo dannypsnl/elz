@@ -2,7 +2,7 @@ use super::ast::*;
 use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::Module;
-use inkwell::types::{BasicType, BasicTypeEnum};
+use inkwell::types::{AnyType, AnyTypeEnum, BasicType, BasicTypeEnum};
 use inkwell::values::BasicValue;
 use inkwell::AddressSpace;
 
@@ -37,6 +37,82 @@ impl Visitor {
                             .add_global(elz_type, Some(AddressSpace::Const), name.as_str());
                     global_value.set_initializer(expr_result.as_ref());
                 }
+                Top::FnDefine(Method(return_t, name, params)) => {
+                    let ret_type = if let Some(t) = return_t {
+                        self.convert(t).as_any_type_enum()
+                    } else {
+                        self.context.void_type().as_any_type_enum()
+                    };
+                    let param_type_list = if params.len() != 0 {
+                        let mut params = params.clone();
+                        // last type must be defined!
+                        let mut param_t = params.pop().unwrap().1.unwrap();
+                        let mut param_type_list = vec![];
+                        while let Some(param) = params.pop() {
+                            if let Some(t) = param.1 {
+                                param_t = t;
+                            }
+                            param_type_list.push(self.convert(param_t.clone()));
+                        }
+                        param_type_list
+                    } else {
+                        vec![]
+                    };
+                    match ret_type {
+                        AnyTypeEnum::ArrayType(t) => {
+                            self.module.add_function(
+                                name.as_str(),
+                                t.fn_type(param_type_list.as_slice(), false),
+                                None,
+                            );
+                        }
+                        AnyTypeEnum::FloatType(t) => {
+                            self.module.add_function(
+                                name.as_str(),
+                                t.fn_type(param_type_list.as_slice(), false),
+                                None,
+                            );
+                        }
+                        AnyTypeEnum::IntType(t) => {
+                            self.module.add_function(
+                                name.as_str(),
+                                t.fn_type(param_type_list.as_slice(), false),
+                                None,
+                            );
+                        }
+                        AnyTypeEnum::PointerType(t) => {
+                            self.module.add_function(
+                                name.as_str(),
+                                t.fn_type(param_type_list.as_slice(), false),
+                                None,
+                            );
+                        }
+                        AnyTypeEnum::StructType(t) => {
+                            self.module.add_function(
+                                name.as_str(),
+                                t.fn_type(param_type_list.as_slice(), false),
+                                None,
+                            );
+                        }
+                        AnyTypeEnum::VectorType(t) => {
+                            self.module.add_function(
+                                name.as_str(),
+                                t.fn_type(param_type_list.as_slice(), false),
+                                None,
+                            );
+                        }
+                        AnyTypeEnum::VoidType(t) => {
+                            self.module.add_function(
+                                name.as_str(),
+                                t.fn_type(param_type_list.as_slice(), false),
+                                None,
+                            );
+                        }
+                        AnyTypeEnum::FunctionType(_t) => {
+                            panic!("can't use function type as parameter type currently");
+                        }
+                    };
+                }
                 _ => println!("Not implement yet"),
             }
         }
@@ -52,6 +128,26 @@ impl Visitor {
                 Box::new(self.context.f64_type().const_float(fv)),
                 self.context.f64_type().as_basic_type_enum(),
             ),
+        }
+    }
+
+    fn convert(&self, typ: Type) -> BasicTypeEnum {
+        match typ {
+            Type(t, v) => {
+                if v.len() == 0 {
+                    match t.as_str() {
+                        "i8" => self.context.i8_type().as_basic_type_enum(),
+                        "i16" => self.context.i16_type().as_basic_type_enum(),
+                        "i32" => self.context.i32_type().as_basic_type_enum(),
+                        "i64" => self.context.i64_type().as_basic_type_enum(),
+                        "f32" => self.context.f32_type().as_basic_type_enum(),
+                        "f64" => self.context.f64_type().as_basic_type_enum(),
+                        t => panic!("unknown {}", t),
+                    }
+                } else {
+                    self.context.i32_type().as_basic_type_enum()
+                }
+            }
         }
     }
 }

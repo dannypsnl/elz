@@ -21,6 +21,6 @@ pub struct Type(pub String, pub Vec<Type>);
 pub struct TypeField(pub String, pub Type);
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct Method(pub String, pub Vec<Parameter>);
+pub struct Method(pub Option<Type>, pub String, pub Vec<Parameter>);
 #[derive(Clone, PartialEq, Debug)]
 pub struct Parameter(pub String, pub Option<Type>);
