@@ -1,5 +1,6 @@
 #[derive(Clone, PartialEq, Debug)]
 pub enum Expr {
+    Integer(i64),
     Number(f64),
 }
 #[derive(Clone, PartialEq, Debug)]

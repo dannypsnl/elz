@@ -98,7 +98,14 @@ fn parse_import_stmt(rule: Pair<Rule>) -> Top {
 
 fn parse_expr(rule: Pair<Rule>) -> Expr {
     match rule.as_rule() {
-        Rule::number => Expr::Number(rule.as_str().to_string().parse::<f64>().unwrap()),
+        Rule::number => {
+            let num_v = rule.as_str();
+            if let Ok(num) = num_v.parse::<i64>() {
+                Expr::Integer(num)
+            } else {
+                Expr::Number(num_v.parse::<f64>().unwrap())
+            }
+        }
         _ => panic!("unknown"),
     }
 }
