@@ -23,7 +23,7 @@ impl Visitor {
             module: module,
         }
     }
-    pub fn visit_program(&mut self, ast_tree: Vec<Top>) {
+    pub fn visit_program(&mut self, ast_tree: Vec<Top>) -> Module {
         for ast in ast_tree {
             match ast {
                 Top::Import(chain, block) => {
@@ -36,11 +36,11 @@ impl Visitor {
                         self.module
                             .add_global(elz_type, Some(AddressSpace::Const), name.as_str());
                     global_value.set_initializer(expr_result.as_ref());
-                    println!("get global IR: {:?}", self.module.get_global(name.as_str()));
                 }
                 _ => println!("Not implement yet"),
             }
         }
+        self.module.clone()
     }
     pub fn visit_const_expr(&mut self, expr: Expr) -> (Box<BasicValue>, BasicTypeEnum) {
         match expr {

@@ -250,20 +250,6 @@ mod tests {
                 .unwrap();
             assert_eq!(ast, parse_function_define(r));
         }
-        parses_to! {
-            parser: ElzParser,
-            input: "fn test(a, b: i32) {}",
-            rule: Rule::function_define,
-            tokens: [
-                function_define(0, 21, [
-                    method(3, 21, [
-                        ident(3, 7),
-                        parameter(8, 9, [ident(8, 9)]),
-                        parameter(11, 17, [ident(11, 12), elz_type(14, 17, [ident(14, 17)])])
-                    ])
-                ])
-            ]
-        }
     }
     #[test]
     fn test_type_define() {

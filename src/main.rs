@@ -6,6 +6,8 @@ extern crate pest;
 extern crate pest_derive;
 extern crate inkwell;
 
+use std::fs::File;
+
 mod ast;
 mod parser;
 mod visit;
@@ -32,6 +34,8 @@ fn main() {
         // FIXME: return AST tree here
         let ast_tree = parser::parse_elz_program(file_name);
         let mut visitor = visit::Visitor::new();
-        visitor.visit_program(ast_tree);
+        let module = visitor.visit_program(ast_tree);
+        let mut output = File::create("test.bc").unwrap();
+        module.write_bitcode_to_file(&output, true, true);
     }
 }
