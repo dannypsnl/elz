@@ -15,8 +15,12 @@ fn parse_method(method: Pair<Rule>) -> Method {
     let mut pairs = method.into_inner();
     let name = pairs.next().unwrap();
     let mut params = vec![];
+    let mut return_type = None;
     while let Some(p) = pairs.next() {
         if p.as_rule() != Rule::parameter {
+            if p.as_rule() == Rule::elz_type {
+                return_type = parse_elz_type(p);
+            }
             break;
         }
         let mut pairs = p.into_inner();
@@ -27,11 +31,6 @@ fn parse_method(method: Pair<Rule>) -> Method {
         }
         params.push(Parameter(p_name.as_str().to_string(), p_type));
     }
-    let return_type = if let Some(t) = pairs.next() {
-        parse_elz_type(t)
-    } else {
-        None
-    };
     Method(return_type, name.as_str().to_string(), params)
 }
 fn parse_function_define(fn_def: Pair<Rule>) -> Top {
@@ -245,6 +244,15 @@ mod tests {
                         Parameter("l".to_string(), None),
                         Parameter("r".to_string(), Some(Type("i32".to_string(), vec![]))),
                     ],
+                )),
+            ),
+            (
+                // test return type parsing
+                "fn foo() -> i32 {}",
+                Top::FnDefine(Method(
+                    Some(Type("i32".to_string(), vec![])),
+                    "foo".to_string(),
+                    vec![],
                 )),
             ),
         ].into_iter()
