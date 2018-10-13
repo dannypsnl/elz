@@ -2,7 +2,7 @@ use super::ast::*;
 use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::Module;
-use inkwell::types::{AnyType, AnyTypeEnum, BasicType, BasicTypeEnum};
+use inkwell::types::{BasicType, BasicTypeEnum};
 use inkwell::values::BasicValue;
 use inkwell::AddressSpace;
 
@@ -38,11 +38,6 @@ impl Visitor {
                     global_value.set_initializer(expr_result.as_ref());
                 }
                 Top::FnDefine(Method(return_t, name, params)) => {
-                    let ret_type = if let Some(t) = return_t {
-                        self.convert(t).as_any_type_enum()
-                    } else {
-                        self.context.void_type().as_any_type_enum()
-                    };
                     let param_type_list = if params.len() != 0 {
                         let mut params = params.clone();
                         // last type must be defined!
@@ -58,60 +53,14 @@ impl Visitor {
                     } else {
                         vec![]
                     };
-                    match ret_type {
-                        AnyTypeEnum::ArrayType(t) => {
-                            self.module.add_function(
-                                name.as_str(),
-                                t.fn_type(param_type_list.as_slice(), false),
-                                None,
-                            );
-                        }
-                        AnyTypeEnum::FloatType(t) => {
-                            self.module.add_function(
-                                name.as_str(),
-                                t.fn_type(param_type_list.as_slice(), false),
-                                None,
-                            );
-                        }
-                        AnyTypeEnum::IntType(t) => {
-                            self.module.add_function(
-                                name.as_str(),
-                                t.fn_type(param_type_list.as_slice(), false),
-                                None,
-                            );
-                        }
-                        AnyTypeEnum::PointerType(t) => {
-                            self.module.add_function(
-                                name.as_str(),
-                                t.fn_type(param_type_list.as_slice(), false),
-                                None,
-                            );
-                        }
-                        AnyTypeEnum::StructType(t) => {
-                            self.module.add_function(
-                                name.as_str(),
-                                t.fn_type(param_type_list.as_slice(), false),
-                                None,
-                            );
-                        }
-                        AnyTypeEnum::VectorType(t) => {
-                            self.module.add_function(
-                                name.as_str(),
-                                t.fn_type(param_type_list.as_slice(), false),
-                                None,
-                            );
-                        }
-                        AnyTypeEnum::VoidType(t) => {
-                            self.module.add_function(
-                                name.as_str(),
-                                t.fn_type(param_type_list.as_slice(), false),
-                                None,
-                            );
-                        }
-                        AnyTypeEnum::FunctionType(_t) => {
-                            panic!("can't use function type as parameter type currently");
-                        }
+                    let fn_type = if let Some(t) = return_t {
+                        self.convert(t).fn_type(param_type_list.as_slice(), false)
+                    } else {
+                        self.context
+                            .void_type()
+                            .fn_type(param_type_list.as_slice(), false)
                     };
+                    self.module.add_function(name.as_str(), fn_type, None);
                 }
                 _ => println!("Not implement yet"),
             }
