@@ -3,7 +3,7 @@ use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::Module;
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::BasicValue;
+use inkwell::values::{BasicValue, BasicValueEnum};
 use inkwell::AddressSpace;
 
 pub struct Visitor {
@@ -60,7 +60,20 @@ impl Visitor {
                             .void_type()
                             .fn_type(param_type_list.as_slice(), false)
                     };
-                    self.module.add_function(name.as_str(), fn_type, None);
+                    let new_fn = self.module.add_function(name.as_str(), fn_type, None);
+                    for (i, param) in params.iter().enumerate() {
+                        if let Some(p) = new_fn.get_nth_param(i as u32) {
+                            let name = param.0.as_str();
+                            match p {
+                                BasicValueEnum::ArrayValue(t) => t.set_name(name),
+                                BasicValueEnum::IntValue(t) => t.set_name(name),
+                                BasicValueEnum::FloatValue(t) => t.set_name(name),
+                                BasicValueEnum::PointerValue(t) => t.set_name(name),
+                                BasicValueEnum::StructValue(t) => t.set_name(name),
+                                BasicValueEnum::VectorValue(t) => t.set_name(name),
+                            };
+                        }
+                    }
                 }
                 _ => println!("Not implement yet"),
             }
