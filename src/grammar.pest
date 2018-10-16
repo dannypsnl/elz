@@ -67,6 +67,7 @@ method = {
   ")"                  ~
   ("->" ~ elz_type)?   ~
   "{"                  ~
+    (statement)*       ~
   "}"
 }
 parameter = {
@@ -85,6 +86,13 @@ expression = _{
   string
   | number
   | ident
+  | access_chain
+}
+// Statement
+statement = {
+  let_define
+  | let_mut_define
+  | assign
   | access_chain
 }
 // Local Statement
