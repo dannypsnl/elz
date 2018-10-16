@@ -24,3 +24,10 @@ pub struct TypeField(pub String, pub Type);
 pub struct Method(pub Option<Type>, pub String, pub Vec<Parameter>);
 #[derive(Clone, PartialEq, Debug)]
 pub struct Parameter(pub String, pub Option<Type>);
+#[derive(Clone, PartialEq, Debug)]
+pub enum Statement {
+    LetDefine,
+    LetMutDefine,
+    Assign,
+    AccessChain,
+}

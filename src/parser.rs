@@ -11,6 +11,18 @@ pub struct ElzParser;
 
 use pest::iterators::Pair;
 
+fn parse_statement(statement: Pair<Rule>) -> Statement {
+    let mut pairs = statement.into_inner();
+    let rule = pairs.next().unwrap();
+
+    match rule.as_rule() {
+        Rule::let_define => Statement::LetDefine,
+        Rule::let_mut_define => Statement::LetMutDefine,
+        Rule::assign => Statement::Assign,
+        Rule::access_chain => Statement::AccessChain,
+        r => panic!("should not found rule: {:?} at here", r),
+    }
+}
 fn parse_method(method: Pair<Rule>) -> Method {
     let mut pairs = method.into_inner();
     let name = pairs.next().unwrap();
@@ -30,6 +42,10 @@ fn parse_method(method: Pair<Rule>) -> Method {
             p_type = parse_elz_type(typ);
         }
         params.push(Parameter(p_name.as_str().to_string(), p_type));
+    }
+    let mut statements = vec![];
+    while let Some(statement) = pairs.next() {
+        statements.push(parse_statement(statement));
     }
     Method(return_type, name.as_str().to_string(), params)
 }
