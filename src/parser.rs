@@ -11,12 +11,25 @@ pub struct ElzParser;
 
 use pest::iterators::Pair;
 
+fn parse_let_define(let_define: Pair<Rule>) -> Statement {
+    let mut pairs = let_define.into_inner();
+    let name = pairs.next().unwrap();
+    let mut r = pairs.next().unwrap();
+    let mut t = None;
+    if r.as_rule() == Rule::elz_type {
+        t = parse_elz_type(pairs.next().unwrap());
+        r = pairs.next().unwrap();
+    }
+    let expr = parse_expr(r);
+
+    Statement::LetDefine(name.as_str().to_string(), t, expr)
+}
 fn parse_statement(statement: Pair<Rule>) -> Statement {
     let mut pairs = statement.into_inner();
     let rule = pairs.next().unwrap();
 
     match rule.as_rule() {
-        Rule::let_define => Statement::LetDefine,
+        Rule::let_define => parse_let_define(rule),
         Rule::let_mut_define => Statement::LetMutDefine,
         Rule::assign => Statement::Assign,
         Rule::access_chain => Statement::AccessChain,
@@ -279,6 +292,21 @@ mod tests {
                 .next()
                 .unwrap();
             assert_eq!(ast, parse_function_define(r));
+        }
+    }
+    #[test]
+    fn test_statement() {
+        let test_cases: HashMap<&str, Statement> = vec![(
+            "let a = 1",
+            Statement::LetDefine("a".to_string(), None, Expr::Integer(1)),
+        )].into_iter()
+        .collect();
+        for (input, ast) in test_cases {
+            let r = ElzParser::parse(Rule::statement, input)
+                .unwrap()
+                .next()
+                .unwrap();
+            assert_eq!(ast, parse_statement(r));
         }
     }
     #[test]
