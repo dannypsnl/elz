@@ -15,8 +15,12 @@ fn parse_method(method: Pair<Rule>) -> Method {
     let mut pairs = method.into_inner();
     let name = pairs.next().unwrap();
     let mut params = vec![];
+    let mut return_type = None;
     while let Some(p) = pairs.next() {
         if p.as_rule() != Rule::parameter {
+            if p.as_rule() == Rule::elz_type {
+                return_type = parse_elz_type(p);
+            }
             break;
         }
         let mut pairs = p.into_inner();
@@ -27,7 +31,7 @@ fn parse_method(method: Pair<Rule>) -> Method {
         }
         params.push(Parameter(p_name.as_str().to_string(), p_type));
     }
-    Method(name.as_str().to_string(), params)
+    Method(return_type, name.as_str().to_string(), params)
 }
 fn parse_function_define(fn_def: Pair<Rule>) -> Top {
     let mut pairs = fn_def.into_inner();
@@ -98,7 +102,14 @@ fn parse_import_stmt(rule: Pair<Rule>) -> Top {
 
 fn parse_expr(rule: Pair<Rule>) -> Expr {
     match rule.as_rule() {
-        Rule::number => Expr::Number(rule.as_str().to_string().parse::<f64>().unwrap()),
+        Rule::number => {
+            let num_v = rule.as_str();
+            if let Ok(num) = num_v.parse::<i64>() {
+                Expr::Integer(num)
+            } else {
+                Expr::Number(num_v.parse::<f64>().unwrap())
+            }
+        }
         _ => panic!("unknown"),
     }
 }
@@ -119,13 +130,14 @@ fn parse_global_binding(rule: Pair<Rule>) -> Top {
     )
 }
 
-pub fn parse_elz_program(file_name: &str) {
+pub fn parse_elz_program(file_name: &str) -> Vec<Top> {
     let mut f = File::open(file_name).expect("file not found");
     let mut program_content = String::new();
     f.read_to_string(&mut program_content)
         .expect("failed at read file");
 
-    println!("start compiling");
+    let mut tree = vec![];
+
     let program = ElzParser::parse(Rule::elz_program, program_content.as_str())
         .expect("unsuccesful compile")
         .next()
@@ -134,28 +146,28 @@ pub fn parse_elz_program(file_name: &str) {
         match rule.as_rule() {
             Rule::import_stmt => {
                 let ast = parse_import_stmt(rule);
-                println!("ast: {:?}", ast);
+                tree.push(ast);
             }
             Rule::global_binding => {
                 let ast = parse_global_binding(rule);
-                println!("ast: {:?}", ast);
+                tree.push(ast);
             }
             Rule::type_define => {
                 let ast = parse_type_define(rule);
-                println!("ast: {:?}", ast);
+                tree.push(ast);
             }
             Rule::function_define => {
                 let ast = parse_function_define(rule);
-                println!("ast: {:?}", ast);
+                tree.push(ast);
             }
-            Rule::EOI => {
-                println!("end of compiling");
-            }
+            Rule::EOI => {}
             _ => {
                 println!("unhandled rule");
             }
         }
     }
+
+    return tree;
 }
 
 #[cfg(test)]
@@ -200,7 +212,7 @@ mod tests {
         let test_cases: HashMap<&str, Top> = vec![
             (
                 "_ab_c1 =1",
-                Top::GlobalBind(false, "_ab_c1".to_string(), Expr::Number(1.0)),
+                Top::GlobalBind(false, "_ab_c1".to_string(), Expr::Integer(1)),
             ),
             (
                 "+a= 3.1415926",
@@ -221,16 +233,26 @@ mod tests {
         let test_cases: HashMap<&str, Top> = vec![
             (
                 "fn test() {}",
-                Top::FnDefine(Method("test".to_string(), vec![])),
+                Top::FnDefine(Method(None, "test".to_string(), vec![])),
             ),
             (
                 "fn add(l, r: i32) {}",
                 Top::FnDefine(Method(
+                    None,
                     "add".to_string(),
                     vec![
                         Parameter("l".to_string(), None),
                         Parameter("r".to_string(), Some(Type("i32".to_string(), vec![]))),
                     ],
+                )),
+            ),
+            (
+                // test return type parsing
+                "fn foo() -> i32 {}",
+                Top::FnDefine(Method(
+                    Some(Type("i32".to_string(), vec![])),
+                    "foo".to_string(),
+                    vec![],
                 )),
             ),
         ].into_iter()
@@ -241,20 +263,6 @@ mod tests {
                 .next()
                 .unwrap();
             assert_eq!(ast, parse_function_define(r));
-        }
-        parses_to! {
-            parser: ElzParser,
-            input: "fn test(a, b: i32) {}",
-            rule: Rule::function_define,
-            tokens: [
-                function_define(0, 21, [
-                    method(3, 21, [
-                        ident(3, 7),
-                        parameter(8, 9, [ident(8, 9)]),
-                        parameter(11, 17, [ident(11, 12), elz_type(14, 17, [ident(14, 17)])])
-                    ])
-                ])
-            ]
         }
     }
     #[test]
