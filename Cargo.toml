@@ -6,4 +6,5 @@ authors = ["dannypsnl <dannypsnl@gmail.com>"]
 [dependencies]
 pest = "2.0.1"
 pest_derive = "2.0.1"
+inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "llvm6-0" }
 clap = "2.32"

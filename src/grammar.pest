@@ -65,6 +65,7 @@ method = {
     parameter?         ~
     ("," ~ parameter)* ~
   ")"                  ~
+  ("->" ~ elz_type)?   ~
   "{"                  ~
   "}"
 }
