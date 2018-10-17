@@ -26,8 +26,8 @@ pub struct Method(pub Option<Type>, pub String, pub Vec<Parameter>);
 pub struct Parameter(pub String, pub Option<Type>);
 #[derive(Clone, PartialEq, Debug)]
 pub enum Statement {
-    LetDefine(String, Option<Type>, Expr),
-    LetMutDefine,
+    // mutable, name, type, expression
+    LetDefine(bool, String, Option<Type>, Expr),
     Assign,
     AccessChain,
 }

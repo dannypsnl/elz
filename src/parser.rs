@@ -11,8 +11,8 @@ pub struct ElzParser;
 
 use pest::iterators::Pair;
 
-fn parse_let_define(let_define: Pair<Rule>) -> Statement {
-    let mut pairs = let_define.into_inner();
+fn parse_local_define(local_define: Pair<Rule>, mutable: bool) -> Statement {
+    let mut pairs = local_define.into_inner();
     let name = pairs.next().unwrap();
     let mut next_rule = pairs.next().unwrap();
     let mut t = None;
@@ -21,8 +21,14 @@ fn parse_let_define(let_define: Pair<Rule>) -> Statement {
         next_rule = pairs.next().unwrap();
     }
     let expr = parse_expr(next_rule);
-
-    Statement::LetDefine(name.as_str().to_string(), t, expr)
+    // immutable, name, type, expression
+    Statement::LetDefine(mutable, name.as_str().to_string(), t, expr)
+}
+fn parse_let_define(let_define: Pair<Rule>) -> Statement {
+    parse_local_define(let_define, false)
+}
+fn parse_let_mut_define(let_mut_define: Pair<Rule>) -> Statement {
+    parse_local_define(let_mut_define, true)
 }
 fn parse_statement(statement: Pair<Rule>) -> Statement {
     let mut pairs = statement.into_inner();
@@ -30,7 +36,7 @@ fn parse_statement(statement: Pair<Rule>) -> Statement {
 
     match rule.as_rule() {
         Rule::let_define => parse_let_define(rule),
-        Rule::let_mut_define => Statement::LetMutDefine,
+        Rule::let_mut_define => parse_let_mut_define(rule),
         Rule::assign => Statement::Assign,
         Rule::access_chain => Statement::AccessChain,
         r => panic!("should not found rule: {:?} at here", r),
@@ -299,15 +305,20 @@ mod tests {
         let test_cases: HashMap<&str, Statement> = vec![
             (
                 "let a = 1",
-                Statement::LetDefine("a".to_string(), None, Expr::Integer(1)),
+                Statement::LetDefine(false, "a".to_string(), None, Expr::Integer(1)),
             ),
             (
                 "let a: i32 = 1",
                 Statement::LetDefine(
+                    false,
                     "a".to_string(),
                     Some(Type("i32".to_string(), vec![])),
                     Expr::Integer(1),
                 ),
+            ),
+            (
+                "let mut a = 1",
+                Statement::LetDefine(true, "a".to_string(), None, Expr::Integer(1)),
             ),
         ].into_iter()
         .collect();
