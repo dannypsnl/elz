@@ -1,9 +1,10 @@
 use super::ast::*;
+use inkwell::basic_block::BasicBlock;
 use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::Module;
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{BasicValue, BasicValueEnum, FunctionValue};
+use inkwell::values::{BasicValue, BasicValueEnum};
 use inkwell::AddressSpace;
 
 pub struct Visitor {
@@ -75,8 +76,9 @@ impl Visitor {
                             };
                         }
                     }
+                    let basic_block = self.context.append_basic_block(&new_fn, "entry");
                     for stmt in statements {
-                        self.visit_statement(stmt, new_fn);
+                        self.visit_statement(stmt, &basic_block);
                     }
                 }
                 _ => println!("Not implement yet"),
@@ -84,9 +86,8 @@ impl Visitor {
         }
         self.module.clone()
     }
-    fn visit_statement(&mut self, stmt: Statement, new_fn: FunctionValue) {
-        let basic_block = self.context.append_basic_block(&new_fn, "entry");
-        self.builder.position_at_end(&basic_block);
+    fn visit_statement(&mut self, stmt: Statement, basic_block: &BasicBlock) {
+        self.builder.position_at_end(basic_block);
         match stmt {
             Statement::LetDefine(_mutable, name, typ, expr) => {
                 let (v, type_enum) = self.visit_const_expr(expr);
