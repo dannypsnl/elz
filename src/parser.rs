@@ -150,7 +150,7 @@ fn parse_expr(rule: Pair<Rule>) -> Expr {
                 Expr::Number(num_v.parse::<f64>().unwrap())
             }
         }
-        _ => panic!("unknown"),
+        r => panic!("unknown rule: {:?}", r),
     }
 }
 fn parse_global_binding(rule: Pair<Rule>) -> Top {

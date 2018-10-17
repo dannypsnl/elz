@@ -85,13 +85,17 @@ impl Visitor {
         self.module.clone()
     }
     fn visit_statement(&mut self, stmt: Statement, new_fn: FunctionValue) {
-        let basic_block = self.context.append_basic_block(&new_fn, "");
+        let basic_block = self.context.append_basic_block(&new_fn, "entry");
         self.builder.position_at_end(&basic_block);
         match stmt {
             Statement::LetDefine(_mutable, name, typ, expr) => {
                 let (v, type_enum) = self.visit_const_expr(expr);
                 let pv = self.builder.build_alloca(type_enum, name.as_str());
                 self.builder.build_store(pv, v);
+            }
+            Statement::Return(e) => {
+                let (v, _t) = self.visit_const_expr(e);
+                self.builder.build_return(Some(&v));
             }
             stmt => panic!("Not implement AST: {:?} yet", stmt),
         }
