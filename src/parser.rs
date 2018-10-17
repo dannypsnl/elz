@@ -17,7 +17,7 @@ fn parse_let_define(let_define: Pair<Rule>) -> Statement {
     let mut next_rule = pairs.next().unwrap();
     let mut t = None;
     if next_rule.as_rule() == Rule::elz_type {
-        t = parse_elz_type(pairs.next().unwrap());
+        t = parse_elz_type(next_rule);
         next_rule = pairs.next().unwrap();
     }
     let expr = parse_expr(next_rule);
@@ -296,10 +296,20 @@ mod tests {
     }
     #[test]
     fn test_statement() {
-        let test_cases: HashMap<&str, Statement> = vec![(
-            "let a = 1",
-            Statement::LetDefine("a".to_string(), None, Expr::Integer(1)),
-        )].into_iter()
+        let test_cases: HashMap<&str, Statement> = vec![
+            (
+                "let a = 1",
+                Statement::LetDefine("a".to_string(), None, Expr::Integer(1)),
+            ),
+            (
+                "let a: i32 = 1",
+                Statement::LetDefine(
+                    "a".to_string(),
+                    Some(Type("i32".to_string(), vec![])),
+                    Expr::Integer(1),
+                ),
+            ),
+        ].into_iter()
         .collect();
         for (input, ast) in test_cases {
             let r = ElzParser::parse(Rule::statement, input)
