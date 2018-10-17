@@ -14,13 +14,13 @@ use pest::iterators::Pair;
 fn parse_let_define(let_define: Pair<Rule>) -> Statement {
     let mut pairs = let_define.into_inner();
     let name = pairs.next().unwrap();
-    let mut r = pairs.next().unwrap();
+    let mut next_rule = pairs.next().unwrap();
     let mut t = None;
-    if r.as_rule() == Rule::elz_type {
+    if next_rule.as_rule() == Rule::elz_type {
         t = parse_elz_type(pairs.next().unwrap());
-        r = pairs.next().unwrap();
+        next_rule = pairs.next().unwrap();
     }
-    let expr = parse_expr(r);
+    let expr = parse_expr(next_rule);
 
     Statement::LetDefine(name.as_str().to_string(), t, expr)
 }
