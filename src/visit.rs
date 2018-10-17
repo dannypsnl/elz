@@ -3,7 +3,7 @@ use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::Module;
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::BasicValue;
+use inkwell::values::{BasicValue, BasicValueEnum, FunctionValue};
 use inkwell::AddressSpace;
 
 pub struct Visitor {
@@ -35,9 +35,9 @@ impl Visitor {
                     let global_value =
                         self.module
                             .add_global(elz_type, Some(AddressSpace::Const), name.as_str());
-                    global_value.set_initializer(expr_result.as_ref());
+                    global_value.set_initializer(&expr_result);
                 }
-                Top::FnDefine(Method(return_t, name, params)) => {
+                Top::FnDefine(Method(return_t, name, params, statements)) => {
                     let param_type_list = if params.len() != 0 {
                         let mut params = params.clone();
                         // last type must be defined!
@@ -75,20 +75,42 @@ impl Visitor {
                             };
                         }
                     }
+                    for stmt in statements {
+                        self.visit_statement(stmt, new_fn);
+                    }
                 }
                 _ => println!("Not implement yet"),
             }
         }
         self.module.clone()
     }
-    pub fn visit_const_expr(&mut self, expr: Expr) -> (Box<BasicValue>, BasicTypeEnum) {
+    fn visit_statement(&mut self, stmt: Statement, new_fn: FunctionValue) {
+        let basic_block = self.context.append_basic_block(&new_fn, "");
+        self.builder.position_at_end(&basic_block);
+        match stmt {
+            Statement::LetDefine(_mutable, name, typ, expr) => {
+                let (v, type_enum) = self.visit_const_expr(expr);
+                let pv = self.builder.build_alloca(type_enum, name.as_str());
+                self.builder.build_store(pv, v);
+            }
+            stmt => panic!("Not implement AST: {:?} yet", stmt),
+        }
+    }
+
+    pub fn visit_const_expr(&mut self, expr: Expr) -> (BasicValueEnum, BasicTypeEnum) {
         match expr {
             Expr::Integer(iv) => (
-                Box::new(self.context.i64_type().const_int(iv as u64, true)),
+                self.context
+                    .i64_type()
+                    .const_int(iv as u64, true)
+                    .as_basic_value_enum(),
                 self.context.i64_type().as_basic_type_enum(),
             ),
             Expr::Number(fv) => (
-                Box::new(self.context.f64_type().const_float(fv)),
+                self.context
+                    .f64_type()
+                    .const_float(fv)
+                    .as_basic_value_enum(),
                 self.context.f64_type().as_basic_type_enum(),
             ),
         }

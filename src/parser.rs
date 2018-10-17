@@ -66,7 +66,7 @@ fn parse_method(method: Pair<Rule>) -> Method {
     while let Some(statement) = pairs.next() {
         statements.push(parse_statement(statement));
     }
-    Method(return_type, name.as_str().to_string(), params)
+    Method(return_type, name.as_str().to_string(), params, statements)
 }
 fn parse_function_define(fn_def: Pair<Rule>) -> Top {
     let mut pairs = fn_def.into_inner();
@@ -268,7 +268,7 @@ mod tests {
         let test_cases: HashMap<&str, Top> = vec![
             (
                 "fn test() {}",
-                Top::FnDefine(Method(None, "test".to_string(), vec![])),
+                Top::FnDefine(Method(None, "test".to_string(), vec![], vec![])),
             ),
             (
                 "fn add(l, r: i32) {}",
@@ -279,6 +279,7 @@ mod tests {
                         Parameter("l".to_string(), None),
                         Parameter("r".to_string(), Some(Type("i32".to_string(), vec![]))),
                     ],
+                    vec![],
                 )),
             ),
             (
@@ -287,6 +288,7 @@ mod tests {
                 Top::FnDefine(Method(
                     Some(Type("i32".to_string(), vec![])),
                     "foo".to_string(),
+                    vec![],
                     vec![],
                 )),
             ),
