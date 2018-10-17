@@ -30,6 +30,10 @@ fn parse_let_define(let_define: Pair<Rule>) -> Statement {
 fn parse_let_mut_define(let_mut_define: Pair<Rule>) -> Statement {
     parse_local_define(let_mut_define, true)
 }
+fn parse_return(return_stmt: Pair<Rule>) -> Statement {
+    let e = return_stmt.into_inner().next().unwrap();
+    Statement::Return(parse_expr(e))
+}
 fn parse_statement(statement: Pair<Rule>) -> Statement {
     let mut pairs = statement.into_inner();
     let rule = pairs.next().unwrap();
@@ -37,6 +41,7 @@ fn parse_statement(statement: Pair<Rule>) -> Statement {
     match rule.as_rule() {
         Rule::let_define => parse_let_define(rule),
         Rule::let_mut_define => parse_let_mut_define(rule),
+        Rule::return_stmt => parse_return(rule),
         Rule::assign => Statement::Assign,
         Rule::access_chain => Statement::AccessChain,
         r => panic!("should not found rule: {:?} at here", r),
@@ -322,6 +327,7 @@ mod tests {
                 "let mut a = 1",
                 Statement::LetDefine(true, "a".to_string(), None, Expr::Integer(1)),
             ),
+            ("return 1", Statement::Return(Expr::Integer(1))),
         ].into_iter()
         .collect();
         for (input, ast) in test_cases {

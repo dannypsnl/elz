@@ -33,6 +33,7 @@ pub struct Parameter(pub String, pub Option<Type>);
 pub enum Statement {
     // mutable, name, type, expression
     LetDefine(bool, String, Option<Type>, Expr),
+    Return(Expr),
     Assign,
     AccessChain,
 }

@@ -92,8 +92,12 @@ expression = _{
 statement = {
   let_define
   | let_mut_define
+  | return_stmt
   | assign
   | access_chain
+}
+return_stmt = {
+  "return" ~ expression
 }
 // Local Statement
 // Local define
