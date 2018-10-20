@@ -35,58 +35,70 @@ impl Visitor {
                 // FIXME: use exported make sure the global value should add into shared var list or not
                 Top::GlobalBind(_exported, name, e) => {
                     let (expr_result, elz_type) = self.visit_const_expr(e);
-                    let global_value =
-                        self.module
-                            .add_global(elz_type, Some(AddressSpace::Const), name.as_str());
+                    let global_value = self.module.add_global(
+                        elz_type,
+                        Some(AddressSpace::Const),
+                        name.as_str(),
+                    );
                     global_value.set_initializer(&expr_result);
                 }
                 Top::FnDefine(Method(return_t, name, params, statements)) => {
-                    let param_type_list = if params.len() != 0 {
-                        let mut params = params.clone();
-                        // last type must be defined!
-                        let mut param_t = params.pop().unwrap().1.unwrap();
-                        let mut param_type_list = vec![];
-                        while let Some(param) = params.pop() {
-                            if let Some(t) = param.1 {
-                                param_t = t;
-                            }
-                            param_type_list.push(self.convert(param_t.clone()));
-                        }
-                        param_type_list
-                    } else {
-                        vec![]
-                    };
-                    let fn_type = if let Some(t) = return_t {
-                        self.convert(t).fn_type(param_type_list.as_slice(), false)
-                    } else {
-                        self.context
-                            .void_type()
-                            .fn_type(param_type_list.as_slice(), false)
-                    };
-                    let new_fn = self.module.add_function(name.as_str(), fn_type, None);
-                    for (i, param) in params.iter().enumerate() {
-                        if let Some(p) = new_fn.get_nth_param(i as u32) {
-                            let name = param.0.as_str();
-                            use inkwell::values::BasicValueEnum::*;
-                            match p {
-                                ArrayValue(t) => t.set_name(name),
-                                IntValue(t) => t.set_name(name),
-                                FloatValue(t) => t.set_name(name),
-                                PointerValue(t) => t.set_name(name),
-                                StructValue(t) => t.set_name(name),
-                                VectorValue(t) => t.set_name(name),
-                            };
-                        }
-                    }
-                    let basic_block = self.context.append_basic_block(&new_fn, "entry");
-                    for stmt in statements {
-                        self.visit_statement(stmt, &basic_block);
-                    }
+                    self.visit_function(return_t, name, params, statements);
                 }
                 _ => println!("Not implement yet"),
             }
         }
         self.module.clone()
+    }
+    fn visit_function(
+        &mut self,
+        return_t: Option<Type>,
+        name: String,
+        params: Vec<Parameter>,
+        statements: Vec<Statement>,
+    ) {
+        let param_type_list = if params.len() != 0 {
+            let mut params = params.clone();
+            // last type must be defined!
+            let mut param_t = params.pop().unwrap().1.unwrap();
+            let mut param_type_list = vec![];
+            while let Some(param) = params.pop() {
+                if let Some(t) = param.1 {
+                    param_t = t;
+                }
+                param_type_list.push(self.convert(param_t.clone()));
+            }
+            param_type_list
+        } else {
+            vec![]
+        };
+        let fn_type = if let Some(t) = return_t {
+            self.convert(t).fn_type(param_type_list.as_slice(), false)
+        } else {
+            self.context.void_type().fn_type(
+                param_type_list.as_slice(),
+                false,
+            )
+        };
+        let new_fn = self.module.add_function(name.as_str(), fn_type, None);
+        for (i, param) in params.iter().enumerate() {
+            if let Some(p) = new_fn.get_nth_param(i as u32) {
+                let name = param.0.as_str();
+                use inkwell::values::BasicValueEnum::*;
+                match p {
+                    ArrayValue(t) => t.set_name(name),
+                    IntValue(t) => t.set_name(name),
+                    FloatValue(t) => t.set_name(name),
+                    PointerValue(t) => t.set_name(name),
+                    StructValue(t) => t.set_name(name),
+                    VectorValue(t) => t.set_name(name),
+                };
+            }
+        }
+        let basic_block = self.context.append_basic_block(&new_fn, "entry");
+        for stmt in statements {
+            self.visit_statement(stmt, &basic_block);
+        }
     }
     fn visit_statement(&mut self, stmt: Statement, basic_block: &BasicBlock) {
         self.builder.position_at_end(basic_block);
@@ -151,13 +163,23 @@ mod tests {
     #[test]
     fn a_function_return_an_interger() {
         let mut visitor = Visitor::new();
-        let tree = vec![Top::FnDefine(Method(Some(Type("i64".to_string(), vec![])), "foo".to_string(), vec![], vec![Statement::Return(Expr::Integer(1))]))];
-        let module = visitor.visit_program(tree);
+        visitor.visit_function(
+            Some(Type("i64".to_string(), vec![])),
+            "foo".to_string(),
+            vec![],
+            vec![Statement::Return(Expr::Integer(1))],
+        );
+        let module = visitor.module;
 
-        Target::initialize_native(&InitializationConfig::default()).expect("Failed to initialize native target");
+        Target::initialize_native(&InitializationConfig::default())
+            .expect("Failed to initialize native target");
 
-        let ee = module.create_jit_execution_engine(OptimizationLevel::None).expect("failed at create JIT execution engine");
-        let fn_foo = ee.get_function_value("foo").expect("failed at get function value");
+        let ee = module
+            .create_jit_execution_engine(OptimizationLevel::None)
+            .expect("failed at create JIT execution engine");
+        let fn_foo = ee.get_function_value("foo").expect(
+            "failed at get function value",
+        );
         let result = unsafe { ee.run_function(&fn_foo, &vec![]) };
         let r = result.as_int(true);
         assert_eq!(r, 1);
