@@ -6,6 +6,8 @@ use inkwell::module::Module;
 use inkwell::types::{BasicType, BasicTypeEnum};
 use inkwell::values::{BasicValue, BasicValueEnum};
 use inkwell::AddressSpace;
+use inkwell::OptimizationLevel;
+use inkwell::targets::{InitializationConfig, Target};
 
 pub struct Visitor {
     context: Context,
@@ -139,5 +141,25 @@ impl Visitor {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_function_return_an_interger() {
+        let mut visitor = Visitor::new();
+        let tree = vec![Top::FnDefine(Method(Some(Type("i64".to_string(), vec![])), "foo".to_string(), vec![], vec![Statement::Return(Expr::Integer(1))]))];
+        let module = visitor.visit_program(tree);
+
+        Target::initialize_native(&InitializationConfig::default()).expect("Failed to initialize native target");
+
+        let ee = module.create_jit_execution_engine(OptimizationLevel::None).expect("failed at create JIT execution engine");
+        let fn_foo = ee.get_function_value("foo").expect("failed at get function value");
+        let result = unsafe { ee.run_function(&fn_foo, &vec![]) };
+        let r = result.as_int(true);
+        assert_eq!(r, 1);
     }
 }
