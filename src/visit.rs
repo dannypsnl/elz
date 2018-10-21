@@ -186,6 +186,21 @@ mod tests {
     use inkwell::OptimizationLevel;
     use inkwell::targets::{InitializationConfig, Target};
 
+    fn test_module(module: Module, fn_name: &str, expected: u64) {
+        Target::initialize_native(&InitializationConfig::default())
+            .expect("Failed to initialize native target");
+
+        let ee = module
+            .create_jit_execution_engine(OptimizationLevel::None)
+            .expect("failed at create JIT execution engine");
+        let test_fn = ee.get_function_value(fn_name).expect(
+            "failed at get function value",
+        );
+        let result = unsafe { ee.run_function(&test_fn, &vec![]) };
+        let r = result.as_int(true);
+        assert_eq!(r, expected);
+    }
+
     #[test]
     fn a_function_return_an_interger() {
         let mut visitor = Visitor::new();
@@ -195,20 +210,7 @@ mod tests {
             vec![],
             vec![Statement::Return(Expr::Integer(1))],
         );
-        let module = visitor.module;
-
-        Target::initialize_native(&InitializationConfig::default())
-            .expect("Failed to initialize native target");
-
-        let ee = module
-            .create_jit_execution_engine(OptimizationLevel::None)
-            .expect("failed at create JIT execution engine");
-        let fn_foo = ee.get_function_value("foo").expect(
-            "failed at get function value",
-        );
-        let result = unsafe { ee.run_function(&fn_foo, &vec![]) };
-        let r = result.as_int(true);
-        assert_eq!(r, 1);
+        test_module(visitor.module, "foo", 1);
     }
 
     #[test]
@@ -221,19 +223,6 @@ mod tests {
             vec![],
             vec![Statement::Return(Expr::Ident("g".to_string()))],
         );
-        let module = visitor.module;
-
-        Target::initialize_native(&InitializationConfig::default())
-            .expect("Failed to initialize native target");
-
-        let ee = module
-            .create_jit_execution_engine(OptimizationLevel::None)
-            .expect("Failed at create JIT execution engine");
-        let fn_foo = ee.get_function_value("foo").expect(
-            "failed at get function value",
-        );
-        let result = unsafe { ee.run_function(&fn_foo, &vec![]) };
-        let r = result.as_int(true);
-        assert_eq!(r, 10);
+        test_module(visitor.module, "foo", 10);
     }
 }
