@@ -11,6 +11,42 @@ pub struct ElzParser;
 
 use pest::iterators::Pair;
 
+fn parse_local_define(local_define: Pair<Rule>, mutable: bool) -> Statement {
+    let mut pairs = local_define.into_inner();
+    let name = pairs.next().unwrap();
+    let mut next_rule = pairs.next().unwrap();
+    let mut t = None;
+    if next_rule.as_rule() == Rule::elz_type {
+        t = parse_elz_type(next_rule);
+        next_rule = pairs.next().unwrap();
+    }
+    let expr = parse_expr(next_rule);
+    // immutable, name, type, expression
+    Statement::LetDefine(mutable, name.as_str().to_string(), t, expr)
+}
+fn parse_let_define(let_define: Pair<Rule>) -> Statement {
+    parse_local_define(let_define, false)
+}
+fn parse_let_mut_define(let_mut_define: Pair<Rule>) -> Statement {
+    parse_local_define(let_mut_define, true)
+}
+fn parse_return(return_stmt: Pair<Rule>) -> Statement {
+    let e = return_stmt.into_inner().next().unwrap();
+    Statement::Return(parse_expr(e))
+}
+fn parse_statement(statement: Pair<Rule>) -> Statement {
+    let mut pairs = statement.into_inner();
+    let rule = pairs.next().unwrap();
+
+    match rule.as_rule() {
+        Rule::let_define => parse_let_define(rule),
+        Rule::let_mut_define => parse_let_mut_define(rule),
+        Rule::return_stmt => parse_return(rule),
+        Rule::assign => Statement::Assign,
+        Rule::access_chain => Statement::AccessChain,
+        r => panic!("should not found rule: {:?} at here", r),
+    }
+}
 fn parse_method(method: Pair<Rule>) -> Method {
     let mut pairs = method.into_inner();
     let name = pairs.next().unwrap();
@@ -31,7 +67,11 @@ fn parse_method(method: Pair<Rule>) -> Method {
         }
         params.push(Parameter(p_name.as_str().to_string(), p_type));
     }
-    Method(return_type, name.as_str().to_string(), params)
+    let mut statements = vec![];
+    while let Some(statement) = pairs.next() {
+        statements.push(parse_statement(statement));
+    }
+    Method(return_type, name.as_str().to_string(), params, statements)
 }
 fn parse_function_define(fn_def: Pair<Rule>) -> Top {
     let mut pairs = fn_def.into_inner();
@@ -110,7 +150,11 @@ fn parse_expr(rule: Pair<Rule>) -> Expr {
                 Expr::Number(num_v.parse::<f64>().unwrap())
             }
         }
-        _ => panic!("unknown"),
+        Rule::ident => {
+            let ident_name = rule.as_str();
+            Expr::Ident(ident_name.to_string())
+        }
+        r => panic!("unknown rule: {:?}", r),
     }
 }
 fn parse_global_binding(rule: Pair<Rule>) -> Top {
@@ -233,7 +277,7 @@ mod tests {
         let test_cases: HashMap<&str, Top> = vec![
             (
                 "fn test() {}",
-                Top::FnDefine(Method(None, "test".to_string(), vec![])),
+                Top::FnDefine(Method(None, "test".to_string(), vec![], vec![])),
             ),
             (
                 "fn add(l, r: i32) {}",
@@ -244,6 +288,7 @@ mod tests {
                         Parameter("l".to_string(), None),
                         Parameter("r".to_string(), Some(Type("i32".to_string(), vec![]))),
                     ],
+                    vec![],
                 )),
             ),
             (
@@ -252,6 +297,7 @@ mod tests {
                 Top::FnDefine(Method(
                     Some(Type("i32".to_string(), vec![])),
                     "foo".to_string(),
+                    vec![],
                     vec![],
                 )),
             ),
@@ -263,6 +309,37 @@ mod tests {
                 .next()
                 .unwrap();
             assert_eq!(ast, parse_function_define(r));
+        }
+    }
+    #[test]
+    fn test_statement() {
+        let test_cases: HashMap<&str, Statement> = vec![
+            (
+                "let a = 1",
+                Statement::LetDefine(false, "a".to_string(), None, Expr::Integer(1)),
+            ),
+            (
+                "let a: i32 = 1",
+                Statement::LetDefine(
+                    false,
+                    "a".to_string(),
+                    Some(Type("i32".to_string(), vec![])),
+                    Expr::Integer(1),
+                ),
+            ),
+            (
+                "let mut a = 1",
+                Statement::LetDefine(true, "a".to_string(), None, Expr::Integer(1)),
+            ),
+            ("return 1", Statement::Return(Expr::Integer(1))),
+        ].into_iter()
+        .collect();
+        for (input, ast) in test_cases {
+            let r = ElzParser::parse(Rule::statement, input)
+                .unwrap()
+                .next()
+                .unwrap();
+            assert_eq!(ast, parse_statement(r));
         }
     }
     #[test]

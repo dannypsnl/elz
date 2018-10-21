@@ -2,6 +2,7 @@
 pub enum Expr {
     Integer(i64),
     Number(f64),
+    Ident(String),
 }
 #[derive(Clone, PartialEq, Debug)]
 pub enum Top {
@@ -21,6 +22,19 @@ pub struct Type(pub String, pub Vec<Type>);
 pub struct TypeField(pub String, pub Type);
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct Method(pub Option<Type>, pub String, pub Vec<Parameter>);
+pub struct Method(
+    pub Option<Type>,
+    pub String,
+    pub Vec<Parameter>,
+    pub Vec<Statement>,
+);
 #[derive(Clone, PartialEq, Debug)]
 pub struct Parameter(pub String, pub Option<Type>);
+#[derive(Clone, PartialEq, Debug)]
+pub enum Statement {
+    // mutable, name, type, expression
+    LetDefine(bool, String, Option<Type>, Expr),
+    Return(Expr),
+    Assign,
+    AccessChain,
+}
