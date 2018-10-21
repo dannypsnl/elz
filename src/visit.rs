@@ -4,15 +4,16 @@ use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::Module;
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{BasicValue, BasicValueEnum};
+use inkwell::values::{BasicValue, BasicValueEnum, PointerValue};
 use inkwell::AddressSpace;
-use inkwell::OptimizationLevel;
-use inkwell::targets::{InitializationConfig, Target};
+
+use std::collections::HashMap;
 
 pub struct Visitor {
     context: Context,
     builder: Builder,
     module: Module,
+    global_bind: HashMap<String, PointerValue>,
 }
 
 impl Visitor {
@@ -24,6 +25,7 @@ impl Visitor {
             context: context,
             builder: builder,
             module: module,
+            global_bind: HashMap::new(),
         }
     }
     pub fn visit_program(&mut self, ast_tree: Vec<Top>) -> Module {
@@ -33,14 +35,8 @@ impl Visitor {
                     println!("chain: {:?}, block: {:?}", chain, block);
                 }
                 // FIXME: use exported make sure the global value should add into shared var list or not
-                Top::GlobalBind(_exported, name, e) => {
-                    let (expr_result, elz_type) = self.visit_const_expr(e);
-                    let global_value = self.module.add_global(
-                        elz_type,
-                        Some(AddressSpace::Const),
-                        name.as_str(),
-                    );
-                    global_value.set_initializer(&expr_result);
+                Top::GlobalBind(_exported, name, expr) => {
+                    self.visit_global_bind(_exported, name, expr);
                 }
                 Top::FnDefine(Method(return_t, name, params, statements)) => {
                     self.visit_function(return_t, name, params, statements);
@@ -49,6 +45,19 @@ impl Visitor {
             }
         }
         self.module.clone()
+    }
+    fn visit_global_bind(&mut self, _exported: bool, name: String, expr: Expr) {
+        let (expr_result, elz_type) = self.visit_const_expr(expr);
+        let global_value = self.module.add_global(
+            elz_type,
+            Some(AddressSpace::Const),
+            name.as_str(),
+        );
+        global_value.set_initializer(&expr_result);
+        self.global_bind.insert(
+            name,
+            global_value.as_pointer_value()
+        );
     }
     fn visit_function(
         &mut self,
@@ -105,6 +114,12 @@ impl Visitor {
         match stmt {
             Statement::LetDefine(_mutable, name, typ, expr) => {
                 let (v, type_enum) = self.visit_const_expr(expr);
+                if let Some(typ) = typ {
+                    let t = self.convert(typ);
+                    if t != type_enum {
+                        panic!("defined type is not matching expression type");
+                    }
+                }
                 let pv = self.builder.build_alloca(type_enum, name.as_str());
                 self.builder.build_store(pv, v);
             }
@@ -132,6 +147,15 @@ impl Visitor {
                     .as_basic_value_enum(),
                 self.context.f64_type().as_basic_type_enum(),
             ),
+            Expr::Ident(name) => {
+                match self.global_bind.get(&name) {
+                    Some(gv) => {
+                        let v = self.builder.build_load(*gv, "");
+                        (v, v.get_type())
+                    }
+                    None => panic!("No value named {}!", name),
+                }
+            }
         }
     }
 
@@ -159,6 +183,8 @@ impl Visitor {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use inkwell::OptimizationLevel;
+    use inkwell::targets::{InitializationConfig, Target};
 
     #[test]
     fn a_function_return_an_interger() {
@@ -183,5 +209,31 @@ mod tests {
         let result = unsafe { ee.run_function(&fn_foo, &vec![]) };
         let r = result.as_int(true);
         assert_eq!(r, 1);
+    }
+
+    #[test]
+    fn function_return_global_value() {
+        let mut visitor = Visitor::new();
+        visitor.visit_global_bind(false, "g".to_string(), Expr::Integer(10));
+        visitor.visit_function(
+            Some(Type("i64".to_string(), vec![])),
+            "foo".to_string(),
+            vec![],
+            vec![Statement::Return(Expr::Ident("g".to_string()))],
+        );
+        let module = visitor.module;
+
+        Target::initialize_native(&InitializationConfig::default())
+            .expect("Failed to initialize native target");
+
+        let ee = module
+            .create_jit_execution_engine(OptimizationLevel::None)
+            .expect("Failed at create JIT execution engine");
+        let fn_foo = ee.get_function_value("foo").expect(
+            "failed at get function value",
+        );
+        let result = unsafe { ee.run_function(&fn_foo, &vec![]) };
+        let r = result.as_int(true);
+        assert_eq!(r, 10);
     }
 }

@@ -2,6 +2,7 @@
 pub enum Expr {
     Integer(i64),
     Number(f64),
+    Ident(String),
 }
 #[derive(Clone, PartialEq, Debug)]
 pub enum Top {

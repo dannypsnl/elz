@@ -150,6 +150,10 @@ fn parse_expr(rule: Pair<Rule>) -> Expr {
                 Expr::Number(num_v.parse::<f64>().unwrap())
             }
         }
+        Rule::ident => {
+            let ident_name = rule.as_str();
+            Expr::Ident(ident_name.to_string())
+        }
         r => panic!("unknown rule: {:?}", r),
     }
 }
