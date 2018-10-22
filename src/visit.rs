@@ -48,16 +48,12 @@ impl Visitor {
     }
     fn visit_global_bind(&mut self, _exported: bool, name: String, expr: Expr) {
         let (expr_result, elz_type) = self.visit_const_expr(expr);
-        let global_value = self.module.add_global(
-            elz_type,
-            Some(AddressSpace::Const),
-            name.as_str(),
-        );
+        let global_value =
+            self.module
+                .add_global(elz_type, Some(AddressSpace::Const), name.as_str());
         global_value.set_initializer(&expr_result);
-        self.global_bind.insert(
-            name,
-            global_value.as_pointer_value()
-        );
+        self.global_bind
+            .insert(name, global_value.as_pointer_value());
     }
     fn visit_function(
         &mut self,
@@ -84,10 +80,9 @@ impl Visitor {
         let fn_type = if let Some(t) = return_t {
             self.convert(t).fn_type(param_type_list.as_slice(), false)
         } else {
-            self.context.void_type().fn_type(
-                param_type_list.as_slice(),
-                false,
-            )
+            self.context
+                .void_type()
+                .fn_type(param_type_list.as_slice(), false)
         };
         let new_fn = self.module.add_function(name.as_str(), fn_type, None);
         for (i, param) in params.iter().enumerate() {
@@ -147,15 +142,13 @@ impl Visitor {
                     .as_basic_value_enum(),
                 self.context.f64_type().as_basic_type_enum(),
             ),
-            Expr::Ident(name) => {
-                match self.global_bind.get(&name) {
-                    Some(gv) => {
-                        let v = self.builder.build_load(*gv, "");
-                        (v, v.get_type())
-                    }
-                    None => panic!("No value named {}!", name),
+            Expr::Ident(name) => match self.global_bind.get(&name) {
+                Some(gv) => {
+                    let v = self.builder.build_load(*gv, "");
+                    (v, v.get_type())
                 }
-            }
+                None => panic!("No value named {}!", name),
+            },
         }
     }
 
@@ -183,8 +176,8 @@ impl Visitor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use inkwell::OptimizationLevel;
     use inkwell::targets::{InitializationConfig, Target};
+    use inkwell::OptimizationLevel;
 
     fn test_module(module: Module, fn_name: &str, expected: u64) {
         Target::initialize_native(&InitializationConfig::default())
@@ -193,9 +186,9 @@ mod tests {
         let ee = module
             .create_jit_execution_engine(OptimizationLevel::None)
             .expect("failed at create JIT execution engine");
-        let test_fn = ee.get_function_value(fn_name).expect(
-            "failed at get function value",
-        );
+        let test_fn = ee
+            .get_function_value(fn_name)
+            .expect("failed at get function value");
         let result = unsafe { ee.run_function(&test_fn, &vec![]) };
         let r = result.as_int(true);
         assert_eq!(r, expected);
