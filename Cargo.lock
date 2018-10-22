@@ -120,7 +120,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=llvm6-0#cf7c06430eeb32ea4cb78b2ce91b749d1139864e"
+source = "git+https://github.com/TheDan64/inkwell?branch=llvm6-0#4cfb0618db74d652f11c252891eaefcb6310542d"
 dependencies = [
  "either 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "enum-methods 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)",
