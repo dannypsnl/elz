@@ -3,17 +3,76 @@ use inkwell::basic_block::BasicBlock;
 use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::Module;
-use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{BasicValue, BasicValueEnum, PointerValue};
+use inkwell::types::{BasicType, BasicTypeEnum, FunctionType};
+use inkwell::values::{BasicValue, BasicValueEnum, FunctionValue, PointerValue};
 use inkwell::AddressSpace;
 
 use std::collections::HashMap;
+
+trait Scope {
+    fn add_bind(&mut self, name: String, value: PointerValue);
+    fn get_bind(&self, name: &String) -> Option<&PointerValue>;
+}
+
+struct FunctionContext {
+    value: FunctionValue,
+    block: Block,
+}
+
+impl FunctionContext {
+    fn from(value: FunctionValue) -> FunctionContext {
+        FunctionContext {
+            value: value,
+            block: Block::new(),
+        }
+    }
+
+    fn return_type(&self) -> BasicTypeEnum {
+        self.value.get_return_type()
+    }
+}
+
+impl Scope for FunctionContext {
+    fn add_bind(&mut self, name: String, value: PointerValue) {
+        self.block.add_bind(name, value);
+    }
+    fn get_bind(&self, name: &String) -> Option<&PointerValue> {
+        self.block.get_bind(name)
+    }
+}
+
+/// Block is holding a closure in compiling, it stores binding & helps others component can access them
+#[derive(Debug)]
+struct Block {
+    binds: HashMap<String, PointerValue>,
+    // TODO: children: Vec<Block>,
+}
+
+impl Block {
+    fn new() -> Block {
+        Block {
+            binds: HashMap::new(),
+        }
+    }
+}
+impl Scope for Block {
+    fn add_bind(&mut self, name: String, value: PointerValue) {
+        if self.binds.contains_key(&name) {
+            panic!("bind: {} already exists!", name)
+        }
+        self.binds.insert(name, value);
+    }
+    fn get_bind(&self, name: &String) -> Option<&PointerValue> {
+        self.binds.get(name)
+    }
+}
 
 pub struct Visitor {
     context: Context,
     builder: Builder,
     module: Module,
-    global_bind: HashMap<String, PointerValue>,
+    global_bind: Block,
+    functions: HashMap<String, FunctionContext>,
 }
 
 impl Visitor {
@@ -25,7 +84,8 @@ impl Visitor {
             context: context,
             builder: builder,
             module: module,
-            global_bind: HashMap::new(),
+            global_bind: Block::new(),
+            functions: HashMap::new(),
         }
     }
     pub fn visit_program(&mut self, ast_tree: Vec<Top>) -> Module {
@@ -47,22 +107,17 @@ impl Visitor {
         self.module.clone()
     }
     fn visit_global_bind(&mut self, _exported: bool, name: String, expr: Expr) {
-        let (expr_result, elz_type) = self.visit_const_expr(expr);
+        let (expr_result, elz_type) = self.visit_const_expr(None, expr);
         let global_value =
             self.module
                 .add_global(elz_type, Some(AddressSpace::Const), name.as_str());
         global_value.set_initializer(&expr_result);
         self.global_bind
-            .insert(name, global_value.as_pointer_value());
+            .add_bind(name, global_value.as_pointer_value());
     }
-    fn visit_function(
-        &mut self,
-        return_t: Option<Type>,
-        name: String,
-        params: Vec<Parameter>,
-        statements: Vec<Statement>,
-    ) {
-        let param_type_list = if params.len() != 0 {
+
+    fn get_param_type_list(&self, params: &Vec<Parameter>) -> Vec<BasicTypeEnum> {
+        if params.len() != 0 {
             let mut params = params.clone();
             // last type must be defined!
             let mut param_t = params.pop().unwrap().1.unwrap();
@@ -76,17 +131,24 @@ impl Visitor {
             param_type_list
         } else {
             vec![]
-        };
-        let fn_type = if let Some(t) = return_t {
+        }
+    }
+    fn get_fn_type(
+        &self,
+        return_t: Option<Type>,
+        param_type_list: Vec<BasicTypeEnum>,
+    ) -> FunctionType {
+        if let Some(t) = return_t {
             self.convert(t).fn_type(param_type_list.as_slice(), false)
         } else {
             self.context
                 .void_type()
                 .fn_type(param_type_list.as_slice(), false)
-        };
-        let new_fn = self.module.add_function(name.as_str(), fn_type, None);
+        }
+    }
+    fn set_params_name(&self, function: FunctionValue, params: &Vec<Parameter>) {
         for (i, param) in params.iter().enumerate() {
-            if let Some(p) = new_fn.get_nth_param(i as u32) {
+            if let Some(p) = function.get_nth_param(i as u32) {
                 let name = param.0.as_str();
                 use inkwell::values::BasicValueEnum::*;
                 match p {
@@ -99,34 +161,68 @@ impl Visitor {
                 };
             }
         }
-        let basic_block = self.context.append_basic_block(&new_fn, "entry");
-        for stmt in statements {
-            self.visit_statement(stmt, &basic_block);
-        }
     }
-    fn visit_statement(&mut self, stmt: Statement, basic_block: &BasicBlock) {
+    fn visit_function(
+        &mut self,
+        return_t: Option<Type>,
+        name: String,
+        params: Vec<Parameter>,
+        statements: Vec<Statement>,
+    ) {
+        let param_type_list = self.get_param_type_list(&params);
+        let fn_type = self.get_fn_type(return_t, param_type_list);
+        let new_fn = self.module.add_function(name.as_str(), fn_type, None);
+        self.set_params_name(new_fn, &params);
+        let mut context = FunctionContext::from(new_fn);
+        let basic_block = self.context.append_basic_block(&new_fn, "entry");
+        self.visit_statements(&mut context, statements, &basic_block);
+        self.functions.insert(name, context);
+    }
+    fn visit_statements(
+        &mut self,
+        context: &mut FunctionContext,
+        statements: Vec<Statement>,
+        basic_block: &BasicBlock,
+    ) {
         self.builder.position_at_end(basic_block);
-        match stmt {
-            Statement::LetDefine(_mutable, name, typ, expr) => {
-                let (v, type_enum) = self.visit_const_expr(expr);
-                if let Some(typ) = typ {
-                    let t = self.convert(typ);
-                    if t != type_enum {
-                        panic!("defined type is not matching expression type");
+        for stmt in statements {
+            match stmt {
+                Statement::LetDefine(_mutable, name, typ, expr) => {
+                    let (v, type_enum) = self.visit_const_expr(Some(context), expr);
+                    if let Some(typ) = typ {
+                        let t = self.convert(typ);
+                        if t != type_enum {
+                            panic!(
+                                "defined type is {:?}, not matching expression type: {:?}",
+                                t, type_enum
+                            );
+                        }
                     }
+                    let pv = self.builder.build_alloca(type_enum, name.as_str());
+                    self.builder.build_store(pv, v);
+                    context.add_bind(name, pv);
                 }
-                let pv = self.builder.build_alloca(type_enum, name.as_str());
-                self.builder.build_store(pv, v);
+                Statement::Return(e) => {
+                    let (v, t) = self.visit_const_expr(Some(context), e);
+                    if context.return_type() != t {
+                        panic!(
+                            "expected return {:?}, but is {:?}",
+                            context.return_type(),
+                            t
+                        );
+                    }
+                    self.builder.build_return(Some(&v));
+                }
+                stmt => panic!("Not implement AST: {:?} yet", stmt),
             }
-            Statement::Return(e) => {
-                let (v, _t) = self.visit_const_expr(e);
-                self.builder.build_return(Some(&v));
-            }
-            stmt => panic!("Not implement AST: {:?} yet", stmt),
         }
     }
 
-    pub fn visit_const_expr(&mut self, expr: Expr) -> (BasicValueEnum, BasicTypeEnum) {
+    fn visit_const_expr(
+        &mut self,
+        scope: Option<&Scope>,
+        expr: Expr,
+    ) -> (BasicValueEnum, BasicTypeEnum) {
         match expr {
             Expr::Integer(iv) => (
                 self.context
@@ -142,13 +238,24 @@ impl Visitor {
                     .as_basic_value_enum(),
                 self.context.f64_type().as_basic_type_enum(),
             ),
-            Expr::Ident(name) => match self.global_bind.get(&name) {
-                Some(gv) => {
-                    let v = self.builder.build_load(*gv, "");
-                    (v, v.get_type())
-                }
-                None => panic!("No value named {}!", name),
-            },
+            Expr::Ident(name) => {
+                let pv = if let Some(scope) = scope {
+                    match scope.get_bind(&name) {
+                        Some(v) => v,
+                        None => match self.global_bind.get_bind(&name) {
+                            Some(v) => v,
+                            None => panic!("No value named {}!", name),
+                        },
+                    }
+                } else {
+                    match self.global_bind.get_bind(&name) {
+                        Some(v) => v,
+                        None => panic!("No value named {}!", name),
+                    }
+                };
+                let v = self.builder.build_load(*pv, "");
+                (v, v.get_type())
+            }
         }
     }
 
@@ -217,5 +324,20 @@ mod tests {
             vec![Statement::Return(Expr::Ident("g".to_string()))],
         );
         test_module(visitor.module, "foo", 10);
+    }
+
+    #[test]
+    fn function_return_local_value() {
+        let mut visitor = Visitor::new();
+        visitor.visit_function(
+            Some(Type("i64".to_string(), vec![])),
+            "foo".to_string(),
+            vec![],
+            vec![
+                Statement::LetDefine(false, "a".to_string(), None, Expr::Integer(15)),
+                Statement::Return(Expr::Ident("a".to_string())),
+            ],
+        );
+        test_module(visitor.module, "foo", 15);
     }
 }
