@@ -135,11 +135,12 @@ impl Visitor {
     }
     fn get_fn_type(
         &self,
-        return_t: Option<Type>,
+        return_t: &Option<Type>,
         param_type_list: Vec<BasicTypeEnum>,
     ) -> FunctionType {
         if let Some(t) = return_t {
-            self.convert(t).fn_type(param_type_list.as_slice(), false)
+            self.convert(t.clone())
+                .fn_type(param_type_list.as_slice(), false)
         } else {
             self.context
                 .void_type()
@@ -170,12 +171,28 @@ impl Visitor {
         statements: Vec<Statement>,
     ) {
         let param_type_list = self.get_param_type_list(&params);
-        let fn_type = self.get_fn_type(return_t, param_type_list);
+        let fn_type = if name == "main" {
+            if return_t != None {
+                panic!("fn main can't return any type");
+            }
+            if params.len() != 0 {
+                panic!("fn main can't have any parameters");
+            }
+            self.context.i32_type().fn_type(&[], false)
+        } else {
+            self.get_fn_type(&return_t, param_type_list)
+        };
         let new_fn = self.module.add_function(name.as_str(), fn_type, None);
         self.set_params_name(new_fn, &params);
         let mut context = FunctionContext::from(new_fn);
         let basic_block = self.context.append_basic_block(&new_fn, "entry");
         self.visit_statements(&mut context, statements, &basic_block);
+        let end_of_fn = new_fn
+            .get_last_basic_block()
+            .expect("missing basic block in function");
+        self.builder.position_at_end(&end_of_fn);
+        self.builder
+            .build_return(Some(&self.context.i32_type().const_int(1 as u64, true)));
         self.functions.insert(name, context);
     }
     fn visit_statements(
