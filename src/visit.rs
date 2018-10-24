@@ -188,12 +188,14 @@ impl Visitor {
         let mut context = FunctionContext::from(new_fn);
         let basic_block = self.context.append_basic_block(&new_fn, "entry");
         self.visit_statements(&mut context, statements, &basic_block);
-        let end_of_fn = new_fn
-            .get_last_basic_block()
-            .expect("missing basic block in function");
-        self.builder.position_at_end(&end_of_fn);
-        self.builder
-            .build_return(Some(&self.context.i32_type().const_int(1 as u64, true)));
+        if name == "main" {
+            let end_of_fn = new_fn
+                .get_last_basic_block()
+                .expect("missing basic block in function");
+            self.builder.position_at_end(&end_of_fn);
+            self.builder
+                .build_return(Some(&self.context.i32_type().const_int(0 as u64, true)));
+        }
         self.functions.insert(name, context);
     }
     fn visit_statements(
