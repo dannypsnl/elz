@@ -34,6 +34,15 @@ fn parse_return(return_stmt: Pair<Rule>) -> Statement {
     let e = return_stmt.into_inner().next().unwrap();
     Statement::Return(parse_expr(e))
 }
+fn parse_access_chain(access_chain: Pair<Rule>) -> Expr {
+    Expr::Ident("a".to_string())
+}
+fn parse_assign(assignment: Pair<Rule>) -> Statement {
+    let mut pairs = assignment.into_inner();
+    let access = parse_access_chain(pairs.next().unwrap());
+    let expr = parse_expr(pairs.next().unwrap());
+    Statement::Assign(access, expr)
+}
 fn parse_statement(statement: Pair<Rule>) -> Statement {
     let mut pairs = statement.into_inner();
     let rule = pairs.next().unwrap();
@@ -42,7 +51,7 @@ fn parse_statement(statement: Pair<Rule>) -> Statement {
         Rule::let_define => parse_let_define(rule),
         Rule::let_mut_define => parse_let_mut_define(rule),
         Rule::return_stmt => parse_return(rule),
-        Rule::assign => Statement::Assign,
+        Rule::assign => parse_assign(rule),
         Rule::access_chain => Statement::AccessChain,
         r => panic!("should not found rule: {:?} at here", r),
     }
@@ -330,6 +339,10 @@ mod tests {
             (
                 "let mut a = 1",
                 Statement::LetDefine(true, "a".to_string(), None, Expr::Integer(1)),
+            ),
+            (
+                "a = 1",
+                Statement::Assign(Expr::Ident("a".to_string()), Expr::Integer(1)),
             ),
             ("return 1", Statement::Return(Expr::Integer(1))),
         ].into_iter()

@@ -35,6 +35,7 @@ pub enum Statement {
     // mutable, name, type, expression
     LetDefine(bool, String, Option<Type>, Expr),
     Return(Expr),
-    Assign,
+    // left-value, expression
+    Assign(Expr, Expr),
     AccessChain,
 }
