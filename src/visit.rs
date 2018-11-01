@@ -276,6 +276,7 @@ impl Visitor {
                 let v = self.builder.build_load(*pv, "");
                 (v, v.get_type())
             }
+            e => panic!("not implement expression {:?} yet", e),
         }
     }
 

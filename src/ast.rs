@@ -3,6 +3,8 @@ pub enum Expr {
     Integer(i64),
     Number(f64),
     Ident(String),
+    // ident chain, sub expression
+    AccessChain(Vec<Expr>),
 }
 #[derive(Clone, PartialEq, Debug)]
 pub enum Top {
