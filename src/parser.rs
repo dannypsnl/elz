@@ -14,15 +14,16 @@ use pest::iterators::Pair;
 fn parse_local_define(local_define: Pair<Rule>, mutable: bool) -> Statement {
     let mut pairs = local_define.into_inner();
     let name = pairs.next().unwrap();
-    let mut next_rule = pairs.next().unwrap();
-    let mut t = None;
-    if next_rule.as_rule() == Rule::elz_type {
-        t = parse_elz_type(next_rule);
-        next_rule = pairs.next().unwrap();
-    }
-    let expr = parse_expr(next_rule);
+    let next_rule = pairs.next().unwrap();
+    let (typ, expr) = match next_rule.as_rule() {
+        Rule::elz_type => {
+            let t = next_rule;
+            (parse_elz_type(t), parse_expr(pairs.next().unwrap()))
+        }
+        _ => (None, parse_expr(next_rule)),
+    };
     // immutable, name, type, expression
-    Statement::LetDefine(mutable, name.as_str().to_string(), t, expr)
+    Statement::LetDefine(mutable, name.as_str().to_string(), typ, expr)
 }
 fn parse_let_define(let_define: Pair<Rule>) -> Statement {
     parse_local_define(let_define, false)
@@ -61,10 +62,11 @@ fn parse_method(method: Pair<Rule>) -> Method {
         }
         let mut pairs = p.into_inner();
         let p_name = pairs.next().unwrap();
-        let mut p_type = None;
-        if let Some(typ) = pairs.next() {
-            p_type = parse_elz_type(typ);
-        }
+        let p_type = if let Some(typ) = pairs.next() {
+            parse_elz_type(typ)
+        } else {
+            None
+        };
         params.push(Parameter(p_name.as_str().to_string(), p_type));
     }
     let mut statements = vec![];
@@ -96,13 +98,13 @@ fn parse_elz_type(elz_type: Pair<Rule>) -> Option<Type> {
 }
 fn parse_type_field(rule: Pair<Rule>) -> TypeField {
     let mut pairs = rule.into_inner();
-    let field_name = pairs.next().unwrap();
+    let field_name = pairs.next().unwrap().as_str().to_string();
     let field_type = parse_elz_type(pairs.next().unwrap()).unwrap();
-    TypeField(field_name.as_str().to_string(), field_type)
+    TypeField(field_name, field_type)
 }
 fn parse_type_define(rule: Pair<Rule>) -> Top {
     let mut pairs = rule.into_inner();
-    let type_name = pairs.next().unwrap();
+    let type_name = pairs.next().unwrap().as_str().to_string();
     let mut templates = vec![];
     let mut fields = vec![];
     while let Some(r) = pairs.next() {
@@ -115,7 +117,7 @@ fn parse_type_define(rule: Pair<Rule>) -> Top {
     for field in pairs {
         fields.push(parse_type_field(field));
     }
-    Top::TypeDefine(type_name.as_str().to_string(), templates, fields)
+    Top::TypeDefine(type_name, templates, fields)
 }
 
 fn parse_import_stmt(rule: Pair<Rule>) -> Top {
@@ -159,13 +161,11 @@ fn parse_expr(rule: Pair<Rule>) -> Expr {
 }
 fn parse_global_binding(rule: Pair<Rule>) -> Top {
     let mut pairs = rule.into_inner();
-    let export = pairs.next().unwrap();
-    let mut name = export.clone();
-    let mut exported = false;
-    if export.as_rule() == Rule::symbol_export {
-        exported = true;
-        name = pairs.next().unwrap();
-    }
+    let next_token = pairs.next().unwrap();
+    let (exported, name) = match next_token.as_rule() {
+        Rule::symbol_export => (true, pairs.next().unwrap()),
+        _ => (false, next_token),
+    };
     let expr = pairs.next().unwrap();
     Top::GlobalBind(
         exported,
@@ -180,12 +180,12 @@ pub fn parse_elz_program(file_name: &str) -> Vec<Top> {
     f.read_to_string(&mut program_content)
         .expect("failed at read file");
 
-    let mut tree = vec![];
-
     let program = ElzParser::parse(Rule::elz_program, program_content.as_str())
         .expect("unsuccesful compile")
         .next()
         .unwrap();
+
+    let mut tree = vec![];
     for rule in program.into_inner() {
         match rule.as_rule() {
             Rule::import_stmt => {
@@ -210,14 +210,18 @@ pub fn parse_elz_program(file_name: &str) -> Vec<Top> {
             }
         }
     }
-
-    return tree;
+    tree
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::collections::HashMap;
+
+    fn test_rule(rule: Rule, input: &str, closure: Box<Fn(Pair<Rule>)>) {
+        let r = ElzParser::parse(rule, input).unwrap().next().unwrap();
+        closure(r);
+    }
 
     #[test]
     fn test_import_stmt() {
@@ -244,11 +248,11 @@ mod tests {
         ].into_iter()
         .collect();
         for (input, ast) in test_cases {
-            let r = ElzParser::parse(Rule::import_stmt, input)
-                .unwrap()
-                .next()
-                .unwrap();
-            assert_eq!(ast, parse_import_stmt(r));
+            test_rule(
+                Rule::import_stmt,
+                input,
+                Box::new(move |r| assert_eq!(ast, parse_import_stmt(r))),
+            )
         }
     }
     #[test]
@@ -265,11 +269,11 @@ mod tests {
         ].into_iter()
         .collect();
         for (input, ast) in test_cases {
-            let r = ElzParser::parse(Rule::global_binding, input)
-                .unwrap()
-                .next()
-                .unwrap();
-            assert_eq!(ast, parse_global_binding(r));
+            test_rule(
+                Rule::global_binding,
+                input,
+                Box::new(move |r| assert_eq!(ast, parse_global_binding(r))),
+            )
         }
     }
     #[test]
@@ -304,11 +308,11 @@ mod tests {
         ].into_iter()
         .collect();
         for (input, ast) in test_cases {
-            let r = ElzParser::parse(Rule::function_define, input)
-                .unwrap()
-                .next()
-                .unwrap();
-            assert_eq!(ast, parse_function_define(r));
+            test_rule(
+                Rule::function_define,
+                input,
+                Box::new(move |r| assert_eq!(ast, parse_function_define(r))),
+            )
         }
     }
     #[test]
@@ -335,11 +339,11 @@ mod tests {
         ].into_iter()
         .collect();
         for (input, ast) in test_cases {
-            let r = ElzParser::parse(Rule::statement, input)
-                .unwrap()
-                .next()
-                .unwrap();
-            assert_eq!(ast, parse_statement(r));
+            test_rule(
+                Rule::statement,
+                input,
+                Box::new(move |r| assert_eq!(ast, parse_statement(r))),
+            )
         }
     }
     #[test]
@@ -370,11 +374,11 @@ mod tests {
         ].into_iter()
         .collect();
         for (input, ast) in test_cases {
-            let r = ElzParser::parse(Rule::type_define, input)
-                .unwrap()
-                .next()
-                .unwrap();
-            assert_eq!(ast, parse_type_define(r));
+            test_rule(
+                Rule::type_define,
+                input,
+                Box::new(move |r| assert_eq!(ast, parse_type_define(r))),
+            )
         }
     }
     #[test]
