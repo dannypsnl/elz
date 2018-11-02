@@ -20,13 +20,13 @@ $ git clone https://github.com/elz-lang/elz.git && cd elz
 $ cargo install
 ```
 
-Make sure your `$GOPATH/bin` is one of `$PATH`
+Make sure your `$HOME/.cargo/bin` in `$PATH`
 
 ## Usage
 
-Only for develop just now.
+Only for developing now.
 
 ```bash
-$ elz compile source.elz  # elz will compile it to llvm ir then print it.
+$ elz compile source.elz
 ```
 
