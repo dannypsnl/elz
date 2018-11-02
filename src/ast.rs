@@ -3,6 +3,8 @@ pub enum Expr {
     Integer(i64),
     Number(f64),
     Ident(String),
+    // ident chain, sub expression
+    AccessChain(Vec<Expr>, Option<Box<Expr>>),
 }
 #[derive(Clone, PartialEq, Debug)]
 pub enum Top {
@@ -35,6 +37,7 @@ pub enum Statement {
     // mutable, name, type, expression
     LetDefine(bool, String, Option<Type>, Expr),
     Return(Expr),
-    Assign,
+    // left-value, expression
+    Assign(Expr, Expr),
     AccessChain,
 }
