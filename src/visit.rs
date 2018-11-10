@@ -107,7 +107,7 @@ impl Visitor {
         self.module.clone()
     }
     fn visit_global_bind(&mut self, _exported: bool, name: String, expr: Expr) {
-        let (expr_result, elz_type) = self.visit_const_expr(None, expr);
+        let (expr_result, elz_type) = self.visit_expr(None, expr);
         let global_value =
             self.module
                 .add_global(elz_type, Some(AddressSpace::Const), name.as_str());
@@ -208,7 +208,7 @@ impl Visitor {
         for stmt in statements {
             match stmt {
                 Statement::LetDefine(_mutable, name, typ, expr) => {
-                    let (v, type_enum) = self.visit_const_expr(Some(context), expr);
+                    let (v, type_enum) = self.visit_expr(Some(context), expr);
                     if let Some(typ) = typ {
                         let t = self.convert(typ);
                         if t != type_enum {
@@ -223,7 +223,7 @@ impl Visitor {
                     context.add_bind(name, pv);
                 }
                 Statement::Return(e) => {
-                    let (v, t) = self.visit_const_expr(Some(context), e);
+                    let (v, t) = self.visit_expr(Some(context), e);
                     if context.return_type() != t {
                         panic!(
                             "expected return {:?}, but is {:?}",
@@ -233,16 +233,16 @@ impl Visitor {
                     }
                     self.builder.build_return(Some(&v));
                 }
+                Statement::Assign(leftValue, rightValue) => {
+                    let (leftV, leftT) = self.visit_expr(Some(context), leftValue);
+                    let (rightV, rightT) = self.visit_expr(Some(context), rightValue);
+                }
                 stmt => panic!("Not implement AST: {:?} yet", stmt),
             }
         }
     }
 
-    fn visit_const_expr(
-        &mut self,
-        scope: Option<&Scope>,
-        expr: Expr,
-    ) -> (BasicValueEnum, BasicTypeEnum) {
+    fn visit_expr(&mut self, scope: Option<&Scope>, expr: Expr) -> (BasicValueEnum, BasicTypeEnum) {
         match expr {
             Expr::Integer(iv) => (
                 self.context
@@ -276,6 +276,10 @@ impl Visitor {
                 let v = self.builder.build_load(*pv, "");
                 (v, v.get_type())
             }
+            // Expr::AccessChain(identChain, subExprs) => {
+            //     for ident in identChain {}
+            //     ()
+            // }
             e => panic!("not implement expression {:?} yet", e),
         }
     }

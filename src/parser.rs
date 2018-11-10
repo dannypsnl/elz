@@ -45,7 +45,8 @@ fn parse_access_element(access_element: Pair<Rule>) -> Expr {
 fn parse_access_chain(access_chain: Pair<Rule>) -> Expr {
     let mut pairs = access_chain.into_inner();
     let mut idents = vec![];
-    let mut sub_access = None;
+    let mut sub_access = vec![];
+    let mut change = false;
     while let Some(pair) = pairs.next() {
         if pair.as_rule() != Rule::ident {
             let sub = match pair.as_rule() {
@@ -53,10 +54,14 @@ fn parse_access_chain(access_chain: Pair<Rule>) -> Expr {
                 Rule::access_element => parse_access_element(pair),
                 r => panic!("access chain should not contain rule: {:?}", r),
             };
-            sub_access = Some(Box::new(sub));
-            break;
+            sub_access.push(sub);
+            change = true;
+        } else {
+            if change {
+                panic!("shouldn't receive ident after start sub expressions");
+            }
+            idents.push(pair.as_str().to_string());
         }
-        idents.push(Expr::Ident(pair.as_str().to_string()))
     }
     Expr::AccessChain(idents, sub_access)
 }
@@ -369,7 +374,7 @@ mod tests {
             (
                 "a = 1",
                 Statement::Assign(
-                    Expr::AccessChain(vec![Expr::Ident("a".to_string())], None),
+                    Expr::AccessChain(vec!["a".to_string()], vec![]),
                     Expr::Integer(1),
                 ),
             ),

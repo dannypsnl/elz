@@ -4,7 +4,7 @@ pub enum Expr {
     Number(f64),
     Ident(String),
     // ident chain, sub expression
-    AccessChain(Vec<Expr>, Option<Box<Expr>>),
+    AccessChain(Vec<String>, Vec<Expr>),
 }
 #[derive(Clone, PartialEq, Debug)]
 pub enum Top {
