@@ -79,28 +79,45 @@ func (c *CodeGenerator) NewExpr(block *ir.BasicBlock, expr ast.Expr) value.Value
 	panic("unsupported expr")
 }
 
+type Operator struct {
+	RetType   types.Type
+	Operation func(block *ir.BasicBlock, l, r value.Value) value.Value
+}
+
 var (
 	binaryOpFormat = "%s(%s,%s)"
 	i32            = types.I32
-	opMap          = map[string]func(block *ir.BasicBlock, l, r value.Value) value.Value{
-		fmt.Sprintf(binaryOpFormat, "+", i32, i32): func(block *ir.BasicBlock, l, r value.Value) value.Value {
-			return block.NewAdd(l, r)
+	opMap          = map[string]*Operator{
+		fmt.Sprintf(binaryOpFormat, "+", i32, i32): {
+			RetType: i32,
+			Operation: func(block *ir.BasicBlock, l, r value.Value) value.Value {
+				return block.NewAdd(l, r)
+			},
 		},
-		fmt.Sprintf(binaryOpFormat, "-", i32, i32): func(block *ir.BasicBlock, l, r value.Value) value.Value {
-			return block.NewSub(l, r)
+		fmt.Sprintf(binaryOpFormat, "-", i32, i32): {
+			RetType: i32,
+			Operation: func(block *ir.BasicBlock, l, r value.Value) value.Value {
+				return block.NewSub(l, r)
+			},
 		},
-		fmt.Sprintf(binaryOpFormat, "*", i32, i32): func(block *ir.BasicBlock, l, r value.Value) value.Value {
-			return block.NewMul(l, r)
+		fmt.Sprintf(binaryOpFormat, "*", i32, i32): {
+			RetType: i32,
+			Operation: func(block *ir.BasicBlock, l, r value.Value) value.Value {
+				return block.NewMul(l, r)
+			},
 		},
-		fmt.Sprintf(binaryOpFormat, "/", i32, i32): func(block *ir.BasicBlock, l, r value.Value) value.Value {
-			return block.NewSDiv(l, r)
+		fmt.Sprintf(binaryOpFormat, "/", i32, i32): {
+			RetType: i32,
+			Operation: func(block *ir.BasicBlock, l, r value.Value) value.Value {
+				return block.NewSDiv(l, r)
+			},
 		},
 	}
 )
 
 func (c *CodeGenerator) SearchOperation(block *ir.BasicBlock, operator string, left, right value.Value) value.Value {
 	generator := opMap[fmt.Sprintf(binaryOpFormat, operator, left.Type(), right.Type())]
-	return generator(block, left, right)
+	return generator.Operation(block, left, right)
 }
 
 func (c *CodeGenerator) GetExprType(expr ast.Expr) types.Type {
@@ -112,8 +129,8 @@ func (c *CodeGenerator) GetExprType(expr ast.Expr) types.Type {
 	case *ast.Bool:
 		return types.I1
 	case *ast.BinaryExpr:
-		// FIXME: should use expression search to get the result type of BinaryExpression
-		return c.GetExprType(expr.LExpr)
+		operator := opMap[fmt.Sprintf(binaryOpFormat, expr.Operator, c.GetExprType(expr.LExpr), c.GetExprType(expr.RExpr))]
+		return operator.RetType
 	default:
 		panic("unsupported type refer")
 	}
