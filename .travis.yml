@@ -1,6 +1,6 @@
 sudo: true
 
-language: rust
+language: go
 
 go:
   - 1.10.x
