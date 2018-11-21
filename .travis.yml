@@ -1,20 +1,27 @@
 sudo: true
 
-language: rust
+language: go
 
 go:
   - 1.10.x
   - 1.11.x
   - master
 
+env:
+  - GO111MODULE=on
+
 matrix:
   allow_failures:
+    - go: 1.10.x # because it can't lock lib version
     - go: master
   fast_finish: true
 
 before_script:
-  - go get -t ./...
+  - go generate ./...
+  - go get -t -v ./...
 script:
-  - go test -coverprofile=coverage.txt -v ./...
+  - make test
+  - make coverage
+  - make build
 after_success:
   - bash <(curl -s https://codecov.io/bash)
