@@ -36,6 +36,12 @@ type (
 	}
 )
 
+func NewIdent(literal string) *Ident {
+	return &Ident{
+		Value: literal,
+	}
+}
+
 func NewInt(literal string) *Int       { return &Int{Literal: literal} }
 func NewFloat(literal string) *Float   { return &Float{Literal: literal} }
 func NewString(literal string) *String { return &String{Literal: literal} }
