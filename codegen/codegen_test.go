@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	"github.com/elz-lang/elz/ast"
-	"github.com/elz-lang/elz/lib/llvm"
+
+	"github.com/llir/llvm/ir/types"
+	"github.com/llir/llvm/ir/value"
 )
 
 func TestBinaryFunction(t *testing.T) {
@@ -20,13 +22,11 @@ func TestBinaryFunction(t *testing.T) {
 			Operator: "+",
 		},
 	})
-	ft := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
-	mainFn := llvm.AddFunction(c.mod, "main", ft)
-	bb := llvm.AddBasicBlock(mainFn, "")
-	builder := llvm.NewBuilder()
-	builder.SetInsertPointAtEnd(bb)
-	c.NewExpr(
-		map[string]llvm.Value{},
+	mainFn := c.mod.NewFunction("main", types.I32)
+	bb := mainFn.NewBlock("")
+	builder := bb
+	v := c.NewExpr(
+		map[string]value.Value{},
 		builder,
 		&ast.FuncCall{
 			Identifier: "add",
@@ -36,5 +36,6 @@ func TestBinaryFunction(t *testing.T) {
 			},
 		},
 	)
+	builder.NewRet(v)
 	fmt.Printf("%s", c.mod)
 }

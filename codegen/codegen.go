@@ -4,19 +4,23 @@ import (
 	"fmt"
 
 	"github.com/elz-lang/elz/ast"
-	"github.com/elz-lang/elz/lib/llvm"
+
+	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
+	"github.com/llir/llvm/ir/types"
+	"github.com/llir/llvm/ir/value"
 )
 
 type CodeGenerator struct {
 	// For LLVM
-	mod llvm.Module
+	mod *ir.Module
 	// Internal
 	bindings map[string]*ast.Binding
 }
 
 func NewGenerator() *CodeGenerator {
 	return &CodeGenerator{
-		mod:      llvm.NewModule(""),
+		mod:      ir.NewModule(),
 		bindings: make(map[string]*ast.Binding),
 	}
 }
@@ -30,31 +34,29 @@ func (c *CodeGenerator) GenBinding(binding *ast.Binding) {
 	// TODO: generate function template
 }
 
-func (c *CodeGenerator) CallBindingWith(builder llvm.Builder, binding *ast.Binding, vs []llvm.Value) llvm.Value {
+func (c *CodeGenerator) CallBindingWith(builder Builder, binding *ast.Binding, vs []value.Value) value.Value {
 	if len(vs) == len(binding.ParamList) {
-		typeList := make([]llvm.Type, len(vs))
-		scope := map[string]llvm.Type{}
-		valueScope := map[string]llvm.Value{}
+		params := make([]*ir.Param, len(vs))
+		scope := map[string]types.Type{}
+		valueScope := map[string]value.Value{}
 		for i, v := range vs {
 			paramName := binding.ParamList[i]
 			scope[paramName] = v.Type()
 			valueScope[paramName] = v
-			typeList[i] = v.Type()
+			params[i] = ir.NewParam(paramName, v.Type())
 		}
 		retT := c.GetExprType(scope, binding.Expr)
-		ft := llvm.FunctionType(retT, typeList, false)
-		newFn := llvm.AddFunction(c.mod, binding.Name, ft)
-		newFunctionBuilder := llvm.NewBuilder()
-		block := llvm.AddBasicBlock(newFn, "")
-		newFunctionBuilder.SetInsertPointAtEnd(block)
+		newFn := c.mod.NewFunction(binding.Name, retT, params...)
+		block := newFn.NewBlock("")
+		newFunctionBuilder := block
 		fnExpr := c.NewExpr(valueScope, newFunctionBuilder, binding.Expr)
-		newFunctionBuilder.CreateRet(fnExpr)
-		return builder.CreateCall(newFn, vs, "")
+		newFunctionBuilder.NewRet(fnExpr)
+		return builder.NewCall(newFn, vs...)
 	}
 	panic("not implement lambda yet")
 }
 
-func (c *CodeGenerator) NewExpr(scope map[string]llvm.Value, builder llvm.Builder, expr ast.Expr) llvm.Value {
+func (c *CodeGenerator) NewExpr(scope map[string]value.Value, builder Builder, expr ast.Expr) value.Value {
 	if expr.IsConst() {
 		return c.NewConstExpr(expr)
 	}
@@ -65,7 +67,7 @@ func (c *CodeGenerator) NewExpr(scope map[string]llvm.Value, builder llvm.Builde
 		return c.SearchOperation(builder, expr.Operator, left, right)
 	case *ast.FuncCall:
 		binding := c.bindings[expr.Identifier]
-		args := make([]llvm.Value, 0)
+		args := make([]value.Value, 0)
 		for _, expr := range expr.ExprList {
 			args = append(args, c.NewExpr(scope, builder, expr))
 		}
@@ -77,59 +79,59 @@ func (c *CodeGenerator) NewExpr(scope map[string]llvm.Value, builder llvm.Builde
 }
 
 type Operator struct {
-	RetType   llvm.Type
-	Operation func(builder llvm.Builder, l, r llvm.Value) llvm.Value
+	RetType   types.Type
+	Operation func(builder Builder, l, r value.Value) value.Value
 }
 
 var (
 	binaryOpFormat = "%s(%s,%s)"
-	i32            = llvm.Int32Type()
+	i32            = types.I32
 	opMap          = map[string]*Operator{
 		fmt.Sprintf(binaryOpFormat, "+", i32, i32): {
 			RetType: i32,
-			Operation: func(builder llvm.Builder, l, r llvm.Value) llvm.Value {
-				return builder.CreateAdd(l, r, "")
+			Operation: func(builder Builder, l, r value.Value) value.Value {
+				return builder.NewAdd(l, r)
 			},
 		},
 		fmt.Sprintf(binaryOpFormat, "-", i32, i32): {
 			RetType: i32,
-			Operation: func(builder llvm.Builder, l, r llvm.Value) llvm.Value {
-				return builder.CreateSub(l, r, "")
+			Operation: func(builder Builder, l, r value.Value) value.Value {
+				return builder.NewSub(l, r)
 			},
 		},
 		fmt.Sprintf(binaryOpFormat, "*", i32, i32): {
 			RetType: i32,
-			Operation: func(builder llvm.Builder, l, r llvm.Value) llvm.Value {
-				return builder.CreateMul(l, r, "")
+			Operation: func(builder Builder, l, r value.Value) value.Value {
+				return builder.NewMul(l, r)
 			},
 		},
 		fmt.Sprintf(binaryOpFormat, "/", i32, i32): {
 			RetType: i32,
-			Operation: func(builder llvm.Builder, l, r llvm.Value) llvm.Value {
-				return builder.CreateSDiv(l, r, "")
+			Operation: func(builder Builder, l, r value.Value) value.Value {
+				return builder.NewSDiv(l, r)
 			},
 		},
 	}
 )
 
-func (c *CodeGenerator) SearchOperation(builder llvm.Builder, operator string, left, right llvm.Value) llvm.Value {
+func (c *CodeGenerator) SearchOperation(builder Builder, operator string, left, right value.Value) value.Value {
 	generator := opMap[fmt.Sprintf(binaryOpFormat, operator, left.Type(), right.Type())]
 	return generator.Operation(builder, left, right)
 }
 
-func (c *CodeGenerator) GetExprType(scope map[string]llvm.Type, expr ast.Expr) llvm.Type {
+func (c *CodeGenerator) GetExprType(scope map[string]types.Type, expr ast.Expr) types.Type {
 	switch expr := expr.(type) {
 	case *ast.Int:
-		return llvm.Int32Type()
+		return types.I32
 	case *ast.Float:
-		return llvm.DoubleType()
+		return types.Double
 	case *ast.Bool:
-		return llvm.Int1Type()
+		return types.I1
 	case *ast.BinaryExpr:
 		operator := opMap[fmt.Sprintf(binaryOpFormat, expr.Operator, c.GetExprType(scope, expr.LExpr), c.GetExprType(scope, expr.RExpr))]
 		return operator.RetType
 	case *ast.FuncCall:
-		return llvm.Int32Type()
+		return types.I32
 	case *ast.Ident:
 		return scope[expr.Value]
 	default:
@@ -137,20 +139,24 @@ func (c *CodeGenerator) GetExprType(scope map[string]llvm.Type, expr ast.Expr) l
 	}
 }
 
-func (c *CodeGenerator) NewConstExpr(expr ast.Expr) llvm.Value {
+func (c *CodeGenerator) NewConstExpr(expr ast.Expr) value.Value {
 	switch expr := expr.(type) {
 	case *ast.Int:
 		// default is i32
-		return llvm.ConstIntFromString(llvm.Int32Type(), expr.Literal, 10)
+		v, err := constant.NewIntFromString(types.I32, expr.Literal)
+		if err != nil {
+			panic(fmt.Errorf("unable to parse integer literal %q; %v", expr.Literal, err))
+		}
+		return v
 	case *ast.Float:
 		// default is f64(double)
-		return llvm.ConstFloatFromString(llvm.DoubleType(), expr.Literal)
-	case *ast.Bool:
-		if expr.IsTrue {
-			return llvm.ConstInt(llvm.Int1Type(), 1, false)
-		} else {
-			return llvm.ConstInt(llvm.Int1Type(), 0, false)
+		v, err := constant.NewFloatFromString(types.Double, expr.Literal)
+		if err != nil {
+			panic(fmt.Errorf("unable to parse floating-point literal %q; %v", expr.Literal, err))
 		}
+		return v
+	case *ast.Bool:
+		return constant.NewBool(expr.IsTrue)
 	case *ast.String:
 		panic("unsupported string right now")
 	case *ast.Ident:
