@@ -22,7 +22,7 @@ func TestBinaryFunction(t *testing.T) {
 			Operator: "+",
 		},
 	})
-	mainFn := c.mod.NewFunction("main", types.I32)
+	mainFn := c.mod.NewFunc("main", types.I32)
 	bb := mainFn.NewBlock("")
 	builder := bb
 	v := c.NewExpr(

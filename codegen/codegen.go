@@ -46,7 +46,7 @@ func (c *CodeGenerator) CallBindingWith(builder Builder, binding *ast.Binding, v
 			params[i] = ir.NewParam(paramName, v.Type())
 		}
 		retT := c.GetExprType(scope, binding.Expr)
-		newFn := c.mod.NewFunction(binding.Name, retT, params...)
+		newFn := c.mod.NewFunc(binding.Name, retT, params...)
 		block := newFn.NewBlock("")
 		newFunctionBuilder := block
 		fnExpr := c.NewExpr(valueScope, newFunctionBuilder, binding.Expr)
