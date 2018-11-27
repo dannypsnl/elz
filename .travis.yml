@@ -32,7 +32,6 @@ env:
 
 matrix:
   allow_failures:
-    - go: 1.10.x # because it can't lock lib version
     - go: master
   fast_finish: true
 
