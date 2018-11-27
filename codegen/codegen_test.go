@@ -5,8 +5,7 @@ import (
 	"testing"
 
 	"github.com/elz-lang/elz/ast"
-
-	"llvm.org/llvm/bindings/go/llvm"
+	"github.com/elz-lang/elz/lib/llvm"
 )
 
 func TestBinaryFunction(t *testing.T) {

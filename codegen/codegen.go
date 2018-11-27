@@ -4,8 +4,7 @@ import (
 	"fmt"
 
 	"github.com/elz-lang/elz/ast"
-
-	"llvm.org/llvm/bindings/go/llvm"
+	"github.com/elz-lang/elz/lib/llvm"
 )
 
 type CodeGenerator struct {
