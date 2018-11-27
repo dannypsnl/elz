@@ -136,7 +136,7 @@ package llvm
 /*
 #cgo CPPFLAGS: %s
 #cgo CXXFLAGS: %s
-#cgo LDFLAGS: %s
+#cgo LDFLAGS: %s -lffi
 */
 import "C"
 
