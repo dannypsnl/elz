@@ -1,3 +1,6 @@
+if [ -d "llvm" ]; then
+    exit 0;
+fi
 case "${LLVM_VER}" in
     60)
         curl -XGET http://releases.llvm.org/6.0.0/llvm-6.0.0.src.tar.xz >> llvm.tar.xz
