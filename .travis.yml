@@ -28,7 +28,7 @@ addons:
       - lldb-8
       - lld-8
 env:
-  - GO111MODULE=on CC=clang-8 CGO_CXXFLAGS=-std=c++11 CGO_LDFLAGS_ALLOW='Wl,(search_paths_first|headerpad_max_install_names)' CGO_CPPFLAGS="`llvm-config-8 --cppflags`" CGO_LDFLAGS="`llvm-config-8 --ldflags --libs --system-libs all`"
+  - CC=clang-8 CGO_CXXFLAGS=-std=c++11 CGO_LDFLAGS_ALLOW='Wl,(search_paths_first|headerpad_max_install_names)' CGO_CPPFLAGS="`llvm-config-8 --cppflags`" CGO_LDFLAGS="`llvm-config-8 --ldflags --libs --system-libs all`"
 
 matrix:
   allow_failures:
