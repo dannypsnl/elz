@@ -47,10 +47,9 @@ func (c *CodeGenerator) CallBindingWith(builder Builder, binding *ast.Binding, v
 		}
 		retT := c.GetExprType(scope, binding.Expr)
 		newFn := c.mod.NewFunc(binding.Name, retT, params...)
-		block := newFn.NewBlock("")
-		newFunctionBuilder := block
-		fnExpr := c.NewExpr(valueScope, newFunctionBuilder, binding.Expr)
-		newFunctionBuilder.NewRet(fnExpr)
+		newFnBuilder := newFn.NewBlock("")
+		fnExpr := c.NewExpr(valueScope, newFnBuilder, binding.Expr)
+		newFnBuilder.NewRet(fnExpr)
 		return builder.NewCall(newFn, vs...)
 	}
 	panic("not implement lambda yet")

@@ -23,11 +23,10 @@ func TestBinaryFunction(t *testing.T) {
 		},
 	})
 	mainFn := c.mod.NewFunc("main", types.I32)
-	bb := mainFn.NewBlock("")
-	builder := bb
+	mainBuilder := mainFn.NewBlock("")
 	v := c.NewExpr(
 		map[string]value.Value{},
-		builder,
+		mainBuilder,
 		&ast.FuncCall{
 			Identifier: "add",
 			ExprList: []ast.Expr{
@@ -36,6 +35,6 @@ func TestBinaryFunction(t *testing.T) {
 			},
 		},
 	)
-	builder.NewRet(v)
+	mainBuilder.NewRet(v)
 	fmt.Printf("%s", c.mod)
 }
