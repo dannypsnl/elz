@@ -94,19 +94,19 @@ var (
 		fmt.Sprintf(binaryOpFormat, "-", i32, i32): {
 			RetType: i32,
 			Operation: func(builder llvm.Builder, l, r llvm.Value) llvm.Value {
-				return builder.CreateAdd(l, r, "")
+				return builder.CreateSub(l, r, "")
 			},
 		},
 		fmt.Sprintf(binaryOpFormat, "*", i32, i32): {
 			RetType: i32,
 			Operation: func(builder llvm.Builder, l, r llvm.Value) llvm.Value {
-				return builder.CreateAdd(l, r, "")
+				return builder.CreateMul(l, r, "")
 			},
 		},
 		fmt.Sprintf(binaryOpFormat, "/", i32, i32): {
 			RetType: i32,
 			Operation: func(builder llvm.Builder, l, r llvm.Value) llvm.Value {
-				return builder.CreateAdd(l, r, "")
+				return builder.CreateSDiv(l, r, "")
 			},
 		},
 	}
