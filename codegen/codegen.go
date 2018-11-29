@@ -55,6 +55,14 @@ func (c *CodeGenerator) CallBindingWith(builder Builder, binding *ast.Binding, v
 	panic("not implement lambda yet")
 }
 
+func (c *CodeGenerator) BindingReturnType(binding *ast.Binding, typeList []types.Type) types.Type {
+	paramTypes := map[string]types.Type{}
+	for i, t := range typeList {
+		paramTypes[binding.ParamList[i]] = t
+	}
+	return c.GetExprType(paramTypes, binding.Expr)
+}
+
 func (c *CodeGenerator) NewExpr(scope map[string]value.Value, builder Builder, expr ast.Expr) value.Value {
 	if expr.IsConst() {
 		return c.NewConstExpr(expr)
@@ -130,7 +138,15 @@ func (c *CodeGenerator) GetExprType(scope map[string]types.Type, expr ast.Expr) 
 		operator := opMap[fmt.Sprintf(binaryOpFormat, expr.Operator, c.GetExprType(scope, expr.LExpr), c.GetExprType(scope, expr.RExpr))]
 		return operator.RetType
 	case *ast.FuncCall:
-		return types.I32
+		binding, found := c.bindings[expr.Identifier]
+		if !found {
+			panic("no this function")
+		}
+		paramTypes := make([]types.Type, 0)
+		for _, e := range expr.ExprList {
+			paramTypes = append(paramTypes, c.GetExprType(scope, e))
+		}
+		return c.BindingReturnType(binding, paramTypes)
 	case *ast.Ident:
 		return scope[expr.Value]
 	default:
