@@ -3,7 +3,6 @@ sudo: true
 language: go
 
 go:
-  - 1.10.x
   - 1.11.x
   - master
 
@@ -11,10 +10,14 @@ matrix:
   allow_failures:
     - go: master
   fast_finish: true
+  include:
+    - go: 1.10.x
+      before_script:
+        - go generate ./...
+        - go get -t -v ./...
 
 before_script:
   - go generate ./...
-  - go get -t -v ./...
 script:
   - make test
   - make coverage
