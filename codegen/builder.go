@@ -26,7 +26,7 @@ type Builder interface {
 	NewCmpXchg(ptr, cmp, new value.Value, successOrdering, failureOrdering enum.AtomicOrdering) *ir.InstCmpXchg
 	NewCondBr(cond value.Value, targetTrue, targetFalse *ir.BasicBlock) *ir.TermCondBr
 	NewExtractElement(x, index value.Value) *ir.InstExtractElement
-	NewExtractValue(x value.Value, indices ...int64) *ir.InstExtractValue
+	NewExtractValue(x value.Value, indices ...uint64) *ir.InstExtractValue
 	NewFAdd(x, y value.Value) *ir.InstFAdd
 	NewFCmp(pred enum.FPred, x, y value.Value) *ir.InstFCmp
 	NewFDiv(x, y value.Value) *ir.InstFDiv
@@ -42,7 +42,7 @@ type Builder interface {
 	NewICmp(pred enum.IPred, x, y value.Value) *ir.InstICmp
 	NewIndirectBr(addr constant.Constant, validTargets ...*ir.BasicBlock) *ir.TermIndirectBr
 	NewInsertElement(x, elem, index value.Value) *ir.InstInsertElement
-	NewInsertValue(x, elem value.Value, indices ...int64) *ir.InstInsertValue
+	NewInsertValue(x, elem value.Value, indices ...uint64) *ir.InstInsertValue
 	NewIntToPtr(from value.Value, to types.Type) *ir.InstIntToPtr
 	NewInvoke(invokee value.Value, args []value.Value, normal, exception *ir.BasicBlock) *ir.TermInvoke
 	NewLShr(x, y value.Value) *ir.InstLShr
