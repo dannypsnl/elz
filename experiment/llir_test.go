@@ -1,19 +1,15 @@
 package experiment
 
 import (
-	"fmt"
 	"testing"
 
+	asserter "github.com/dannypsnl/assert"
 	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/types"
 )
 
 func TestHowToCreateVARGFunction(t *testing.T) {
+	assert := asserter.NewTester(t)
 	mod := ir.NewModule()
-	f := mod.NewFunc(
-		"printf",
-		types.I32,
-		ir.NewParam("format", types.NewPointer(types.I8)),
-	)
-	fmt.Printf("%s\n", f.Def())
+	f := declarePrintf(mod)
+	assert.Eq(f.Def(), "declare i32 @printf(i8* %format, ...)")
 }
