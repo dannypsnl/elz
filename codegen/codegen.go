@@ -34,7 +34,7 @@ func (c *CodeGenerator) GenBinding(binding *ast.Binding) {
 	// TODO: generate function template
 }
 
-func (c *CodeGenerator) CallBindingWith(builder Builder, binding *ast.Binding, vs []value.Value) value.Value {
+func (c *CodeGenerator) CallBindingWith(builder *ir.BasicBlock, binding *ast.Binding, vs []value.Value) value.Value {
 	if len(vs) == len(binding.ParamList) {
 		params := make([]*ir.Param, len(vs))
 		scope := map[string]types.Type{}
@@ -63,7 +63,7 @@ func (c *CodeGenerator) BindingReturnType(binding *ast.Binding, typeList []types
 	return c.GetExprType(paramTypes, binding.Expr)
 }
 
-func (c *CodeGenerator) NewExpr(scope map[string]value.Value, builder Builder, expr ast.Expr) value.Value {
+func (c *CodeGenerator) NewExpr(scope map[string]value.Value, builder *ir.BasicBlock, expr ast.Expr) value.Value {
 	if expr.IsConst() {
 		return c.NewConstExpr(expr)
 	}
@@ -87,7 +87,7 @@ func (c *CodeGenerator) NewExpr(scope map[string]value.Value, builder Builder, e
 
 type Operator struct {
 	RetType   types.Type
-	Operation func(builder Builder, l, r value.Value) value.Value
+	Operation func(builder *ir.BasicBlock, l, r value.Value) value.Value
 }
 
 var (
@@ -96,32 +96,32 @@ var (
 	opMap          = map[string]*Operator{
 		fmt.Sprintf(binaryOpFormat, "+", i32, i32): {
 			RetType: i32,
-			Operation: func(builder Builder, l, r value.Value) value.Value {
+			Operation: func(builder *ir.BasicBlock, l, r value.Value) value.Value {
 				return builder.NewAdd(l, r)
 			},
 		},
 		fmt.Sprintf(binaryOpFormat, "-", i32, i32): {
 			RetType: i32,
-			Operation: func(builder Builder, l, r value.Value) value.Value {
+			Operation: func(builder *ir.BasicBlock, l, r value.Value) value.Value {
 				return builder.NewSub(l, r)
 			},
 		},
 		fmt.Sprintf(binaryOpFormat, "*", i32, i32): {
 			RetType: i32,
-			Operation: func(builder Builder, l, r value.Value) value.Value {
+			Operation: func(builder *ir.BasicBlock, l, r value.Value) value.Value {
 				return builder.NewMul(l, r)
 			},
 		},
 		fmt.Sprintf(binaryOpFormat, "/", i32, i32): {
 			RetType: i32,
-			Operation: func(builder Builder, l, r value.Value) value.Value {
+			Operation: func(builder *ir.BasicBlock, l, r value.Value) value.Value {
 				return builder.NewSDiv(l, r)
 			},
 		},
 	}
 )
 
-func (c *CodeGenerator) SearchOperation(builder Builder, operator string, left, right value.Value) value.Value {
+func (c *CodeGenerator) SearchOperation(builder *ir.BasicBlock, operator string, left, right value.Value) value.Value {
 	generator := opMap[fmt.Sprintf(binaryOpFormat, operator, left.Type(), right.Type())]
 	return generator.Operation(builder, left, right)
 }
