@@ -20,6 +20,7 @@ github.com/llir/ll v0.0.0-20181207163918-0cfcde00de3f h1:OJxImTgaK6hQ8w6OOEeNox1
 github.com/llir/ll v0.0.0-20181207163918-0cfcde00de3f/go.mod h1:jPRfHdh8JEos8a05CSejK/nIKptCRRixCfhg0zngzpg=
 github.com/llir/llvm v0.3.0-pre5 h1:23FAmKbkTBCjOOgYSwgTAnNwHeMPzFVm/99LbdX4l24=
 github.com/llir/llvm v0.3.0-pre5/go.mod h1:+ufojQPE9iR5h7g9CqjTQNdTrglB9+RhRSbnrkd+5XQ=
+github.com/llir/llvm v0.3.0-pre6 h1:fN81cWhhvHwhZIgD73InEaVMgLKUTVJX6cRKLJbhl8k=
 github.com/mattn/go-colorable v0.0.9 h1:UVL0vNpWh04HeJXV0KLcaT7r06gOH2l4OW6ddYRUIY4=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-isatty v0.0.3 h1:ns/ykhmWi7G9O+8a448SecJU3nSMBXJfqQkl0upE1jI=
