@@ -48,4 +48,6 @@ var (
 
 	F32 = NewType(types.Float)
 	F64 = NewType(types.Double)
+
+	Any = NewType(types.NewPointer(types.I8))
 )
