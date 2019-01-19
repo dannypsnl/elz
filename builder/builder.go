@@ -13,7 +13,7 @@ import (
 type Builder struct {
 	*parser.BaseElzListener
 
-	bindings []*ast.Binding
+	bindings []*ast.Func
 
 	exprStack *stack.Stack
 	debug     bool
@@ -29,7 +29,7 @@ func New() *Builder {
 	return &Builder{
 		debug:     false,
 		exprStack: stack.New(),
-		bindings:  make([]*ast.Binding, 0),
+		bindings:  make([]*ast.Func, 0),
 	}
 }
 

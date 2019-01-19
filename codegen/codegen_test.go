@@ -5,15 +5,14 @@ import (
 	"testing"
 
 	"github.com/elz-lang/elz/ast"
-
-	"github.com/llir/llvm/ir/types"
+	"github.com/elz-lang/elz/codegen/types"
 	"github.com/llir/llvm/ir/value"
 )
 
 func TestBinaryFunction(t *testing.T) {
 	c := NewGenerator()
 
-	c.GenBinding(&ast.Binding{
+	f := NewFunc(&ast.Func{
 		Name:      "add",
 		ParamList: []string{"x", "y"},
 		Expr: &ast.BinaryExpr{
@@ -22,19 +21,13 @@ func TestBinaryFunction(t *testing.T) {
 			Operator: "+",
 		},
 	})
-	mainFn := c.mod.NewFunc("main", types.I32)
-	mainBuilder := mainFn.NewBlock("")
-	v := c.NewExpr(
-		map[string]value.Value{},
-		mainBuilder,
-		&ast.FuncCall{
-			Identifier: "add",
-			ExprList: []ast.Expr{
-				ast.NewInt("10"),
-				ast.NewInt("10"),
-			},
-		},
-	)
-	mainBuilder.NewRet(v)
-	fmt.Printf("%s", c.mod)
+	mainFn := c.mod.NewFunc("main", types.I32.LLVMT())
+	mainBlock := mainFn.NewBlock("")
+	f.CallWith(c, mainBlock, []value.Value{
+		types.I64.NewInt("1"),
+		types.I64.NewInt("1"),
+	})
+
+	mainBlock.NewRet(types.I32.NewInt("0"))
+	fmt.Printf("%s\n", c.mod)
 }

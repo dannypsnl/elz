@@ -1,8 +1,8 @@
 package ast
 
 type (
-	Node    interface{}
-	Binding struct {
+	Node interface{}
+	Func struct {
 		Name      string
 		ParamList []string
 		Expr      Expr

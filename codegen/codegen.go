@@ -1,13 +1,11 @@
 package codegen
 
 import (
-	"fmt"
-
 	"github.com/elz-lang/elz/ast"
+	"github.com/elz-lang/elz/codegen/types"
 
 	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/constant"
-	"github.com/llir/llvm/ir/types"
+	irTypes "github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 )
 
@@ -15,168 +13,74 @@ type CodeGenerator struct {
 	// For LLVM
 	mod *ir.Module
 	// Internal
-	bindings map[string]*ast.Binding
+	functions map[string]*Func
+}
+
+func prepareingModule() *ir.Module {
+	mod := ir.NewModule()
+	elzFuncType := irTypes.NewStruct()
+	elzFuncType.Opaque = true
+	elzFT := irTypes.NewPointer(mod.NewTypeDef("elz_func", elzFuncType))
+	mod.NewFunc("new_elz_func", elzFT, ir.NewParam("parameters_length", irTypes.I64))
+	mod.NewFunc("elz_func_append_argument",
+		irTypes.Void,
+		ir.NewParam("f", elzFT),
+		ir.NewParam("arg", irTypes.NewPointer(irTypes.Void)),
+	)
+	return mod
 }
 
 func NewGenerator() *CodeGenerator {
 	return &CodeGenerator{
-		mod:      ir.NewModule(),
-		bindings: make(map[string]*ast.Binding),
+		mod:       prepareingModule(),
+		functions: make(map[string]*Func),
 	}
 }
 
-func (c *CodeGenerator) GenBinding(binding *ast.Binding) {
-	c.bindings[binding.Name] = binding
-	// e.g. i = 1
-	// But also should consider something like Main
-	// e.g. main = println "Hello, World"
-	// e.g. add x y = x + y
-	// TODO: generate function template
+func (c *CodeGenerator) AddFunc(fn *ast.Func) {
+	c.functions[fn.Name] = NewFunc(fn)
 }
 
-func (c *CodeGenerator) CallBindingWith(builder *ir.BasicBlock, binding *ast.Binding, vs []value.Value) value.Value {
-	if len(vs) == len(binding.ParamList) {
-		params := make([]*ir.Param, len(vs))
-		scope := map[string]types.Type{}
-		valueScope := map[string]value.Value{}
-		for i, v := range vs {
-			paramName := binding.ParamList[i]
-			scope[paramName] = v.Type()
-			valueScope[paramName] = v
-			params[i] = ir.NewParam(paramName, v.Type())
-		}
-		retT := c.GetExprType(scope, binding.Expr)
-		newFn := c.mod.NewFunc(binding.Name, retT, params...)
-		newFnBuilder := newFn.NewBlock("")
-		fnExpr := c.NewExpr(valueScope, newFnBuilder, binding.Expr)
-		newFnBuilder.NewRet(fnExpr)
-		return builder.NewCall(newFn, vs...)
+type Func struct {
+	*ast.Func
+
+	params []*ir.Param
+}
+
+func NewFunc(f *ast.Func) *Func {
+	return &Func{
+		Func:   f,
+		params: make([]*ir.Param, 0),
+	}
+}
+
+func (f *Func) CallWith(c *CodeGenerator, block *ir.Block, args []value.Value) value.Value {
+	scope := make(map[string]value.Value)
+	for i, arg := range args {
+		scope[f.Func.ParamList[i]] = arg
+		f.params = append(f.params, ir.NewParam(f.Func.ParamList[i], arg.Type()))
+	}
+	if len(f.params) > len(f.Func.ParamList) {
+		panic("too many argument in call")
+	}
+	if len(f.params) == len(f.Func.ParamList) {
+		newFn := c.mod.NewFunc(f.Func.Name, types.I64.LLVMT(), f.params...)
+		fnBlock := newFn.NewBlock("")
+
+		fnBlock.NewRet(c.NewExpr(NewScope(fnBlock, scope), f.Func.Expr))
+		return block.NewCall(newFn, args...)
 	}
 	panic("not implement lambda yet")
 }
 
-func (c *CodeGenerator) BindingReturnType(binding *ast.Binding, typeList []types.Type) types.Type {
-	paramTypes := map[string]types.Type{}
-	for i, t := range typeList {
-		paramTypes[binding.ParamList[i]] = t
-	}
-	return c.GetExprType(paramTypes, binding.Expr)
-}
-
-func (c *CodeGenerator) NewExpr(scope map[string]value.Value, builder *ir.BasicBlock, expr ast.Expr) value.Value {
-	if expr.IsConst() {
-		return c.NewConstExpr(expr)
-	}
+func (c *CodeGenerator) NewExpr(scope *Scope, expr ast.Expr) value.Value {
 	switch expr := expr.(type) {
+	case *ast.Ident:
+		return scope.Var(expr.Value)
 	case *ast.BinaryExpr:
-		left := c.NewExpr(scope, builder, expr.LExpr)
-		right := c.NewExpr(scope, builder, expr.RExpr)
-		return c.SearchOperation(builder, expr.Operator, left, right)
-	case *ast.FuncCall:
-		binding := c.bindings[expr.Identifier]
-		args := make([]value.Value, 0)
-		for _, expr := range expr.ExprList {
-			args = append(args, c.NewExpr(scope, builder, expr))
-		}
-		return c.CallBindingWith(builder, binding, args)
-	case *ast.Ident:
-		return scope[expr.Value]
+		lexpr, rexpr := c.NewExpr(scope, expr.LExpr), c.NewExpr(scope, expr.RExpr)
+		return scope.NewAdd(lexpr, rexpr)
 	}
-	panic("unsupported expr")
-}
-
-type Operator struct {
-	RetType   types.Type
-	Operation func(builder *ir.BasicBlock, l, r value.Value) value.Value
-}
-
-var (
-	binaryOpFormat = "%s(%s,%s)"
-	i32            = types.I32
-	opMap          = map[string]*Operator{
-		fmt.Sprintf(binaryOpFormat, "+", i32, i32): {
-			RetType: i32,
-			Operation: func(builder *ir.BasicBlock, l, r value.Value) value.Value {
-				return builder.NewAdd(l, r)
-			},
-		},
-		fmt.Sprintf(binaryOpFormat, "-", i32, i32): {
-			RetType: i32,
-			Operation: func(builder *ir.BasicBlock, l, r value.Value) value.Value {
-				return builder.NewSub(l, r)
-			},
-		},
-		fmt.Sprintf(binaryOpFormat, "*", i32, i32): {
-			RetType: i32,
-			Operation: func(builder *ir.BasicBlock, l, r value.Value) value.Value {
-				return builder.NewMul(l, r)
-			},
-		},
-		fmt.Sprintf(binaryOpFormat, "/", i32, i32): {
-			RetType: i32,
-			Operation: func(builder *ir.BasicBlock, l, r value.Value) value.Value {
-				return builder.NewSDiv(l, r)
-			},
-		},
-	}
-)
-
-func (c *CodeGenerator) SearchOperation(builder *ir.BasicBlock, operator string, left, right value.Value) value.Value {
-	generator := opMap[fmt.Sprintf(binaryOpFormat, operator, left.Type(), right.Type())]
-	return generator.Operation(builder, left, right)
-}
-
-func (c *CodeGenerator) GetExprType(scope map[string]types.Type, expr ast.Expr) types.Type {
-	switch expr := expr.(type) {
-	case *ast.Int:
-		return types.I32
-	case *ast.Float:
-		return types.Double
-	case *ast.Bool:
-		return types.I1
-	case *ast.BinaryExpr:
-		operator := opMap[fmt.Sprintf(binaryOpFormat, expr.Operator, c.GetExprType(scope, expr.LExpr), c.GetExprType(scope, expr.RExpr))]
-		return operator.RetType
-	case *ast.FuncCall:
-		binding, found := c.bindings[expr.Identifier]
-		if !found {
-			panic("no this function")
-		}
-		paramTypes := make([]types.Type, 0)
-		for _, e := range expr.ExprList {
-			paramTypes = append(paramTypes, c.GetExprType(scope, e))
-		}
-		return c.BindingReturnType(binding, paramTypes)
-	case *ast.Ident:
-		return scope[expr.Value]
-	default:
-		panic("unsupported type refer")
-	}
-}
-
-func (c *CodeGenerator) NewConstExpr(expr ast.Expr) value.Value {
-	switch expr := expr.(type) {
-	case *ast.Int:
-		// default is i32
-		v, err := constant.NewIntFromString(types.I32, expr.Literal)
-		if err != nil {
-			panic(fmt.Errorf("unable to parse integer literal %q; %v", expr.Literal, err))
-		}
-		return v
-	case *ast.Float:
-		// default is f64(double)
-		v, err := constant.NewFloatFromString(types.Double, expr.Literal)
-		if err != nil {
-			panic(fmt.Errorf("unable to parse floating-point literal %q; %v", expr.Literal, err))
-		}
-		return v
-	case *ast.Bool:
-		return constant.NewBool(expr.IsTrue)
-	case *ast.String:
-		panic("unsupported string right now")
-	case *ast.Ident:
-		panic("unsupported identifier right now")
-	default:
-		panic("unsupported expression")
-	}
+	panic("Bomb")
+	// return types.I64.NewInt("1")
 }

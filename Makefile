@@ -1,11 +1,11 @@
 all: test build
 
-GO_MOD=GO111MODULE=on
-
-.PHONY: test build coverage
-test:
-	@$(GO_MOD) go test -v ./... -count 1 -cover
-build:
-	@$(GO_MOD) go build
-coverage:
-	@$(GO_MOD) go test -coverprofile=coverage.txt ./...
+.PHONY: deps test build coverage
+deps:
+	@go get -t ./...
+test: deps
+	@go test -v ./... -count 1 -cover
+build: deps
+	@go build
+coverage: deps
+	@go test -coverprofile=coverage.txt ./...

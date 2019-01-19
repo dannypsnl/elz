@@ -5,7 +5,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 )
 
-func declarePrintf(mod *ir.Module) *ir.Function {
+func declarePrintf(mod *ir.Module) *ir.Func {
 	f := mod.NewFunc(
 		"printf",
 		types.I32,
