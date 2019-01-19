@@ -5,6 +5,7 @@ import (
 	"github.com/elz-lang/elz/codegen/types"
 
 	"github.com/llir/llvm/ir"
+	irTypes "github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 )
 
@@ -15,9 +16,23 @@ type CodeGenerator struct {
 	functions map[string]*Func
 }
 
+func prepareingModule() *ir.Module {
+	mod := ir.NewModule()
+	elzFuncType := irTypes.NewStruct()
+	elzFuncType.Opaque = true
+	elzFT := irTypes.NewPointer(mod.NewTypeDef("elz_func", elzFuncType))
+	mod.NewFunc("new_elz_func", elzFT, ir.NewParam("parameters_length", irTypes.I64))
+	mod.NewFunc("elz_func_append_argument",
+		irTypes.Void,
+		ir.NewParam("f", elzFT),
+		ir.NewParam("arg", irTypes.NewPointer(irTypes.Void)),
+	)
+	return mod
+}
+
 func NewGenerator() *CodeGenerator {
 	return &CodeGenerator{
-		mod:       ir.NewModule(),
+		mod:       prepareingModule(),
 		functions: make(map[string]*Func),
 	}
 }
@@ -39,7 +54,7 @@ func NewFunc(f *ast.Func) *Func {
 	}
 }
 
-func (f *Func) CallWith(c *CodeGenerator, block *ir.BasicBlock, args []value.Value) value.Value {
+func (f *Func) CallWith(c *CodeGenerator, block *ir.Block, args []value.Value) value.Value {
 	scope := make(map[string]value.Value)
 	for i, arg := range args {
 		scope[f.Func.ParamList[i]] = arg

@@ -6,11 +6,11 @@ import (
 )
 
 type Scope struct {
-	block *ir.BasicBlock
+	block *ir.Block
 	scope map[string]value.Value
 }
 
-func NewScope(block *ir.BasicBlock, scope map[string]value.Value) *Scope {
+func NewScope(block *ir.Block, scope map[string]value.Value) *Scope {
 	return &Scope{
 		block: block,
 		scope: scope,
