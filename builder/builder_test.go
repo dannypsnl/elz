@@ -25,30 +25,41 @@ main =
 }
 
 func TestBindingRule(t *testing.T) {
-	t.Run("ValueBind", func(t *testing.T) {
-		builder := New()
-		builder.BuildFromCode("i = 1")
-		binding := builder.bindings[0]
-		expected := &ast.Binding{
-			Name:      "i",
-			ParamList: []string{},
-			Expr:      &ast.Int{Literal: "1"},
-		}
-		assert.Equal(t, expected, binding)
-	})
-	t.Run("WithParam", func(t *testing.T) {
-		builder := New()
-		builder.BuildFromCode("add x y = x + y")
-		binding := builder.bindings[0]
-		expected := &ast.Binding{
-			Name:      "add",
-			ParamList: []string{"x", "y"},
-			Expr: &ast.BinaryExpr{
-				Op:    "+",
-				LExpr: &ast.Ident{Value: "x"},
-				RExpr: &ast.Ident{Value: "y"},
+	testCases := []struct {
+		name            string
+		code            string
+		expectedBinding *ast.Binding
+	}{
+		{
+			name: "no param bind",
+			code: `i = 1`,
+			expectedBinding: &ast.Binding{
+				Name:      "i",
+				ParamList: []string{},
+				Expr:      &ast.Int{Literal: "1"},
 			},
-		}
-		assert.Equal(t, expected, binding)
-	})
+		},
+		{
+			name: "with param",
+			code: `add x y = x + y`,
+			expectedBinding: &ast.Binding{
+				Name:      "add",
+				ParamList: []string{"x", "y"},
+				Expr: &ast.BinaryExpr{
+					Op:    "+",
+					LExpr: &ast.Ident{Value: "x"},
+					RExpr: &ast.Ident{Value: "y"},
+				},
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			builder := New()
+			builder.BuildFromCode(testCase.code)
+			b := builder.bindings[0]
+			assert.Equal(t, testCase.expectedBinding, b)
+		})
+	}
 }
