@@ -72,7 +72,7 @@ func (b *Builder) ExitFnCall(c *parser.FnCallContext) {
 	})
 }
 func (b *Builder) ExitArg(c *parser.ArgContext) {
-	expr := b.PopExpr()
+	expr := b.PopExpr().(ast.Expr)
 	ident := ""
 	if c.IDENT() != nil {
 		ident = c.IDENT().GetText()

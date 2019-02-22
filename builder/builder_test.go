@@ -20,7 +20,7 @@ func TestBindingRule(t *testing.T) {
 			expectedBinding: &ast.Binding{
 				Name:      "i",
 				ParamList: []string{},
-				Expr:      &ast.Int{Literal: "1"},
+				Expr:      ast.NewInt("1"),
 			},
 		},
 		{
@@ -31,8 +31,8 @@ func TestBindingRule(t *testing.T) {
 				ParamList: []string{"x", "y"},
 				Expr: &ast.BinaryExpr{
 					Op:    "+",
-					LExpr: ast.Ident("x"),
-					RExpr: ast.Ident("y"),
+					LExpr: ast.NewIdent("x"),
+					RExpr: ast.NewIdent("y"),
 				},
 			},
 		},

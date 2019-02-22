@@ -1,8 +1,15 @@
 package ast
 
+type isExpr struct{}
+
+func (isExpr) IsExpr() bool {
+	return true
+}
+
 type (
-	Node interface{}
-	Expr interface{}
+	Expr interface {
+		IsExpr() bool
+	}
 
 	Binding struct {
 		Name      string
@@ -10,35 +17,47 @@ type (
 		Expr      Expr
 	}
 	FuncCall struct {
+		isExpr
 		FuncName string
 		ExprList []Expr
 	}
 	Arg struct {
+		isExpr
 		Ident string
 		Expr  Expr
 	}
 	Int struct {
+		isExpr
 		Literal string
 	}
 	Float struct {
+		isExpr
 		Literal string
 	}
 	String struct {
+		isExpr
 		Literal string
 	}
 	Bool struct {
+		isExpr
 		IsTrue bool
 	}
 	BinaryExpr struct {
+		isExpr
 		LExpr Expr
 		RExpr Expr
 		Op    string
 	}
-	Ident string
+	Ident struct {
+		isExpr
+		Literal string
+	}
 )
 
-func NewIdent(literal string) Ident {
-	return Ident(literal)
+func NewIdent(literal string) *Ident {
+	return &Ident{
+		Literal: literal,
+	}
 }
 
 func NewInt(literal string) *Int       { return &Int{Literal: literal} }
