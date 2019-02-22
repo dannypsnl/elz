@@ -10,8 +10,12 @@ type (
 		Expr      Expr
 	}
 	FuncCall struct {
-		Identifier string
-		ExprList   []Expr
+		FuncName string
+		ExprList []Expr
+	}
+	Arg struct {
+		Ident string
+		Expr  Expr
 	}
 	Int struct {
 		Literal string
@@ -30,15 +34,11 @@ type (
 		RExpr Expr
 		Op    string
 	}
-	Ident struct {
-		Value string
-	}
+	Ident string
 )
 
-func NewIdent(literal string) *Ident {
-	return &Ident{
-		Value: literal,
-	}
+func NewIdent(literal string) Ident {
+	return Ident(literal)
 }
 
 func NewInt(literal string) *Int       { return &Int{Literal: literal} }

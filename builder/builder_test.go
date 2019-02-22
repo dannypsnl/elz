@@ -8,22 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewBuilder(t *testing.T) {
-	builder := New()
-	builder.debug = true
-	builder.BuildFromCode(`
-main =
-  println "Hello"
-  |> add 1 2
-  |> println "World" 1+2
-  |> println [1, 2, 3]
-`)
-
-	assert.Equal(t, len(builder.bindings), 1)
-	b0 := builder.bindings[0]
-	assert.Equal(t, b0.Name, "main")
-}
-
 func TestBindingRule(t *testing.T) {
 	testCases := []struct {
 		name            string
@@ -47,8 +31,38 @@ func TestBindingRule(t *testing.T) {
 				ParamList: []string{"x", "y"},
 				Expr: &ast.BinaryExpr{
 					Op:    "+",
-					LExpr: &ast.Ident{Value: "x"},
-					RExpr: &ast.Ident{Value: "y"},
+					LExpr: ast.Ident("x"),
+					RExpr: ast.Ident("y"),
+				},
+			},
+		},
+		{
+			name: "function call",
+			code: `addOne y = add(1, y)`,
+			expectedBinding: &ast.Binding{
+				Name:      "addOne",
+				ParamList: []string{"y"},
+				Expr: &ast.FuncCall{
+					FuncName: "add",
+					ExprList: []ast.Expr{
+						&ast.Arg{Expr: ast.NewInt("1")},
+						&ast.Arg{Expr: ast.NewIdent("y")},
+					},
+				},
+			},
+		},
+		{
+			name: "function call with arg name",
+			code: `tests = assert(that: 1, should_be: 1)`,
+			expectedBinding: &ast.Binding{
+				Name:      "tests",
+				ParamList: []string{},
+				Expr: &ast.FuncCall{
+					FuncName: "assert",
+					ExprList: []ast.Expr{
+						&ast.Arg{Ident: "that", Expr: ast.NewInt("1")},
+						&ast.Arg{Ident: "should_be", Expr: ast.NewInt("1")},
+					},
 				},
 			},
 		},
@@ -58,7 +72,7 @@ func TestBindingRule(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			builder := New()
 			builder.BuildFromCode(testCase.code)
-			b := builder.bindings[0]
+			b := builder.bindings[testCase.expectedBinding.Name]
 			assert.Equal(t, testCase.expectedBinding, b)
 		})
 	}

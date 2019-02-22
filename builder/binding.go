@@ -6,7 +6,7 @@ import (
 )
 
 func (b *Builder) NewBinding(binding *ast.Binding) {
-	b.bindings = append(b.bindings, binding)
+	b.bindings[binding.Name] = binding
 }
 
 func (b *Builder) ExitBinding(c *parser.BindingContext) {

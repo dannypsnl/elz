@@ -52,15 +52,16 @@ binding:
 // print "hello" |> print "world"
 // parseIdent "a = 1", [] |> parseBinding |> parseExpression
 pipe: expr ('|>' expr)*;
-funcCall: IDENT expr*;
-expr:
-    funcCall                     # FnCall
-    | BOOLEAN                    # Boolean
-    | STRING                     # String
-    | FLOAT                      # Float
-    | INT                        # Int
-    | '(' expr ')'               # SubExpr
-    | '[' expr? (',' expr)* ']'  # List
-    | expr op=('*'|'/') expr     # MulDiv
-    | expr op=('+'|'-') expr     # AddSub
+
+expr: BOOLEAN                       # Boolean
+    | STRING                        # String
+    | FLOAT                         # Float
+    | INT                           # Int
+    | IDENT                         # Identifier
+    | '(' expr ')'                  # SubExpr
+    | '[' expr? (',' expr)* ']'     # List
+    | expr op=('*'|'/') expr        # MulDiv
+    | expr op=('+'|'-') expr        # AddSub
+    | IDENT '(' arg? (',' arg)* ')' # FnCall
     ;
+arg: (IDENT ':')? expr;

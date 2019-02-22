@@ -57,20 +57,28 @@ func (b *Builder) ExitString(c *parser.StringContext) {
 func (b *Builder) ExitBoolean(c *parser.BooleanContext) {
 	b.PushExpr(ast.NewBool(c.BOOLEAN().GetText()))
 }
+func (b *Builder) ExitIdentifier(c *parser.IdentifierContext) {
+	b.PushExpr(ast.NewIdent(c.GetText()))
+}
 
-func (b *Builder) ExitFuncCall(c *parser.FuncCallContext) {
-	if len(c.AllExpr()) == 0 {
-		b.PushExpr(&ast.Ident{
-			Value: c.IDENT().GetText(),
-		})
-		return
-	}
+func (b *Builder) ExitFnCall(c *parser.FnCallContext) {
 	exprList := make([]ast.Expr, 0)
 	for e, hasExpr := b.PopExpr().(ast.Expr); hasExpr; e, hasExpr = b.PopExpr().(ast.Expr) {
 		exprList = append([]ast.Expr{e}, exprList...)
 	}
 	b.PushExpr(&ast.FuncCall{
-		Identifier: c.IDENT().GetText(),
-		ExprList:   exprList,
+		FuncName: c.IDENT().GetText(),
+		ExprList: exprList,
+	})
+}
+func (b *Builder) ExitArg(c *parser.ArgContext) {
+	expr := b.PopExpr()
+	ident := ""
+	if c.IDENT() != nil {
+		ident = c.IDENT().GetText()
+	}
+	b.PushExpr(&ast.Arg{
+		Ident: ident,
+		Expr:  expr,
 	})
 }
