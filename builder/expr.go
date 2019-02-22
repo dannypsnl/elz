@@ -19,7 +19,7 @@ func (b *Builder) PopExpr() interface{} {
 //
 // WorkFlow:
 //
-// e.g. leftExpr Operator rightExpr
+// e.g. leftExpr Op rightExpr
 // 1. push leftExpr
 // 2. push rightExpr
 // MulDiv
@@ -30,9 +30,9 @@ func (b *Builder) ExitMulDiv(c *parser.MulDivContext) {
 	lExpr := b.PopExpr().(ast.Expr)
 	// left expr, right expr, operator
 	b.PushExpr(&ast.BinaryExpr{
-		LExpr:    lExpr,
-		RExpr:    rExpr,
-		Operator: c.GetOp().GetText(),
+		LExpr: lExpr,
+		RExpr: rExpr,
+		Op:    c.GetOp().GetText(),
 	})
 }
 func (b *Builder) ExitAddSub(c *parser.AddSubContext) {
@@ -40,9 +40,9 @@ func (b *Builder) ExitAddSub(c *parser.AddSubContext) {
 	lExpr := b.PopExpr().(ast.Expr)
 	// left expr, right expr, operator
 	b.PushExpr(&ast.BinaryExpr{
-		LExpr:    lExpr,
-		RExpr:    rExpr,
-		Operator: c.GetOp().GetText(),
+		LExpr: lExpr,
+		RExpr: rExpr,
+		Op:    c.GetOp().GetText(),
 	})
 }
 func (b *Builder) ExitInt(c *parser.IntContext) {

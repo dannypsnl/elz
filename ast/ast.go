@@ -2,13 +2,12 @@ package ast
 
 type (
 	Node interface{}
-	Func struct {
+	Expr interface{}
+
+	Binding struct {
 		Name      string
 		ParamList []string
 		Expr      Expr
-	}
-	Expr interface {
-		IsConst() bool
 	}
 	FuncCall struct {
 		Identifier string
@@ -27,9 +26,9 @@ type (
 		IsTrue bool
 	}
 	BinaryExpr struct {
-		LExpr    Expr
-		RExpr    Expr
-		Operator string
+		LExpr Expr
+		RExpr Expr
+		Op    string
 	}
 	Ident struct {
 		Value string
@@ -57,11 +56,3 @@ func NewBool(literal string) *Bool {
 	}
 	return &Bool{IsTrue: value}
 }
-
-func (f *FuncCall) IsConst() bool   { return false }
-func (i *Int) IsConst() bool        { return true }
-func (f *Float) IsConst() bool      { return true }
-func (b *Bool) IsConst() bool       { return true }
-func (s *String) IsConst() bool     { return true }
-func (b *BinaryExpr) IsConst() bool { return false }
-func (i *Ident) IsConst() bool      { return false }

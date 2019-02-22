@@ -1,8 +1,6 @@
 package builder
 
 import (
-	"fmt"
-
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/internal/collection/stack"
 	"github.com/elz-lang/elz/parser"
@@ -13,23 +11,20 @@ import (
 type Builder struct {
 	*parser.BaseElzListener
 
-	bindings []*ast.Func
+	bindings []*ast.Binding
 
 	exprStack *stack.Stack
 	debug     bool
 }
 
 func (b *Builder) ExitProg(c *parser.ProgContext) {
-	if b.debug {
-		fmt.Printf("%#v\n", c)
-	}
 }
 
 func New() *Builder {
 	return &Builder{
 		debug:     false,
 		exprStack: stack.New(),
-		bindings:  make([]*ast.Func, 0),
+		bindings:  make([]*ast.Binding, 0),
 	}
 }
 
