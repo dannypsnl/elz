@@ -2,15 +2,15 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/llir/llvm/ir/constant"
-	"github.com/llir/llvm/ir/value"
 	"strings"
 
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/types"
 
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
 	llvmtypes "github.com/llir/llvm/ir/types"
+	"github.com/llir/llvm/ir/value"
 )
 
 type Generator struct {

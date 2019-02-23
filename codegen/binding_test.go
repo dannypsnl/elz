@@ -1,11 +1,12 @@
 package codegen_test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/elz-lang/elz/ast"
 	"github.com/elz-lang/elz/codegen"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBindingCodegen(t *testing.T) {
