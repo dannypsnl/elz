@@ -54,6 +54,13 @@ type (
 	}
 )
 
+func NewArg(ident string, expr Expr) *Arg {
+	return &Arg{
+		Ident: ident,
+		Expr:  expr,
+	}
+}
+
 func NewIdent(literal string) *Ident {
 	return &Ident{
 		Literal: literal,
