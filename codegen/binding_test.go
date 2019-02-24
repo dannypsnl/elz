@@ -62,11 +62,29 @@ func TestBindingCodegen(t *testing.T) {
 	ret i64 %3
 }`,
 		},
+		{
+			name:     "call function in function",
+			bindName: "addOne",
+			args: []*ast.Arg{
+				ast.NewArg("", ast.NewInt("2")),
+			},
+			expectContains: `define i64 @add(i64, i64) {
+; <label>:2
+	%3 = add i64 1, 2
+	ret i64 %3
+}
+
+define i64 @addOne(i64) {
+; <label>:1
+	%2 = call i64 @add(i64 1, i64 2)
+	ret i64 %2
+}`,
+		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			g := codegen.New()
+			g := codegen.New(bindMap)
 			g.Call(bindMap[testCase.bindName], testCase.args...)
 			assert.Contains(t, g.String(), testCase.expectContains)
 		})

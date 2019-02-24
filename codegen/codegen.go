@@ -14,18 +14,20 @@ import (
 )
 
 type Generator struct {
-	mod *ir.Module
+	mod     *ir.Module
+	bindMap map[string]*ast.Binding
 
 	implsOfBinding       map[string]*ir.Func
 	typeOfBuiltInBinding map[string]types.Type
 	typeOfBinding        map[string]types.Type
 }
 
-func New() *Generator {
+func New(bindMap map[string]*ast.Binding) *Generator {
 	typMap := make(map[string]types.Type)
 	typMap["+(int,int)"] = &types.Int{}
 	return &Generator{
 		mod:                  ir.NewModule(),
+		bindMap:              bindMap,
 		implsOfBinding:       make(map[string]*ir.Func),
 		typeOfBuiltInBinding: typMap,
 		typeOfBinding:        typMap,
@@ -77,7 +79,8 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, argList ...*ast.Arg) *ir.Func
 		argName := bind.ParamList[i]
 		typeMap[argName] = t
 	}
-	inferT := g.inferReturnType(bind.Expr, typeMap)
+	inferT := g.inferReturnType(bind.Expr, binds, typeMap)
+	g.typeOfBinding[key] = inferT
 	f := g.mod.NewFunc(bindName, inferT.LLVMType(), params...)
 
 	b := f.NewBlock("")
@@ -88,11 +91,29 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, argList ...*ast.Arg) *ir.Func
 }
 
 // inference the return type by the expression we going to execute and input types
-func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type) types.Type {
+func (g *Generator) inferReturnType(expr ast.Expr, binds map[string]ast.Expr, typeMap map[string]types.Type) types.Type {
 	switch expr := expr.(type) {
+	case *ast.FuncCall:
+		bind, hasBind := g.bindMap[expr.FuncName]
+		if hasBind {
+			argList := make([]*ast.Arg, 0)
+			for _, arg := range expr.ExprList {
+				argument := arg
+				if e, isIdent := arg.Expr.(*ast.Ident); isIdent {
+					argument.Expr = binds[e.Literal]
+				}
+				argList = append(argList, argument)
+			}
+			g.mustGetImpl(bind, argList...)
+			t, exist := g.typeOfBind(genKeyByArg(expr.FuncName, expr.ExprList...))
+			if exist {
+				return t
+			}
+		}
+		panic(fmt.Sprintf("can't find any binding call: %s", expr.FuncName))
 	case *ast.BinaryExpr:
-		lt := g.inferReturnType(expr.LExpr, typeMap)
-		rt := g.inferReturnType(expr.RExpr, typeMap)
+		lt := g.inferReturnType(expr.LExpr, binds, typeMap)
+		rt := g.inferReturnType(expr.RExpr, binds, typeMap)
 		op := expr.Op
 		key := genKeyByTypes(op, lt, rt)
 		t, ok := g.typeOfBind(key)
@@ -135,6 +156,15 @@ func (g *Generator) funcBody(b *ir.Block, expr ast.Expr, binds map[string]ast.Ex
 
 func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]ast.Expr, typeMap map[string]types.Type) value.Value {
 	switch expr := expr.(type) {
+	case *ast.FuncCall:
+		bind := g.bindMap[expr.FuncName]
+		f := g.mustGetImpl(bind, expr.ExprList...)
+		valueList := make([]value.Value, 0)
+		for _, arg := range expr.ExprList {
+			e := g.genExpr(b, arg.Expr, binds, typeMap)
+			valueList = append(valueList, e)
+		}
+		return b.NewCall(f, valueList...)
 	case *ast.BinaryExpr:
 		x := g.genExpr(b, expr.LExpr, binds, typeMap)
 		y := g.genExpr(b, expr.RExpr, binds, typeMap)
