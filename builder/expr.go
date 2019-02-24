@@ -62,9 +62,9 @@ func (b *Builder) ExitIdentifier(c *parser.IdentifierContext) {
 }
 
 func (b *Builder) ExitFnCall(c *parser.FnCallContext) {
-	exprList := make([]ast.Expr, 0)
-	for e, hasExpr := b.PopExpr().(ast.Expr); hasExpr; e, hasExpr = b.PopExpr().(ast.Expr) {
-		exprList = append([]ast.Expr{e}, exprList...)
+	exprList := make([]*ast.Arg, 0)
+	for e, hasExpr := b.PopExpr().(*ast.Arg); hasExpr; e, hasExpr = b.PopExpr().(*ast.Arg) {
+		exprList = append([]*ast.Arg{e}, exprList...)
 	}
 	b.PushExpr(&ast.FuncCall{
 		FuncName: c.IDENT().GetText(),

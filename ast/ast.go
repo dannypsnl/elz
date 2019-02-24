@@ -19,7 +19,7 @@ type (
 	FuncCall struct {
 		isExpr
 		FuncName string
-		ExprList []Expr
+		ExprList []*Arg
 	}
 	Arg struct {
 		isExpr

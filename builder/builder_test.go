@@ -44,9 +44,9 @@ func TestBindingRule(t *testing.T) {
 				ParamList: []string{"y"},
 				Expr: &ast.FuncCall{
 					FuncName: "add",
-					ExprList: []ast.Expr{
-						&ast.Arg{Expr: ast.NewInt("1")},
-						&ast.Arg{Expr: ast.NewIdent("y")},
+					ExprList: []*ast.Arg{
+						{Expr: ast.NewInt("1")},
+						{Expr: ast.NewIdent("y")},
 					},
 				},
 			},
@@ -59,9 +59,9 @@ func TestBindingRule(t *testing.T) {
 				ParamList: []string{},
 				Expr: &ast.FuncCall{
 					FuncName: "assert",
-					ExprList: []ast.Expr{
-						&ast.Arg{Ident: "that", Expr: ast.NewInt("1")},
-						&ast.Arg{Ident: "should_be", Expr: ast.NewInt("1")},
+					ExprList: []*ast.Arg{
+						{Ident: "that", Expr: ast.NewInt("1")},
+						{Ident: "should_be", Expr: ast.NewInt("1")},
 					},
 				},
 			},
