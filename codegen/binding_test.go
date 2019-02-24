@@ -9,10 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBindingCodegen(t *testing.T) {
-	g := codegen.New()
-
-	g.Call(&ast.Binding{
+var (
+	bindAdd = &ast.Binding{
 		Name:      "add",
 		ParamList: []string{"x", "y"},
 		Expr: &ast.BinaryExpr{
@@ -20,7 +18,13 @@ func TestBindingCodegen(t *testing.T) {
 			RExpr: ast.NewIdent("y"),
 			Op:    "+",
 		},
-	},
+	}
+)
+
+func TestBindingCodegen(t *testing.T) {
+	g := codegen.New()
+
+	g.Call(bindAdd,
 		ast.NewArg("", ast.NewInt("1")),
 		ast.NewArg("", ast.NewInt("2")),
 	)

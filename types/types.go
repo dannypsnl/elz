@@ -40,6 +40,6 @@ func TypeOf(e ast.Expr) Type {
 	case *ast.Int:
 		return &Int{}
 	default:
-		panic(fmt.Sprintf("unsupport this expression yet, expression: %#v", e))
+		panic(fmt.Sprintf("unsupport this expression: `%#v` yet", e))
 	}
 }

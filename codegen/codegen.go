@@ -16,17 +16,19 @@ import (
 type Generator struct {
 	mod *ir.Module
 
-	implsOfBinding map[string]*ir.Func
-	typeOfBinding  map[string]types.Type
+	implsOfBinding       map[string]*ir.Func
+	typeOfBuiltInBinding map[string]types.Type
+	typeOfBinding        map[string]types.Type
 }
 
 func New() *Generator {
 	typMap := make(map[string]types.Type)
 	typMap["+(int,int)"] = &types.Int{}
 	return &Generator{
-		mod:            ir.NewModule(),
-		implsOfBinding: make(map[string]*ir.Func),
-		typeOfBinding:  typMap,
+		mod:                  ir.NewModule(),
+		implsOfBinding:       make(map[string]*ir.Func),
+		typeOfBuiltInBinding: typMap,
+		typeOfBinding:        typMap,
 	}
 }
 
@@ -79,7 +81,7 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, argList ...*ast.Arg) *ir.Func
 	f := g.mod.NewFunc(bindName, inferT.LLVMType(), params...)
 
 	b := f.NewBlock("")
-	funcBody(b, bind.Expr, binds)
+	g.funcBody(b, bind.Expr, binds, typeMap)
 
 	g.implsOfBinding[key] = f
 	return f
@@ -93,7 +95,7 @@ func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type
 		rt := g.inferReturnType(expr.RExpr, typeMap)
 		op := expr.Op
 		key := genKeyByTypes(op, lt, rt)
-		t, ok := g.typeOfBinding[key]
+		t, ok := g.typeOfBind(key)
 		if !ok {
 			panic(fmt.Sprintf("can't infer return type by %s", key))
 		}
@@ -109,23 +111,54 @@ func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type
 	}
 }
 
-func funcBody(b *ir.Block, expr ast.Expr, binds map[string]ast.Expr) {
-	v := genExpr(b, expr, binds)
+func (g *Generator) isBuiltIn(key string) bool {
+	_, isBuiltIn := g.typeOfBuiltInBinding[key]
+	return isBuiltIn
+}
+
+func (g *Generator) typeOfBind(key string) (types.Type, bool) {
+	t, existed := g.typeOfBuiltInBinding[key]
+	if existed {
+		return t, true
+	}
+	t, existed = g.typeOfBinding[key]
+	if existed {
+		return t, true
+	}
+	return nil, false
+}
+
+func (g *Generator) funcBody(b *ir.Block, expr ast.Expr, binds map[string]ast.Expr, typeMap map[string]types.Type) {
+	v := g.genExpr(b, expr, binds, typeMap)
 	b.NewRet(v)
 }
 
-func genExpr(b *ir.Block, expr ast.Expr, binds map[string]ast.Expr) value.Value {
+func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]ast.Expr, typeMap map[string]types.Type) value.Value {
 	switch expr := expr.(type) {
 	case *ast.BinaryExpr:
-		if expr.Op == "+" {
-			x := genExpr(b, expr.LExpr, binds)
-			y := genExpr(b, expr.RExpr, binds)
-			return b.NewAdd(x, y)
+		x := g.genExpr(b, expr.LExpr, binds, typeMap)
+		y := g.genExpr(b, expr.RExpr, binds, typeMap)
+		lt := getType(expr.LExpr, typeMap)
+		rt := getType(expr.RExpr, typeMap)
+		key := genKeyByTypes(expr.Op, lt, rt)
+		if g.isBuiltIn(key) {
+			if lt.String() == "int" && rt.String() == "int" {
+				switch expr.Op {
+				case "+":
+					return b.NewAdd(x, y)
+				case "-":
+					return b.NewSub(x, y)
+				case "*":
+					return b.NewMul(x, y)
+				case "/":
+					return b.NewSDiv(x, y)
+				}
+			}
 		}
 		panic(fmt.Sprintf("unsupported operator: %s", expr.Op))
 	case *ast.Ident:
 		e := binds[expr.Literal]
-		return genExpr(b, e, binds)
+		return g.genExpr(b, e, binds, typeMap)
 	case *ast.Int:
 		v, err := constant.NewIntFromString(llvmtypes.I64, expr.Literal)
 		if err != nil {
@@ -134,6 +167,13 @@ func genExpr(b *ir.Block, expr ast.Expr, binds map[string]ast.Expr) value.Value 
 	default:
 		panic(fmt.Sprintf("failed at generate expression: %#v", expr))
 	}
+}
+
+func getType(e ast.Expr, typeMap map[string]types.Type) types.Type {
+	if e, isIdentifier := e.(*ast.Ident); isIdentifier {
+		return typeMap[e.Literal]
+	}
+	return types.TypeOf(e)
 }
 
 func genKeyByTypes(bindName string, typeList ...types.Type) string {
