@@ -39,23 +39,28 @@ func (g *Generator) String() string {
 }
 
 func (g *Generator) Call(bind *ast.Binding, exprList ...*ast.Arg) {
-	g.mustGetImpl(bind, exprList...)
+	g.mustGetImpl(bind, make(map[string]types.Type), exprList...)
 }
 
-func (g *Generator) mustGetImpl(bind *ast.Binding, argList ...*ast.Arg) *ir.Func {
+func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type, argList ...*ast.Arg) *ir.Func {
 	bindName := bind.Name
-	key := genKeyByArg(bindName, argList...)
+	typeList := make([]types.Type, 0)
+	for _, arg := range argList {
+		var t types.Type
+		if ident, isIdent := arg.Expr.(*ast.Ident); isIdent {
+			t = typeMap[ident.Literal]
+		} else {
+			t = types.TypeOf(arg.Expr)
+		}
+		typeList = append(typeList, t)
+	}
+	key := genKeyByTypes(bindName, typeList...)
 	impl, getImpl := g.implsOfBinding[key]
 	if getImpl {
 		return impl
 	}
 	if len(argList) != len(bind.ParamList) {
 		panic(`do not have enough arguments to call function`)
-	}
-	binds := make(map[string]ast.Expr)
-	typeList := make([]types.Type, 0)
-	for _, e := range argList {
-		typeList = append(typeList, types.TypeOf(e))
 	}
 	params := make([]*ir.Param, 0)
 	for i, e := range argList {
@@ -71,19 +76,21 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, argList ...*ast.Arg) *ir.Func
   assert(that: 1+2, should_be: 3)
 `)
 		}
-		binds[argName] = e.Expr
 		params = append(params, ir.NewParam(e.Ident, typeList[i].LLVMType()))
 	}
-	typeMap := make(map[string]types.Type)
 	for i, t := range typeList {
 		argName := bind.ParamList[i]
 		typeMap[argName] = t
 	}
-	inferT := g.inferReturnType(bind.Expr, binds, typeMap)
+	inferT := g.inferReturnType(bind.Expr, typeMap)
 	g.typeOfBinding[key] = inferT
 	f := g.mod.NewFunc(bindName, inferT.LLVMType(), params...)
 
 	b := f.NewBlock("")
+	binds := make(map[string]*ir.Param)
+	for i, p := range params {
+		binds[bind.ParamList[i]] = p
+	}
 	g.funcBody(b, bind.Expr, binds, typeMap)
 
 	g.implsOfBinding[key] = f
@@ -91,29 +98,38 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, argList ...*ast.Arg) *ir.Func
 }
 
 // inference the return type by the expression we going to execute and input types
-func (g *Generator) inferReturnType(expr ast.Expr, binds map[string]ast.Expr, typeMap map[string]types.Type) types.Type {
+func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type) types.Type {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
 		bind, hasBind := g.bindMap[expr.FuncName]
 		if hasBind {
-			argList := make([]*ast.Arg, 0)
+			typeList := make([]types.Type, 0)
 			for _, arg := range expr.ExprList {
-				argument := arg
-				if e, isIdent := arg.Expr.(*ast.Ident); isIdent {
-					argument.Expr = binds[e.Literal]
+				var t types.Type
+				if ident, isIdent := arg.Expr.(*ast.Ident); isIdent {
+					t = typeMap[ident.Literal]
+				} else {
+					t = types.TypeOf(arg.Expr)
 				}
-				argList = append(argList, argument)
+				typeList = append(typeList, t)
 			}
-			g.mustGetImpl(bind, argList...)
-			t, exist := g.typeOfBind(genKeyByArg(expr.FuncName, expr.ExprList...))
+			typeMap := make(map[string]types.Type)
+			for i, t := range typeList {
+				argName := bind.ParamList[i]
+				typeMap[argName] = t
+			}
+			inferT := g.inferReturnType(bind.Expr, typeMap)
+			key := genKeyByTypes(bind.Name, typeList...)
+			g.typeOfBinding[key] = inferT
+			t, exist := g.typeOfBind(genKeyByTypes(expr.FuncName, typeList...))
 			if exist {
 				return t
 			}
 		}
 		panic(fmt.Sprintf("can't find any binding call: %s", expr.FuncName))
 	case *ast.BinaryExpr:
-		lt := g.inferReturnType(expr.LExpr, binds, typeMap)
-		rt := g.inferReturnType(expr.RExpr, binds, typeMap)
+		lt := g.inferReturnType(expr.LExpr, typeMap)
+		rt := g.inferReturnType(expr.RExpr, typeMap)
 		op := expr.Op
 		key := genKeyByTypes(op, lt, rt)
 		t, ok := g.typeOfBind(key)
@@ -149,16 +165,16 @@ func (g *Generator) typeOfBind(key string) (types.Type, bool) {
 	return nil, false
 }
 
-func (g *Generator) funcBody(b *ir.Block, expr ast.Expr, binds map[string]ast.Expr, typeMap map[string]types.Type) {
+func (g *Generator) funcBody(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap map[string]types.Type) {
 	v := g.genExpr(b, expr, binds, typeMap)
 	b.NewRet(v)
 }
 
-func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]ast.Expr, typeMap map[string]types.Type) value.Value {
+func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap map[string]types.Type) value.Value {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
 		bind := g.bindMap[expr.FuncName]
-		f := g.mustGetImpl(bind, expr.ExprList...)
+		f := g.mustGetImpl(bind, typeMap, expr.ExprList...)
 		valueList := make([]value.Value, 0)
 		for _, arg := range expr.ExprList {
 			e := g.genExpr(b, arg.Expr, binds, typeMap)
@@ -187,8 +203,11 @@ func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]ast.Exp
 		}
 		panic(fmt.Sprintf("unsupported operator: %s", expr.Op))
 	case *ast.Ident:
-		e := binds[expr.Literal]
-		return g.genExpr(b, e, binds, typeMap)
+		v, exist := binds[expr.Literal]
+		if exist {
+			return v
+		}
+		panic(fmt.Sprintf("can't find any identifier: %s", expr.Literal))
 	case *ast.Int:
 		v, err := constant.NewIntFromString(llvmtypes.I64, expr.Literal)
 		if err != nil {
@@ -227,12 +246,4 @@ func genKey(bindName string, exprList ...ast.Expr) string {
 		typeList = append(typeList, types.TypeOf(e))
 	}
 	return genKeyByTypes(bindName, typeList...)
-}
-
-func genKeyByArg(bindName string, argList ...*ast.Arg) string {
-	exprList := make([]ast.Expr, len(argList))
-	for i, arg := range argList {
-		exprList[i] = arg
-	}
-	return genKey(bindName, exprList...)
 }
