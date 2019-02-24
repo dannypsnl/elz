@@ -44,16 +44,7 @@ func (g *Generator) Call(bind *ast.Binding, exprList ...*ast.Arg) {
 
 func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type, argList ...*ast.Arg) *ir.Func {
 	bindName := bind.Name
-	typeList := make([]types.Type, 0)
-	for _, arg := range argList {
-		var t types.Type
-		if ident, isIdent := arg.Expr.(*ast.Ident); isIdent {
-			t = typeMap[ident.Literal]
-		} else {
-			t = types.TypeOf(arg.Expr)
-		}
-		typeList = append(typeList, t)
-	}
+	typeList := getTypeListFrom(typeMap, argList...)
 	key := genKey(bindName, typeList...)
 	impl, getImpl := g.implsOfBinding[key]
 	if getImpl {
@@ -103,16 +94,7 @@ func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type
 	case *ast.FuncCall:
 		bind, hasBind := g.bindMap[expr.FuncName]
 		if hasBind {
-			typeList := make([]types.Type, 0)
-			for _, arg := range expr.ExprList {
-				var t types.Type
-				if ident, isIdent := arg.Expr.(*ast.Ident); isIdent {
-					t = typeMap[ident.Literal]
-				} else {
-					t = types.TypeOf(arg.Expr)
-				}
-				typeList = append(typeList, t)
-			}
+			typeList := getTypeListFrom(typeMap, expr.ExprList...)
 			typeMap := make(map[string]types.Type)
 			for i, t := range typeList {
 				argName := bind.ParamList[i]
@@ -238,4 +220,18 @@ func genKey(bindName string, typeList ...types.Type) string {
 		b.WriteRune(')')
 	}
 	return b.String()
+}
+
+func getTypeListFrom(typeMap map[string]types.Type, args ...*ast.Arg) []types.Type {
+	typeList := make([]types.Type, 0)
+	for _, arg := range args {
+		var t types.Type
+		if ident, isIdent := arg.Expr.(*ast.Ident); isIdent {
+			t = typeMap[ident.Literal]
+		} else {
+			t = types.TypeOf(arg.Expr)
+		}
+		typeList = append(typeList, t)
+	}
+	return typeList
 }
