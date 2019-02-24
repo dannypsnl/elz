@@ -54,7 +54,7 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 		}
 		typeList = append(typeList, t)
 	}
-	key := genKeyByTypes(bindName, typeList...)
+	key := genKey(bindName, typeList...)
 	impl, getImpl := g.implsOfBinding[key]
 	if getImpl {
 		return impl
@@ -119,9 +119,9 @@ func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type
 				typeMap[argName] = t
 			}
 			inferT := g.inferReturnType(bind.Expr, typeMap)
-			key := genKeyByTypes(bind.Name, typeList...)
+			key := genKey(bind.Name, typeList...)
 			g.typeOfBinding[key] = inferT
-			t, exist := g.typeOfBind(genKeyByTypes(expr.FuncName, typeList...))
+			t, exist := g.typeOfBind(genKey(expr.FuncName, typeList...))
 			if exist {
 				return t
 			}
@@ -131,7 +131,7 @@ func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type
 		lt := g.inferReturnType(expr.LExpr, typeMap)
 		rt := g.inferReturnType(expr.RExpr, typeMap)
 		op := expr.Op
-		key := genKeyByTypes(op, lt, rt)
+		key := genKey(op, lt, rt)
 		t, ok := g.typeOfBind(key)
 		if !ok {
 			panic(fmt.Sprintf("can't infer return type by %s", key))
@@ -186,7 +186,7 @@ func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Par
 		y := g.genExpr(b, expr.RExpr, binds, typeMap)
 		lt := getType(expr.LExpr, typeMap)
 		rt := getType(expr.RExpr, typeMap)
-		key := genKeyByTypes(expr.Op, lt, rt)
+		key := genKey(expr.Op, lt, rt)
 		if g.isBuiltIn(key) {
 			if lt.String() == "int" && rt.String() == "int" {
 				switch expr.Op {
@@ -225,7 +225,7 @@ func getType(e ast.Expr, typeMap map[string]types.Type) types.Type {
 	return types.TypeOf(e)
 }
 
-func genKeyByTypes(bindName string, typeList ...types.Type) string {
+func genKey(bindName string, typeList ...types.Type) string {
 	var b strings.Builder
 	b.WriteString(bindName)
 	if len(typeList) > 0 {
@@ -238,12 +238,4 @@ func genKeyByTypes(bindName string, typeList ...types.Type) string {
 		b.WriteRune(')')
 	}
 	return b.String()
-}
-
-func genKey(bindName string, exprList ...ast.Expr) string {
-	typeList := make([]types.Type, 0)
-	for _, e := range exprList {
-		typeList = append(typeList, types.TypeOf(e))
-	}
-	return genKeyByTypes(bindName, typeList...)
 }
