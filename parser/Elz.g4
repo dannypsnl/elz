@@ -47,11 +47,7 @@ topLevel: bind_type
     ;
 bind_type: IDENT '::' ;
 binding:
-    IDENT+ '=' pipe;
-
-// print "hello" |> print "world"
-// parseIdent "a = 1", [] |> parseBinding |> parseExpression
-pipe: expr ('|>' expr)*;
+    IDENT+ '=' expr;
 
 expr: BOOLEAN                       # Boolean
     | STRING                        # String
