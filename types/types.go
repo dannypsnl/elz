@@ -32,6 +32,18 @@ func (*Int) LLVMType() types.Type {
 	return types.I64
 }
 
+type Float struct {
+	isType
+}
+
+func (f *Float) String() string {
+	return "f64"
+}
+
+func (f *Float) LLVMType() types.Type {
+	return types.Double
+}
+
 func TypeOf(e ast.Expr) Type {
 	// where e := e.(type) can save the convert in case clause
 	switch e := e.(type) {
@@ -39,6 +51,8 @@ func TypeOf(e ast.Expr) Type {
 		return TypeOf(e.Expr)
 	case *ast.Int:
 		return &Int{}
+	case *ast.Float:
+		return &Float{}
 	default:
 		panic(fmt.Sprintf("you can't use expression: `%#v` to get type directly", e))
 	}

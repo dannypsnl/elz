@@ -7,10 +7,12 @@ import (
 	"github.com/elz-lang/elz/codegen"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
 	bindings = []*ast.Binding{
+		// addOne y = add(1, y)
 		{
 			Name:      "addOne",
 			ParamList: []string{"y"},
@@ -22,6 +24,7 @@ var (
 				},
 			},
 		},
+		// add x y = x + y
 		{
 			Name:      "add",
 			ParamList: []string{"x", "y"},
@@ -29,6 +32,18 @@ var (
 				LExpr: ast.NewIdent("x"),
 				RExpr: ast.NewIdent("y"),
 				Op:    "+",
+			},
+		},
+	}
+
+	bindTypes = []*ast.BindType{
+		// add :: int -> int -> int
+		{
+			Name: "add",
+			Type: []ast.Type{
+				&ast.ExistType{Name: "int"},
+				&ast.ExistType{Name: "int"},
+				&ast.ExistType{Name: "int"},
 			},
 		},
 	}
@@ -41,6 +56,9 @@ func init() {
 	for _, bind := range bindings {
 		bindMap[bind.Name] = bind
 	}
+	for _, bindT := range bindTypes {
+		bindType[bindT.Name] = bindT
+	}
 }
 
 func TestBindingCodegen(t *testing.T) {
@@ -49,6 +67,7 @@ func TestBindingCodegen(t *testing.T) {
 		bindName       string
 		args           []*ast.Arg
 		expectContains []string
+		expectErrorMsg string
 	}{
 		{
 			name:     "call by generator",
@@ -82,12 +101,26 @@ func TestBindingCodegen(t *testing.T) {
 }`,
 			},
 		},
+		{
+			name:     "using wrong argument to call function should failed",
+			bindName: "add",
+			args: []*ast.Arg{
+				ast.NewArg("", ast.NewFloat("3.3")),
+				ast.NewArg("", ast.NewFloat("3.4")),
+			},
+			expectErrorMsg: "the type of argument doesn't match bind type requirement",
+		},
 	}
 
 	g := codegen.New(bindMap, bindType)
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			g.Call(bindMap[testCase.bindName], testCase.args...)
+			err := g.Call(bindMap[testCase.bindName], testCase.args...)
+			if testCase.expectErrorMsg != "" {
+				require.Contains(t, err.Error(), testCase.expectErrorMsg)
+				return
+			}
+			require.NoError(t, err)
 			for _, expectedContain := range testCase.expectContains {
 				assert.Contains(t, g.String(), expectedContain)
 			}
