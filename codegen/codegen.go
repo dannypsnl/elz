@@ -14,19 +14,21 @@ import (
 )
 
 type Generator struct {
-	mod     *ir.Module
-	bindMap map[string]*ast.Binding
+	mod      *ir.Module
+	bindType map[string]*ast.BindType
+	bindMap  map[string]*ast.Binding
 
 	implsOfBinding       map[string]*ir.Func
 	typeOfBuiltInBinding map[string]types.Type
 	typeOfBinding        map[string]types.Type
 }
 
-func New(bindMap map[string]*ast.Binding) *Generator {
+func New(bindMap map[string]*ast.Binding, bindType map[string]*ast.BindType) *Generator {
 	typMap := make(map[string]types.Type)
 	typMap["+(int,int)"] = &types.Int{}
 	return &Generator{
 		mod:                  ir.NewModule(),
+		bindType:             bindType,
 		bindMap:              bindMap,
 		implsOfBinding:       make(map[string]*ir.Func),
 		typeOfBuiltInBinding: typMap,

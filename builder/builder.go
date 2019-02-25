@@ -11,24 +11,29 @@ import (
 type Builder struct {
 	*parser.BaseElzListener
 
-	bindings map[string]*ast.Binding
+	bindTypeList []ast.Type
+	exprStack    *stack.Stack
 
-	exprStack *stack.Stack
-	debug     bool
+	bindTypes map[string]*ast.BindType
+	bindings  map[string]*ast.Binding
 }
 
-func (b *Builder) GetAST() map[string]*ast.Binding {
+func (b *Builder) GetBindTypes() map[string]*ast.BindType {
+	return b.bindTypes
+}
+func (b *Builder) GetBindMap() map[string]*ast.Binding {
 	return b.bindings
 }
 
-func (b *Builder) ExitProg(c *parser.ProgContext) {
+func (b *Builder) ExitProgram(c *parser.ProgramContext) {
 }
 
 func New() *Builder {
 	return &Builder{
-		debug:     false,
-		exprStack: stack.New(),
-		bindings:  make(map[string]*ast.Binding),
+		bindTypeList: make([]ast.Type, 0),
+		exprStack:    stack.New(),
+		bindTypes:    make(map[string]*ast.BindType),
+		bindings:     make(map[string]*ast.Binding),
 	}
 }
 
@@ -51,6 +56,6 @@ func (b *Builder) build(input antlr.CharStream) {
 	stream := antlr.NewCommonTokenStream(lexer, 0)
 	p := parser.NewElzParser(stream)
 	p.BuildParseTrees = true
-	tree := p.Prog()
+	tree := p.Program()
 	antlr.ParseTreeWalkerDefault.Walk(b, tree)
 }

@@ -10,9 +10,10 @@ import (
 
 func TestBindingRule(t *testing.T) {
 	testCases := []struct {
-		name            string
-		code            string
-		expectedBinding *ast.Binding
+		name             string
+		code             string
+		expectedBinding  *ast.Binding
+		expectedBindType *ast.BindType
 	}{
 		{
 			name: "no param bind",
@@ -66,14 +67,46 @@ func TestBindingRule(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "type bind with existing types",
+			code: `add :: int -> int -> int`,
+			expectedBindType: &ast.BindType{
+				Name: "add",
+				Type: []ast.Type{
+					&ast.ExistType{Name: "int"},
+					&ast.ExistType{Name: "int"},
+					&ast.ExistType{Name: "int"},
+				},
+			},
+		},
+		{
+			name: "type bind with variant types",
+			code: `assert :: 'that -> 'should_be -> ()`,
+			expectedBindType: &ast.BindType{
+				Name: "assert",
+				Type: []ast.Type{
+					&ast.VariantType{Name: "that"},
+					&ast.VariantType{Name: "should_be"},
+					&ast.VoidType{},
+				},
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			builder := New()
 			builder.BuildFromCode(testCase.code)
-			b := builder.bindings[testCase.expectedBinding.Name]
-			assert.Equal(t, testCase.expectedBinding, b)
+			if testCase.expectedBinding != nil {
+				bindMap := builder.GetBindMap()
+				b := bindMap[testCase.expectedBinding.Name]
+				assert.Equal(t, testCase.expectedBinding, b)
+			}
+			if testCase.expectedBindType != nil {
+				bindTypes := builder.GetBindTypes()
+				bt := bindTypes[testCase.expectedBindType.Name]
+				assert.Equal(t, testCase.expectedBindType, bt)
+			}
 		})
 	}
 }

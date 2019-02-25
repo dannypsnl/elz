@@ -11,6 +11,10 @@ type (
 		IsExpr() bool
 	}
 
+	BindType struct {
+		Name string
+		Type []Type
+	}
 	Binding struct {
 		Name      string
 		ParamList []string

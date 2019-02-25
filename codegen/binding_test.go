@@ -33,7 +33,8 @@ var (
 		},
 	}
 
-	bindMap = map[string]*ast.Binding{}
+	bindMap  = map[string]*ast.Binding{}
+	bindType = map[string]*ast.BindType{}
 )
 
 func init() {
@@ -83,7 +84,7 @@ func TestBindingCodegen(t *testing.T) {
 		},
 	}
 
-	g := codegen.New(bindMap)
+	g := codegen.New(bindMap, bindType)
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			g.Call(bindMap[testCase.bindName], testCase.args...)

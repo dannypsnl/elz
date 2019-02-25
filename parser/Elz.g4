@@ -40,15 +40,21 @@ Digit: [0-9];
 // e.g. "hello", "say hello"
 STRING: '"' .*? '"';
 
-prog: topLevel* EOF;
+program: topLevel* EOF;
 
-topLevel: bind_type
+topLevel: bindType
     | binding
     ;
-bind_type: IDENT '::' ;
+
+bindType: IDENT '::' elzType;
 binding:
     IDENT+ '=' expr;
 
+elzType: IDENT                # ExistType
+    | '()'                    # VoidType
+    | '\'' IDENT              # VariantType
+    | elzType ('->' elzType)+ # CombineType
+    ;
 expr: BOOLEAN                       # Boolean
     | STRING                        # String
     | FLOAT                         # Float
