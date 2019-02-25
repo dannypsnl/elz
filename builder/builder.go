@@ -17,6 +17,10 @@ type Builder struct {
 	debug     bool
 }
 
+func (b *Builder) GetAST() map[string]*ast.Binding {
+	return b.bindings
+}
+
 func (b *Builder) ExitProg(c *parser.ProgContext) {
 }
 

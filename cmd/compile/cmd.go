@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/elz-lang/elz/builder"
+	"github.com/elz-lang/elz/codegen"
 
 	"github.com/spf13/cobra"
 )
@@ -24,6 +25,10 @@ var (
 				fmt.Printf("failed at compile file, error: %s\n", err)
 				return
 			}
+			bindMap := builder.GetAST()
+			g := codegen.New(bindMap)
+			g.Generate()
+			fmt.Printf("%s", g)
 		},
 	}
 )

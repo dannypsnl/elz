@@ -38,6 +38,17 @@ func (g *Generator) String() string {
 	return g.mod.String()
 }
 
+func (g *Generator) Generate() {
+	entryBinding := g.bindMap["main"]
+	if len(entryBinding.ParamList) > 0 {
+		panic("main function should not have any parameters")
+	}
+	impl := g.mod.NewFunc("main", llvmtypes.I64)
+	b := impl.NewBlock("")
+	g.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), make(map[string]types.Type))
+	b.NewRet(constant.NewInt(llvmtypes.I64, 0))
+}
+
 func (g *Generator) Call(bind *ast.Binding, exprList ...*ast.Arg) {
 	g.mustGetImpl(bind, make(map[string]types.Type), exprList...)
 }
