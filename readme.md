@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/elz-lang/elz.svg)](https://travis-ci.org/elz-lang/elz)
 
+[![asciicast](https://asciinema.org/a/229973.svg)](https://asciinema.org/a/229973)
+
 ## Install
 
 ```bash
