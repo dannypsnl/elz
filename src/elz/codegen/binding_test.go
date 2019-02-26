@@ -3,8 +3,8 @@ package codegen_test
 import (
 	"testing"
 
-	"github.com/elz-lang/elz/ast"
-	"github.com/elz-lang/elz/codegen"
+	"github.com/elz-lang/elz/src/elz/ast"
+	"github.com/elz-lang/elz/src/elz/codegen"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

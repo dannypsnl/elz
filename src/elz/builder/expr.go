@@ -1,8 +1,8 @@
 package builder
 
 import (
-	"github.com/elz-lang/elz/ast"
-	"github.com/elz-lang/elz/parser"
+	"github.com/elz-lang/elz/src/elz/ast"
+	"github.com/elz-lang/elz/src/elz/parser"
 )
 
 func (b *Builder) PushExpr(e interface{}) {

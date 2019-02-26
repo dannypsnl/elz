@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/elz-lang/elz/ast"
-	"github.com/elz-lang/elz/types"
+	"github.com/elz-lang/elz/src/elz/ast"
+	"github.com/elz-lang/elz/src/elz/types"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"

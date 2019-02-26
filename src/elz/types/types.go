@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 
-	"github.com/elz-lang/elz/ast"
+	"github.com/elz-lang/elz/src/elz/ast"
 
 	"github.com/llir/llvm/ir/types"
 )

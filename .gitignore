@@ -1,6 +1,3 @@
 .idea
 /target
 **/*.rs.bk
-
-# binary
-elz

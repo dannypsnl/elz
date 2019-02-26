@@ -3,7 +3,7 @@ package builder
 import (
 	"testing"
 
-	"github.com/elz-lang/elz/ast"
+	"github.com/elz-lang/elz/src/elz/ast"
 
 	"github.com/stretchr/testify/assert"
 )

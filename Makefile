@@ -1,14 +1,14 @@
-all: test build
+all: generate deps
 
 GO_MOD=GO111MODULE=on
 
-.PHONY: deps test build generate coverage
+.PHONY: install deps test generate coverage
+install: generate
+	@$(GO_MOD) go install ./src/cmd/elz
 deps:
 	@$(GO_MOD) go get ./...
 test: deps generate
 	@$(GO_MOD) go test -v ./... -count 1 -cover
-build: deps generate
-	@$(GO_MOD) go build
 generate:
 	@$(GO_MOD) go generate ./...
 coverage: deps

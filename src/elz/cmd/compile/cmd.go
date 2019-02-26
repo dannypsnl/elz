@@ -3,8 +3,8 @@ package compile
 import (
 	"fmt"
 
-	"github.com/elz-lang/elz/builder"
-	"github.com/elz-lang/elz/codegen"
+	"github.com/elz-lang/elz/src/elz/builder"
+	"github.com/elz-lang/elz/src/elz/codegen"
 
 	"github.com/spf13/cobra"
 )

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/elz-lang/elz/cmd/compile"
+	"github.com/elz-lang/elz/src/elz/cmd/compile"
 
 	"github.com/spf13/cobra"
 )

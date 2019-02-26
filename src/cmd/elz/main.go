@@ -1,7 +1,7 @@
-package main
+package elz
 
 import (
-	"github.com/elz-lang/elz/cmd"
+	"github.com/elz-lang/elz/src/elz/cmd"
 )
 
 func main() {
