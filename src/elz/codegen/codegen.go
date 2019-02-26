@@ -26,10 +26,27 @@ type Generator struct {
 func New(astTree *ast.Tree) *Generator {
 	typMap := make(map[string]types.Type)
 	typMap["+(int,int)"] = &types.Int{}
+
+	err := astTree.InsertBinding(&ast.Binding{
+		Name:             "printf",
+		ParamList:        []string{"format"},
+		NoImplementation: true,
+	})
+	if err != nil {
+		panic("some function conflict with built-in function printf")
+	}
+	mod := ir.NewModule()
+	builtInImpl := make(map[string]*ir.Func)
+	printfImpl := mod.NewFunc("printf", llvmtypes.I64,
+		ir.NewParam("format", llvmtypes.NewPointer(llvmtypes.I8)),
+	)
+	printfImpl.Sig.Variadic = true
+	builtInImpl["printf"] = printfImpl
+
 	return &Generator{
-		mod:                  ir.NewModule(),
+		mod:                  mod,
 		astTree:              astTree,
-		implsOfBinding:       make(map[string]*ir.Func),
+		implsOfBinding:       builtInImpl,
 		typeOfBuiltInBinding: typMap,
 		typeOfBinding:        typMap,
 	}
@@ -67,6 +84,11 @@ func (g *Generator) Call(bind *ast.Binding, exprList ...*ast.Arg) error {
 
 func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type, argList ...*ast.Arg) (*ir.Func, error) {
 	bindName := bind.Name
+	// FIXME: currently for convenience we skip all checking when it's a built-in function
+	// it should be fix after we can do more type checking
+	if bind.NoImplementation {
+		return g.implsOfBinding[bindName], nil
+	}
 	typeList := getTypeListFrom(typeMap, argList...)
 	key := genKey(bindName, typeList...)
 	impl, getImpl := g.implsOfBinding[key]
@@ -255,6 +277,17 @@ func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Par
 			return nil, err
 		}
 		return v, nil
+	case *ast.String:
+		str := g.mod.NewGlobal("", llvmtypes.NewArray(uint64(len(expr.Literal)), llvmtypes.I8))
+		str.Align = 1
+		str.Init = constant.NewCharArrayFromString(expr.Literal)
+		strSrc := b.NewGetElementPtr(str,
+			constant.NewInt(llvmtypes.I64, 0),
+			constant.NewInt(llvmtypes.I64, 0),
+		)
+		x := b.NewAlloca(llvmtypes.NewPointer(llvmtypes.I8))
+		b.NewStore(strSrc, x)
+		return b.NewLoad(x), nil
 	default:
 		return nil, fmt.Errorf("failed at generate expression: %#v", expr)
 	}

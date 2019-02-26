@@ -48,6 +48,8 @@ type (
 		ParamList []string
 		Expr      Expr
 		Type      []Type
+		// NoImplementation means this function is an external function or compiler trick
+		NoImplementation bool
 	}
 	FuncCall struct {
 		isExpr
