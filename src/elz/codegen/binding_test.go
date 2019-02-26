@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/elz-lang/elz/src/elz/ast"
+	"github.com/elz-lang/elz/src/elz/builder"
 	"github.com/elz-lang/elz/src/elz/codegen"
 
 	"github.com/stretchr/testify/assert"
@@ -11,38 +12,19 @@ import (
 )
 
 var (
-	bindings = []*ast.Binding{
-		// addOne y = add(1, y)
-		{
-			Name:      "addOne",
-			ParamList: []string{"y"},
-			Expr: &ast.FuncCall{
-				FuncName: "add",
-				ExprList: []*ast.Arg{
-					ast.NewArg("", ast.NewInt("1")),
-					ast.NewArg("", ast.NewIdent("y")),
-				},
-			},
-		},
-		// add x y = x + y
-		{
-			Name:      "add",
-			ParamList: []string{"x", "y"},
-			Expr: &ast.BinaryExpr{
-				LExpr: ast.NewIdent("x"),
-				RExpr: ast.NewIdent("y"),
-				Op:    "+",
-			},
-		},
-	}
+	bindingsCode = `
+	addOne y = add(1, y)
+	add x y = x + y
+	`
 
-	tree = ast.NewTree()
+	tree *ast.Tree
 )
 
 func init() {
-	for _, bind := range bindings {
-		tree.InsertBinding(bind)
-	}
+	b := builder.New()
+	b.BuildFromCode(bindingsCode)
+
+	tree = b.GetTree()
 }
 
 func TestBindingCodegen(t *testing.T) {
