@@ -1,16 +1,16 @@
 package builder
 
 import (
+	"fmt"
+
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/parser"
 )
 
 func (b *Builder) ExitBindType(c *parser.BindTypeContext) {
 	bindName := c.IDENT().GetText()
-	b.bindTypes[bindName] = &ast.BindType{
-		Name: bindName,
-		Type: b.bindTypeList,
-	}
+	// FIXME: nil dereference
+	fmt.Printf("new bind spec type of %s: %#v\n", bindName, b.bindTypeList)
 	b.bindTypeList = make([]ast.Type, 0)
 }
 
@@ -35,7 +35,7 @@ func (b *Builder) ExitCombineType(c *parser.CombineTypeContext) {
 }
 
 func (b *Builder) NewBinding(binding *ast.Binding) {
-	b.bindings[binding.Name] = binding
+	b.astTree.InsertBinding(binding)
 }
 
 func (b *Builder) ExitBinding(c *parser.BindingContext) {

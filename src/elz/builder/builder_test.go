@@ -6,14 +6,14 @@ import (
 	"github.com/elz-lang/elz/src/elz/ast"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBindingRule(t *testing.T) {
 	testCases := []struct {
-		name             string
-		code             string
-		expectedBinding  *ast.Binding
-		expectedBindType *ast.BindType
+		name            string
+		code            string
+		expectedBinding *ast.Binding
 	}{
 		{
 			name: "no param bind",
@@ -67,30 +67,6 @@ func TestBindingRule(t *testing.T) {
 				},
 			},
 		},
-		{
-			name: "type bind with existing types",
-			code: `add :: int -> int -> int`,
-			expectedBindType: &ast.BindType{
-				Name: "add",
-				Type: []ast.Type{
-					&ast.ExistType{Name: "int"},
-					&ast.ExistType{Name: "int"},
-					&ast.ExistType{Name: "int"},
-				},
-			},
-		},
-		{
-			name: "type bind with variant types",
-			code: `assert :: 'that -> 'should_be -> ()`,
-			expectedBindType: &ast.BindType{
-				Name: "assert",
-				Type: []ast.Type{
-					&ast.VariantType{Name: "that"},
-					&ast.VariantType{Name: "should_be"},
-					&ast.VoidType{},
-				},
-			},
-		},
 	}
 
 	for _, testCase := range testCases {
@@ -98,14 +74,10 @@ func TestBindingRule(t *testing.T) {
 			builder := New()
 			builder.BuildFromCode(testCase.code)
 			if testCase.expectedBinding != nil {
-				bindMap := builder.GetBindMap()
-				b := bindMap[testCase.expectedBinding.Name]
+				tree := builder.GetTree()
+				b, err := tree.GetBinding(testCase.expectedBinding.Name)
+				require.NoError(t, err)
 				assert.Equal(t, testCase.expectedBinding, b)
-			}
-			if testCase.expectedBindType != nil {
-				bindTypes := builder.GetBindTypes()
-				bt := bindTypes[testCase.expectedBindType.Name]
-				assert.Equal(t, testCase.expectedBindType, bt)
 			}
 		})
 	}

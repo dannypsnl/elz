@@ -36,28 +36,12 @@ var (
 		},
 	}
 
-	bindTypes = []*ast.BindType{
-		// add :: int -> int -> int
-		{
-			Name: "add",
-			Type: []ast.Type{
-				&ast.ExistType{Name: "int"},
-				&ast.ExistType{Name: "int"},
-				&ast.ExistType{Name: "int"},
-			},
-		},
-	}
-
-	bindMap  = map[string]*ast.Binding{}
-	bindType = map[string]*ast.BindType{}
+	tree = ast.NewTree()
 )
 
 func init() {
 	for _, bind := range bindings {
-		bindMap[bind.Name] = bind
-	}
-	for _, bindT := range bindTypes {
-		bindType[bindT.Name] = bindT
+		tree.InsertBinding(bind)
 	}
 }
 
@@ -108,14 +92,16 @@ func TestBindingCodegen(t *testing.T) {
 				ast.NewArg("", ast.NewFloat("3.3")),
 				ast.NewArg("", ast.NewFloat("3.4")),
 			},
-			expectErrorMsg: "the type of argument doesn't match bind type requirement",
+			expectErrorMsg: "can't infer return type",
 		},
 	}
 
-	g := codegen.New(bindMap, bindType)
+	g := codegen.New(tree)
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			err := g.Call(bindMap[testCase.bindName], testCase.args...)
+			binding, err := tree.GetBinding(testCase.bindName)
+			require.NoError(t, err)
+			err = g.Call(binding, testCase.args...)
 			if testCase.expectErrorMsg != "" {
 				require.Contains(t, err.Error(), testCase.expectErrorMsg)
 				return

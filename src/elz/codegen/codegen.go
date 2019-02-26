@@ -14,22 +14,21 @@ import (
 )
 
 type Generator struct {
-	mod      *ir.Module
-	bindType map[string]*ast.BindType
-	bindMap  map[string]*ast.Binding
+	mod *ir.Module
+
+	astTree *ast.Tree
 
 	implsOfBinding       map[string]*ir.Func
 	typeOfBuiltInBinding map[string]types.Type
 	typeOfBinding        map[string]types.Type
 }
 
-func New(bindMap map[string]*ast.Binding, bindType map[string]*ast.BindType) *Generator {
+func New(astTree *ast.Tree) *Generator {
 	typMap := make(map[string]types.Type)
 	typMap["+(int,int)"] = &types.Int{}
 	return &Generator{
 		mod:                  ir.NewModule(),
-		bindType:             bindType,
-		bindMap:              bindMap,
+		astTree:              astTree,
 		implsOfBinding:       make(map[string]*ir.Func),
 		typeOfBuiltInBinding: typMap,
 		typeOfBinding:        typMap,
@@ -41,13 +40,17 @@ func (g *Generator) String() string {
 }
 
 func (g *Generator) Generate() {
-	entryBinding := g.bindMap["main"]
+	bind, err := g.astTree.GetBinding("main")
+	if err != nil {
+		panic("no main function exist, no compile")
+	}
+	entryBinding := bind
 	if len(entryBinding.ParamList) > 0 {
 		panic("main function should not have any parameters")
 	}
 	impl := g.mod.NewFunc("main", llvmtypes.I64)
 	b := impl.NewBlock("")
-	_, err := g.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), make(map[string]types.Type))
+	_, err = g.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), make(map[string]types.Type))
 	if err != nil {
 		panic(fmt.Sprintf("report error: %s", err))
 	}
@@ -93,33 +96,10 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 		argName := bind.ParamList[i]
 		typeMap[argName] = t
 	}
-	// what if we can get bindType
-	if bindT, exist := g.bindType[bindName]; exist {
-		for i, t := range bindT.Type[:len(bindT.Type)-1] {
-			if existT, ok := t.(*ast.ExistType); ok {
-				if existT.Name != typeList[i].String() {
-					return nil, fmt.Errorf("at argument: %d, the type of argument doesn't match bind type requirement", i)
-				}
-			}
-		}
-	}
 
 	inferT, err := g.inferReturnType(bind.Expr, typeMap)
 	if err != nil {
 		return nil, err
-	}
-	// what if we can get bindType
-	if bindT, exist := g.bindType[bindName]; exist {
-		returnT := bindT.Type[len(bindT.Type)-1]
-		if existT, ok := returnT.(*ast.ExistType); ok {
-			if existT.Name != inferT.String() {
-				return nil,
-					fmt.Errorf("infer return type doesn't match bind type requirement, infer type: %s, require type: %s",
-						inferT,
-						existT.Name,
-					)
-			}
-		}
 	}
 
 	g.typeOfBinding[key] = inferT
@@ -142,24 +122,25 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type) (types.Type, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, hasBind := g.bindMap[expr.FuncName]
-		if hasBind {
-			typeList := getTypeListFrom(typeMap, expr.ExprList...)
-			typeMap := make(map[string]types.Type)
-			for i, t := range typeList {
-				argName := bind.ParamList[i]
-				typeMap[argName] = t
-			}
-			inferT, err := g.inferReturnType(bind.Expr, typeMap)
-			if err != nil {
-				return nil, err
-			}
-			key := genKey(bind.Name, typeList...)
-			g.typeOfBinding[key] = inferT
-			t, exist := g.typeOfBind(genKey(expr.FuncName, typeList...))
-			if exist {
-				return t, nil
-			}
+		bind, err := g.astTree.GetBinding(expr.FuncName)
+		if err != nil {
+			return nil, err
+		}
+		typeList := getTypeListFrom(typeMap, expr.ExprList...)
+		typeMap := make(map[string]types.Type)
+		for i, t := range typeList {
+			argName := bind.ParamList[i]
+			typeMap[argName] = t
+		}
+		inferT, err := g.inferReturnType(bind.Expr, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		key := genKey(bind.Name, typeList...)
+		g.typeOfBinding[key] = inferT
+		t, exist := g.typeOfBind(genKey(expr.FuncName, typeList...))
+		if exist {
+			return t, nil
 		}
 		return nil, fmt.Errorf("can't find any binding call: %s", expr.FuncName)
 	case *ast.BinaryExpr:
@@ -218,7 +199,10 @@ func (g *Generator) funcBody(b *ir.Block, expr ast.Expr, binds map[string]*ir.Pa
 func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap map[string]types.Type) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind := g.bindMap[expr.FuncName]
+		bind, err := g.astTree.GetBinding(expr.FuncName)
+		if err != nil {
+			return nil, err
+		}
 		f, err := g.mustGetImpl(bind, typeMap, expr.ExprList...)
 		if err != nil {
 			return nil, err

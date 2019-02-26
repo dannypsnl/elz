@@ -25,9 +25,8 @@ var (
 				fmt.Printf("failed at compile file, error: %s\n", err)
 				return
 			}
-			bindMap := builder.GetBindMap()
-			bindType := builder.GetBindTypes()
-			g := codegen.New(bindMap, bindType)
+			bindMap := builder.GetTree()
+			g := codegen.New(bindMap)
 			g.Generate()
 			fmt.Printf("%s", g)
 		},
