@@ -5,20 +5,22 @@ import (
 )
 
 type Tree struct {
-	bindings map[string][]*Binding
+	bindings map[string]*Binding
 }
 
 func NewTree() *Tree {
 	return &Tree{
-		bindings: make(map[string][]*Binding),
+		bindings: make(map[string]*Binding),
 	}
 }
 
-func (t *Tree) InsertBinding(b *Binding) {
-	if t.bindings[b.Name] == nil {
-		t.bindings[b.Name] = make([]*Binding, 0)
+func (t *Tree) InsertBinding(b *Binding) error {
+	_, exist := t.bindings[b.Name]
+	if exist {
+		return fmt.Errorf("binding: %s already exist", b.Name)
 	}
-	t.bindings[b.Name] = append(t.bindings[b.Name], b)
+	t.bindings[b.Name] = b
+	return nil
 }
 
 func (t *Tree) GetBinding(bindName string) (*Binding, error) {
@@ -27,7 +29,7 @@ func (t *Tree) GetBinding(bindName string) (*Binding, error) {
 		return nil, fmt.Errorf("no binding name: %s", bindName)
 	}
 	// FIXME: assuming only one binding for right now situation, should do complete discuss into how to deal with multiple implementations
-	return binding[0], nil
+	return binding, nil
 }
 
 type isExpr struct{}

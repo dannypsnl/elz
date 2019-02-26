@@ -34,19 +34,19 @@ func (b *Builder) ExitCombineType(c *parser.CombineTypeContext) {
 	// ignore, just help we know has this syntax
 }
 
-func (b *Builder) NewBinding(binding *ast.Binding) {
-	b.astTree.InsertBinding(binding)
-}
-
 func (b *Builder) ExitBinding(c *parser.BindingContext) {
 	bindingTo := b.PopExpr().(ast.Expr)
 	paramList := make([]string, 0)
 	for _, paramName := range c.AllIDENT() {
 		paramList = append(paramList, paramName.GetText())
 	}
-	b.NewBinding(&ast.Binding{
+	err := b.astTree.InsertBinding(&ast.Binding{
 		Name:      c.IDENT(0).GetText(),
 		ParamList: paramList[1:],
 		Expr:      bindingTo,
 	})
+	if err != nil {
+		err := fmt.Errorf("stop parsing, error: %s", err)
+		panic(err)
+	}
 }
