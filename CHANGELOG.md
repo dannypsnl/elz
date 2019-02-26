@@ -1,0 +1,8 @@
+## latest
+
+- binding
+    ```
+    add x y = x + y
+    > add(1, 2)
+    3
+    ```
