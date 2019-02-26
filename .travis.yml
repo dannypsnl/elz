@@ -16,6 +16,5 @@ before_script:
 script:
   - make test
   - make coverage
-  - make build
 after_success:
   - bash <(curl -s https://codecov.io/bash)
