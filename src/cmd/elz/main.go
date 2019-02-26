@@ -1,4 +1,4 @@
-package elz
+package main
 
 import (
 	"github.com/elz-lang/elz/src/elz/cmd"
