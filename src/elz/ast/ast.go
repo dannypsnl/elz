@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"strconv"
 )
 
 type Tree struct {
@@ -102,9 +103,15 @@ func NewIdent(literal string) *Ident {
 	}
 }
 
-func NewInt(literal string) *Int       { return &Int{Literal: literal} }
-func NewFloat(literal string) *Float   { return &Float{Literal: literal} }
-func NewString(literal string) *String { return &String{Literal: literal} }
+func NewInt(literal string) *Int     { return &Int{Literal: literal} }
+func NewFloat(literal string) *Float { return &Float{Literal: literal} }
+func NewString(literal string) *String {
+	literal, err := strconv.Unquote(literal)
+	if err != nil {
+		panic(fmt.Errorf("failed at unquoting string literal, it's a compiler bug that you should report, error: %s", err))
+	}
+	return &String{Literal: literal}
+}
 func NewBool(literal string) *Bool {
 	var value bool
 	switch literal {
