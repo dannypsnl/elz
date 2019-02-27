@@ -96,7 +96,7 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 		return impl, nil
 	}
 	if len(argList) != len(bind.ParamList) {
-		return nil, fmt.Errorf(`do not have enough arguments to call function`)
+		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s, argList: %#v`, bindName, argList)
 	}
 	params := make([]*ir.Param, 0)
 	for i, arg := range argList {

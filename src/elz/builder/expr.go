@@ -1,15 +1,21 @@
 package builder
 
 import (
+	"fmt"
 	"github.com/elz-lang/elz/src/elz/ast"
+	"github.com/elz-lang/elz/src/elz/internal/collection/stack"
 	"github.com/elz-lang/elz/src/elz/parser"
 )
 
 func (b *Builder) PushExpr(e interface{}) {
 	b.exprStack.Push(e)
 }
-func (b *Builder) PopExpr() interface{} {
-	return b.exprStack.Pop()
+func (b *Builder) PopExpr() ast.Expr {
+	e := b.exprStack.Pop()
+	if e != nil {
+		return e.(ast.Expr)
+	}
+	return nil
 }
 
 // ExitMulDiv:
@@ -26,8 +32,8 @@ func (b *Builder) PopExpr() interface{} {
 // 3. pop rightExpr
 // 4. pop leftExpr
 func (b *Builder) ExitMulDiv(c *parser.MulDivContext) {
-	rExpr := b.PopExpr().(ast.Expr)
-	lExpr := b.PopExpr().(ast.Expr)
+	rExpr := b.PopExpr()
+	lExpr := b.PopExpr()
 	// left expr, right expr, operator
 	b.PushExpr(&ast.BinaryExpr{
 		LExpr: lExpr,
@@ -36,8 +42,8 @@ func (b *Builder) ExitMulDiv(c *parser.MulDivContext) {
 	})
 }
 func (b *Builder) ExitAddSub(c *parser.AddSubContext) {
-	rExpr := b.PopExpr().(ast.Expr)
-	lExpr := b.PopExpr().(ast.Expr)
+	rExpr := b.PopExpr()
+	lExpr := b.PopExpr()
 	// left expr, right expr, operator
 	b.PushExpr(&ast.BinaryExpr{
 		LExpr: lExpr,
@@ -62,17 +68,27 @@ func (b *Builder) ExitIdentifier(c *parser.IdentifierContext) {
 }
 
 func (b *Builder) ExitFnCall(c *parser.FnCallContext) {
-	exprList := make([]*ast.Arg, 0)
-	for e, hasExpr := b.PopExpr().(*ast.Arg); hasExpr; e, hasExpr = b.PopExpr().(*ast.Arg) {
-		exprList = append([]*ast.Arg{e}, exprList...)
+	s := stack.New()
+	for i := 0; i < len(c.AllArg()); i++ {
+		s.Push(b.PopExpr().(*ast.Arg))
+	}
+	exprList := make([]*ast.Arg, len(c.AllArg()))
+	for i, _ := range exprList {
+		e, isArg := s.Pop().(*ast.Arg)
+		if isArg {
+			exprList[i] = e
+		} else {
+			panic(fmt.Errorf("expression in function call is not an argument, it must be compiler bug, report it to the project, error: %#v", e))
+		}
 	}
 	b.PushExpr(&ast.FuncCall{
 		FuncName: c.IDENT().GetText(),
 		ExprList: exprList,
 	})
 }
+
 func (b *Builder) ExitArg(c *parser.ArgContext) {
-	expr := b.PopExpr().(ast.Expr)
+	expr := b.PopExpr()
 	ident := ""
 	if c.IDENT() != nil {
 		ident = c.IDENT().GetText()

@@ -67,6 +67,27 @@ func TestBindingRule(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "function call as argument",
+			code: `main = printf("add(1, 2) = %d", add(1, 2))`,
+			expectedBinding: &ast.Binding{
+				Name:      "main",
+				ParamList: []string{},
+				Expr: &ast.FuncCall{
+					FuncName: "printf",
+					ExprList: []*ast.Arg{
+						{Ident: "", Expr: ast.NewString(`"add(1, 2) = %d"`)},
+						{Ident: "", Expr: &ast.FuncCall{
+							FuncName: "add",
+							ExprList: []*ast.Arg{
+								{Expr: ast.NewInt("1")},
+								{Expr: ast.NewInt("2")},
+							},
+						}},
+					},
+				},
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
