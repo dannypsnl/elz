@@ -2,6 +2,8 @@ package builder
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/internal/collection/stack"
 	"github.com/elz-lang/elz/src/elz/parser"
@@ -58,7 +60,12 @@ func (b *Builder) ExitFloat(c *parser.FloatContext) {
 	b.PushExpr(ast.NewFloat(c.FLOAT().GetText()))
 }
 func (b *Builder) ExitString(c *parser.StringContext) {
-	b.PushExpr(ast.NewString(c.STRING().GetText()))
+	literal := c.STRING().GetText()
+	literal, err := strconv.Unquote(literal)
+	if err != nil {
+		panic(fmt.Errorf("failed at unquoting string literal, it's a compiler bug that you should report, error: %s", err))
+	}
+	b.PushExpr(ast.NewString(literal))
 }
 func (b *Builder) ExitBoolean(c *parser.BooleanContext) {
 	b.PushExpr(ast.NewBool(c.BOOLEAN().GetText()))
