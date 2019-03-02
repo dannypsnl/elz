@@ -20,4 +20,12 @@ Make sure your `$GOPATH/bin` in `$PATH`
 $ elz compile source.elz
 ```
 
+## Example
+
+> Warning, this is nota stable example, that might outdated anytime with developing
+
+```
+main = printf("hello, world\n")
+```
+
 ## Contributing
