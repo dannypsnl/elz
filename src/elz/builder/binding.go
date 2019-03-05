@@ -9,9 +9,11 @@ import (
 
 func (b *Builder) ExitBindType(c *parser.BindTypeContext) {
 	bindName := c.IDENT().GetText()
-	// FIXME: nil dereference
-	fmt.Printf("new bind spec type of %s: %#v\n", bindName, b.bindTypeList)
-	b.bindTypeList = make([]ast.Type, 0)
+	_, exist := b.bindingType[bindName]
+	if exist {
+		panic("bind type existed")
+	}
+	b.bindingType[bindName] = b.bindTypeList
 }
 
 // ExitExistType listen format: `int` represents existing type
@@ -40,11 +42,16 @@ func (b *Builder) ExitBinding(c *parser.BindingContext) {
 	for _, paramName := range c.AllIDENT() {
 		paramList = append(paramList, paramName.GetText())
 	}
-	err := b.astTree.InsertBinding(&ast.Binding{
-		Name:      c.IDENT(0).GetText(),
+	bindName := c.IDENT(0).GetText()
+	binding := &ast.Binding{
+		Name:      bindName,
 		ParamList: paramList[1:],
 		Expr:      bindingTo,
-	})
+	}
+	if t, exist := b.bindingType[bindName]; exist {
+		binding.Type = t
+	}
+	err := b.astTree.InsertBinding(binding)
 	if err != nil {
 		err := fmt.Errorf("stop parsing, error: %s", err)
 		panic(err)

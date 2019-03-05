@@ -94,6 +94,27 @@ func TestBindingRule(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "with certain type limiter",
+			code: `
+add :: int -> int -> int
+add x y = x + y
+`,
+			expectedBinding: &ast.Binding{
+				Name:      "add",
+				ParamList: []string{"x", "y"},
+				Expr: &ast.BinaryExpr{
+					Op:    "+",
+					LExpr: ast.NewIdent("x"),
+					RExpr: ast.NewIdent("y"),
+				},
+				Type: []ast.Type{
+					&ast.ExistType{Name: "int"},
+					&ast.ExistType{Name: "int"},
+					&ast.ExistType{Name: "int"},
+				},
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
