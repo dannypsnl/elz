@@ -90,26 +90,30 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 		return g.implsOfBinding[bindName], nil
 	}
 	typeList := getTypeListFrom(typeMap, argList...)
-	key := genKey(bindName, typeList...)
-	// TODO: check type by require T
+	actualTypeWhenCall := genKey(bindName, typeList...)
 	if bind.Type != nil {
 		fmtTypes := make([]fmt.Stringer, 0)
 		for _, t := range bind.Type[:len(bind.Type)-1] {
 			fmtTypes = append(fmtTypes, t)
 		}
 		requireT := typeFormat(fmtTypes...)
-		inputT := genKey(bindName, typeList...)
-		if bindName+requireT != inputT {
-			return nil, fmt.Errorf(`require type: %s but get: %s`, bindName+requireT, inputT)
+		if bindName+requireT != actualTypeWhenCall {
+			return nil, fmt.Errorf(`require type: %s but get: %s`, bindName+requireT, actualTypeWhenCall)
 		}
 	}
 
-	impl, getImpl := g.implsOfBinding[key]
+	impl, getImpl := g.implsOfBinding[actualTypeWhenCall]
 	if getImpl {
 		return impl, nil
 	}
+	return g.generateNewImpl(bind, typeMap, argList...)
+}
+
+func (g *Generator) generateNewImpl(bind *ast.Binding, typeMap map[string]types.Type, argList ...*ast.Arg) (*ir.Func, error) {
+	typeList := getTypeListFrom(typeMap, argList...)
+	actualTypeWhenCall := genKey(bind.Name, typeList...)
 	if len(argList) != len(bind.ParamList) {
-		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s, argList: %#v`, bindName, argList)
+		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s, argList: %#v`, bind.Name, argList)
 	}
 	params := make([]*ir.Param, 0)
 	for i, arg := range argList {
@@ -137,8 +141,8 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 		return nil, err
 	}
 
-	g.typeOfBinding[key] = inferT
-	f := g.mod.NewFunc(bindName, inferT.LLVMType(), params...)
+	g.typeOfBinding[actualTypeWhenCall] = inferT
+	f := g.mod.NewFunc(bind.Name, inferT.LLVMType(), params...)
 
 	b := f.NewBlock("")
 	binds := make(map[string]*ir.Param)
@@ -149,7 +153,7 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 		return nil, err
 	}
 
-	g.implsOfBinding[key] = f
+	g.implsOfBinding[actualTypeWhenCall] = f
 	return f, nil
 }
 
@@ -205,7 +209,7 @@ func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type
 	}
 }
 
-func (g *Generator) isBuiltIn(key string) bool {
+func (g *Generator) isBuiltInFunction(key string) bool {
 	_, isBuiltIn := g.typeOfBuiltInBinding[key]
 	return isBuiltIn
 }
@@ -263,7 +267,7 @@ func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Par
 		lt := getType(expr.LExpr, typeMap)
 		rt := getType(expr.RExpr, typeMap)
 		key := genKey(expr.Op, lt, rt)
-		if g.isBuiltIn(key) {
+		if g.isBuiltInFunction(key) {
 			if lt.String() == "int" && rt.String() == "int" {
 				switch expr.Op {
 				case "+":
@@ -294,12 +298,12 @@ func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Par
 		str := g.mod.NewGlobal("", llvmtypes.NewArray(uint64(len(expr.Literal)), llvmtypes.I8))
 		str.Align = 1
 		str.Init = constant.NewCharArrayFromString(expr.Literal)
-		strSrc := b.NewGetElementPtr(str,
+		strGEP := b.NewGetElementPtr(str,
 			constant.NewInt(llvmtypes.I64, 0),
 			constant.NewInt(llvmtypes.I64, 0),
 		)
 		x := b.NewAlloca(llvmtypes.NewPointer(llvmtypes.I8))
-		b.NewStore(strSrc, x)
+		b.NewStore(strGEP, x)
 		return b.NewLoad(x), nil
 	default:
 		return nil, fmt.Errorf("failed at generate expression: %#v", expr)
