@@ -11,25 +11,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	bindingsCode = `
-	addOne y = add(1, y)
-	add x y = x + y
-	`
-
-	tree *ast.Tree
-)
-
-func init() {
-	b := builder.New()
-	b.BuildFromCode(bindingsCode)
-
-	tree = b.GetTree()
-}
-
 func TestBindingCodegen(t *testing.T) {
 	testCases := []struct {
 		name           string
+		code           string
 		bindName       string
 		args           []*ast.Arg
 		expectContains []string
@@ -37,6 +22,7 @@ func TestBindingCodegen(t *testing.T) {
 	}{
 		{
 			name:     "call by generator",
+			code:     `add x y = x + y`,
 			bindName: "add",
 			args: []*ast.Arg{
 				ast.NewArg("", ast.NewInt("1")),
@@ -49,7 +35,11 @@ func TestBindingCodegen(t *testing.T) {
 }`},
 		},
 		{
-			name:     "call function in function",
+			name: "call function in function",
+			code: `
+add x y = x + y
+addOne y = add(1, y)
+`,
 			bindName: "addOne",
 			args: []*ast.Arg{
 				ast.NewArg("", ast.NewInt("2")),
@@ -69,6 +59,7 @@ func TestBindingCodegen(t *testing.T) {
 		},
 		{
 			name:     "using wrong argument to call function should failed",
+			code:     `add x y = x + y`,
 			bindName: "add",
 			args: []*ast.Arg{
 				ast.NewArg("", ast.NewFloat("3.3")),
@@ -76,11 +67,28 @@ func TestBindingCodegen(t *testing.T) {
 			},
 			expectErrorMsg: "can't infer return type",
 		},
+		{
+			name: "with certain type limiter",
+			code: `
+add :: int -> int -> int
+add x y = x + y
+`,
+			bindName: "add",
+			args: []*ast.Arg{
+				ast.NewArg("", ast.NewFloat("3.3")),
+				ast.NewArg("", ast.NewFloat("3.4")),
+			},
+			expectErrorMsg: "require type: add(int,int) but get: add(f64,f64)",
+		},
 	}
 
-	g := codegen.New(tree)
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
+			b := builder.New()
+			b.BuildFromCode(testCase.code)
+			tree := b.GetTree()
+
+			g := codegen.New(tree)
 			binding, err := tree.GetBinding(testCase.bindName)
 			require.NoError(t, err)
 			err = g.Call(binding, testCase.args...)

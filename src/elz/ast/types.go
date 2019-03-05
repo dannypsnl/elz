@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 type isType struct{}
 
 func (isType) IsType() bool {
@@ -9,6 +13,7 @@ func (isType) IsType() bool {
 type (
 	Type interface {
 		IsType() bool
+		fmt.Stringer
 	}
 
 	ExistType struct {
@@ -23,3 +28,13 @@ type (
 		Name string
 	}
 )
+
+func (t *ExistType) String() string {
+	return t.Name
+}
+func (t *VoidType) String() string {
+	return "()"
+}
+func (t *VariantType) String() string {
+	return "'" + t.Name
+}

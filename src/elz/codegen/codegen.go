@@ -91,6 +91,19 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 	}
 	typeList := getTypeListFrom(typeMap, argList...)
 	key := genKey(bindName, typeList...)
+	// TODO: check type by require T
+	if bind.Type != nil {
+		fmtTypes := make([]fmt.Stringer, 0)
+		for _, t := range bind.Type[:len(bind.Type)-1] {
+			fmtTypes = append(fmtTypes, t)
+		}
+		requireT := typeFormat(fmtTypes...)
+		inputT := genKey(bindName, typeList...)
+		if bindName+requireT != inputT {
+			return nil, fmt.Errorf(`require type: %s but get: %s`, bindName+requireT, inputT)
+		}
+	}
+
 	impl, getImpl := g.implsOfBinding[key]
 	if getImpl {
 		return impl, nil
@@ -303,6 +316,16 @@ func getType(e ast.Expr, typeMap map[string]types.Type) types.Type {
 func genKey(bindName string, typeList ...types.Type) string {
 	var b strings.Builder
 	b.WriteString(bindName)
+	fmtTypes := make([]fmt.Stringer, 0)
+	for _, t := range typeList {
+		fmtTypes = append(fmtTypes, t)
+	}
+	b.WriteString(typeFormat(fmtTypes...))
+	return b.String()
+}
+
+func typeFormat(typeList ...fmt.Stringer) string {
+	var b strings.Builder
 	if len(typeList) > 0 {
 		b.WriteRune('(')
 		for _, t := range typeList[:len(typeList)-1] {
