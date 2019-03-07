@@ -22,7 +22,7 @@ $ elz compile source.elz
 
 ## Example
 
-> Warning, this is nota stable example, that might outdated anytime with developing
+> Warning, this is not a stable example, that might outdated anytime with developing
 
 ```
 main = printf("hello, world\n")
