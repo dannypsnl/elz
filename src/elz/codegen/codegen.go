@@ -25,7 +25,7 @@ type Generator struct {
 
 func New(astTree *ast.Tree) *Generator {
 	typMap := make(map[string]types.Type)
-	typMap["+(int,int)"] = &types.Int{}
+	typMap["+ :: int -> int"] = &types.Int{}
 
 	err := astTree.InsertBinding(&ast.Binding{
 		Name:             "printf",
@@ -91,15 +91,9 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 	}
 	typeList := getTypeListFrom(typeMap, argList...)
 	actualTypeWhenCall := genKey(bindName, typeList...)
-	if bind.Type != nil {
-		fmtTypes := make([]fmt.Stringer, 0)
-		for _, t := range bind.Type[:len(bind.Type)-1] {
-			fmtTypes = append(fmtTypes, t)
-		}
-		requireT := typeFormat(fmtTypes...)
-		if bindName+requireT != actualTypeWhenCall {
-			return nil, fmt.Errorf(`require type: %s but get: %s`, bindName+requireT, actualTypeWhenCall)
-		}
+	err := typeCheck(bindName, actualTypeWhenCall, bind.Type, typeList)
+	if err != nil {
+		return nil, err
 	}
 
 	impl, getImpl := g.implsOfBinding[actualTypeWhenCall]
@@ -155,6 +149,44 @@ func (g *Generator) generateNewImpl(bind *ast.Binding, typeMap map[string]types.
 
 	g.implsOfBinding[actualTypeWhenCall] = f
 	return f, nil
+}
+
+func typeCheck(bindName, actualTypeWhenCall string, bindType []ast.Type, typeList []types.Type) error {
+	if bindType == nil {
+		return nil
+	}
+	var (
+		b              strings.Builder
+		err            error
+		variantTypeMap = map[string]string{}
+	)
+	for i, requireT := range bindType[:len(bindType)-1] {
+		actualType := typeList[i]
+		switch requireT := requireT.(type) {
+		case *ast.ExistType:
+			if requireT.Name != actualType.String() {
+				err = fmt.Errorf("")
+			}
+		case *ast.VariantType:
+			t, exist := variantTypeMap[requireT.Name]
+			if !exist {
+				variantTypeMap[requireT.Name] = actualType.String()
+				t = actualType.String()
+			}
+			if t != actualType.String() {
+				err = fmt.Errorf("")
+			}
+		case *ast.VoidType:
+		}
+		b.WriteString(requireT.String())
+		b.WriteString(" -> ")
+	}
+	requireT := b.String()
+	requireType := bindName + " :: " + requireT[:len(requireT)-4]
+	if err != nil {
+		return fmt.Errorf("require type: `%s` but get: `%s`", requireType, actualTypeWhenCall)
+	}
+	return nil
 }
 
 // inference the return type by the expression we going to execute and input types
@@ -320,6 +352,7 @@ func getType(e ast.Expr, typeMap map[string]types.Type) types.Type {
 func genKey(bindName string, typeList ...types.Type) string {
 	var b strings.Builder
 	b.WriteString(bindName)
+	b.WriteString(" :: ")
 	fmtTypes := make([]fmt.Stringer, 0)
 	for _, t := range typeList {
 		fmtTypes = append(fmtTypes, t)
@@ -331,13 +364,11 @@ func genKey(bindName string, typeList ...types.Type) string {
 func typeFormat(typeList ...fmt.Stringer) string {
 	var b strings.Builder
 	if len(typeList) > 0 {
-		b.WriteRune('(')
 		for _, t := range typeList[:len(typeList)-1] {
 			b.WriteString(t.String())
-			b.WriteRune(',')
+			b.WriteString(" -> ")
 		}
 		b.WriteString(typeList[len(typeList)-1].String())
-		b.WriteRune(')')
 	}
 	return b.String()
 }

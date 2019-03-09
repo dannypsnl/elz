@@ -78,7 +78,20 @@ add x y = x + y
 				ast.NewArg("", ast.NewFloat("3.3")),
 				ast.NewArg("", ast.NewFloat("3.4")),
 			},
-			expectErrorMsg: "require type: add(int,int) but get: add(f64,f64)",
+			expectErrorMsg: "require type: `add :: int -> int` but get: `add :: f64 -> f64",
+		},
+		{
+			name: "with variant type limiter",
+			code: `
+add :: 'a -> 'a -> 'a
+add x y = x + y
+`,
+			bindName: "add",
+			args: []*ast.Arg{
+				ast.NewArg("", ast.NewInt("3")),
+				ast.NewArg("", ast.NewFloat("3.4")),
+			},
+			expectErrorMsg: "require type: `add :: 'a -> 'a` but get: `add :: int -> f64`",
 		},
 	}
 
