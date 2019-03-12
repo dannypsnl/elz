@@ -101,7 +101,7 @@ add x y = x + y
 			b.BuildFromCode(testCase.code)
 			tree := b.GetTree()
 
-			g := codegen.New(tree)
+			g := codegen.New(tree, nil)
 			binding, err := tree.GetBinding(testCase.bindName)
 			require.NoError(t, err)
 			err = g.Call(binding, testCase.args...)

@@ -8,6 +8,7 @@ WS: [ \t\r\n]+ -> channel(HIDDEN);
 COMMENT: '//' .*? '\n' -> channel(HIDDEN);
 
 BOOLEAN: 'true' | 'false';
+KEYWORD_EXPORT: 'export';
 IDENT : StartLetter Letter*;
 fragment
 StartLetter: [a-zA-Z_]
@@ -42,13 +43,18 @@ STRING: '"' .*? '"';
 
 program: topLevel* EOF;
 
-topLevel: bindType
+topLevel: importStatement
+    | bindType
     | binding
+    ;
+
+importStatement:
+    'import' accessChain
     ;
 
 bindType: IDENT '::' elzType;
 binding:
-    IDENT+ '=' expr;
+    KEYWORD_EXPORT? IDENT+ '=' expr;
 
 elzType: IDENT                # ExistType
     | '()'                    # VoidType
@@ -64,6 +70,7 @@ expr: BOOLEAN                       # Boolean
     | '[' expr? (',' expr)* ']'     # List
     | expr op=('*'|'/') expr        # MulDiv
     | expr op=('+'|'-') expr        # AddSub
-    | IDENT '(' arg? (',' arg)* ')' # FnCall
+    | accessChain '(' arg? (',' arg)* ')' # FnCall
     ;
+accessChain: IDENT ('::' IDENT)* ;
 arg: (IDENT ':')? expr;

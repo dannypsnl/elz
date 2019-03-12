@@ -34,6 +34,21 @@ func New() *Builder {
 	}
 }
 
+func NewFromFile(file string) (*ast.Tree, error) {
+	b := New()
+	err := b.BuildFromFile(file)
+	if err != nil {
+		return nil, err
+	}
+	return b.GetTree(), nil
+}
+
+func NewFromCode(code string) *ast.Tree {
+	b := New()
+	b.BuildFromCode(code)
+	return b.GetTree()
+}
+
 func (b *Builder) BuildFromCode(code string) {
 	input := antlr.NewInputStream(code)
 	b.build(input)

@@ -1,37 +1,5 @@
 package ast
 
-import (
-	"fmt"
-)
-
-type Tree struct {
-	bindings map[string]*Binding
-}
-
-func NewTree() *Tree {
-	return &Tree{
-		bindings: make(map[string]*Binding),
-	}
-}
-
-func (t *Tree) InsertBinding(b *Binding) error {
-	_, exist := t.bindings[b.Name]
-	if exist {
-		return fmt.Errorf("binding: %s already exist", b.Name)
-	}
-	t.bindings[b.Name] = b
-	return nil
-}
-
-func (t *Tree) GetBinding(bindName string) (*Binding, error) {
-	binding, exist := t.bindings[bindName]
-	if !exist {
-		return nil, fmt.Errorf("no binding name: %s", bindName)
-	}
-	// FIXME: assuming only one binding for right now situation, should do complete discuss into how to deal with multiple implementations
-	return binding, nil
-}
-
 type isExpr struct{}
 
 func (isExpr) IsExpr() bool {
@@ -44,6 +12,7 @@ type (
 	}
 
 	Binding struct {
+		Export    bool
 		Name      string
 		ParamList []string
 		Expr      Expr

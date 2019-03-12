@@ -1,9 +1,14 @@
 package main
 
 import (
+	"log"
+
 	"github.com/elz-lang/elz/src/elz/cmd"
 )
 
 func main() {
-	cmd.Compiler.Execute()
+	err := cmd.Compiler.Execute()
+	if err != nil {
+		log.Fatalf("elz compiler failed: %s", err)
+	}
 }

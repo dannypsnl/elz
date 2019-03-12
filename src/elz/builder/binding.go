@@ -43,7 +43,9 @@ func (b *Builder) ExitBinding(c *parser.BindingContext) {
 		paramList = append(paramList, paramName.GetText())
 	}
 	bindName := c.IDENT(0).GetText()
+	export := c.KEYWORD_EXPORT() != nil
 	binding := &ast.Binding{
+		Export:    export,
 		Name:      bindName,
 		ParamList: paramList[1:],
 		Expr:      bindingTo,

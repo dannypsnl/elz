@@ -16,17 +16,19 @@ import (
 type Generator struct {
 	mod *ir.Module
 
-	astTree *ast.Tree
+	allTree   map[string]*ast.Tree
+	entryTree *ast.Tree
 
 	implsOfBinding       map[string]*ir.Func
 	typeOfBuiltInBinding map[string]types.Type
 	typeOfBinding        map[string]types.Type
 }
 
-func New(astTree *ast.Tree) *Generator {
+func New(entryTree *ast.Tree, astAllTree map[string]*ast.Tree) *Generator {
 	typMap := make(map[string]types.Type)
 	typMap["+ :: int -> int"] = &types.Int{}
 
+	astTree := entryTree
 	err := astTree.InsertBinding(&ast.Binding{
 		Name:             "printf",
 		ParamList:        []string{"format"},
@@ -45,7 +47,8 @@ func New(astTree *ast.Tree) *Generator {
 
 	return &Generator{
 		mod:                  mod,
-		astTree:              astTree,
+		entryTree:            astTree,
+		allTree:              astAllTree,
 		implsOfBinding:       builtInImpl,
 		typeOfBuiltInBinding: typMap,
 		typeOfBinding:        typMap,
@@ -57,11 +60,10 @@ func (g *Generator) String() string {
 }
 
 func (g *Generator) Generate() {
-	bind, err := g.astTree.GetBinding("main")
+	entryBinding, err := g.entryTree.GetBinding("main")
 	if err != nil {
 		panic("no main function exist, no compile")
 	}
-	entryBinding := bind
 	if len(entryBinding.ParamList) > 0 {
 		panic("main function should not have any parameters")
 	}
@@ -193,7 +195,7 @@ func typeCheck(bindName, actualTypeWhenCall string, bindType []ast.Type, typeLis
 func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type) (types.Type, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := g.astTree.GetBinding(expr.FuncName)
+		bind, err := g.getBindingByAccessChain(expr.FuncName)
 		if err != nil {
 			return nil, err
 		}
@@ -241,6 +243,19 @@ func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type
 	}
 }
 
+func (g *Generator) getBindingByAccessChain(accessChain string) (*ast.Binding, error) {
+	chain := strings.Split(accessChain, "::")
+	if len(chain) == 2 {
+		moduleName := chain[0]
+		funcName := chain[1]
+		return g.allTree[moduleName].GetExportBinding(funcName)
+	}
+	if len(chain) == 1 {
+		return g.entryTree.GetBinding(accessChain)
+	}
+	return nil, fmt.Errorf("not supported access chain: %s", accessChain)
+}
+
 func (g *Generator) isBuiltInFunction(key string) bool {
 	_, isBuiltIn := g.typeOfBuiltInBinding[key]
 	return isBuiltIn
@@ -270,7 +285,7 @@ func (g *Generator) funcBody(b *ir.Block, expr ast.Expr, binds map[string]*ir.Pa
 func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap map[string]types.Type) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := g.astTree.GetBinding(expr.FuncName)
+		bind, err := g.getBindingByAccessChain(expr.FuncName)
 		if err != nil {
 			return nil, err
 		}
