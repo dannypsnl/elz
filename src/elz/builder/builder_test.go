@@ -44,7 +44,7 @@ func TestBindingRule(t *testing.T) {
 				Name:      "addOne",
 				ParamList: []string{"y"},
 				Expr: &ast.FuncCall{
-					FuncName: "add",
+					AccessChain: "add",
 					ExprList: []*ast.Arg{
 						{Expr: ast.NewInt("1")},
 						{Expr: ast.NewIdent("y")},
@@ -59,7 +59,7 @@ func TestBindingRule(t *testing.T) {
 				Name:      "tests",
 				ParamList: []string{},
 				Expr: &ast.FuncCall{
-					FuncName: "assert",
+					AccessChain: "assert",
 					ExprList: []*ast.Arg{
 						{Ident: "that", Expr: ast.NewInt("1")},
 						{Ident: "should_be", Expr: ast.NewInt("1")},
@@ -74,14 +74,14 @@ func TestBindingRule(t *testing.T) {
 				Name:      "tests",
 				ParamList: []string{},
 				Expr: &ast.FuncCall{
-					FuncName: "add",
+					AccessChain: "add",
 					ExprList: []*ast.Arg{
 						{Ident: "", Expr: ast.NewInt("1")},
 						{Ident: "", Expr: &ast.FuncCall{
-							FuncName: "add",
+							AccessChain: "add",
 							ExprList: []*ast.Arg{
 								{Ident: "", Expr: &ast.FuncCall{
-									FuncName: "add",
+									AccessChain: "add",
 									ExprList: []*ast.Arg{
 										{Expr: ast.NewInt("1")},
 										{Expr: ast.NewInt("2")},

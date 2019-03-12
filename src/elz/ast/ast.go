@@ -22,8 +22,8 @@ type (
 	}
 	FuncCall struct {
 		isExpr
-		FuncName string
-		ExprList []*Arg
+		AccessChain string
+		ExprList    []*Arg
 	}
 	Arg struct {
 		isExpr

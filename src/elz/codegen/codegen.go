@@ -77,14 +77,14 @@ func (g *Generator) Generate() {
 }
 
 func (g *Generator) Call(bind *ast.Binding, exprList ...*ast.Arg) error {
-	_, err := g.mustGetImpl(bind, make(map[string]types.Type), exprList...)
+	_, err := g.mustGetImpl(bind.Name, bind, make(map[string]types.Type), exprList...)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type, argList ...*ast.Arg) (*ir.Func, error) {
+func (g *Generator) mustGetImpl(accessChain string, bind *ast.Binding, typeMap map[string]types.Type, argList ...*ast.Arg) (*ir.Func, error) {
 	bindName := bind.Name
 	// FIXME: currently for convenience we skip all checking when it's a built-in function
 	// it should be fix after we can do more type checking
@@ -102,12 +102,12 @@ func (g *Generator) mustGetImpl(bind *ast.Binding, typeMap map[string]types.Type
 	if getImpl {
 		return impl, nil
 	}
-	return g.generateNewImpl(bind, typeMap, argList...)
+	return g.generateNewImpl(accessChain, bind, typeMap, argList...)
 }
 
-func (g *Generator) generateNewImpl(bind *ast.Binding, typeMap map[string]types.Type, argList ...*ast.Arg) (*ir.Func, error) {
+func (g *Generator) generateNewImpl(accessChain string, bind *ast.Binding, typeMap map[string]types.Type, argList ...*ast.Arg) (*ir.Func, error) {
 	typeList := getTypeListFrom(typeMap, argList...)
-	actualTypeWhenCall := genKey(bind.Name, typeList...)
+	actualTypeWhenCall := genKey(accessChain, typeList...)
 	if len(argList) != len(bind.ParamList) {
 		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s, argList: %#v`, bind.Name, argList)
 	}
@@ -138,7 +138,7 @@ func (g *Generator) generateNewImpl(bind *ast.Binding, typeMap map[string]types.
 	}
 
 	g.typeOfBinding[actualTypeWhenCall] = inferT
-	f := g.mod.NewFunc(bind.Name, inferT.LLVMType(), params...)
+	f := g.mod.NewFunc(accessChain, inferT.LLVMType(), params...)
 
 	b := f.NewBlock("")
 	binds := make(map[string]*ir.Param)
@@ -195,7 +195,7 @@ func typeCheck(bindName, actualTypeWhenCall string, bindType []ast.Type, typeLis
 func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type) (types.Type, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := g.getBindingByAccessChain(expr.FuncName)
+		bind, err := g.getBindingByAccessChain(expr.AccessChain)
 		if err != nil {
 			return nil, err
 		}
@@ -211,11 +211,11 @@ func (g *Generator) inferReturnType(expr ast.Expr, typeMap map[string]types.Type
 		}
 		key := genKey(bind.Name, typeList...)
 		g.typeOfBinding[key] = inferT
-		t, exist := g.typeOfBind(genKey(expr.FuncName, typeList...))
+		t, exist := g.typeOfBind(genKey(expr.AccessChain, typeList...))
 		if exist {
 			return t, nil
 		}
-		return nil, fmt.Errorf("can't find any binding call: %s", expr.FuncName)
+		return nil, fmt.Errorf("can't find any binding call: %s", expr.AccessChain)
 	case *ast.BinaryExpr:
 		lt, err := g.inferReturnType(expr.LExpr, typeMap)
 		if err != nil {
@@ -285,11 +285,11 @@ func (g *Generator) funcBody(b *ir.Block, expr ast.Expr, binds map[string]*ir.Pa
 func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap map[string]types.Type) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := g.getBindingByAccessChain(expr.FuncName)
+		bind, err := g.getBindingByAccessChain(expr.AccessChain)
 		if err != nil {
 			return nil, err
 		}
-		f, err := g.mustGetImpl(bind, typeMap, expr.ExprList...)
+		f, err := g.mustGetImpl(expr.AccessChain, bind, typeMap, expr.ExprList...)
 		if err != nil {
 			return nil, err
 		}

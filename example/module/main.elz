@@ -1,3 +1,4 @@
 import add
+import second
 
-main = printf("add::add(1, 2) = %d\n", add::add(1, 2))
+main = printf("add::add(1, 2) = %d, %d\n", add::add(1, 2), second::add(1, 3))
