@@ -93,8 +93,10 @@ func (g *Generator) mustGetImpl(accessChain string, bind *ast.Binding, typeMap *
 	}
 	typeList := typeMap.convertArgsToTypeList(argList...)
 	actualTypeWhenCall := genKey(bindName, typeList...)
-	err := typeCheck(bindName, actualTypeWhenCall, bind.Type, typeList)
-	if err != nil {
+	if err := bind.CheckArg(argList...); err != nil {
+		return nil, err
+	}
+	if err := typeCheck(bindName, actualTypeWhenCall, bind.Type, typeList); err != nil {
 		return nil, err
 	}
 
@@ -113,18 +115,6 @@ func (g *Generator) generateNewImpl(accessChain string, bind *ast.Binding, typeM
 	}
 	params := make([]*ir.Param, 0)
 	for i, arg := range argList {
-		argNameMustBe := bind.ParamList[i]
-		argName := arg.Ident
-		// allow ignore argument name like: `add(1, 2)`
-		if argName == "" {
-			argName = argNameMustBe
-		}
-		if argNameMustBe != argName {
-			return nil, fmt.Errorf(`argument name must be parameter name(or empty), for example:
-  assert that should_be = ...
-  assert(that: 1+2, should_be: 3)
-`)
-		}
 		params = append(params, ir.NewParam(arg.Ident, typeList[i].LLVMType()))
 	}
 	for i, t := range typeList {
