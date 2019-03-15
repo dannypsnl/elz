@@ -1,6 +1,8 @@
 package codegen
 
 import (
+	"fmt"
+
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/types"
 )
@@ -23,7 +25,7 @@ func (t *typeMap) getTypeOfExpr(expr ast.Expr) types.Type {
 	if e, isIdentifier := expr.(*ast.Ident); isIdentifier {
 		return t.typeMap[e.Literal]
 	}
-	return types.TypeOf(expr)
+	return typeOfExpr(expr)
 }
 
 func (t *typeMap) convertArgsToTypeList(args ...*ast.Arg) []types.Type {
@@ -37,5 +39,21 @@ func getTypeOfArg(typeMap map[string]types.Type, arg *ast.Arg) types.Type {
 	if ident, isIdent := arg.Expr.(*ast.Ident); isIdent {
 		return typeMap[ident.Literal]
 	}
-	return types.TypeOf(arg.Expr)
+	return typeOfExpr(arg.Expr)
+}
+
+func typeOfExpr(e ast.Expr) types.Type {
+	// where e := e.(type) can save the convert in case clause
+	switch e := e.(type) {
+	case *ast.Arg:
+		return typeOfExpr(e.Expr)
+	case *ast.Int:
+		return &types.Int{}
+	case *ast.Float:
+		return &types.Float{}
+	case *ast.String:
+		return &types.String{}
+	default:
+		panic(fmt.Sprintf("you can't use expression: `%#v` to get type directly", e))
+	}
 }

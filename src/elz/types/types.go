@@ -3,8 +3,6 @@ package types
 import (
 	"fmt"
 
-	"github.com/elz-lang/elz/src/elz/ast"
-
 	"github.com/llir/llvm/ir/types"
 )
 
@@ -56,20 +54,4 @@ func (s *String) LLVMType() types.Type {
 	t := types.NewStruct()
 	t.Opaque = true
 	return t
-}
-
-func TypeOf(e ast.Expr) Type {
-	// where e := e.(type) can save the convert in case clause
-	switch e := e.(type) {
-	case *ast.Arg:
-		return TypeOf(e.Expr)
-	case *ast.Int:
-		return &Int{}
-	case *ast.Float:
-		return &Float{}
-	case *ast.String:
-		return &String{}
-	default:
-		panic(fmt.Sprintf("you can't use expression: `%#v` to get type directly", e))
-	}
 }
