@@ -96,7 +96,7 @@ func (g *Generator) mustGetImpl(accessChain string, bind *ast.Binding, typeMap *
 	if err := bind.CheckArg(argList...); err != nil {
 		return nil, err
 	}
-	if err := typeCheck(bindName, actualTypeWhenCall, bind.Type, typeList); err != nil {
+	if err := bind.TypeCheck(actualTypeWhenCall, typeList); err != nil {
 		return nil, err
 	}
 
@@ -141,44 +141,6 @@ func (g *Generator) generateNewImpl(accessChain string, bind *ast.Binding, typeM
 
 	g.implsOfBinding[actualTypeWhenCall] = f
 	return f, nil
-}
-
-func typeCheck(bindName, actualTypeWhenCall string, bindType []ast.Type, typeList []types.Type) error {
-	if bindType == nil {
-		return nil
-	}
-	var (
-		b              strings.Builder
-		err            error
-		variantTypeMap = map[string]string{}
-	)
-	for i, requireT := range bindType[:len(bindType)-1] {
-		actualType := typeList[i]
-		switch requireT := requireT.(type) {
-		case *ast.ExistType:
-			if requireT.Name != actualType.String() {
-				err = fmt.Errorf("")
-			}
-		case *ast.VariantType:
-			t, exist := variantTypeMap[requireT.Name]
-			if !exist {
-				variantTypeMap[requireT.Name] = actualType.String()
-				t = actualType.String()
-			}
-			if t != actualType.String() {
-				err = fmt.Errorf("")
-			}
-		case *ast.VoidType:
-		}
-		b.WriteString(requireT.String())
-		b.WriteString(" -> ")
-	}
-	requireT := b.String()
-	requireType := bindName + " :: " + requireT[:len(requireT)-4]
-	if err != nil {
-		return fmt.Errorf("require type: `%s` but get: `%s`", requireType, actualTypeWhenCall)
-	}
-	return nil
 }
 
 // inference the return type by the expression we going to execute and input types
