@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"github.com/elz-lang/elz/src/irutil"
 	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
@@ -56,6 +57,7 @@ func New(entryTree *Tree, astAllTree map[string]*Tree) *Generator {
 }
 
 func (g *Generator) String() string {
+	irutil.FixDups(g.mod)
 	return g.mod.String()
 }
 
@@ -77,70 +79,20 @@ func (g *Generator) Generate() {
 }
 
 func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
-	_, err := g.mustGetImpl(bind.Name, bind, newTypeMap(), exprList...)
+	_, err := g.mustGetImpl(bind, newTypeMap(), exprList...)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (g *Generator) mustGetImpl(accessChain string, bind *Binding, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
-	bindName := bind.Name
+func (g *Generator) mustGetImpl(bind *Binding, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
 	// FIXME: currently for convenience we skip all checking when it's a built-in function
 	// it should be fix after we can do more type checking
 	if bind.NoImplementation {
-		return g.implsOfBinding[bindName], nil
+		return g.implsOfBinding[bind.Name], nil
 	}
-	typeList := typeMap.convertArgsToTypeList(argList...)
-	actualTypeWhenCall := genKey(bindName, typeList...)
-	if err := bind.CheckArg(argList...); err != nil {
-		return nil, err
-	}
-	if err := bind.TypeCheck(actualTypeWhenCall, typeList); err != nil {
-		return nil, err
-	}
-
-	impl, getImpl := g.implsOfBinding[actualTypeWhenCall]
-	if getImpl {
-		return impl, nil
-	}
-	return g.generateNewImpl(accessChain, bind, typeMap, argList...)
-}
-
-func (g *Generator) generateNewImpl(accessChain string, bind *Binding, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
-	typeList := typeMap.convertArgsToTypeList(argList...)
-	actualTypeWhenCall := genKey(accessChain, typeList...)
-	if len(argList) != len(bind.ParamList) {
-		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s, argList: %#v`, bind.Name, argList)
-	}
-	params := make([]*ir.Param, 0)
-	for i, arg := range argList {
-		params = append(params, ir.NewParam(arg.Ident, typeList[i].LLVMType()))
-	}
-	for i, t := range typeList {
-		argName := bind.ParamList[i]
-		typeMap.add(argName, t)
-	}
-
-	inferT, err := g.inferReturnType(bind.Expr, typeMap)
-	if err != nil {
-		return nil, err
-	}
-
-	g.typeOfBinding[actualTypeWhenCall] = inferT
-	f := g.mod.NewFunc(accessChain, inferT.LLVMType(), params...)
-
-	b := f.NewBlock("")
-	binds := make(map[string]*ir.Param)
-	for i, p := range params {
-		binds[bind.ParamList[i]] = p
-	}
-	if err := g.funcBody(b, bind.Expr, binds, typeMap); err != nil {
-		return nil, err
-	}
-
-	g.implsOfBinding[actualTypeWhenCall] = f
-	return f, nil
+	return bind.GetImpl(g, typeMap, argList...)
 }
 
 // inference the return type by the expression we going to execute and input types
@@ -225,15 +177,6 @@ func (g *Generator) typeOfBind(key string) (types.Type, bool) {
 	return nil, false
 }
 
-func (g *Generator) funcBody(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) error {
-	v, err := g.genExpr(b, expr, binds, typeMap)
-	if err != nil {
-		return err
-	}
-	b.NewRet(v)
-	return nil
-}
-
 func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
@@ -241,7 +184,7 @@ func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Par
 		if err != nil {
 			return nil, err
 		}
-		f, err := g.mustGetImpl(expr.AccessChain, bind, typeMap, expr.ExprList...)
+		f, err := g.mustGetImpl(bind, typeMap, expr.ExprList...)
 		if err != nil {
 			return nil, err
 		}
@@ -313,15 +256,11 @@ func genKey(bindName string, typeList ...types.Type) string {
 	var b strings.Builder
 	b.WriteString(bindName)
 	b.WriteString(" :: ")
-	fmtTypes := make([]fmt.Stringer, 0)
-	for _, t := range typeList {
-		fmtTypes = append(fmtTypes, t)
-	}
-	b.WriteString(typeFormat(fmtTypes...))
+	b.WriteString(typeFormat(typeList...))
 	return b.String()
 }
 
-func typeFormat(typeList ...fmt.Stringer) string {
+func typeFormat(typeList ...types.Type) string {
 	var b strings.Builder
 	if len(typeList) > 0 {
 		for _, t := range typeList[:len(typeList)-1] {
