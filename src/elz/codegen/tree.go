@@ -1,7 +1,8 @@
-package ast
+package codegen
 
 import (
 	"fmt"
+	"github.com/elz-lang/elz/src/elz/ast"
 	"path/filepath"
 	"strings"
 )
@@ -18,12 +19,12 @@ func NewTree() *Tree {
 	}
 }
 
-func (t *Tree) InsertBinding(b *Binding) error {
+func (t *Tree) InsertBinding(b *ast.Binding) error {
 	_, exist := t.bindings[b.Name]
 	if exist {
 		return fmt.Errorf("binding: %s already exist", b.Name)
 	}
-	t.bindings[b.Name] = b
+	t.bindings[b.Name] = NewBinding(b)
 	return nil
 }
 

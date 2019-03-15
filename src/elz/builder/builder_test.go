@@ -125,7 +125,7 @@ add x y = x + y
 				tree := builder.GetTree()
 				b, err := tree.GetBinding(testCase.expectedBinding.Name)
 				require.NoError(t, err)
-				assert.Equal(t, testCase.expectedBinding, b)
+				assert.Equal(t, testCase.expectedBinding, b.Binding)
 			}
 		})
 	}

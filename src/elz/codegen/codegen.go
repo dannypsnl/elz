@@ -16,15 +16,15 @@ import (
 type Generator struct {
 	mod *ir.Module
 
-	allTree   map[string]*ast.Tree
-	entryTree *ast.Tree
+	allTree   map[string]*Tree
+	entryTree *Tree
 
 	implsOfBinding       map[string]*ir.Func
 	typeOfBuiltInBinding map[string]types.Type
 	typeOfBinding        map[string]types.Type
 }
 
-func New(entryTree *ast.Tree, astAllTree map[string]*ast.Tree) *Generator {
+func New(entryTree *Tree, astAllTree map[string]*Tree) *Generator {
 	typMap := make(map[string]types.Type)
 	typMap["+ :: int -> int"] = &types.Int{}
 
@@ -76,7 +76,7 @@ func (g *Generator) Generate() {
 	b.NewRet(constant.NewInt(llvmtypes.I64, 0))
 }
 
-func (g *Generator) Call(bind *ast.Binding, exprList ...*ast.Arg) error {
+func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
 	_, err := g.mustGetImpl(bind.Name, bind, newTypeMap(), exprList...)
 	if err != nil {
 		return err
@@ -84,7 +84,7 @@ func (g *Generator) Call(bind *ast.Binding, exprList ...*ast.Arg) error {
 	return nil
 }
 
-func (g *Generator) mustGetImpl(accessChain string, bind *ast.Binding, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
+func (g *Generator) mustGetImpl(accessChain string, bind *Binding, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
 	bindName := bind.Name
 	// FIXME: currently for convenience we skip all checking when it's a built-in function
 	// it should be fix after we can do more type checking
@@ -107,7 +107,7 @@ func (g *Generator) mustGetImpl(accessChain string, bind *ast.Binding, typeMap *
 	return g.generateNewImpl(accessChain, bind, typeMap, argList...)
 }
 
-func (g *Generator) generateNewImpl(accessChain string, bind *ast.Binding, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
+func (g *Generator) generateNewImpl(accessChain string, bind *Binding, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
 	typeList := typeMap.convertArgsToTypeList(argList...)
 	actualTypeWhenCall := genKey(accessChain, typeList...)
 	if len(argList) != len(bind.ParamList) {
@@ -195,7 +195,7 @@ func (g *Generator) inferReturnType(expr ast.Expr, typeMap *typeMap) (types.Type
 	}
 }
 
-func (g *Generator) getBindingByAccessChain(accessChain string) (*ast.Binding, error) {
+func (g *Generator) getBindingByAccessChain(accessChain string) (*Binding, error) {
 	chain := strings.Split(accessChain, "::")
 	if len(chain) == 2 {
 		moduleName := chain[0]

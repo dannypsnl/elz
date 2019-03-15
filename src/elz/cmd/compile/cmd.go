@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/builder"
 	"github.com/elz-lang/elz/src/elz/codegen"
 
@@ -39,12 +38,12 @@ var (
 )
 
 type cacheAgent struct {
-	caches map[string]*ast.Tree
+	caches map[string]*codegen.Tree
 }
 
 func newCacheAgent() *cacheAgent {
 	return &cacheAgent{
-		caches: make(map[string]*ast.Tree),
+		caches: make(map[string]*codegen.Tree),
 	}
 }
 

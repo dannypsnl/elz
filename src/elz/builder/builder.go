@@ -2,6 +2,7 @@ package builder
 
 import (
 	"github.com/elz-lang/elz/src/elz/ast"
+	"github.com/elz-lang/elz/src/elz/codegen"
 	"github.com/elz-lang/elz/src/elz/internal/collection/stack"
 	"github.com/elz-lang/elz/src/elz/parser"
 
@@ -15,10 +16,10 @@ type Builder struct {
 	bindTypeList []ast.Type
 	exprStack    *stack.Stack
 
-	astTree *ast.Tree
+	astTree *codegen.Tree
 }
 
-func (b *Builder) GetTree() *ast.Tree {
+func (b *Builder) GetTree() *codegen.Tree {
 	return b.astTree
 }
 
@@ -30,11 +31,11 @@ func New() *Builder {
 		bindingType:  make(map[string][]ast.Type),
 		bindTypeList: make([]ast.Type, 0),
 		exprStack:    stack.New(),
-		astTree:      ast.NewTree(),
+		astTree:      codegen.NewTree(),
 	}
 }
 
-func NewFromFile(file string) (*ast.Tree, error) {
+func NewFromFile(file string) (*codegen.Tree, error) {
 	b := New()
 	err := b.BuildFromFile(file)
 	if err != nil {
@@ -43,7 +44,7 @@ func NewFromFile(file string) (*ast.Tree, error) {
 	return b.GetTree(), nil
 }
 
-func NewFromCode(code string) *ast.Tree {
+func NewFromCode(code string) *codegen.Tree {
 	b := New()
 	b.BuildFromCode(code)
 	return b.GetTree()
