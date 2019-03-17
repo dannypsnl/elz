@@ -2,11 +2,11 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/elz-lang/elz/src/irutil"
 	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/types"
+	"github.com/elz-lang/elz/src/irutil"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
@@ -20,7 +20,6 @@ type Generator struct {
 	allTree   map[string]*Tree
 	entryTree *Tree
 
-	implsOfBinding       map[string]*ir.Func
 	typeOfBuiltInBinding map[string]types.Type
 	typeOfBinding        map[string]types.Type
 }
@@ -31,26 +30,27 @@ func New(entryTree *Tree, astAllTree map[string]*Tree) *Generator {
 
 	astTree := entryTree
 	err := astTree.InsertBinding(&ast.Binding{
-		Name:             "printf",
-		ParamList:        []string{"format"},
-		NoImplementation: true,
+		Name:      "printf",
+		ParamList: []string{"format"},
 	})
 	if err != nil {
 		panic("some function conflict with built-in function printf")
 	}
 	mod := ir.NewModule()
-	builtInImpl := make(map[string]*ir.Func)
 	printfImpl := mod.NewFunc("printf", llvmtypes.I64,
 		ir.NewParam("format", llvmtypes.NewPointer(llvmtypes.I8)),
 	)
 	printfImpl.Sig.Variadic = true
-	builtInImpl["printf"] = printfImpl
+	printfBind, err := astTree.GetBinding("printf")
+	if err != nil {
+		panic(fmt.Errorf("can't get printf binding: %s", err))
+	}
+	printfBind.compilerProvidedImpl = printfImpl
 
 	return &Generator{
 		mod:                  mod,
 		entryTree:            astTree,
 		allTree:              astAllTree,
-		implsOfBinding:       builtInImpl,
 		typeOfBuiltInBinding: typMap,
 		typeOfBinding:        typMap,
 	}
@@ -79,20 +79,11 @@ func (g *Generator) Generate() {
 }
 
 func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
-	_, err := g.mustGetImpl(bind, newTypeMap(), exprList...)
+	_, err := bind.GetImpl(g, newTypeMap(), exprList...)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func (g *Generator) mustGetImpl(bind *Binding, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
-	// FIXME: currently for convenience we skip all checking when it's a built-in function
-	// it should be fix after we can do more type checking
-	if bind.NoImplementation {
-		return g.implsOfBinding[bind.Name], nil
-	}
-	return bind.GetImpl(g, typeMap, argList...)
 }
 
 // inference the return type by the expression we going to execute and input types
@@ -184,7 +175,7 @@ func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Par
 		if err != nil {
 			return nil, err
 		}
-		f, err := g.mustGetImpl(bind, typeMap, expr.ExprList...)
+		f, err := bind.GetImpl(g, typeMap, expr.ExprList...)
 		if err != nil {
 			return nil, err
 		}
