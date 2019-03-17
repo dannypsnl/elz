@@ -20,8 +20,7 @@ type Generator struct {
 	allTree   map[string]*Tree
 	entryTree *Tree
 
-	typeOfBuiltInBinding map[string]types.Type
-	typeOfBinding        map[string]types.Type
+	operatorTypeStore map[string]types.Type
 }
 
 func New(entryTree *Tree, astAllTree map[string]*Tree) *Generator {
@@ -48,11 +47,10 @@ func New(entryTree *Tree, astAllTree map[string]*Tree) *Generator {
 	printfBind.compilerProvidedImpl = printfImpl
 
 	return &Generator{
-		mod:                  mod,
-		entryTree:            astTree,
-		allTree:              astAllTree,
-		typeOfBuiltInBinding: typMap,
-		typeOfBinding:        typMap,
+		mod:               mod,
+		entryTree:         astTree,
+		allTree:           astAllTree,
+		operatorTypeStore: typMap,
 	}
 }
 
@@ -87,44 +85,37 @@ func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
 }
 
 // inference the return type by the expression we going to execute and input types
-func (g *Generator) inferReturnType(expr ast.Expr, typeMap *typeMap) (types.Type, error) {
+func (g *Generator) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
 		bind, err := g.getBindingByAccessChain(expr.AccessChain)
 		if err != nil {
 			return nil, err
 		}
-		typeList := typeMap.convertArgsToTypeList(expr.ExprList...)
+		typeList := typeMap.convertArgsToTypeList(expr.ArgList...)
 		typeMap := newTypeMap()
-		for i, t := range typeList {
-			argName := bind.ParamList[i]
-			typeMap.add(argName, t)
+		for i, paramType := range typeList {
+			paramName := bind.ParamList[i]
+			typeMap.add(paramName, paramType)
 		}
-		inferT, err := g.inferReturnType(bind.Expr, typeMap)
+		t, err := bind.GetReturnType(g, typeMap, typeList...)
 		if err != nil {
 			return nil, err
 		}
-		key := genKey(bind.Name, typeList...)
-		g.typeOfBinding[key] = inferT
-		t, exist := g.typeOfBind(genKey(expr.AccessChain, typeList...))
-		if exist {
-			return t, nil
-		}
-		return nil, fmt.Errorf("can't find any binding call: %s", expr.AccessChain)
+		return t, nil
 	case *ast.BinaryExpr:
-		lt, err := g.inferReturnType(expr.LExpr, typeMap)
+		lt, err := g.inferTypeOf(expr.LExpr, typeMap)
 		if err != nil {
 			return nil, err
 		}
-		rt, err := g.inferReturnType(expr.RExpr, typeMap)
+		rt, err := g.inferTypeOf(expr.RExpr, typeMap)
 		if err != nil {
 			return nil, err
 		}
 		op := expr.Op
-		key := genKey(op, lt, rt)
-		t, ok := g.typeOfBind(key)
-		if !ok {
-			return nil, fmt.Errorf("can't infer return type by %s", key)
+		t, err := g.typeOfOperator(op, lt, rt)
+		if err != nil {
+			return nil, err
 		}
 		return t, nil
 	case *ast.Ident:
@@ -151,21 +142,18 @@ func (g *Generator) getBindingByAccessChain(accessChain string) (*Binding, error
 	return nil, fmt.Errorf("not supported access chain: %s", accessChain)
 }
 
-func (g *Generator) isBuiltInFunction(key string) bool {
-	_, isBuiltIn := g.typeOfBuiltInBinding[key]
+func (g *Generator) isOperator(key string) bool {
+	_, isBuiltIn := g.operatorTypeStore[key]
 	return isBuiltIn
 }
 
-func (g *Generator) typeOfBind(key string) (types.Type, bool) {
-	t, existed := g.typeOfBuiltInBinding[key]
-	if existed {
-		return t, true
+func (g *Generator) typeOfOperator(op string, typeList ...types.Type) (types.Type, error) {
+	key := genKey(op, typeList...)
+	t, existed := g.operatorTypeStore[key]
+	if !existed {
+		return nil, fmt.Errorf("can't infer return type by %s", key)
 	}
-	t, existed = g.typeOfBinding[key]
-	if existed {
-		return t, true
-	}
-	return nil, false
+	return t, nil
 }
 
 func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) (value.Value, error) {
@@ -175,12 +163,12 @@ func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Par
 		if err != nil {
 			return nil, err
 		}
-		f, err := bind.GetImpl(g, typeMap, expr.ExprList...)
+		f, err := bind.GetImpl(g, typeMap, expr.ArgList...)
 		if err != nil {
 			return nil, err
 		}
 		valueList := make([]value.Value, 0)
-		for _, arg := range expr.ExprList {
+		for _, arg := range expr.ArgList {
 			e, err := g.genExpr(b, arg.Expr, binds, typeMap)
 			if err != nil {
 				return nil, err
@@ -200,7 +188,7 @@ func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Par
 		lt := typeMap.getTypeOfExpr(expr.LExpr)
 		rt := typeMap.getTypeOfExpr(expr.RExpr)
 		key := genKey(expr.Op, lt, rt)
-		if g.isBuiltInFunction(key) {
+		if g.isOperator(key) {
 			if lt.String() == "int" && rt.String() == "int" {
 				switch expr.Op {
 				case "+":

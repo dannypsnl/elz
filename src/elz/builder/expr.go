@@ -90,7 +90,7 @@ func (b *Builder) ExitFnCall(c *parser.FnCallContext) {
 	}
 	b.PushExpr(&ast.FuncCall{
 		AccessChain: c.AccessChain().GetText(),
-		ExprList:    exprList,
+		ArgList:     exprList,
 	})
 }
 

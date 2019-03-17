@@ -15,6 +15,7 @@ type Binding struct {
 
 	compilerProvidedImpl *ir.Func
 	cacheOfImpl          map[string]*ir.Func
+	cacheOfType          map[string]types.Type
 }
 
 func NewBinding(bind *ast.Binding) *Binding {
@@ -22,7 +23,22 @@ func NewBinding(bind *ast.Binding) *Binding {
 		Binding: bind,
 		// unexported part
 		cacheOfImpl: map[string]*ir.Func{},
+		cacheOfType: map[string]types.Type{},
 	}
+}
+
+func (b *Binding) GetReturnType(g *Generator, typeMap *typeMap, typeListOfArgs ...types.Type) (types.Type, error) {
+	key := typeFormat(typeListOfArgs...)
+	t, ok := b.cacheOfType[key]
+	if ok {
+		return t, nil
+	}
+	inferT, err := g.inferTypeOf(b.Expr, typeMap)
+	if err != nil {
+		return nil, err
+	}
+	b.cacheOfType[key] = inferT
+	return inferT, nil
 }
 
 func (b *Binding) GetImpl(g *Generator, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
@@ -57,7 +73,7 @@ func (b *Binding) GetImpl(g *Generator, typeMap *typeMap, argList ...*ast.Arg) (
 		typeMap.add(paramName, paramType)
 		params = append(params, ir.NewParam(paramName, paramType.LLVMType()))
 	}
-	returnType, err := g.inferReturnType(b.Expr, typeMap)
+	returnType, err := b.GetReturnType(g, typeMap, typeListOfArgs...)
 	if err != nil {
 		return nil, err
 	}
