@@ -28,10 +28,10 @@ func TestBindingCodegen(t *testing.T) {
 				ast.NewArg("", ast.NewInt("1")),
 				ast.NewArg("", ast.NewInt("2")),
 			},
-			expectContains: []string{`define i64 @add(i64, i64) {
-; <label>:2
-	%3 = add i64 %0, %1
-	ret i64 %3
+			expectContains: []string{`define i64 @add(i64 %x, i64 %y) {
+; <label>:0
+	%1 = add i64 %x, %y
+	ret i64 %1
 }`},
 		},
 		{
@@ -45,15 +45,15 @@ addOne y = add(1, y)
 				ast.NewArg("", ast.NewInt("2")),
 			},
 			expectContains: []string{
-				`define i64 @addOne(i64) {
-; <label>:1
-	%2 = call i64 @add(i64 1, i64 %0)
-	ret i64 %2
+				`define i64 @addOne(i64 %y) {
+; <label>:0
+	%1 = call i64 @add(i64 1, i64 %y)
+	ret i64 %1
 }`,
-				`define i64 @add(i64, i64) {
-; <label>:2
-	%3 = add i64 %0, %1
-	ret i64 %3
+				`define i64 @add(i64 %x, i64 %y) {
+; <label>:0
+	%1 = add i64 %x, %y
+	ret i64 %1
 }`,
 			},
 		},

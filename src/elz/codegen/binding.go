@@ -34,57 +34,56 @@ func (b *Binding) GetImpl(g *Generator, typeMap *typeMap, argList ...*ast.Arg) (
 	if b.compilerProvidedImpl != nil {
 		return b.compilerProvidedImpl, nil
 	}
-	typeList := typeMap.convertArgsToTypeList(argList...)
-
-	if err := b.checkArg(argList...); err != nil {
-		return nil, err
-	}
-	if err := b.typeCheck(typeList); err != nil {
-		return nil, err
-	}
-	for i, t := range typeList {
-		argName := b.ParamList[i]
-		typeMap.add(argName, t)
-	}
-	inferT, err := g.inferReturnType(b.Expr, typeMap)
-	if err != nil {
-		return nil, err
-	}
-
-	certainTypeFormatOfArgs := typeFormat(typeList...)
+	typeListOfArgs := typeMap.convertArgsToTypeList(argList...)
+	certainTypeFormatOfArgs := typeFormat(typeListOfArgs...)
+	// if we could get the implementation that we don't have to do any checking
+	// because it must already be checked
 	impl, getImpl := b.cacheOfImpl[certainTypeFormatOfArgs]
 	if getImpl {
 		return impl, nil
 	}
-	f, err := generateNewImpl(g, b, inferT, typeMap, argList...)
+
+	if err := b.checkArg(argList...); err != nil {
+		return nil, err
+	}
+	if err := b.typeCheck(typeListOfArgs); err != nil {
+		return nil, err
+	}
+	// - record parameters' type
+	// - create parameters of IR
+	params := make([]*ir.Param, 0)
+	for i, paramType := range typeListOfArgs {
+		paramName := b.ParamList[i]
+		typeMap.add(paramName, paramType)
+		params = append(params, ir.NewParam(paramName, paramType.LLVMType()))
+	}
+	returnType, err := g.inferReturnType(b.Expr, typeMap)
 	if err != nil {
 		return nil, err
 	}
-	b.cacheOfImpl[certainTypeFormatOfArgs] = f
-	return f, nil
+	function, err := generateNewImpl(g, b, returnType, typeMap, params)
+	if err != nil {
+		return nil, err
+	}
+	b.cacheOfImpl[certainTypeFormatOfArgs] = function
+	return function, nil
 }
 
-func generateNewImpl(g *Generator, bind *Binding, inferT types.Type, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
-	typeList := typeMap.convertArgsToTypeList(argList...)
-	if len(argList) != len(bind.ParamList) {
-		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s, argList: %#v`, bind.Name, argList)
+func generateNewImpl(g *Generator, bind *Binding, returnType types.Type, typeMap *typeMap, params []*ir.Param) (*ir.Func, error) {
+	if len(params) != len(bind.ParamList) {
+		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s`, bind.Name)
 	}
-	params := make([]*ir.Param, 0)
-	for i, arg := range argList {
-		params = append(params, ir.NewParam(arg.Ident, typeList[i].LLVMType()))
-	}
-
-	f := g.mod.NewFunc(bind.Name, inferT.LLVMType(), params...)
-
-	block := f.NewBlock("")
+	function := g.mod.NewFunc(bind.Name, returnType.LLVMType(), params...)
+	block := function.NewBlock("")
 	binds := make(map[string]*ir.Param)
 	for i, p := range params {
 		binds[bind.ParamList[i]] = p
 	}
-	if err := funcBody(g, block, bind.Expr, binds, typeMap); err != nil {
+	err := funcBody(g, block, bind.Expr, binds, typeMap)
+	if err != nil {
 		return nil, err
 	}
-	return f, nil
+	return function, nil
 }
 
 func funcBody(g *Generator, b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) error {
