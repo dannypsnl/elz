@@ -2,9 +2,10 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/elz-lang/elz/src/elz/ast"
 	"path/filepath"
 	"strings"
+
+	"github.com/elz-lang/elz/src/elz/ast"
 )
 
 type Tree struct {
