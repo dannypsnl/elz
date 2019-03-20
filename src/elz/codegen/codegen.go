@@ -35,6 +35,17 @@ func New(entryTree *Tree, allAstTree map[string]*Tree) *Generator {
 		panic("some function conflict with built-in function printf")
 	}
 	mod := ir.NewModule()
+	g := &Generator{
+		mod:               mod,
+		operatorTypeStore: typMap,
+	}
+	allModule := make(map[string]*module)
+	for name, tree := range allAstTree {
+		allModule[name] = newModule(g, tree)
+	}
+	g.allModule = allModule
+	g.entryModule = newModule(g, entryTree)
+
 	printfImpl := mod.NewFunc("printf", llvmtypes.I64,
 		ir.NewParam("format", llvmtypes.NewPointer(llvmtypes.I8)),
 	)
@@ -45,17 +56,7 @@ func New(entryTree *Tree, allAstTree map[string]*Tree) *Generator {
 	}
 	printfBind.compilerProvidedImpl = printfImpl
 
-	allModule := make(map[string]*module)
-	for name, tree := range allAstTree {
-		allModule[name] = newModule(tree)
-	}
-
-	return &Generator{
-		mod:               mod,
-		entryModule:       newModule(entryTree),
-		allModule:         allModule,
-		operatorTypeStore: typMap,
-	}
+	return g
 }
 
 func (g *Generator) String() string {
@@ -92,7 +93,7 @@ func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
 func (g *Generator) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := g.getBindingByAccessChain(expr.AccessChain)
+		bind, err := g.entryModule.getBindingByAccessChain(expr.AccessChain)
 		if err != nil {
 			return nil, err
 		}
@@ -133,20 +134,6 @@ func (g *Generator) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, er
 	}
 }
 
-func (g *Generator) getBindingByAccessChain(accessChain string) (*Binding, error) {
-	chain := strings.Split(accessChain, "::")
-	if len(chain) >= 2 {
-		localModuleName := chain[len(chain)-2]
-		funcName := chain[len(chain)-1]
-		moduleName := g.entryModule.imports[localModuleName]
-		return g.allModule[moduleName].GetExportBinding(funcName)
-	}
-	if len(chain) == 1 {
-		return g.entryModule.GetBinding(accessChain)
-	}
-	return nil, fmt.Errorf("not supported access chain: %s", accessChain)
-}
-
 func (g *Generator) isOperator(key string) bool {
 	_, isBuiltIn := g.operatorTypeStore[key]
 	return isBuiltIn
@@ -164,7 +151,7 @@ func (g *Generator) typeOfOperator(op string, typeList ...types.Type) (types.Typ
 func (g *Generator) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := g.getBindingByAccessChain(expr.AccessChain)
+		bind, err := g.entryModule.getBindingByAccessChain(expr.AccessChain)
 		if err != nil {
 			return nil, err
 		}

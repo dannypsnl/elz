@@ -7,7 +7,8 @@ import (
 
 type module struct {
 	*Tree
-	imports map[string]string
+	generator *Generator
+	imports   map[string]string
 }
 
 // ```
@@ -21,7 +22,7 @@ type module struct {
 //
 // import format is `lib::lib::lib`,
 // but would only take last name as local name of the module
-func newModule(tree *Tree) *module {
+func newModule(g *Generator, tree *Tree) *module {
 	imports := map[string]string{}
 	for _, importPath := range tree.imports {
 		accessChain := strings.Split(importPath, "::")
@@ -36,7 +37,26 @@ has the same name in the module`, mod1, importPath))
 		imports[accessKey] = importPath
 	}
 	return &module{
-		Tree:    tree,
-		imports: imports,
+		Tree:      tree,
+		generator: g,
+		imports:   imports,
 	}
+}
+
+func (m *module) getBindingByAccessChain(accessChain string) (*Binding, error) {
+	chain := strings.Split(accessChain, "::")
+	if len(chain) >= 2 {
+		localModuleName := chain[len(chain)-2]
+		funcName := chain[len(chain)-1]
+		moduleName := m.imports[localModuleName]
+		return m.generator.allModule[moduleName].GetExportBinding(funcName)
+	}
+	if len(chain) == 1 {
+		bind, err := m.GetBinding(accessChain)
+		if err != nil {
+			return m.generator.entryModule.GetBinding(accessChain)
+		}
+		return bind, nil
+	}
+	return nil, fmt.Errorf("not supported access chain: %s", accessChain)
 }
