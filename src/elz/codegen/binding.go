@@ -27,13 +27,13 @@ func NewBinding(bind *ast.Binding) *Binding {
 	}
 }
 
-func (b *Binding) GetReturnType(g *Generator, typeMap *typeMap, typeListOfArgs ...types.Type) (types.Type, error) {
+func (b *Binding) GetReturnType(m *module, typeMap *typeMap, typeListOfArgs ...types.Type) (types.Type, error) {
 	key := typeFormat(typeListOfArgs...)
 	t, ok := b.cacheOfType[key]
 	if ok {
 		return t, nil
 	}
-	inferT, err := g.inferTypeOf(b.Expr, typeMap)
+	inferT, err := m.inferTypeOf(b.Expr, typeMap)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (b *Binding) GetImpl(m *module, typeMap *typeMap, argList ...*ast.Arg) (*ir
 		typeMap.add(paramName, paramType)
 		params = append(params, ir.NewParam(paramName, paramType.LLVMType()))
 	}
-	returnType, err := b.GetReturnType(m.generator, typeMap, typeListOfArgs...)
+	returnType, err := b.GetReturnType(m, typeMap, typeListOfArgs...)
 	if err != nil {
 		return nil, err
 	}

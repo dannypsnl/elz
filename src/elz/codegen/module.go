@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
+	"github.com/elz-lang/elz/src/elz/types"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
@@ -47,6 +48,51 @@ has the same name in the module`, mod1, importPath))
 		Tree:      tree,
 		generator: g,
 		imports:   imports,
+	}
+}
+
+// inference the return type by the expression we going to execute and input types
+func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error) {
+	switch expr := expr.(type) {
+	case *ast.FuncCall:
+		bind, err := m.getBindingByAccessChain(expr.AccessChain)
+		if err != nil {
+			return nil, err
+		}
+		typeList := typeMap.convertArgsToTypeList(expr.ArgList...)
+		typeMap := newTypeMap()
+		for i, paramType := range typeList {
+			paramName := bind.ParamList[i]
+			typeMap.add(paramName, paramType)
+		}
+		t, err := bind.GetReturnType(m, typeMap, typeList...)
+		if err != nil {
+			return nil, err
+		}
+		return t, nil
+	case *ast.BinaryExpr:
+		lt, err := m.inferTypeOf(expr.LExpr, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		rt, err := m.inferTypeOf(expr.RExpr, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		op := expr.Op
+		t, err := m.generator.typeOfOperator(op, lt, rt)
+		if err != nil {
+			return nil, err
+		}
+		return t, nil
+	case *ast.Ident:
+		t := typeMap.getTypeOfExpr(expr)
+		if t == nil {
+			return nil, fmt.Errorf("can't get type of identifier: %s", expr.Literal)
+		}
+		return t, nil
+	default:
+		return nil, fmt.Errorf("unsupported type inference for expression: %#v yet", expr)
 	}
 }
 

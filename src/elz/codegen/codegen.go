@@ -88,51 +88,6 @@ func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
 	return nil
 }
 
-// inference the return type by the expression we going to execute and input types
-func (g *Generator) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error) {
-	switch expr := expr.(type) {
-	case *ast.FuncCall:
-		bind, err := g.entryModule.getBindingByAccessChain(expr.AccessChain)
-		if err != nil {
-			return nil, err
-		}
-		typeList := typeMap.convertArgsToTypeList(expr.ArgList...)
-		typeMap := newTypeMap()
-		for i, paramType := range typeList {
-			paramName := bind.ParamList[i]
-			typeMap.add(paramName, paramType)
-		}
-		t, err := bind.GetReturnType(g, typeMap, typeList...)
-		if err != nil {
-			return nil, err
-		}
-		return t, nil
-	case *ast.BinaryExpr:
-		lt, err := g.inferTypeOf(expr.LExpr, typeMap)
-		if err != nil {
-			return nil, err
-		}
-		rt, err := g.inferTypeOf(expr.RExpr, typeMap)
-		if err != nil {
-			return nil, err
-		}
-		op := expr.Op
-		t, err := g.typeOfOperator(op, lt, rt)
-		if err != nil {
-			return nil, err
-		}
-		return t, nil
-	case *ast.Ident:
-		t := typeMap.getTypeOfExpr(expr)
-		if t == nil {
-			return nil, fmt.Errorf("can't get type of identifier: %s", expr.Literal)
-		}
-		return t, nil
-	default:
-		return nil, fmt.Errorf("unsupported type inference for expression: %#v yet", expr)
-	}
-}
-
 func (g *Generator) isOperator(key string) bool {
 	_, isBuiltIn := g.operatorTypeStore[key]
 	return isBuiltIn
