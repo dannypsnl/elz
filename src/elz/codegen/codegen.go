@@ -81,7 +81,7 @@ func (g *Generator) Generate() {
 }
 
 func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
-	_, err := bind.GetImpl(g.entryModule, newTypeMap(), exprList...)
+	_, err := bind.GetImpl(newTypeMap(), exprList...)
 	if err != nil {
 		return err
 	}

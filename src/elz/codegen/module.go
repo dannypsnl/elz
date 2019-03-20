@@ -44,11 +44,15 @@ has the same name in the module`, mod1, importPath))
 		}
 		imports[accessKey] = importPath
 	}
-	return &module{
+	m := &module{
 		Tree:      tree,
 		generator: g,
 		imports:   imports,
 	}
+	for _, bind := range tree.bindings {
+		bind.SetModule(m)
+	}
+	return m
 }
 
 // inference the return type by the expression we going to execute and input types
@@ -65,7 +69,7 @@ func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error
 			paramName := bind.ParamList[i]
 			typeMap.add(paramName, paramType)
 		}
-		t, err := bind.GetReturnType(m, typeMap, typeList...)
+		t, err := bind.GetReturnType(typeMap, typeList...)
 		if err != nil {
 			return nil, err
 		}
@@ -103,7 +107,7 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		f, err := bind.GetImpl(m, typeMap, expr.ArgList...)
+		f, err := bind.GetImpl(typeMap, expr.ArgList...)
 		if err != nil {
 			return nil, err
 		}

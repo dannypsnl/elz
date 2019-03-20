@@ -13,6 +13,7 @@ import (
 type Binding struct {
 	*ast.Binding
 
+	selfModule           *module
 	compilerProvidedImpl *ir.Func
 	cacheOfImpl          map[string]*ir.Func
 	cacheOfType          map[string]types.Type
@@ -27,13 +28,17 @@ func NewBinding(bind *ast.Binding) *Binding {
 	}
 }
 
-func (b *Binding) GetReturnType(m *module, typeMap *typeMap, typeListOfArgs ...types.Type) (types.Type, error) {
+func (b *Binding) SetModule(m *module) {
+	b.selfModule = m
+}
+
+func (b *Binding) GetReturnType(typeMap *typeMap, typeListOfArgs ...types.Type) (types.Type, error) {
 	key := typeFormat(typeListOfArgs...)
 	t, ok := b.cacheOfType[key]
 	if ok {
 		return t, nil
 	}
-	inferT, err := m.inferTypeOf(b.Expr, typeMap)
+	inferT, err := b.selfModule.inferTypeOf(b.Expr, typeMap)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +46,7 @@ func (b *Binding) GetReturnType(m *module, typeMap *typeMap, typeListOfArgs ...t
 	return inferT, nil
 }
 
-func (b *Binding) GetImpl(m *module, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
+func (b *Binding) GetImpl(typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
 	// FIXME: currently for convenience we skip all checking when it's a built-in function
 	// it should be fix after we can do more type checking
 	//
@@ -73,11 +78,11 @@ func (b *Binding) GetImpl(m *module, typeMap *typeMap, argList ...*ast.Arg) (*ir
 		typeMap.add(paramName, paramType)
 		params = append(params, ir.NewParam(paramName, paramType.LLVMType()))
 	}
-	returnType, err := b.GetReturnType(m, typeMap, typeListOfArgs...)
+	returnType, err := b.GetReturnType(typeMap, typeListOfArgs...)
 	if err != nil {
 		return nil, err
 	}
-	function, err := generateNewImpl(m, b, returnType, typeMap, params)
+	function, err := generateNewImpl(b, returnType, typeMap, params)
 	if err != nil {
 		return nil, err
 	}
@@ -85,17 +90,17 @@ func (b *Binding) GetImpl(m *module, typeMap *typeMap, argList ...*ast.Arg) (*ir
 	return function, nil
 }
 
-func generateNewImpl(m *module, bind *Binding, returnType types.Type, typeMap *typeMap, params []*ir.Param) (*ir.Func, error) {
+func generateNewImpl(bind *Binding, returnType types.Type, typeMap *typeMap, params []*ir.Param) (*ir.Func, error) {
 	if len(params) != len(bind.ParamList) {
 		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s`, bind.Name)
 	}
-	function := m.generator.mod.NewFunc(bind.Name, returnType.LLVMType(), params...)
+	function := bind.selfModule.generator.mod.NewFunc(bind.Name, returnType.LLVMType(), params...)
 	block := function.NewBlock("")
 	binds := make(map[string]*ir.Param)
 	for i, p := range params {
 		binds[bind.ParamList[i]] = p
 	}
-	err := funcBody(m, block, bind.Expr, binds, typeMap)
+	err := funcBody(bind.selfModule, block, bind.Expr, binds, typeMap)
 	if err != nil {
 		return nil, err
 	}
