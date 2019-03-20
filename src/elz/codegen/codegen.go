@@ -17,18 +17,17 @@ import (
 type Generator struct {
 	mod *ir.Module
 
-	allTree   map[string]*Tree
-	entryTree *Tree
+	allModule   map[string]*module
+	entryModule *module
 
 	operatorTypeStore map[string]types.Type
 }
 
-func New(entryTree *Tree, astAllTree map[string]*Tree) *Generator {
+func New(entryTree *Tree, allAstTree map[string]*Tree) *Generator {
 	typMap := make(map[string]types.Type)
 	typMap["+ :: int -> int"] = &types.Int{}
 
-	astTree := entryTree
-	err := astTree.InsertBinding(&ast.Binding{
+	err := entryTree.InsertBinding(&ast.Binding{
 		Name:      "printf",
 		ParamList: []string{"format"},
 	})
@@ -40,16 +39,21 @@ func New(entryTree *Tree, astAllTree map[string]*Tree) *Generator {
 		ir.NewParam("format", llvmtypes.NewPointer(llvmtypes.I8)),
 	)
 	printfImpl.Sig.Variadic = true
-	printfBind, err := astTree.GetBinding("printf")
+	printfBind, err := entryTree.GetBinding("printf")
 	if err != nil {
 		panic(fmt.Errorf("can't get printf binding: %s", err))
 	}
 	printfBind.compilerProvidedImpl = printfImpl
 
+	allModule := make(map[string]*module)
+	for name, tree := range allAstTree {
+		allModule[name] = newModule(tree)
+	}
+
 	return &Generator{
 		mod:               mod,
-		entryTree:         astTree,
-		allTree:           astAllTree,
+		entryModule:       newModule(entryTree),
+		allModule:         allModule,
 		operatorTypeStore: typMap,
 	}
 }
@@ -60,7 +64,7 @@ func (g *Generator) String() string {
 }
 
 func (g *Generator) Generate() {
-	entryBinding, err := g.entryTree.GetBinding("main")
+	entryBinding, err := g.entryModule.GetBinding("main")
 	if err != nil {
 		panic("no main function exist, no compile")
 	}
@@ -131,13 +135,14 @@ func (g *Generator) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, er
 
 func (g *Generator) getBindingByAccessChain(accessChain string) (*Binding, error) {
 	chain := strings.Split(accessChain, "::")
-	if len(chain) == 2 {
-		moduleName := chain[0]
-		funcName := chain[1]
-		return g.allTree[moduleName].GetExportBinding(funcName)
+	if len(chain) >= 2 {
+		localModuleName := chain[len(chain)-2]
+		funcName := chain[len(chain)-1]
+		moduleName := g.entryModule.imports[localModuleName]
+		return g.allModule[moduleName].GetExportBinding(funcName)
 	}
 	if len(chain) == 1 {
-		return g.entryTree.GetBinding(accessChain)
+		return g.entryModule.GetBinding(accessChain)
 	}
 	return nil, fmt.Errorf("not supported access chain: %s", accessChain)
 }

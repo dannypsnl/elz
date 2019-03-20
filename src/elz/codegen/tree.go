@@ -2,8 +2,6 @@ package codegen
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
 )
@@ -42,7 +40,6 @@ func (t *Tree) GetBinding(bindName string) (*Binding, error) {
 	if !exist {
 		return nil, fmt.Errorf("no binding call: `%s`", bindName)
 	}
-	// FIXME: assuming only one binding for right now situation, should do complete discuss into how to deal with multiple implementations
 	return binding, nil
 }
 
@@ -51,10 +48,5 @@ func (t *Tree) InsertImport(s string) {
 }
 
 func (t *Tree) GetDependencies() []string {
-	deps := make([]string, 0)
-	for _, importStr := range t.imports {
-		dep := filepath.Join(strings.Split(importStr, "::")...)
-		deps = append(deps, dep+".elz")
-	}
-	return deps
+	return t.imports
 }

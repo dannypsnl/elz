@@ -22,13 +22,10 @@ var (
 			entryFile := args[0]
 			rootDirOfProject := filepath.Dir(entryFile)
 			c := newCacheAgent()
-			err := c.compile(rootDirOfProject, entryFile)
+			entry, err := c.compile(rootDirOfProject, entryFile)
 			if err != nil {
 				return fmt.Errorf("failed at compile file, error: %s\n", err)
 			}
-			entry := c.caches["main"]
-			// make sure won't reference to entry module in codegen
-			c.caches["main"] = nil
 			g := codegen.New(entry, c.caches)
 			g.Generate()
 			fmt.Printf("%s", g)
@@ -47,20 +44,26 @@ func newCacheAgent() *cacheAgent {
 	}
 }
 
-func (c *cacheAgent) compile(root, file string) error {
-	tree, err := builder.NewFromFile(file)
+func (c *cacheAgent) compile(rootDir, entryFile string) (*codegen.Tree, error) {
+	tree, err := builder.NewFromFile(entryFile)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	for _, dep := range tree.GetDependencies() {
-		err := c.compile(root, filepath.Join(root, dep))
+	for _, importPath := range tree.GetDependencies() {
+		// importPath: lib::sub_lib::sub_lib
+		dependentFilePath := filepath.Join(strings.Split(importPath, "::")...)
+		tree, err := c.compile(rootDir, filepath.Join(rootDir, dependentFilePath)+".elz")
 		if err != nil {
-			return err
+			return nil, err
 		}
+		c.addTree(importPath, tree)
 	}
-	k := strings.TrimPrefix(file, "./")
-	k = strings.TrimPrefix(k, root+"/")
-	k = strings.TrimSuffix(k, ".elz")
-	c.caches[k] = tree
-	return nil
+	return tree, nil
+}
+
+func (c *cacheAgent) addTree(importPath string, tree *codegen.Tree) {
+	if _, exist := c.caches[importPath]; exist {
+		return
+	}
+	c.caches[importPath] = tree
 }
