@@ -41,7 +41,7 @@ func (b *Binding) GetReturnType(g *Generator, typeMap *typeMap, typeListOfArgs .
 	return inferT, nil
 }
 
-func (b *Binding) GetImpl(g *Generator, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
+func (b *Binding) GetImpl(m *module, typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
 	// FIXME: currently for convenience we skip all checking when it's a built-in function
 	// it should be fix after we can do more type checking
 	//
@@ -73,11 +73,11 @@ func (b *Binding) GetImpl(g *Generator, typeMap *typeMap, argList ...*ast.Arg) (
 		typeMap.add(paramName, paramType)
 		params = append(params, ir.NewParam(paramName, paramType.LLVMType()))
 	}
-	returnType, err := b.GetReturnType(g, typeMap, typeListOfArgs...)
+	returnType, err := b.GetReturnType(m.generator, typeMap, typeListOfArgs...)
 	if err != nil {
 		return nil, err
 	}
-	function, err := generateNewImpl(g, b, returnType, typeMap, params)
+	function, err := generateNewImpl(m, b, returnType, typeMap, params)
 	if err != nil {
 		return nil, err
 	}
@@ -85,25 +85,25 @@ func (b *Binding) GetImpl(g *Generator, typeMap *typeMap, argList ...*ast.Arg) (
 	return function, nil
 }
 
-func generateNewImpl(g *Generator, bind *Binding, returnType types.Type, typeMap *typeMap, params []*ir.Param) (*ir.Func, error) {
+func generateNewImpl(m *module, bind *Binding, returnType types.Type, typeMap *typeMap, params []*ir.Param) (*ir.Func, error) {
 	if len(params) != len(bind.ParamList) {
 		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s`, bind.Name)
 	}
-	function := g.mod.NewFunc(bind.Name, returnType.LLVMType(), params...)
+	function := m.generator.mod.NewFunc(bind.Name, returnType.LLVMType(), params...)
 	block := function.NewBlock("")
 	binds := make(map[string]*ir.Param)
 	for i, p := range params {
 		binds[bind.ParamList[i]] = p
 	}
-	err := funcBody(g, block, bind.Expr, binds, typeMap)
+	err := funcBody(m, block, bind.Expr, binds, typeMap)
 	if err != nil {
 		return nil, err
 	}
 	return function, nil
 }
 
-func funcBody(g *Generator, b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) error {
-	v, err := g.genExpr(b, expr, binds, typeMap)
+func funcBody(m *module, b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) error {
+	v, err := m.genExpr(b, expr, binds, typeMap)
 	if err != nil {
 		return err
 	}
