@@ -8,6 +8,7 @@ import (
 	"github.com/elz-lang/elz/src/elz/types"
 
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/enum"
 )
 
 type Binding struct {
@@ -94,7 +95,12 @@ func generateNewImpl(bind *Binding, returnType types.Type, typeMap *typeMap, par
 	if len(params) != len(bind.ParamList) {
 		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s`, bind.Name)
 	}
-	function := bind.selfModule.generator.mod.NewFunc(bind.Name, returnType.LLVMType(), params...)
+	function := bind.selfModule.generator.mod.NewFunc(
+		bind.Name,
+		returnType.LLVMType(),
+		params...,
+	)
+	function.Linkage = enum.LinkageInternal
 	block := function.NewBlock("")
 	binds := make(map[string]*ir.Param)
 	for i, p := range params {
