@@ -18,7 +18,6 @@ func TestBindingCodegen(t *testing.T) {
 		bindName       string
 		args           []*ast.Arg
 		expectContains []string
-		expectErrorMsg string
 	}{
 		{
 			name:     "call by generator",
@@ -57,8 +56,34 @@ addOne y = add(1, y)
 }`,
 			},
 		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			tree := builder.NewFromCode(testCase.code)
+
+			binding, err := tree.GetBinding(testCase.bindName)
+			require.NoError(t, err)
+			generator := codegen.New(tree, nil)
+			err = generator.Call(binding, testCase.args...)
+			require.NoError(t, err)
+			for _, expectedContain := range testCase.expectContains {
+				assert.Contains(t, generator.String(), expectedContain)
+			}
+		})
+	}
+}
+
+func TestErrorReporting(t *testing.T) {
+	testCases := []struct {
+		name           string
+		code           string
+		bindName       string
+		args           []*ast.Arg
+		expectErrorMsg string
+	}{
 		{
-			name:     "using wrong argument to call function should failed",
+			name:     "can not inference return type would report error",
 			code:     `add x y = x + y`,
 			bindName: "add",
 			args: []*ast.Arg{
@@ -68,7 +93,7 @@ addOne y = add(1, y)
 			expectErrorMsg: "can't infer return type",
 		},
 		{
-			name: "with certain type limiter",
+			name: "certain type limiter would reject type mismatched arguments",
 			code: `
 add :: int -> int -> int
 add x y = x + y
@@ -81,7 +106,7 @@ add x y = x + y
 			expectErrorMsg: "require type: `add :: int -> int` but get: `add :: f64 -> f64",
 		},
 		{
-			name: "with variant type limiter",
+			name: "variant type limiter would use first exact type as it's real type",
 			code: `
 add :: 'a -> 'a -> 'a
 add x y = x + y
@@ -97,22 +122,13 @@ add x y = x + y
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			b := builder.New()
-			b.BuildFromCode(testCase.code)
-			tree := b.GetTree()
+			tree := builder.NewFromCode(testCase.code)
 
-			g := codegen.New(tree, nil)
 			binding, err := tree.GetBinding(testCase.bindName)
 			require.NoError(t, err)
-			err = g.Call(binding, testCase.args...)
-			if testCase.expectErrorMsg != "" {
-				require.Contains(t, err.Error(), testCase.expectErrorMsg)
-				return
-			}
-			require.NoError(t, err)
-			for _, expectedContain := range testCase.expectContains {
-				assert.Contains(t, g.String(), expectedContain)
-			}
+			generator := codegen.New(tree, nil)
+			err = generator.Call(binding, testCase.args...)
+			require.Contains(t, err.Error(), testCase.expectErrorMsg)
 		})
 	}
 }
