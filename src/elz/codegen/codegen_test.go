@@ -88,7 +88,7 @@ func TestErrorReporting(t *testing.T) {
 			bindName: "add",
 			args: []*ast.Arg{
 				ast.NewArg("", ast.NewFloat("3.3")),
-				ast.NewArg("", ast.NewFloat("3.4")),
+				ast.NewArg("", ast.NewInt("3")),
 			},
 			expectErrorMsg: "can't infer return type",
 		},
@@ -128,6 +128,7 @@ add x y = x + y
 			require.NoError(t, err)
 			generator := codegen.New(tree, nil)
 			err = generator.Call(binding, testCase.args...)
+			require.Error(t, err, testCase.name)
 			require.Contains(t, err.Error(), testCase.expectErrorMsg)
 		})
 	}
