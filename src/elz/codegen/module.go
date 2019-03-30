@@ -166,17 +166,9 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		}
 		return nil, fmt.Errorf("can't find any identifier: %s", expr.Literal)
 	case *ast.Int:
-		v, err := constant.NewIntFromString(llvmtypes.I64, expr.Literal)
-		if err != nil {
-			return nil, err
-		}
-		return v, nil
+		return constant.NewIntFromString(llvmtypes.I64, expr.Literal)
 	case *ast.Float:
-		v, err := constant.NewFloatFromString(llvmtypes.Double, expr.Literal)
-		if err != nil {
-			return nil, err
-		}
-		return v, nil
+		return constant.NewFloatFromString(llvmtypes.Double, expr.Literal)
 	case *ast.String:
 		str := m.generator.mod.NewGlobal("", llvmtypes.NewArray(uint64(len(expr.Literal)), llvmtypes.I8))
 		str.Align = 1
@@ -189,7 +181,7 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		b.NewStore(strGEP, x)
 		return b.NewLoad(x), nil
 	default:
-		return nil, fmt.Errorf("failed at generate expression: %#v", expr)
+		return nil, fmt.Errorf("[Unsupport Yet] failed at generate expression: %#v", expr)
 	}
 }
 
