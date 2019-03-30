@@ -145,6 +145,18 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 					return b.NewSDiv(x, y), nil
 				}
 			}
+			if lt.String() == "f64" && rt.String() == "f64" {
+				switch expr.Op {
+				case "+":
+					return b.NewFAdd(x, y), nil
+				case "-":
+					return b.NewFSub(x, y), nil
+				case "*":
+					return b.NewFMul(x, y), nil
+				case "/":
+					return b.NewFDiv(x, y), nil
+				}
+			}
 		}
 		return nil, fmt.Errorf("unsupported operator: %s", expr.Op)
 	case *ast.Ident:
@@ -155,6 +167,12 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		return nil, fmt.Errorf("can't find any identifier: %s", expr.Literal)
 	case *ast.Int:
 		v, err := constant.NewIntFromString(llvmtypes.I64, expr.Literal)
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
+	case *ast.Float:
+		v, err := constant.NewFloatFromString(llvmtypes.Double, expr.Literal)
 		if err != nil {
 			return nil, err
 		}

@@ -25,6 +25,7 @@ type Generator struct {
 func New(entryTree *Tree, allAstTree map[string]*Tree) *Generator {
 	typMap := make(map[string]types.Type)
 	typMap["+ :: int -> int"] = &types.Int{}
+	typMap["+ :: f64 -> f64"] = &types.Float{}
 
 	err := entryTree.InsertBinding(&ast.Binding{
 		Name:      "printf",
