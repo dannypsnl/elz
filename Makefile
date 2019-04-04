@@ -8,7 +8,7 @@ install: generate
 deps:
 	@$(GO_MOD) go get ./...
 test: deps generate
-	@$(GO_MOD) go test -v ./... -count 1 -cover
+	@$(GO_MOD) go test ./... -count 1 -cover -failfast
 generate:
 	@$(GO_MOD) go generate ./...
 coverage: deps
