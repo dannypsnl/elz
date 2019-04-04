@@ -70,6 +70,13 @@ func (b *Builder) ExitString(c *parser.StringContext) {
 func (b *Builder) ExitBoolean(c *parser.BooleanContext) {
 	b.PushExpr(ast.NewBool(c.BOOLEAN().GetText()))
 }
+func (b *Builder) ExitList(c *parser.ListContext) {
+	exprList := make([]ast.Expr, 0)
+	for e := b.PopExpr(); e != nil; e = b.PopExpr() {
+		exprList = append(exprList, e)
+	}
+	b.PushExpr(ast.NewList(exprList...))
+}
 func (b *Builder) ExitIdentifier(c *parser.IdentifierContext) {
 	b.PushExpr(ast.NewIdent(c.GetText()))
 }

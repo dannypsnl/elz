@@ -40,6 +40,10 @@ type (
 		isExpr
 		Literal string
 	}
+	List struct {
+		isExpr
+		ExprList []Expr
+	}
 	Bool struct {
 		isExpr
 		IsTrue bool
@@ -73,6 +77,11 @@ func NewInt(literal string) *Int     { return &Int{Literal: literal} }
 func NewFloat(literal string) *Float { return &Float{Literal: literal} }
 func NewString(literal string) *String {
 	return &String{Literal: literal}
+}
+func NewList(exprList ...Expr) *List {
+	return &List{
+		ExprList: exprList,
+	}
 }
 func NewBool(literal string) *Bool {
 	var value bool
