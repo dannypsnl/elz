@@ -11,6 +11,14 @@ type (
 		IsExpr() bool
 	}
 
+	Field struct {
+		Name string
+		Type
+	}
+	NewType struct {
+		Name   string
+		Fields []*Field
+	}
 	Binding struct {
 		Export    bool
 		Name      string
@@ -59,6 +67,13 @@ type (
 		Literal string
 	}
 )
+
+func NewField(name string, t Type) *Field {
+	return &Field{
+		Name: name,
+		Type: t,
+	}
+}
 
 func NewArg(ident string, expr Expr) *Arg {
 	return &Arg{

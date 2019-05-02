@@ -9,6 +9,7 @@ COMMENT: '//' .*? '\n' -> channel(HIDDEN);
 
 BOOLEAN: 'true' | 'false';
 KEYWORD_EXPORT: 'export';
+KEYWORD_TYPE: 'type';
 IDENT : StartLetter Letter*;
 fragment
 StartLetter: [a-zA-Z_]
@@ -44,9 +45,18 @@ STRING: '"' .*? '"';
 program: topLevel* EOF;
 
 topLevel: importStatement
+    | typeDefine
     | bindType
     | binding
     ;
+
+typeDefine:
+    KEYWORD_TYPE IDENT '=' typeDefineBody
+    ;
+typeDefineBody:
+    '(' typeField? (',' typeField)* ','? ')'
+    ;
+typeField: IDENT ':' elzType;
 
 importStatement:
     'import' accessChain

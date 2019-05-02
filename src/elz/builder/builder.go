@@ -12,9 +12,10 @@ import (
 type Builder struct {
 	*parser.BaseElzListener
 
-	bindingType  map[string][]ast.Type
-	bindTypeList []ast.Type
-	exprStack    *stack.Stack
+	bindingType      map[string][]ast.Type
+	bindTypeList     []ast.Type
+	exprStack        *stack.Stack
+	typeDefineFields []*ast.Field
 
 	astTree *codegen.Tree
 }
@@ -28,10 +29,11 @@ func (b *Builder) ExitProgram(c *parser.ProgramContext) {
 
 func New() *Builder {
 	return &Builder{
-		bindingType:  make(map[string][]ast.Type),
-		bindTypeList: make([]ast.Type, 0),
-		exprStack:    stack.New(),
-		astTree:      codegen.NewTree(),
+		bindingType:      make(map[string][]ast.Type),
+		bindTypeList:     make([]ast.Type, 0),
+		exprStack:        stack.New(),
+		typeDefineFields: make([]*ast.Field, 0),
+		astTree:          codegen.NewTree(),
 	}
 }
 

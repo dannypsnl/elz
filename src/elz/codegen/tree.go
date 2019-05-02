@@ -7,14 +7,16 @@ import (
 )
 
 type Tree struct {
-	imports  []string
-	bindings map[string]*Binding
+	imports     []string
+	bindings    map[string]*Binding
+	typeDefines map[string]*ast.NewType
 }
 
 func NewTree() *Tree {
 	return &Tree{
-		imports:  make([]string, 0),
-		bindings: make(map[string]*Binding),
+		imports:     make([]string, 0),
+		bindings:    make(map[string]*Binding),
+		typeDefines: make(map[string]*ast.NewType),
 	}
 }
 
@@ -41,6 +43,23 @@ func (t *Tree) GetBinding(bindName string) (*Binding, error) {
 		return nil, fmt.Errorf("no binding call: `%s`", bindName)
 	}
 	return binding, nil
+}
+
+func (t *Tree) InsertTypeDefine(typDef *ast.NewType) error {
+	_, exist := t.bindings[typDef.Name]
+	if exist {
+		return fmt.Errorf("type: %s already exist", typDef.Name)
+	}
+	t.typeDefines[typDef.Name] = typDef
+	return nil
+}
+
+func (t *Tree) GetTypeDefine(typeName string) (*ast.NewType, error) {
+	typDef, exist := t.typeDefines[typeName]
+	if !exist {
+		return nil, fmt.Errorf("no type call: `%s`", typeName)
+	}
+	return typDef, nil
 }
 
 func (t *Tree) InsertImport(s string) {
