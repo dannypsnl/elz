@@ -2,6 +2,8 @@ package compile
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -28,7 +30,32 @@ var (
 			}
 			g := codegen.New(entry, c.caches)
 			g.Generate()
-			fmt.Printf("%s", g)
+			tmpIRFile, err := os.OpenFile(
+				// main_file_name.ll
+				fmt.Sprintf("%s.ll", entryFile),
+				// if not exist create, truncate from start if exist, read/write open
+				os.O_CREATE|os.O_TRUNC|os.O_RDWR,
+				0644,
+			)
+			if err != nil {
+				return err
+			}
+			tmpIRFile.WriteString(g.String())
+			defer os.Remove(tmpIRFile.Name())
+
+			irFileName := tmpIRFile.Name()
+			irFilePrefix := strings.TrimSuffix(irFileName, "ll")
+			tmpObject := irFilePrefix + "o"
+			compileCmd := exec.Command("clang", "-c", tmpIRFile.Name(), "-o", tmpObject)
+			if err := compileCmd.Run(); err != nil {
+				return fmt.Errorf("failed at compile ir file: %s", err)
+			}
+			linkCmd := exec.Command("clang", tmpObject)
+			if err := linkCmd.Run(); err != nil {
+				return fmt.Errorf("failed at link object file: %s", err)
+			}
+			defer os.Remove(tmpObject)
+
 			return nil
 		},
 	}
