@@ -1,0 +1,5 @@
+type Car = (
+  price: int
+)
+
+main = printf("define Car\n")

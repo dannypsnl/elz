@@ -72,6 +72,7 @@ func (g *Generator) Generate() {
 	if len(entryBinding.ParamList) > 0 {
 		panic("main function should not have any parameters")
 	}
+	g.GenerateTypes()
 	impl := g.mod.NewFunc("main", llvmtypes.I64)
 	b := impl.NewBlock("")
 	_, err = g.entryModule.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), newTypeMap())

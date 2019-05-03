@@ -55,3 +55,16 @@ func (s *String) LLVMType() types.Type {
 	t.Opaque = true
 	return t
 }
+
+func FromString(typeName string) Type {
+	switch typeName {
+	case "string":
+		return &String{}
+	case "int":
+		return &Int{}
+	case "f64":
+		return &Float{}
+	default:
+		panic(fmt.Errorf("unknown type: %s", typeName))
+	}
+}

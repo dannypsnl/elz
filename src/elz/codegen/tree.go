@@ -54,6 +54,10 @@ func (t *Tree) InsertTypeDefine(typDef *ast.NewType) error {
 	return nil
 }
 
+func (t *Tree) GetTypeDefines() map[string]*ast.NewType {
+	return t.typeDefines
+}
+
 func (t *Tree) GetTypeDefine(typeName string) (*ast.NewType, error) {
 	typDef, exist := t.typeDefines[typeName]
 	if !exist {
