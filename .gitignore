@@ -1,3 +1,4 @@
 .idea
+.ccls-cache/
 /target
 **/*.rs.bk
