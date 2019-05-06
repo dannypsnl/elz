@@ -196,7 +196,7 @@ func (m *module) getBindingByAccessChain(accessChain string) (*Binding, error) {
 	if len(chain) == 1 {
 		bind, err := m.GetBinding(accessChain)
 		if err != nil {
-			return m.generator.entryModule.GetBinding(accessChain)
+			return m.generator.getBuiltin(accessChain)
 		}
 		return bind, nil
 	}

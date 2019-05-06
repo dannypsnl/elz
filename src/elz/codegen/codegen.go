@@ -19,6 +19,8 @@ type Generator struct {
 	allModule   map[string]*module
 	entryModule *module
 
+	builtin map[string]*Binding
+
 	operatorTypeStore map[string]types.Type
 }
 
@@ -27,17 +29,12 @@ func New(entryTree *Tree, allAstTree map[string]*Tree) *Generator {
 	typMap["+ :: int -> int"] = &types.Int{}
 	typMap["+ :: f64 -> f64"] = &types.Float{}
 
-	err := entryTree.InsertBinding(&ast.Binding{
-		Name:      "printf",
-		ParamList: []string{"format"},
-	})
-	if err != nil {
-		panic("some function conflict with built-in function printf")
-	}
 	mod := ir.NewModule()
+	builtin := generateBuiltin(mod)
 	g := &Generator{
 		mod:               mod,
 		operatorTypeStore: typMap,
+		builtin:           builtin,
 	}
 	allModule := make(map[string]*module)
 	for name, tree := range allAstTree {
@@ -45,17 +42,6 @@ func New(entryTree *Tree, allAstTree map[string]*Tree) *Generator {
 	}
 	g.allModule = allModule
 	g.entryModule = newModule(g, entryTree)
-
-	printfImpl := mod.NewFunc("printf", llvmtypes.I64,
-		ir.NewParam("format", llvmtypes.NewPointer(llvmtypes.I8)),
-	)
-	printfImpl.Sig.Variadic = true
-	printfBind, err := entryTree.GetBinding("printf")
-	if err != nil {
-		panic(fmt.Errorf("can't get printf binding: %s", err))
-	}
-	printfBind.compilerProvidedImpl = printfImpl
-
 	return g
 }
 
@@ -102,6 +88,14 @@ func (g *Generator) typeOfOperator(op string, typeList ...types.Type) (types.Typ
 		return nil, fmt.Errorf("can't infer return type by %s", key)
 	}
 	return t, nil
+}
+
+func (g *Generator) getBuiltin(name string) (*Binding, error) {
+	b, ok := g.builtin[name]
+	if !ok {
+		return nil, fmt.Errorf("no binding call: `%s`", name)
+	}
+	return b, nil
 }
 
 func genKey(bindName string, typeList ...types.Type) string {
