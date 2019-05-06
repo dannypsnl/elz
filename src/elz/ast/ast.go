@@ -94,6 +94,9 @@ func NewString(literal string) *String {
 	return &String{Literal: literal}
 }
 func NewList(exprList ...Expr) *List {
+	if len(exprList) == 0 {
+		exprList = []Expr{}
+	}
 	return &List{
 		ExprList: exprList,
 	}

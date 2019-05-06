@@ -75,7 +75,11 @@ func (b *Builder) ExitList(c *parser.ListContext) {
 	for e := b.PopExpr(); e != nil; e = b.PopExpr() {
 		exprList = append(exprList, e)
 	}
-	b.PushExpr(ast.NewList(exprList...))
+	exprList2 := make([]ast.Expr, 0)
+	for i := len(exprList) - 1; i >= 0; i-- {
+		exprList2 = append(exprList2, exprList[i])
+	}
+	b.PushExpr(ast.NewList(exprList2...))
 }
 func (b *Builder) ExitIdentifier(c *parser.IdentifierContext) {
 	b.PushExpr(ast.NewIdent(c.GetText()))
