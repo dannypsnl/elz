@@ -1,5 +1,5 @@
 [package]
-name = "core"
+name = "list"
 version = "0.1.0"
 authors = ["dannypsnl <dannypsnl@gmail.com>"]
 edition = "2018"
