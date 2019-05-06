@@ -166,6 +166,10 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		}
 		return nil, fmt.Errorf("unsupported operator: %s", expr.Op)
 	case *ast.Ident:
+		v, ok := binds[expr.Literal]
+		if ok {
+			return v, nil
+		}
 		bind, err := m.GetBinding(expr.Literal)
 		if err != nil {
 			return nil, err
