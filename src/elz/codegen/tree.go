@@ -46,7 +46,7 @@ func (t *Tree) GetBinding(bindName string) (*Binding, error) {
 }
 
 func (t *Tree) InsertTypeDefine(typDef *ast.NewType) error {
-	_, exist := t.bindings[typDef.Name]
+	_, exist := t.typeDefines[typDef.Name]
 	if exist {
 		return fmt.Errorf("type: %s already exist", typDef.Name)
 	}
