@@ -50,7 +50,10 @@ var (
 			if err := compileCmd.Run(); err != nil {
 				return fmt.Errorf("failed at compile ir file: %s", err)
 			}
-			linkCmd := exec.Command("clang", tmpObject)
+			linkCmd := exec.Command("clang", tmpObject,
+				// FIXME: install core libs to $HOME/.elz/core
+				"core/list/list.o",
+			)
 			if err := linkCmd.Run(); err != nil {
 				return fmt.Errorf("failed at link object file: %s", err)
 			}

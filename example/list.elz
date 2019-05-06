@@ -1,0 +1,4 @@
+lst = [1, 2]
+
+main =
+  printf("%d\n", lst)

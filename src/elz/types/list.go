@@ -17,6 +17,7 @@ func (l *List) String() string {
 // LLVMType is opaque type, from external implementation
 func (*List) LLVMType() types.Type {
 	t := types.NewStruct()
+	t.TypeName = "list"
 	t.Opaque = true
 	return t
 }

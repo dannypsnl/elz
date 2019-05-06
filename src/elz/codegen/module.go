@@ -166,11 +166,11 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		}
 		return nil, fmt.Errorf("unsupported operator: %s", expr.Op)
 	case *ast.Ident:
-		v, exist := binds[expr.Literal]
-		if exist {
-			return v, nil
+		bind, err := m.GetBinding(expr.Literal)
+		if err != nil {
+			return nil, err
 		}
-		return nil, fmt.Errorf("can't find any identifier: %s", expr.Literal)
+		return m.genExpr(b, bind.Expr, binds, typeMap)
 	case *ast.Int:
 		return constant.NewIntFromString(llvmtypes.I64, expr.Literal)
 	case *ast.Float:
@@ -186,6 +186,23 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		x := b.NewAlloca(llvmtypes.NewPointer(llvmtypes.I8))
 		b.NewStore(strGEP, x)
 		return b.NewLoad(x), nil
+	case *ast.List:
+		newList, err := m.generator.getBuiltin("new_list")
+		if err != nil {
+			return nil, err
+		}
+		newListImpl, err := newList.GetImpl(typeMap)
+		if err != nil {
+			return nil, err
+		}
+		// FIXME: push ast list into elems
+		elems := b.NewAlloca(llvmtypes.NewPointer(llvmtypes.I8))
+		return b.NewCall(newListImpl,
+			// size
+			constant.NewInt(llvmtypes.I64, int64(len(expr.ExprList))),
+			// elements
+			elems,
+		), nil
 	default:
 		return nil, fmt.Errorf("[Unsupport Yet] failed at generate expression: %#v", expr)
 	}
