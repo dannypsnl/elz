@@ -95,6 +95,12 @@ func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error
 			return nil, fmt.Errorf("can't get type of identifier: %s", expr.Literal)
 		}
 		return t, nil
+	case *ast.List:
+		elemT, err := m.inferTypeOf(expr.ExprList[0], typeMap)
+		if err != nil {
+			return nil, err
+		}
+		return types.NewList(elemT), nil
 	default:
 		return nil, fmt.Errorf("unsupported type inference for expression: %#v yet", expr)
 	}
