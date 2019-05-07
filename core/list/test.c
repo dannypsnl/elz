@@ -11,6 +11,6 @@ TEST(List, test_new_list) {
   int two = 2;
   void *init[] = {&one, &two};
   struct List *list = new_list(2, init);
-  ASSERT_EQ(2, length(list));
+  ASSERT_EQ(2, list_length(list));
   delete_list(list);
 }

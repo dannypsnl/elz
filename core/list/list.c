@@ -29,7 +29,7 @@ struct List *new_list(int size, void **values) {
   return head;
 }
 
-uint64_t length(struct List *list) {
+uint64_t list_length(struct List *list) {
   struct List *next = list;
   uint64_t count = 0;
   while (next != NULL && next->head != NULL && next->tail != NULL) {
