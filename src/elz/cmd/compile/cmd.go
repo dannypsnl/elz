@@ -40,7 +40,11 @@ var (
 			if err != nil {
 				return err
 			}
-			tmpIRFile.WriteString(g.String())
+			defer tmpIRFile.Close()
+			_, err = tmpIRFile.WriteString(g.String())
+			if err != nil {
+				return err
+			}
 			defer os.Remove(tmpIRFile.Name())
 
 			irFileName := tmpIRFile.Name()
@@ -50,11 +54,17 @@ var (
 			if err := compileCmd.Run(); err != nil {
 				return fmt.Errorf("failed at compile ir file: %s", err)
 			}
-			linkCmd := exec.Command("clang", tmpObject)
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				return err
+			}
+			linkCmd := exec.Command("clang", tmpObject,
+				filepath.Join(homeDir, ".elz/core/list.o"),
+			)
+			defer os.Remove(tmpObject)
 			if err := linkCmd.Run(); err != nil {
 				return fmt.Errorf("failed at link object file: %s", err)
 			}
-			defer os.Remove(tmpObject)
 
 			return nil
 		},

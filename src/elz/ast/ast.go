@@ -56,6 +56,11 @@ type (
 		isExpr
 		IsTrue bool
 	}
+	ExtractElement struct {
+		isExpr
+		X   Expr
+		Key Expr
+	}
 	BinaryExpr struct {
 		isExpr
 		LExpr Expr
@@ -112,4 +117,10 @@ func NewBool(literal string) *Bool {
 		panic("boolean syntax define must be wrong")
 	}
 	return &Bool{IsTrue: value}
+}
+func NewExtractElement(x, key Expr) *ExtractElement {
+	return &ExtractElement{
+		X:   x,
+		Key: key,
+	}
 }

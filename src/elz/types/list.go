@@ -6,17 +6,18 @@ import (
 
 func NewList(elemT Type) Type {
 	return &List{
-		elemT: elemT,
+		ElemT: elemT,
 	}
 }
 
 func (l *List) String() string {
-	return "list<" + l.elemT.String() + ">"
+	return "list<" + l.ElemT.String() + ">"
 }
 
 // LLVMType is opaque type, from external implementation
 func (*List) LLVMType() types.Type {
 	t := types.NewStruct()
+	t.TypeName = "list"
 	t.Opaque = true
 	return t
 }

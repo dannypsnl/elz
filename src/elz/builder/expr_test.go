@@ -35,6 +35,14 @@ func TestExpr(t *testing.T) {
 				ast.NewInt("3"),
 			),
 		},
+		{
+			name: "extract element",
+			code: `i = list[0]`,
+			expectedExpr: ast.NewExtractElement(
+				ast.NewIdent("list"),
+				ast.NewInt("0"),
+			),
+		},
 	}
 
 	for _, testCase := range testCases {

@@ -101,6 +101,24 @@ func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error
 			return nil, err
 		}
 		return types.NewList(elemT), nil
+	case *ast.ExtractElement:
+		list, ok := expr.X.(*ast.List)
+		if !ok {
+			return nil, fmt.Errorf("extract element do not support ast: %#v", expr.X)
+		}
+		listT, err := m.inferTypeOf(list, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		keyT, err := m.inferTypeOf(expr.Key, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		kt, ok := keyT.(*types.Int)
+		if !ok {
+			return nil, fmt.Errorf("extract element do not support key type: %s", kt)
+		}
+		return listT.(*types.List).ElemT, nil
 	default:
 		return nil, fmt.Errorf("unsupported type inference for expression: %#v yet", expr)
 	}
@@ -166,11 +184,15 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		}
 		return nil, fmt.Errorf("unsupported operator: %s", expr.Op)
 	case *ast.Ident:
-		v, exist := binds[expr.Literal]
-		if exist {
+		v, ok := binds[expr.Literal]
+		if ok {
 			return v, nil
 		}
-		return nil, fmt.Errorf("can't find any identifier: %s", expr.Literal)
+		bind, err := m.GetBinding(expr.Literal)
+		if err != nil {
+			return nil, err
+		}
+		return m.genExpr(b, bind.Expr, binds, typeMap)
 	case *ast.Int:
 		return constant.NewIntFromString(llvmtypes.I64, expr.Literal)
 	case *ast.Float:
@@ -186,6 +208,82 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		x := b.NewAlloca(llvmtypes.NewPointer(llvmtypes.I8))
 		b.NewStore(strGEP, x)
 		return b.NewLoad(x), nil
+	case *ast.List:
+		newList, err := m.generator.getBuiltin("new_list")
+		if err != nil {
+			return nil, err
+		}
+		newListImpl, err := newList.GetImpl(typeMap)
+		if err != nil {
+			return nil, err
+		}
+		// make a tmp global array for storing arguments of new_list
+		tmpListPtr := m.generator.mod.NewGlobalDef("",
+			constant.NewZeroInitializer(
+				llvmtypes.NewArray(
+					uint64(len(expr.ExprList)),
+					llvmtypes.NewPointer(llvmtypes.I8),
+				),
+			),
+		)
+		tmpListPtr.Align = ir.Align(1)
+
+		// storing ast list into tmp list
+		for i, e := range expr.ExprList {
+			llvmExpr, err := m.genExpr(b, e, binds, typeMap)
+			if err != nil {
+				return nil, err
+			}
+			indexI := b.NewGetElementPtr(
+				tmpListPtr,
+				constant.NewInt(llvmtypes.I64, 0),
+				constant.NewInt(llvmtypes.I64, int64(i)),
+			)
+			exprAlloca := b.NewAlloca(llvmExpr.Type())
+			b.NewStore(llvmExpr, exprAlloca)
+			elemPtr := b.NewBitCast(exprAlloca, llvmtypes.NewPointer(llvmtypes.I8))
+			b.NewStore(elemPtr, indexI)
+		}
+
+		elems := b.NewGetElementPtr(tmpListPtr,
+			constant.NewInt(llvmtypes.I64, 0),
+			constant.NewInt(llvmtypes.I64, 0),
+		)
+		return b.NewCall(newListImpl,
+			// size
+			constant.NewInt(llvmtypes.I64, int64(len(expr.ExprList))),
+			// elements
+			elems,
+		), nil
+	case *ast.ExtractElement:
+		listIndex, err := m.generator.getBuiltin("list_index")
+		if err != nil {
+			return nil, err
+		}
+		listIndexImpl, err := listIndex.GetImpl(typeMap)
+		if err != nil {
+			return nil, err
+		}
+		// rely on infer type checking the X and Key type already,
+		// we don't check it again
+		x, err := m.genExpr(b, expr.X, binds, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		if x.Type().String() == "%list*" {
+			key, err := m.genExpr(b, expr.Key, binds, typeMap)
+			if err != nil {
+				return nil, err
+			}
+			elemPtr := b.NewCall(listIndexImpl,
+				x,
+				key,
+			)
+			// FIXME: the type is hard code as int64 which of course is wrong
+			convertedPtr := b.NewBitCast(elemPtr, llvmtypes.NewPointer(llvmtypes.I64))
+			return b.NewLoad(convertedPtr), nil
+		}
+		return nil, fmt.Errorf("unknown x value: %s", x)
 	default:
 		return nil, fmt.Errorf("[Unsupport Yet] failed at generate expression: %#v", expr)
 	}

@@ -75,6 +75,7 @@ expr: BOOLEAN                       # Boolean
     | STRING                        # String
     | FLOAT                         # Float
     | INT                           # Int
+    | expr '[' expr ']'             # ExtractElement
     | '[' expr? (',' expr)* ']'     # List
     | IDENT                         # Identifier
     | '(' expr ')'                  # SubExpr
