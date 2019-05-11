@@ -199,8 +199,37 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		// FIXME: push ast list into elems
-		elems := b.NewAlloca(llvmtypes.NewPointer(llvmtypes.I8))
+		// make a tmp global array for storing arguments of new_list
+		tmpListPtr := m.generator.mod.NewGlobalDef("tmpListInit",
+			constant.NewZeroInitializer(
+				llvmtypes.NewArray(
+					uint64(len(expr.ExprList)),
+					llvmtypes.NewPointer(llvmtypes.I8),
+				),
+			),
+		)
+		tmpListPtr.Align = ir.Align(1)
+
+		// storing ast list into tmp list
+		for i, e := range expr.ExprList {
+			llvmExpr, err := m.genExpr(b, e, binds, typeMap)
+			if err != nil {
+				return nil, err
+			}
+			indexI := b.NewGetElementPtr(
+				tmpListPtr,
+				constant.NewInt(llvmtypes.I64, 0),
+				constant.NewInt(llvmtypes.I64, int64(i)),
+			)
+			exprAlloca := b.NewAlloca(llvmExpr.Type())
+			elemPtr := b.NewBitCast(exprAlloca, llvmtypes.NewPointer(llvmtypes.I8))
+			b.NewStore(elemPtr, indexI)
+		}
+
+		elems := b.NewGetElementPtr(tmpListPtr,
+			constant.NewInt(llvmtypes.I64, 0),
+			constant.NewInt(llvmtypes.I64, 0),
+		)
 		return b.NewCall(newListImpl,
 			// size
 			constant.NewInt(llvmtypes.I64, int64(len(expr.ExprList))),
