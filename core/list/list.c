@@ -30,11 +30,10 @@ struct List *new_list(int size, void **values) {
 }
 
 uint64_t list_length(struct List *list) {
-  struct List *next = list;
-  uint64_t count = 0;
-  while (next != NULL && next->tail != NULL) {
+  uint64_t count = -1;
+  struct List **next;
+  for (next = &list; *next != NULL; *next = (*next)->tail) {
     count++;
-    next = next->tail;
   }
   return count;
 }
