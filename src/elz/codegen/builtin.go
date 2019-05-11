@@ -10,6 +10,7 @@ import (
 
 func generateBuiltin(mod *ir.Module) map[string]*Binding {
 	listType := mod.NewTypeDef("list", (&types.List{}).LLVMType())
+	listPointerType := llvmtypes.NewPointer(listType)
 
 	builtins := make(map[string]*Binding)
 
@@ -30,7 +31,7 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 		// size: int, elements: void **
 		ParamList: []string{"size", "elements"},
 	})
-	newListBind.compilerProvidedImpl = mod.NewFunc("new_list", listType,
+	newListBind.compilerProvidedImpl = mod.NewFunc("new_list", listPointerType,
 		ir.NewParam("size", llvmtypes.I64),
 		ir.NewParam("elements", llvmtypes.NewPointer(llvmtypes.NewPointer(llvmtypes.I8))),
 	)
@@ -42,7 +43,7 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 		ParamList: []string{"list", "index"},
 	})
 	listIndexBind.compilerProvidedImpl = mod.NewFunc("list_index", llvmtypes.NewPointer(llvmtypes.I8),
-		ir.NewParam("list", listType),
+		ir.NewParam("list", listPointerType),
 		ir.NewParam("index", llvmtypes.I64),
 	)
 	builtins["list_index"] = listIndexBind
@@ -52,7 +53,7 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 		ParamList: []string{"list"},
 	})
 	listLengthBind.compilerProvidedImpl = mod.NewFunc("list_length", llvmtypes.I64,
-		ir.NewParam("list", listType),
+		ir.NewParam("list", listPointerType),
 	)
 	builtins["list_length"] = listLengthBind
 

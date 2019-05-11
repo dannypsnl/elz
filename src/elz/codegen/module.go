@@ -270,15 +270,18 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		if x.Type().Name() == "list" {
+		if x.Type().String() == "%list*" {
 			key, err := m.genExpr(b, expr.Key, binds, typeMap)
 			if err != nil {
 				return nil, err
 			}
-			return b.NewCall(listIndexImpl,
+			elemPtr := b.NewCall(listIndexImpl,
 				x,
 				key,
-			), nil
+			)
+			// FIXME: the type is hard code as int64 which of course is wrong
+			convertedPtr := b.NewBitCast(elemPtr, llvmtypes.NewPointer(llvmtypes.I64))
+			return b.NewLoad(convertedPtr), nil
 		}
 		return nil, fmt.Errorf("unknown x value: %s", x)
 	default:
