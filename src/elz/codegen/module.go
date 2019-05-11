@@ -101,6 +101,24 @@ func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error
 			return nil, err
 		}
 		return types.NewList(elemT), nil
+	case *ast.ExtractElement:
+		list, ok := expr.X.(*ast.List)
+		if !ok {
+			return nil, fmt.Errorf("extract element do not support ast: %#v", expr.X)
+		}
+		listT, err := m.inferTypeOf(list, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		keyT, err := m.inferTypeOf(expr.Key, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		kt, ok := keyT.(*types.Int)
+		if !ok {
+			return nil, fmt.Errorf("extract element do not support key type: %s", kt)
+		}
+		return listT.(*types.List).ElemT, nil
 	default:
 		return nil, fmt.Errorf("unsupported type inference for expression: %#v yet", expr)
 	}
@@ -200,7 +218,7 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 			return nil, err
 		}
 		// make a tmp global array for storing arguments of new_list
-		tmpListPtr := m.generator.mod.NewGlobalDef("tmpListInit",
+		tmpListPtr := m.generator.mod.NewGlobalDef("",
 			constant.NewZeroInitializer(
 				llvmtypes.NewArray(
 					uint64(len(expr.ExprList)),
@@ -222,6 +240,7 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 				constant.NewInt(llvmtypes.I64, int64(i)),
 			)
 			exprAlloca := b.NewAlloca(llvmExpr.Type())
+			b.NewStore(llvmExpr, exprAlloca)
 			elemPtr := b.NewBitCast(exprAlloca, llvmtypes.NewPointer(llvmtypes.I8))
 			b.NewStore(elemPtr, indexI)
 		}
@@ -236,6 +255,32 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 			// elements
 			elems,
 		), nil
+	case *ast.ExtractElement:
+		listIndex, err := m.generator.getBuiltin("list_index")
+		if err != nil {
+			return nil, err
+		}
+		listIndexImpl, err := listIndex.GetImpl(typeMap)
+		if err != nil {
+			return nil, err
+		}
+		// rely on infer type checking the X and Key type already,
+		// we don't check it again
+		x, err := m.genExpr(b, expr.X, binds, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		if x.Type().Name() == "list" {
+			key, err := m.genExpr(b, expr.Key, binds, typeMap)
+			if err != nil {
+				return nil, err
+			}
+			return b.NewCall(listIndexImpl,
+				x,
+				key,
+			), nil
+		}
+		return nil, fmt.Errorf("unknown x value: %s", x)
 	default:
 		return nil, fmt.Errorf("[Unsupport Yet] failed at generate expression: %#v", expr)
 	}

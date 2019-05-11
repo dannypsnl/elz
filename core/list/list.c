@@ -32,11 +32,25 @@ struct List *new_list(int size, void **values) {
 uint64_t list_length(struct List *list) {
   struct List *next = list;
   uint64_t count = 0;
-  while (next != NULL && next->head != NULL && next->tail != NULL) {
+  while (next != NULL && next->tail != NULL) {
     count++;
     next = next->tail;
   }
   return count;
+}
+
+void *list_index(struct List *list, uint64_t index) {
+  struct List *next = list;
+  uint64_t count = 0;
+  while (next != NULL && next->tail != NULL) {
+    if (count == index)
+      return next->head;
+    else if (count > index)
+      return NULL;
+    count++;
+    next = next->tail;
+  }
+  return NULL;
 }
 
 void for_each(struct List *list, void f(void *)) {

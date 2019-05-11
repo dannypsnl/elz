@@ -116,3 +116,9 @@ func (b *Builder) ExitArg(c *parser.ArgContext) {
 		Expr:  expr,
 	})
 }
+
+func (b *Builder) ExitExtractElement(c *parser.ExtractElementContext) {
+	key := b.PopExpr()
+	x := b.PopExpr()
+	b.PushExpr(ast.NewExtractElement(x, key))
+}

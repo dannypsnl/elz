@@ -29,7 +29,7 @@ type (
 	}
 	List struct {
 		isType
-		elemT Type
+		ElemT Type
 	}
 )
 

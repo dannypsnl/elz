@@ -36,6 +36,17 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 	)
 	builtins["new_list"] = newListBind
 
+	listIndexBind := NewBinding(&ast.Binding{
+		Name: "list_index",
+		// list: list, index: i64
+		ParamList: []string{"list", "index"},
+	})
+	listIndexBind.compilerProvidedImpl = mod.NewFunc("list_index", llvmtypes.NewPointer(llvmtypes.I8),
+		ir.NewParam("list", listType),
+		ir.NewParam("index", llvmtypes.I64),
+	)
+	builtins["list_index"] = listIndexBind
+
 	listLengthBind := NewBinding(&ast.Binding{
 		Name:      "list_length",
 		ParamList: []string{"list"},
