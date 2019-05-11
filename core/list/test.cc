@@ -18,5 +18,7 @@ TEST(List, test_list_index) {
   struct List *list = new_list(2, init);
   void *first = list_index(list, 0);
   ASSERT_EQ(1, *(int *)first);
+  void *second = list_index(list, 1);
+  ASSERT_EQ(2, *(int *)second);
   delete_list(list);
 }
