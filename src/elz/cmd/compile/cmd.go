@@ -54,10 +54,10 @@ var (
 				// FIXME: install core libs to $HOME/.elz/core
 				"core/list/list.o",
 			)
+			defer os.Remove(tmpObject)
 			if err := linkCmd.Run(); err != nil {
 				return fmt.Errorf("failed at link object file: %s", err)
 			}
-			defer os.Remove(tmpObject)
 
 			return nil
 		},
