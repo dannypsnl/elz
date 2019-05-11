@@ -5,9 +5,15 @@
 TEST(List, test_new_list) {
   int one = 1;
   int two = 2;
-  void *init[] = {&one, &two};
-  struct List *list = new_list(2, init);
-  ASSERT_EQ(2, list_length(list));
+  int three = 9;
+  void *init[] = {&one, &two, &three};
+  struct List *list = new_list(3, init);
+  ASSERT_EQ(3, list_length(list));
+
+  ASSERT_EQ(1, *(int *)list->head);
+  ASSERT_EQ(2, *(int *)list->tail->head);
+  ASSERT_EQ(9, *(int *)list->tail->tail->head);
+
   delete_list(list);
 }
 
