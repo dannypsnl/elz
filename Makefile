@@ -5,6 +5,7 @@ GO_MOD=GO111MODULE=on
 .PHONY: install deps test generate coverage
 install: generate
 	@$(GO_MOD) go install ./src/cmd/elz
+	@$(MAKE) -C core
 deps:
 	@$(GO_MOD) go get ./...
 test: deps generate

@@ -40,7 +40,11 @@ var (
 			if err != nil {
 				return err
 			}
-			tmpIRFile.WriteString(g.String())
+			defer tmpIRFile.Close()
+			_, err = tmpIRFile.WriteString(g.String())
+			if err != nil {
+				return err
+			}
 			defer os.Remove(tmpIRFile.Name())
 
 			irFileName := tmpIRFile.Name()
@@ -50,9 +54,12 @@ var (
 			if err := compileCmd.Run(); err != nil {
 				return fmt.Errorf("failed at compile ir file: %s", err)
 			}
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				return err
+			}
 			linkCmd := exec.Command("clang", tmpObject,
-				// FIXME: install core libs to $HOME/.elz/core
-				"core/list/list.o",
+				filepath.Join(homeDir, ".elz/core/list.o"),
 			)
 			defer os.Remove(tmpObject)
 			if err := linkCmd.Run(); err != nil {
