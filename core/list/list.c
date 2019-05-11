@@ -39,15 +39,13 @@ uint64_t list_length(struct List *list) {
 }
 
 void *list_index(struct List *list, uint64_t index) {
-  struct List *next = list;
   uint64_t count = 0;
-  while (next != NULL && next->tail != NULL) {
-    if (count == index)
-      return next->head;
-    else if (count > index)
-      return NULL;
+  struct List **next;
+  for (next = &list; *next != NULL; *next = (*next)->tail) {
+    if (count == index) {
+      return (*next)->head;
+    }
     count++;
-    next = next->tail;
   }
   return NULL;
 }

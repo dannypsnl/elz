@@ -19,13 +19,15 @@ TEST(List, test_new_list) {
 }
 
 TEST(List, test_list_index) {
-  int one = 1;
-  int two = 2;
-  void *init[] = {&one, &two};
-  struct List *list = new_list(2, init);
+  int one = 36;
+  int two = 9;
+  void *init[] = {&one, &two, &one};
+  struct List *list = new_list(3, init);
   void *first = list_index(list, 0);
-  ASSERT_EQ(1, *(int *)first);
+  ASSERT_EQ(36, *(int *)first);
   void *second = list_index(list, 1);
-  ASSERT_EQ(2, *(int *)second);
+  ASSERT_EQ(9, *(int *)second);
+  void *three = list_index(list, 2);
+  ASSERT_EQ(36, *(int *)three);
   delete_list(list);
 }
