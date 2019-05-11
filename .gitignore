@@ -2,3 +2,4 @@
 .ccls-cache/
 /target
 **/*.rs.bk
+*.out
