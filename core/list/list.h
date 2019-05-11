@@ -3,7 +3,6 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include <stdlib.h>
 
 struct List {
   void *head;
