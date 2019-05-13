@@ -79,6 +79,7 @@ func (g *Generator) Generate() {
 }
 
 func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
+	g.entryModule.initFuncBlock.NewRet(nil)
 	_, err := bind.GetImpl(newTypeMap(), exprList...)
 	if err != nil {
 		return err
