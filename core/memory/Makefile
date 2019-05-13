@@ -5,7 +5,7 @@ install: build
 	@echo "installing lib: memory..."
 	@cp memory.o $(HOME)/.elz/core/
 	@echo "lib: memory installed"
-build: list.o
+build: memory.o
 test:
 	@clang++ -g -c *.cc
 	@clang -g -c *.c
@@ -15,5 +15,5 @@ clean:
 	@rm -f *.out
 	@rm -f *.o
 
-list.o:
+memory.o:
 	@clang -c memory.c
