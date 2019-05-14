@@ -232,6 +232,14 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
+		elzMalloc, err := m.generator.getBuiltin("elz_malloc")
+		if err != nil {
+			return nil, err
+		}
+		elzMallocImpl, err := elzMalloc.GetImpl(typeMap)
+		if err != nil {
+			return nil, err
+		}
 		// make a temporary global array for storing arguments of new_list
 		tmpListPtr := m.generator.mod.NewGlobalDef("",
 			constant.NewZeroInitializer(
@@ -254,11 +262,12 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 				constant.NewInt(llvmtypes.I64, 0),
 				constant.NewInt(llvmtypes.I64, int64(i)),
 			)
-			// FIXME: using malloc, else we can't access the value of these elements
-			exprAlloca := initBlock.NewAlloca(llvmExpr.Type())
-			initBlock.NewStore(llvmExpr, exprAlloca)
-			elemPtr := initBlock.NewBitCast(exprAlloca, llvmtypes.NewPointer(llvmtypes.I8))
-			initBlock.NewStore(elemPtr, indexI)
+			// FIXME: create correct size(of: expr) replace hard coded size
+			size := constant.NewInt(llvmtypes.I64, 64)
+			exprMalloca := initBlock.NewCall(elzMallocImpl, size)
+			storeTo := initBlock.NewBitCast(exprMalloca, llvmtypes.NewPointer(llvmExpr.Type()))
+			initBlock.NewStore(llvmExpr, storeTo)
+			initBlock.NewStore(exprMalloca, indexI)
 		}
 		// get this temporary array's address
 		elems := initBlock.NewGetElementPtr(tmpListPtr,
