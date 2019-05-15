@@ -60,7 +60,17 @@ func (g *Generator) Generate() {
 	}
 	g.GenerateTypes()
 	impl := g.mod.NewFunc("main", llvmtypes.I64)
+	// call init function of module to sure global variable would be initialized
 	b := impl.NewBlock("")
+
+	// NewRet(nil) is return void
+	g.entryModule.initFuncBlock.NewRet(nil)
+	b.NewCall(g.entryModule.initFunc)
+	for _, mod := range g.allModule {
+		mod.initFuncBlock.NewRet(nil)
+		b.NewCall(mod.initFunc)
+	}
+
 	_, err = g.entryModule.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), newTypeMap())
 	if err != nil {
 		panic(fmt.Sprintf("report error: %s", err))
@@ -69,6 +79,7 @@ func (g *Generator) Generate() {
 }
 
 func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
+	g.entryModule.initFuncBlock.NewRet(nil)
 	_, err := bind.GetImpl(newTypeMap(), exprList...)
 	if err != nil {
 		return err

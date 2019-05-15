@@ -26,6 +26,16 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 	printfBind.compilerProvidedImpl = printfImpl
 	builtins["printf"] = printfBind
 
+	elzMallocBind := NewBinding(&ast.Binding{
+		Name: "elz_malloc",
+		// size: size_t(aka int)
+		ParamList: []string{"size"},
+	})
+	elzMallocBind.compilerProvidedImpl = mod.NewFunc("elz_malloc", llvmtypes.NewPointer(llvmtypes.I8),
+		ir.NewParam("size", llvmtypes.I64),
+	)
+	builtins["elz_malloc"] = elzMallocBind
+
 	newListBind := NewBinding(&ast.Binding{
 		Name: "new_list",
 		// size: int, elements: void **

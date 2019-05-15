@@ -2,21 +2,25 @@ package codegen
 
 import (
 	"fmt"
+	"github.com/elz-lang/elz/src/irutil"
 	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/types"
+	"github.com/elz-lang/elz/src/elz/value"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	llvmtypes "github.com/llir/llvm/ir/types"
-	"github.com/llir/llvm/ir/value"
+	llvmvalue "github.com/llir/llvm/ir/value"
 )
 
 type module struct {
 	*Tree
-	generator *Generator
-	imports   map[string]string
+	generator     *Generator
+	initFunc      *ir.Func
+	initFuncBlock *ir.Block
+	imports       map[string]string
 }
 
 // ```
@@ -44,10 +48,13 @@ has the same name in the module`, mod1, importPath))
 		}
 		imports[accessKey] = importPath
 	}
+	initFunc := g.mod.NewFunc("init", llvmtypes.Void)
 	m := &module{
-		Tree:      tree,
-		generator: g,
-		imports:   imports,
+		Tree:          tree,
+		generator:     g,
+		initFunc:      initFunc,
+		initFuncBlock: initFunc.NewBlock(""),
+		imports:       imports,
 	}
 	for _, bind := range tree.bindings {
 		bind.SetModule(m)
@@ -135,7 +142,7 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		valueList := make([]value.Value, 0)
+		valueList := make([]llvmvalue.Value, 0)
 		for _, arg := range expr.ArgList {
 			e, err := m.genExpr(b, arg.Expr, binds, typeMap)
 			if err != nil {
@@ -192,7 +199,23 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		return m.genExpr(b, bind.Expr, binds, typeMap)
+		globalVarValue, err := m.genExpr(b, bind.Expr, binds, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		// declare global variable
+		globalVar := m.generator.mod.NewGlobal(bind.Name, globalVarValue.Type())
+		globalVar.Init = &constant.ZeroInitializer{}
+		globalVar.Align = 1
+		// store the temporary value into global variable in init function
+		m.initFuncBlock.NewStore(globalVarValue, globalVar)
+		if v, ok := globalVarValue.(*value.Wrapper); ok {
+			return value.NewWrap(
+				b.NewLoad(globalVar),
+				v.ElemT,
+			), nil
+		}
+		return b.NewLoad(globalVar), nil
 	case *ast.Int:
 		return constant.NewIntFromString(llvmtypes.I64, expr.Literal)
 	case *ast.Float:
@@ -217,7 +240,15 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		// make a tmp global array for storing arguments of new_list
+		elzMalloc, err := m.generator.getBuiltin("elz_malloc")
+		if err != nil {
+			return nil, err
+		}
+		elzMallocImpl, err := elzMalloc.GetImpl(typeMap)
+		if err != nil {
+			return nil, err
+		}
+		// make a temporary global array for storing arguments of new_list
 		tmpListPtr := m.generator.mod.NewGlobalDef("",
 			constant.NewZeroInitializer(
 				llvmtypes.NewArray(
@@ -227,33 +258,42 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 			),
 		)
 		tmpListPtr.Align = ir.Align(1)
-
+		var elemT llvmtypes.Type
 		// storing ast list into tmp list
+		initBlock := m.initFuncBlock
 		for i, e := range expr.ExprList {
-			llvmExpr, err := m.genExpr(b, e, binds, typeMap)
+			llvmExpr, err := m.genExpr(initBlock, e, binds, typeMap)
 			if err != nil {
 				return nil, err
 			}
-			indexI := b.NewGetElementPtr(
+			if i == 0 {
+				elemT = llvmExpr.Type()
+			}
+			indexI := initBlock.NewGetElementPtr(
 				tmpListPtr,
 				constant.NewInt(llvmtypes.I64, 0),
 				constant.NewInt(llvmtypes.I64, int64(i)),
 			)
-			exprAlloca := b.NewAlloca(llvmExpr.Type())
-			b.NewStore(llvmExpr, exprAlloca)
-			elemPtr := b.NewBitCast(exprAlloca, llvmtypes.NewPointer(llvmtypes.I8))
-			b.NewStore(elemPtr, indexI)
-		}
+			size := constant.NewInt(llvmtypes.I64, irutil.SizeOf(elemT))
+			exprMalloca := initBlock.NewCall(elzMallocImpl, size)
+			storeTo := initBlock.NewBitCast(exprMalloca, llvmtypes.NewPointer(llvmExpr.Type()))
 
-		elems := b.NewGetElementPtr(tmpListPtr,
+			initBlock.NewStore(llvmExpr, storeTo)
+			initBlock.NewStore(exprMalloca, indexI)
+		}
+		// get this temporary array's address
+		elems := initBlock.NewGetElementPtr(tmpListPtr,
 			constant.NewInt(llvmtypes.I64, 0),
 			constant.NewInt(llvmtypes.I64, 0),
 		)
-		return b.NewCall(newListImpl,
-			// size
-			constant.NewInt(llvmtypes.I64, int64(len(expr.ExprList))),
-			// elements
-			elems,
+		return value.NewWrap(
+			initBlock.NewCall(newListImpl,
+				// size
+				constant.NewInt(llvmtypes.I64, int64(len(expr.ExprList))),
+				// elements
+				elems,
+			),
+			elemT,
 		), nil
 	case *ast.ExtractElement:
 		listIndex, err := m.generator.getBuiltin("list_index")
@@ -270,17 +310,14 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		if x.Type().String() == "%list*" {
+		if strings.HasPrefix(x.Type().String(), "%list") {
 			key, err := m.genExpr(b, expr.Key, binds, typeMap)
 			if err != nil {
 				return nil, err
 			}
-			elemPtr := b.NewCall(listIndexImpl,
-				x,
-				key,
-			)
-			// FIXME: the type is hard code as int64 which of course is wrong
-			convertedPtr := b.NewBitCast(elemPtr, llvmtypes.NewPointer(llvmtypes.I64))
+			elemPtr := b.NewCall(listIndexImpl, x, key)
+			// x value of extract element must be a wrapper, so we using type assertion here
+			convertedPtr := b.NewBitCast(elemPtr, llvmtypes.NewPointer(x.(*value.Wrapper).ElemT))
 			return b.NewLoad(convertedPtr), nil
 		}
 		return nil, fmt.Errorf("unknown x value: %s", x)
