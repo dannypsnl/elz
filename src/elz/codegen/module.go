@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"github.com/elz-lang/elz/src/irutil"
 	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
@@ -265,18 +266,18 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 			if err != nil {
 				return nil, err
 			}
+			if i == 0 {
+				elemT = llvmExpr.Type()
+			}
 			indexI := initBlock.NewGetElementPtr(
 				tmpListPtr,
 				constant.NewInt(llvmtypes.I64, 0),
 				constant.NewInt(llvmtypes.I64, int64(i)),
 			)
-			// FIXME: create correct size(of: expr) replace hard coded size
-			size := constant.NewInt(llvmtypes.I64, 64)
+			size := constant.NewInt(llvmtypes.I64, irutil.SizeOf(elemT))
 			exprMalloca := initBlock.NewCall(elzMallocImpl, size)
 			storeTo := initBlock.NewBitCast(exprMalloca, llvmtypes.NewPointer(llvmExpr.Type()))
-			if i == 0 {
-				elemT = llvmExpr.Type()
-			}
+
 			initBlock.NewStore(llvmExpr, storeTo)
 			initBlock.NewStore(exprMalloca, indexI)
 		}

@@ -5,7 +5,17 @@ import (
 	"strconv"
 
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/types"
 )
+
+func SizeOf(t types.Type) int64 {
+	switch t {
+	case types.I64:
+		return 64
+	default:
+		panic(fmt.Sprintf("size of unsupported type %s yet", t))
+	}
+}
 
 // FixDups fixes duplicates identifiers in the module by adding uniquely
 // differentiating numerical suffixes.
