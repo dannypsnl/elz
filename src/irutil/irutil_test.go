@@ -37,3 +37,21 @@ func TestIRFixDuplicate(t *testing.T) {
 		assert.Equal(t, testCase.newName, def.GlobalName, testCase.name)
 	}
 }
+
+func TestSizeOf(t *testing.T) {
+	testCases := []struct {
+		name     string
+		llvmType types.Type
+		size     int64
+	}{
+		{
+			name:     "int64",
+			llvmType: types.I64,
+			size:     64,
+		},
+	}
+
+	for _, testCase := range testCases {
+		assert.Equal(t, testCase.size, irutil.SizeOf(testCase.llvmType))
+	}
+}
