@@ -1,5 +1,10 @@
 ## latest
 
+- improve install message, add:
+    ```
+    installing elz compiler...
+    elz compiler installed
+    ```
 - list literal
     ```
     lst = [1, 2, 3]
