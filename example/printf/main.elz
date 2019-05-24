@@ -1,2 +1,0 @@
-main =
-  printf(format: "hello, world, %d", 2)
