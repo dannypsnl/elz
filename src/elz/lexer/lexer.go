@@ -32,8 +32,36 @@ const (
 	ItemDiv        // /
 	// Meta
 	ItemEOF
-	ItemForInit // This ItemType is for parser initial it's current token
 )
+
+var itemTypeToString map[ItemType]string
+
+func init() {
+	itemTypeToString = make(map[ItemType]string)
+	itemTypeToString[ItemError] = "error"
+	itemTypeToString[ItemIdent] = "identifier"
+	itemTypeToString[ItemNumber] = "number"
+	itemTypeToString[ItemString] = "string"
+	itemTypeToString[ItemKwType] = "keyword:type"
+	itemTypeToString[ItemKwImport] = "keyword:import"
+	itemTypeToString[ItemAssign] = "operator:assign"
+	itemTypeToString[ItemColon] = "operator:colon"
+	itemTypeToString[ItemLeftParen] = "operator:left_paren"
+	itemTypeToString[ItemRightParen] = "operator:right_paren"
+	itemTypeToString[ItemPlus] = "operator:plus"
+	itemTypeToString[ItemMinus] = "operator:minus"
+	itemTypeToString[ItemMul] = "operator:mul"
+	itemTypeToString[ItemDiv] = "operator:div"
+	itemTypeToString[ItemEOF] = "EOF"
+}
+
+func (t ItemType) String() string {
+	s, ok := itemTypeToString[t]
+	if !ok {
+		return "unknown item type"
+	}
+	return s
+}
 
 type Item struct {
 	Type ItemType
@@ -75,11 +103,11 @@ func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
 	return nil
 }
 
-func (lex *Lexer) run() {
-	for lex.state = lexWhiteSpace; lex.state != nil; {
-		lex.state = lex.state(lex)
+func (l *Lexer) run() {
+	for l.state = lexWhiteSpace; l.state != nil; {
+		l.state = l.state(l)
 	}
-	defer close(lex.items)
+	defer close(l.items)
 }
 
 // next returns the next rune in the input.
@@ -176,7 +204,7 @@ func isSpace(r rune) bool {
 type stateFn func(*Lexer) stateFn
 
 func lexWhiteSpace(l *Lexer) stateFn {
-	for r := l.next(); isSpace(r) || r == '\n'; l.next() {
+	for r := l.next(); isSpace(r) || isEndOfLine(r); l.next() {
 		r = l.peek()
 	}
 	l.backup()
@@ -206,7 +234,7 @@ func lexWhiteSpace(l *Lexer) stateFn {
 	case r == '+':
 		l.emit(ItemPlus)
 		return lexWhiteSpace
-	case ('0' <= r && r <= '9'):
+	case '0' <= r && r <= '9':
 		l.backup()
 		return lexNumber
 	case isAlphaNumeric(r):
