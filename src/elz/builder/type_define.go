@@ -1,10 +1,10 @@
 package builder
 
 import (
-	"fmt"
-
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/parser"
+
+	"github.com/sirupsen/logrus"
 )
 
 func (b *Builder) ExitTypeField(c *parser.TypeFieldContext) {
@@ -37,7 +37,6 @@ func (b *Builder) ExitTypeDefine(c *parser.TypeDefineContext) {
 	}
 	err := b.astTree.InsertTypeDefine(newTyp)
 	if err != nil {
-		err := fmt.Errorf("stop parsing, error: %s", err)
-		panic(err)
+		logrus.Fatalf("stop parsing, error: %s", err)
 	}
 }

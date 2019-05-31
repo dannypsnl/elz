@@ -1,12 +1,13 @@
 package builder
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/internal/collection/stack"
 	"github.com/elz-lang/elz/src/elz/parser"
+
+	"github.com/sirupsen/logrus"
 )
 
 func (b *Builder) PushExpr(e interface{}) {
@@ -63,7 +64,7 @@ func (b *Builder) ExitString(c *parser.StringContext) {
 	literal := c.STRING().GetText()
 	literal, err := strconv.Unquote(literal)
 	if err != nil {
-		panic(fmt.Errorf("failed at unquoting string literal, it's a compiler bug that you should report, error: %s", err))
+		logrus.Fatalf("failed at unquoting string literal, it's a compiler bug that you should report, error: %s", err)
 	}
 	b.PushExpr(ast.NewString(literal))
 }
@@ -96,7 +97,7 @@ func (b *Builder) ExitFnCall(c *parser.FnCallContext) {
 		if isArg {
 			exprList[i] = e
 		} else {
-			panic(fmt.Errorf("expression in function call is not an argument, it must be compiler bug, report it to the project, error: %#v", e))
+			logrus.Fatalf("expression in function call is not an argument, it must be compiler bug, report it to the project, error: %#v", e)
 		}
 	}
 	b.PushExpr(&ast.FuncCall{

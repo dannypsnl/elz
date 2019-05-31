@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/llir/llvm/ir/types"
+	"github.com/sirupsen/logrus"
 )
 
 type isType struct{}
@@ -42,6 +43,8 @@ func FromString(typeName string) Type {
 	case "f64":
 		return &Float{}
 	default:
-		panic(fmt.Errorf("unknown type: %s", typeName))
+		logrus.Fatalf("unknown type: %s", typeName)
+		// dead code return for compiler
+		return nil
 	}
 }

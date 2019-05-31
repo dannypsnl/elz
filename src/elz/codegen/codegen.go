@@ -11,6 +11,7 @@ import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	llvmtypes "github.com/llir/llvm/ir/types"
+	"github.com/sirupsen/logrus"
 )
 
 type Generator struct {
@@ -53,10 +54,10 @@ func (g *Generator) String() string {
 func (g *Generator) Generate() {
 	entryBinding, err := g.entryModule.GetBinding("main")
 	if err != nil {
-		panic("no main function exist, no compile")
+		logrus.Fatalf("no main function exist, no compile")
 	}
 	if len(entryBinding.ParamList) > 0 {
-		panic("main function should not have any parameters")
+		logrus.Fatalf("main function should not have any parameters")
 	}
 	g.GenerateTypes()
 	impl := g.mod.NewFunc("main", llvmtypes.I64)
@@ -73,7 +74,7 @@ func (g *Generator) Generate() {
 
 	_, err = g.entryModule.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), newTypeMap())
 	if err != nil {
-		panic(fmt.Sprintf("report error: %s", err))
+		logrus.Fatalf("report error: %s", err)
 	}
 	b.NewRet(constant.NewInt(llvmtypes.I64, 0))
 }

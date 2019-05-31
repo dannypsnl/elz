@@ -1,5 +1,7 @@
 package ast
 
+import "github.com/sirupsen/logrus"
+
 type isExpr struct{}
 
 func (isExpr) IsExpr() bool {
@@ -114,7 +116,7 @@ func NewBool(literal string) *Bool {
 	case "false":
 		value = false
 	default:
-		panic("boolean syntax define must be wrong")
+		logrus.Fatalf("boolean syntax define must be wrong")
 	}
 	return &Bool{IsTrue: value}
 }

@@ -3,6 +3,7 @@ package codegen
 import (
 	"fmt"
 	"github.com/elz-lang/elz/src/irutil"
+	"github.com/sirupsen/logrus"
 	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
@@ -41,10 +42,10 @@ func newModule(g *Generator, tree *Tree) *module {
 		lastOne := len(accessChain) - 1
 		accessKey := accessChain[lastOne]
 		if mod1, exist := imports[accessKey]; exist {
-			panic(fmt.Sprintf(`import %s
+			logrus.Fatalf(`import %s
 and
 import %s
-has the same name in the module`, mod1, importPath))
+has the same name in the module`, mod1, importPath)
 		}
 		imports[accessKey] = importPath
 	}

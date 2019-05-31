@@ -1,7 +1,7 @@
 package codegen
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/types"
@@ -54,6 +54,8 @@ func typeOfExpr(e ast.Expr) types.Type {
 	case *ast.String:
 		return &types.String{}
 	default:
-		panic(fmt.Sprintf("you can't use expression: `%#v` to get type directly", e))
+		logrus.Fatalf("you can't use expression: `%#v` to get type directly", e)
+		// dead code return for compiler
+		return nil
 	}
 }

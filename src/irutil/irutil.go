@@ -6,6 +6,7 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/types"
+	"github.com/sirupsen/logrus"
 )
 
 func SizeOf(t types.Type) int64 {
@@ -13,7 +14,9 @@ func SizeOf(t types.Type) int64 {
 	case types.I64:
 		return 64
 	default:
-		panic(fmt.Sprintf("size of unsupported type %s yet", t))
+		logrus.Fatalf("size of unsupported type %s yet", t)
+		// dead code return for compiler
+		return 0
 	}
 }
 

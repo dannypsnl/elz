@@ -5,13 +5,15 @@ import (
 
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/parser"
+
+	"github.com/sirupsen/logrus"
 )
 
 func (b *Builder) ExitBindType(c *parser.BindTypeContext) {
 	bindName := c.IDENT().GetText()
 	_, exist := b.bindingType[bindName]
 	if exist {
-		panic("bind type existed")
+		logrus.Fatalf("bind type existed")
 	}
 	b.bindingType[bindName] = b.bindTypeList
 }
@@ -56,6 +58,6 @@ func (b *Builder) ExitBinding(c *parser.BindingContext) {
 	err := b.astTree.InsertBinding(binding)
 	if err != nil {
 		err := fmt.Errorf("stop parsing, error: %s", err)
-		panic(err)
+		logrus.Fatal(err)
 	}
 }
