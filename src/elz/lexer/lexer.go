@@ -69,6 +69,13 @@ type Item struct {
 	Val  string
 }
 
+func (i Item) String() string {
+	return fmt.Sprintf(
+		"type: %s, value: %s, pos: %d",
+		i.Type, i.Val, i.Pos,
+	)
+}
+
 type Lexer struct {
 	name    string
 	input   string
