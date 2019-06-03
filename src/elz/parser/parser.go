@@ -55,7 +55,14 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	}
 	// consume assign
 	p.next()
-	expr := p.ParseExpression(p.ParsePrimary(), 0)
+	primary, err := p.ParsePrimary()
+	if err != nil {
+		return nil, err
+	}
+	expr, err := p.ParseExpression(primary, 0)
+	if err != nil {
+		return nil, err
+	}
 	return &ast.Binding{
 		Export:    false,
 		Name:      bindingName,
@@ -64,7 +71,7 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	}, nil
 }
 
-func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) ast.Expr {
+func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) (ast.Expr, error) {
 	lhs := leftHandSide
 	lookahead := p.peekToken
 	// precedence of lookahead would also break with not operator token
@@ -73,14 +80,20 @@ func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) ast
 		operator := lookahead
 		p.next() // consume end of lhs
 		p.next() // consume operator
-		rhs := p.ParsePrimary()
+		rhs, err := p.ParsePrimary()
+		if err != nil {
+			return nil, err
+		}
 		// consume end of rhs
 		// update lookahead, else the loop would never end
 		// and bring unexpected result
 		lookahead = p.peekToken
 		for precedence(lookahead) > precedence(operator) ||
 			(isRightAssociative(lookahead) && precedence(lookahead) == precedence(operator)) {
-			rhs = p.ParseExpression(rhs, precedence(lookahead))
+			rhs, err = p.ParseExpression(rhs, precedence(lookahead))
+			if err != nil {
+				return nil, err
+			}
 			lookahead = p.peekToken
 		}
 		lhs = &ast.BinaryExpr{
@@ -89,23 +102,47 @@ func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) ast
 			Op:    operator.Val,
 		}
 	}
-	return lhs
+	return lhs, nil
 }
 
-func (p *Parser) ParsePrimary() ast.Expr {
+func (p *Parser) ParsePrimary() (ast.Expr, error) {
 	switch p.curToken.Type {
 	case lexer.ItemNumber:
 		if strings.ContainsRune(p.curToken.Val, '.') {
-			return ast.NewFloat(p.curToken.Val)
+			return ast.NewFloat(p.curToken.Val), nil
 		} else {
-			return ast.NewInt(p.curToken.Val)
+			return ast.NewInt(p.curToken.Val), nil
 		}
 	case lexer.ItemIdent:
-		return ast.NewIdent(p.curToken.Val)
+		return p.ParseAccessChain()
 	default:
 		logrus.Fatalf("unsupported primary token: %s", p.curToken)
 	}
-	return nil
+	// compiler notation
+	return nil, nil
+}
+
+func (p *Parser) ParseAccessChain() (*ast.Ident, error) {
+	if err := p.want(lexer.ItemIdent); err != nil {
+		return nil, err
+	}
+	var identifier strings.Builder
+	identifier.WriteString(p.curToken.Val)
+	for p.peekToken.Type == lexer.ItemColon {
+		p.next() // consume identifier
+		if p.peekToken.Type == lexer.ItemColon {
+			// match :: now
+			// consume ::
+			p.next()
+			p.next()
+			if err := p.want(lexer.ItemIdent); err != nil {
+				return nil, err
+			}
+			identifier.WriteString("::")
+			identifier.WriteString(p.curToken.Val)
+		}
+	}
+	return ast.NewIdent(identifier.String()), nil
 }
 
 func precedence(token lexer.Item) int {
