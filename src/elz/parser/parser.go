@@ -117,6 +117,8 @@ func (p *Parser) ParsePrimary() (ast.Expr, error) {
 		return p.ParseAccessChain()
 	case lexer.ItemString:
 		return ast.NewString(p.curToken.Val), nil
+	case lexer.ItemKwTrue, lexer.ItemKwFalse:
+		return ast.NewBool(p.curToken.Val), nil
 	default:
 		logrus.Fatalf("unsupported primary token: %s", p.curToken)
 	}

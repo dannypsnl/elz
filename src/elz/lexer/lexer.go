@@ -19,6 +19,8 @@ const (
 	ItemNumber // ex. 1.24 0.12 .23
 	ItemString // ex. "I am a string"
 	// Keywords
+	ItemKwTrue   // true
+	ItemKwFalse  // false
 	ItemKwType   // type
 	ItemKwImport // import module
 	// Operator
@@ -147,6 +149,10 @@ func (l *Lexer) emit(t ItemType) {
 	st := l.start
 	value := l.input[l.start:l.pos]
 	switch value {
+	case "true":
+		l.items <- Item{ItemKwTrue, st, value}
+	case "false":
+		l.items <- Item{ItemKwFalse, st, value}
 	case "type":
 		l.items <- Item{ItemKwType, st, value}
 	case "import":

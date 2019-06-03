@@ -187,3 +187,28 @@ func TestParseStringLiteral(t *testing.T) {
 		})
 	}
 }
+
+func TestParseBooleanLiteral(t *testing.T) {
+	testCases := []struct {
+		code         string
+		expectedExpr *ast.Bool
+	}{
+		{
+			code:         `true`,
+			expectedExpr: ast.NewBool("true"),
+		},
+		{
+			code:         `false`,
+			expectedExpr: ast.NewBool("false"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.code, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParsePrimary()
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedExpr, actual)
+		})
+	}
+}
