@@ -124,6 +124,18 @@ func TestParseBinaryExpression(t *testing.T) {
 				Op:    "+",
 			},
 		},
+		{
+			code: `1 * (2 - 3)`,
+			expectedExpr: &ast.BinaryExpr{
+				LExpr: ast.NewInt("1"),
+				RExpr: &ast.BinaryExpr{
+					LExpr: ast.NewInt("2"),
+					RExpr: ast.NewInt("3"),
+					Op:    "-",
+				},
+				Op: "*",
+			},
+		},
 	}
 
 	for _, tc := range testCases {

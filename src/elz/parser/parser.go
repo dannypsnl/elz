@@ -119,6 +119,21 @@ func (p *Parser) ParsePrimary() (ast.Expr, error) {
 		return ast.NewString(p.curToken.Val), nil
 	case lexer.ItemKwTrue, lexer.ItemKwFalse:
 		return ast.NewBool(p.curToken.Val), nil
+	case lexer.ItemLeftParen:
+		p.next() // consume left paren (
+		primary, err := p.ParsePrimary()
+		if err != nil {
+			return nil, err
+		}
+		expr, err := p.ParseExpression(primary, 0)
+		if err != nil {
+			return nil, err
+		}
+		p.next() // consume the end of expression
+		if err := p.want(lexer.ItemRightParen); err != nil {
+			return nil, err
+		}
+		return expr, nil
 	default:
 		logrus.Fatalf("unsupported primary token: %s", p.curToken)
 	}

@@ -247,6 +247,12 @@ func lexWhiteSpace(l *Lexer) stateFn {
 	case r == '+':
 		l.emit(ItemPlus)
 		return lexWhiteSpace
+	case r == '(':
+		l.emit(ItemLeftParen)
+		return lexWhiteSpace
+	case r == ')':
+		l.emit(ItemRightParen)
+		return lexWhiteSpace
 	case '0' <= r && r <= '9':
 		l.backup()
 		return lexNumber
