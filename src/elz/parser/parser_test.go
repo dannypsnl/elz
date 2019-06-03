@@ -47,35 +47,6 @@ func TestParseBinding(t *testing.T) {
 	}
 }
 
-func TestParseAccessChain(t *testing.T) {
-	testCases := []struct {
-		code         string
-		expectedExpr *ast.Ident
-	}{
-		{
-			code:         "a",
-			expectedExpr: ast.NewIdent("a"),
-		},
-		{
-			code:         "a::b",
-			expectedExpr: ast.NewIdent("a::b"),
-		},
-		{
-			code:         "a::b::c",
-			expectedExpr: ast.NewIdent("a::b::c"),
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.code, func(t *testing.T) {
-			p := parser.NewParser("test", tc.code)
-			actual, err := p.ParseAccessChain()
-			require.NoError(t, err)
-			assert.Equal(t, tc.expectedExpr, actual)
-		})
-	}
-}
-
 func TestParseBinaryExpression(t *testing.T) {
 	testCases := []struct {
 		code         string
@@ -161,6 +132,56 @@ func TestParseBinaryExpression(t *testing.T) {
 			primary, err := p.ParsePrimary()
 			require.NoError(t, err)
 			actual, err := p.ParseExpression(primary, 0)
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedExpr, actual)
+		})
+	}
+}
+
+func TestParseAccessChain(t *testing.T) {
+	testCases := []struct {
+		code         string
+		expectedExpr *ast.Ident
+	}{
+		{
+			code:         "a",
+			expectedExpr: ast.NewIdent("a"),
+		},
+		{
+			code:         "a::b",
+			expectedExpr: ast.NewIdent("a::b"),
+		},
+		{
+			code:         "a::b::c",
+			expectedExpr: ast.NewIdent("a::b::c"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.code, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParseAccessChain()
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedExpr, actual)
+		})
+	}
+}
+
+func TestParseStringLiteral(t *testing.T) {
+	testCases := []struct {
+		code         string
+		expectedExpr *ast.String
+	}{
+		{
+			code:         `"a"`,
+			expectedExpr: ast.NewString(`"a"`),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.code, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParsePrimary()
 			require.NoError(t, err)
 			assert.Equal(t, tc.expectedExpr, actual)
 		})
