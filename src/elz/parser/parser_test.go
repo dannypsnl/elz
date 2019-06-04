@@ -150,6 +150,148 @@ func TestParseBinaryExpression(t *testing.T) {
 	}
 }
 
+func TestParseElementAccess(t *testing.T) {
+	testCases := []struct {
+		code         string
+		expectedExpr *ast.ExtractElement
+	}{
+		{
+			code: "a[1]",
+			expectedExpr: &ast.ExtractElement{
+				X:   ast.NewIdent("a"),
+				Key: ast.NewInt("1"),
+			},
+		},
+		{
+			code: "a[b[1]]",
+			expectedExpr: &ast.ExtractElement{
+				X: ast.NewIdent("a"),
+				Key: &ast.ExtractElement{
+					X:   ast.NewIdent("b"),
+					Key: ast.NewInt("1"),
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.code, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParsePrimary()
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedExpr, actual)
+		})
+	}
+}
+
+func TestParseFunctionCall(t *testing.T) {
+	testCases := []struct {
+		name         string
+		code         string
+		expectedExpr *ast.FuncCall
+	}{
+		{
+			name: "no argument",
+			code: "a()",
+			expectedExpr: &ast.FuncCall{
+				X:       ast.NewIdent("a"),
+				ArgList: []*ast.Arg{},
+			},
+		},
+		{
+			name: "2 arguments",
+			code: "a(1, 2)",
+			expectedExpr: &ast.FuncCall{
+				X: ast.NewIdent("a"),
+				ArgList: []*ast.Arg{
+					ast.NewArg("", ast.NewInt("1")),
+					ast.NewArg("", ast.NewInt("2")),
+				},
+			},
+		},
+		{
+			name: "2 arguments, one with name",
+			code: "a(left: 1, 2)",
+			expectedExpr: &ast.FuncCall{
+				X: ast.NewIdent("a"),
+				ArgList: []*ast.Arg{
+					ast.NewArg("left", ast.NewInt("1")),
+					ast.NewArg("", ast.NewInt("2")),
+				},
+			},
+		},
+		{
+			name: "2 arguments with name",
+			code: "a(left: 1, right: 2)",
+			expectedExpr: &ast.FuncCall{
+				X: ast.NewIdent("a"),
+				ArgList: []*ast.Arg{
+					ast.NewArg("left", ast.NewInt("1")),
+					ast.NewArg("right", ast.NewInt("2")),
+				},
+			},
+		},
+		{
+			name: "3 arguments, 2 with name",
+			code: "a(first: 1, mid: 2, 3)",
+			expectedExpr: &ast.FuncCall{
+				X: ast.NewIdent("a"),
+				ArgList: []*ast.Arg{
+					ast.NewArg("first", ast.NewInt("1")),
+					ast.NewArg("mid", ast.NewInt("2")),
+					ast.NewArg("", ast.NewInt("3")),
+				},
+			},
+		},
+		{
+			name: "nesting",
+			code: "a(b(), c())",
+			expectedExpr: &ast.FuncCall{
+				X: ast.NewIdent("a"),
+				ArgList: []*ast.Arg{
+					ast.NewArg("", &ast.FuncCall{
+						X:       ast.NewIdent("b"),
+						ArgList: []*ast.Arg{},
+					}),
+					ast.NewArg("", &ast.FuncCall{
+						X:       ast.NewIdent("c"),
+						ArgList: []*ast.Arg{},
+					}),
+				},
+			},
+		},
+		{
+			name: "level 3 nesting",
+			code: "a(b(c()))",
+			expectedExpr: &ast.FuncCall{
+				X: ast.NewIdent("a"),
+				ArgList: []*ast.Arg{
+					ast.NewArg("", &ast.FuncCall{
+						X: ast.NewIdent("b"),
+						ArgList: []*ast.Arg{
+							ast.NewArg("", &ast.FuncCall{
+								X:       ast.NewIdent("c"),
+								ArgList: []*ast.Arg{},
+							}),
+						},
+					}),
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParsePrimary()
+			require.NoError(t, err)
+			//actual, err := p.ParseExpression(primary, 0)
+			//require.NoError(t, err)
+			assert.Equal(t, tc.expectedExpr, actual)
+		})
+	}
+}
+
 func TestParseAccessChain(t *testing.T) {
 	testCases := []struct {
 		code         string

@@ -30,6 +30,8 @@ type (
 	}
 	FuncCall struct {
 		isExpr
+		X Expr
+		// FIXME: after complete parser, remove access chain this field & fix code generator
 		AccessChain string
 		ArgList     []*Arg
 	}

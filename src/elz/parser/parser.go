@@ -105,6 +105,23 @@ func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) (as
 }
 
 func (p *Parser) ParsePrimary() (ast.Expr, error) {
+	expr, err := p.ParseUnary()
+	if err != nil {
+		return nil, err
+	}
+	switch p.peekToken.Type {
+	case lexer.ItemLeftParen:
+		p.next()
+		return p.ParseArgument(expr)
+	case lexer.ItemLeftBracket:
+		p.next()
+		return p.ParseElementAccess(expr)
+	default:
+		return expr, nil
+	}
+}
+
+func (p *Parser) ParseUnary() (ast.Expr, error) {
 	switch p.curToken.Type {
 	case lexer.ItemNumber:
 		if strings.ContainsRune(p.curToken.Val, '.') {
@@ -138,6 +155,68 @@ func (p *Parser) ParsePrimary() (ast.Expr, error) {
 	}
 	// compiler notation
 	return nil, nil
+}
+
+func (p *Parser) ParseElementAccess(expr ast.Expr) (*ast.ExtractElement, error) {
+	if p.curToken.Type != lexer.ItemLeftBracket {
+		return nil, expectedError(lexer.ItemLeftBracket, p.peekToken, p.peekToken.Pos)
+	}
+	p.next() // consume left bracket [
+	primary, err := p.ParsePrimary()
+	if err != nil {
+		return nil, err
+	}
+	keyExpr, err := p.ParseExpression(primary, 0)
+	if err != nil {
+		return nil, err
+	}
+	p.next()
+	if err := p.want(lexer.ItemRightBracket); err != nil {
+		return nil, err
+	}
+	return ast.NewExtractElement(expr, keyExpr), nil
+}
+
+func (p *Parser) ParseArgument(expr ast.Expr) (*ast.FuncCall, error) {
+	if p.curToken.Type != lexer.ItemLeftParen {
+		return nil, expectedError(lexer.ItemLeftParen, p.peekToken, p.peekToken.Pos)
+	}
+	p.next() // consume left paren (
+
+	args := make([]*ast.Arg, 0)
+	for p.curToken.Type != lexer.ItemRightParen {
+		identifier := ""
+		// `identifier:` is optional, so we don't check the error
+		if err := p.want(lexer.ItemIdent); err == nil {
+			if p.peekToken.Type == (lexer.ItemColon) {
+				identifier = p.curToken.Val
+				p.next() // consume identifier
+				p.next() // consume colon :
+			}
+		}
+		primary, err := p.ParsePrimary()
+		if err != nil {
+			return nil, err
+		}
+		expr, err := p.ParseExpression(primary, 0)
+		if err != nil {
+			return nil, err
+		}
+		p.next() // consume end of expression
+		args = append(args, ast.NewArg(identifier, expr))
+		if err := p.want(lexer.ItemComma); err != nil {
+			if err := p.want(lexer.ItemRightParen); err != nil {
+				return nil, err
+			} else {
+				break
+			}
+		}
+		p.next() // consume comma
+	}
+	return &ast.FuncCall{
+		X:       expr,
+		ArgList: args,
+	}, nil
 }
 
 func (p *Parser) ParseAccessChain() (*ast.Ident, error) {

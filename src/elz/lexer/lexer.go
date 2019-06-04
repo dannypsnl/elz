@@ -24,14 +24,17 @@ const (
 	ItemKwType   // type
 	ItemKwImport // import module
 	// Operator
-	ItemAssign     // =
-	ItemColon      // :
-	ItemLeftParen  // (
-	ItemRightParen // )
-	ItemPlus       // +
-	ItemMinus      // -
-	ItemMul        // *
-	ItemDiv        // /
+	ItemAssign       // =
+	ItemColon        // :
+	ItemComma        // ,
+	ItemLeftParen    // (
+	ItemRightParen   // )
+	ItemLeftBracket  // [
+	ItemRightBracket // ]
+	ItemPlus         // +
+	ItemMinus        // -
+	ItemMul          // *
+	ItemDiv          // /
 	// Meta
 	ItemEOF
 )
@@ -48,8 +51,11 @@ func init() {
 	itemTypeToString[ItemKwImport] = "keyword:import"
 	itemTypeToString[ItemAssign] = "operator:assign"
 	itemTypeToString[ItemColon] = "operator:colon"
+	itemTypeToString[ItemComma] = "operator:comma"
 	itemTypeToString[ItemLeftParen] = "operator:left_paren"
 	itemTypeToString[ItemRightParen] = "operator:right_paren"
+	itemTypeToString[ItemLeftBracket] = "operator:left_bracket"
+	itemTypeToString[ItemRightBracket] = "operator:right_bracket"
 	itemTypeToString[ItemPlus] = "operator:plus"
 	itemTypeToString[ItemMinus] = "operator:minus"
 	itemTypeToString[ItemMul] = "operator:mul"
@@ -73,7 +79,7 @@ type Item struct {
 
 func (i Item) String() string {
 	return fmt.Sprintf(
-		"type: %s, value: %s, pos: %d",
+		"(%s, value: `%s` at %d)",
 		i.Type, i.Val, i.Pos,
 	)
 }
@@ -238,6 +244,9 @@ func lexWhiteSpace(l *Lexer) stateFn {
 	case r == ':':
 		l.emit(ItemColon)
 		return lexWhiteSpace
+	case r == ',':
+		l.emit(ItemComma)
+		return lexWhiteSpace
 	case r == '=':
 		l.emit(ItemAssign)
 		return lexWhiteSpace
@@ -252,6 +261,12 @@ func lexWhiteSpace(l *Lexer) stateFn {
 		return lexWhiteSpace
 	case r == ')':
 		l.emit(ItemRightParen)
+		return lexWhiteSpace
+	case r == '[':
+		l.emit(ItemLeftBracket)
+		return lexWhiteSpace
+	case r == ']':
+		l.emit(ItemRightBracket)
 		return lexWhiteSpace
 	case '0' <= r && r <= '9':
 		l.backup()
