@@ -84,7 +84,6 @@ func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) (as
 		if err != nil {
 			return nil, err
 		}
-		// consume end of rhs
 		// update lookahead, else the loop would never end
 		// and bring unexpected result
 		lookahead = p.peekToken
