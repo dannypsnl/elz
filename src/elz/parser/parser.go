@@ -145,11 +145,34 @@ func (p *Parser) ParseUnary() (ast.Expr, error) {
 		if err != nil {
 			return nil, err
 		}
-		p.next() // consume the end of expression
+		p.next() // consume end of expression
 		if err := p.want(lexer.ItemRightParen); err != nil {
 			return nil, err
 		}
 		return expr, nil
+	case lexer.ItemLeftBracket:
+		listElem := make([]ast.Expr, 0)
+		for p.peekToken.Type != lexer.ItemRightBracket {
+			p.next()
+			primary, err := p.ParsePrimary()
+			if err != nil {
+				return nil, err
+			}
+			expr, err := p.ParseExpression(primary, 0)
+			if err != nil {
+				return nil, err
+			}
+			p.next() // consume end of expression
+			listElem = append(listElem, expr)
+			if err := p.want(lexer.ItemComma); err != nil {
+				if err := p.want(lexer.ItemRightBracket); err != nil {
+					return nil, err
+				} else {
+					break
+				}
+			}
+		}
+		return ast.NewList(listElem...), nil
 	default:
 		logrus.Fatalf("unsupported primary token: %s", p.curToken)
 	}
@@ -170,7 +193,7 @@ func (p *Parser) ParseElementAccess(expr ast.Expr) (*ast.ExtractElement, error) 
 	if err != nil {
 		return nil, err
 	}
-	p.next()
+	p.next() // consume end of expression
 	if err := p.want(lexer.ItemRightBracket); err != nil {
 		return nil, err
 	}

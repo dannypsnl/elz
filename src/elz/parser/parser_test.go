@@ -150,6 +150,44 @@ func TestParseBinaryExpression(t *testing.T) {
 	}
 }
 
+func TestParseListLiteral(t *testing.T) {
+	testCases := []struct {
+		code         string
+		expectedExpr *ast.List
+	}{
+		{
+			code:         `[]`,
+			expectedExpr: ast.NewList(),
+		},
+		{
+			code: `[1, 2, 3]`,
+			expectedExpr: ast.NewList(
+				ast.NewInt("1"),
+				ast.NewInt("2"),
+				ast.NewInt("3"),
+			),
+		},
+		{
+			code: `[1, [2]]`,
+			expectedExpr: ast.NewList(
+				ast.NewInt("1"),
+				ast.NewList(
+					ast.NewInt("2"),
+				),
+			),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.code, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParsePrimary()
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedExpr, actual)
+		})
+	}
+}
+
 func TestParseElementAccess(t *testing.T) {
 	testCases := []struct {
 		code         string
@@ -199,8 +237,8 @@ func TestParseFunctionCall(t *testing.T) {
 			},
 		},
 		{
-			name: "2 arguments",
-			code: "a(1, 2)",
+			name: "2 arguments, with optional end comma",
+			code: "a(1, 2,)",
 			expectedExpr: &ast.FuncCall{
 				X: ast.NewIdent("a"),
 				ArgList: []*ast.Arg{
