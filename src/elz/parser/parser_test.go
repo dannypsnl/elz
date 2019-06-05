@@ -10,6 +10,35 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestParseImport(t *testing.T) {
+	testCases := []struct {
+		code        string
+		expectedAst *ast.Import
+	}{
+		{
+			code: `import a`,
+			expectedAst: &ast.Import{
+				AccessChain: ast.NewIdent("a"),
+			},
+		},
+		{
+			code: `import a::b::c`,
+			expectedAst: &ast.Import{
+				AccessChain: ast.NewIdent("a::b::c"),
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.code, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParseImport()
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedAst, actual)
+		})
+	}
+}
+
 func TestParseBinding(t *testing.T) {
 	testCases := []struct {
 		code        string

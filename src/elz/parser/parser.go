@@ -39,6 +39,20 @@ func (p *Parser) want(wantType lexer.ItemType) error {
 	return nil
 }
 
+func (p *Parser) ParseImport() (*ast.Import, error) {
+	if err := p.want(lexer.ItemKwImport); err != nil {
+		return nil, err
+	}
+	p.next() // consume keyword import
+	accessChain, err := p.ParseAccessChain()
+	if err != nil {
+		return nil, err
+	}
+	return &ast.Import{
+		AccessChain: accessChain,
+	}, nil
+}
+
 func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	if err := p.want(lexer.ItemIdent); err != nil {
 		return nil, err

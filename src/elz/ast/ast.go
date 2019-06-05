@@ -21,6 +21,10 @@ type (
 		Name   string
 		Fields []*Field
 	}
+	// FIXME: merge this with the codegen tree(originally approach of imports)
+	Import struct {
+		AccessChain *Ident
+	}
 	Binding struct {
 		Export    bool
 		Name      string
