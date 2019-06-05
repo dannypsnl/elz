@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
-	"unicode/utf8"
 )
 
 type ItemType int
-type Pos int
+type Offset int
+type Pos struct {
+	Line, Pos Offset
+}
+
+func (p Pos) String() string {
+	return fmt.Sprintf("(%d, %d)", p.Line, p.Pos)
+}
 
 const EOF = -1
 
@@ -73,36 +79,40 @@ func (t ItemType) String() string {
 
 type Item struct {
 	Type ItemType
-	Pos  Pos
 	Val  string
+	Pos
 }
 
 func (i Item) String() string {
 	return fmt.Sprintf(
-		"(%s, value: `%s` at %d)",
+		"(%s, value: `%s` at %s)",
 		i.Type, i.Val, i.Pos,
 	)
 }
 
 type Lexer struct {
-	name    string
-	input   string
-	state   stateFn
-	pos     Pos
-	start   Pos
-	width   Pos
-	lastPos Pos
-	items   chan Item
-
-	parenDepth int
-	vectDepth  int
+	name  string
+	input []rune
+	state stateFn
+	// for report position as format: (line, pos)
+	line Offset
+	pos  Offset
+	// lexing helpers
+	offset Offset
+	start  Offset
+	items  chan Item
 }
 
 func Lex(name, input string) *Lexer {
 	l := &Lexer{
-		name:  name,
-		input: input,
-		items: make(chan Item),
+		name:   name,
+		input:  []rune(input),
+		items:  make(chan Item),
+		state:  lexWhiteSpace,
+		line:   1,
+		pos:    0,
+		offset: 0,
+		start:  0,
 	}
 	go l.run()
 	return l
@@ -110,16 +120,15 @@ func Lex(name, input string) *Lexer {
 
 func (l *Lexer) NextItem() Item {
 	item := <-l.items
-	l.lastPos = item.Pos
 	return item
 }
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
-	l.items <- Item{ItemError, l.start, fmt.Sprintf(format, args...)}
+	l.items <- l.newItem(ItemError, fmt.Sprintf(format, args...))
 	return nil
 }
 
 func (l *Lexer) run() {
-	for l.state = lexWhiteSpace; l.state != nil; {
+	for l.state != nil {
 		l.state = l.state(l)
 	}
 	defer close(l.items)
@@ -127,67 +136,73 @@ func (l *Lexer) run() {
 
 // next returns the next rune in the input.
 func (l *Lexer) next() rune {
-	if int(l.pos) >= len(l.input) {
-		l.width = 0
+	l.offset += 1
+	if int(l.offset) >= len(l.input) {
 		return EOF
 	}
-	r, w := utf8.DecodeRuneInString(l.input[l.pos:])
-	l.width = Pos(w)
-	l.pos += l.width
+	r := l.input[l.offset]
+	l.pos++
+	if isEndOfLine(r) {
+		// newline -> pos: (line+1, 0)
+		l.line++
+		l.pos = 0
+	}
 	return r
 }
 
 // peek returns but does not consume the next rune in the input.
 func (l *Lexer) peek() rune {
-	r := l.next()
-	l.backup()
-	return r
+	if int(l.offset) >= len(l.input) {
+		return EOF
+	}
+	return l.input[l.offset]
 }
 
-// backup steps back one rune. Can only be called once per call of next.
-func (l *Lexer) backup() {
-	l.pos -= l.width
+func (l *Lexer) newItem(typ ItemType, val string) Item {
+	return Item{
+		Type: typ,
+		Val:  val,
+		Pos:  Pos{l.line, l.pos},
+	}
 }
 
 // emit passes an Item back to the client.
 func (l *Lexer) emit(t ItemType) {
-	// Item {ItemType, Pos, Val}
-	st := l.start
-	value := l.input[l.start:l.pos]
+	value := string(l.input[l.start:l.offset])
 	switch value {
 	case "true":
-		l.items <- Item{ItemKwTrue, st, value}
+		l.items <- l.newItem(ItemKwTrue, value)
 	case "false":
-		l.items <- Item{ItemKwFalse, st, value}
+		l.items <- l.newItem(ItemKwFalse, value)
 	case "type":
-		l.items <- Item{ItemKwType, st, value}
+		l.items <- l.newItem(ItemKwType, value)
 	case "import":
-		l.items <- Item{ItemKwImport, st, value}
+		l.items <- l.newItem(ItemKwImport, value)
 	default:
-		l.items <- Item{t, st, value}
+		l.items <- l.newItem(t, value)
 	}
-	l.start = l.pos
+	l.start = l.offset
 }
 
 // accept consumes the next rune if it's from the valid set.
 func (l *Lexer) accept(valid string) bool {
-	if strings.IndexRune(valid, l.next()) >= 0 {
+	if strings.IndexRune(valid, l.peek()) >= 0 {
+		l.next()
 		return true
 	}
-	l.backup()
 	return false
 }
 
 // acceptRun consumes a run of runes from the valid set.
 func (l *Lexer) acceptRun(valid string) {
-	for strings.IndexRune(valid, l.next()) >= 0 {
+	for strings.IndexRune(valid, l.peek()) >= 0 {
+		l.next()
 	}
-	l.backup()
 }
 
 // ignore drop not yet emitted parts
 func (l *Lexer) ignore() {
-	l.start = l.pos
+	l.start = l.offset
 }
 
 func (l *Lexer) scanNumber() bool {
@@ -204,8 +219,6 @@ func (l *Lexer) scanNumber() bool {
 		l.accept("+-")
 		l.acceptRun("0123456789")
 	}
-	// Is it imaginary?
-	l.accept("i")
 	// Next thing mustn't be alphanumeric.
 	if r := l.peek(); isAlphaNumeric(r) {
 		l.next()
@@ -214,62 +227,67 @@ func (l *Lexer) scanNumber() bool {
 	return true
 }
 
-// isSpace reports whether r is a space character.
-func isSpace(r rune) bool {
-	return r == ' ' || r == '\t'
-}
-
 // stateFn is a function need get info from Lexer and return next stateFn
 type stateFn func(*Lexer) stateFn
 
 func lexWhiteSpace(l *Lexer) stateFn {
-	for r := l.next(); isSpace(r) || isEndOfLine(r); l.next() {
-		r = l.peek()
+	for r := l.peek(); isSpace(r) || isEndOfLine(r); {
+		r = l.next()
 	}
-	l.backup()
 	l.ignore()
 
-	switch r := l.next(); {
+	switch r := l.peek(); {
 	case r == EOF:
 		l.emit(ItemEOF)
 		return nil
 	case r == '"':
+		l.next()
 		return lexString
 	case r == '*':
+		l.next()
 		l.emit(ItemMul)
 		return lexWhiteSpace
 	case r == '/':
+		l.next()
 		l.emit(ItemDiv)
 		return lexWhiteSpace
 	case r == ':':
+		l.next()
 		l.emit(ItemColon)
 		return lexWhiteSpace
 	case r == ',':
+		l.next()
 		l.emit(ItemComma)
 		return lexWhiteSpace
 	case r == '=':
+		l.next()
 		l.emit(ItemAssign)
 		return lexWhiteSpace
 	case r == '-':
+		l.next()
 		l.emit(ItemMinus)
 		return lexWhiteSpace
 	case r == '+':
+		l.next()
 		l.emit(ItemPlus)
 		return lexWhiteSpace
 	case r == '(':
+		l.next()
 		l.emit(ItemLeftParen)
 		return lexWhiteSpace
 	case r == ')':
+		l.next()
 		l.emit(ItemRightParen)
 		return lexWhiteSpace
 	case r == '[':
+		l.next()
 		l.emit(ItemLeftBracket)
 		return lexWhiteSpace
 	case r == ']':
+		l.next()
 		l.emit(ItemRightBracket)
 		return lexWhiteSpace
 	case '0' <= r && r <= '9':
-		l.backup()
 		return lexNumber
 	case isAlphaNumeric(r):
 		return lexIdent
@@ -287,13 +305,14 @@ func lexString(l *Lexer) stateFn {
 			return l.errorf("unterminated quoted string")
 		}
 	}
+	l.next()
 	l.emit(ItemString)
 	return lexWhiteSpace
 }
 
 func lexNumber(l *Lexer) stateFn {
 	if !l.scanNumber() {
-		return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
+		return l.errorf("bad number syntax: %q", l.input[l.start:l.offset])
 	}
 
 	l.emit(ItemNumber)
@@ -302,12 +321,17 @@ func lexNumber(l *Lexer) stateFn {
 }
 
 func lexIdent(l *Lexer) stateFn {
-	for r := l.next(); isAlphaNumeric(r); r = l.next() {
+	for r := l.peek(); isAlphaNumeric(r); {
+		r = l.next()
 	}
-	l.backup()
 
 	l.emit(ItemIdent)
 	return lexWhiteSpace
+}
+
+// isSpace reports whether r is a space character.
+func isSpace(r rune) bool {
+	return r == ' ' || r == '\t'
 }
 
 // isEndOfLine reports whether r is an end-of-line character.

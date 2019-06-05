@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
@@ -35,7 +34,7 @@ func (p *Parser) next() {
 
 func (p *Parser) want(wantType lexer.ItemType) error {
 	if p.curToken.Type != wantType {
-		return expectedError(wantType, p.curToken.Type, p.curToken.Pos)
+		return expectedError(wantType, p.curToken.Type)
 	}
 	return nil
 }
@@ -174,15 +173,13 @@ func (p *Parser) ParseUnary() (ast.Expr, error) {
 		}
 		return ast.NewList(listElem...), nil
 	default:
-		logrus.Fatalf("unsupported primary token: %s", p.curToken)
+		return nil, fmt.Errorf("unsupported primary token: %s", p.curToken)
 	}
-	// compiler notation
-	return nil, nil
 }
 
 func (p *Parser) ParseElementAccess(expr ast.Expr) (*ast.ExtractElement, error) {
 	if p.curToken.Type != lexer.ItemLeftBracket {
-		return nil, expectedError(lexer.ItemLeftBracket, p.peekToken, p.peekToken.Pos)
+		return nil, expectedError(lexer.ItemLeftBracket, p.peekToken)
 	}
 	p.next() // consume left bracket [
 	primary, err := p.ParsePrimary()
@@ -202,7 +199,7 @@ func (p *Parser) ParseElementAccess(expr ast.Expr) (*ast.ExtractElement, error) 
 
 func (p *Parser) ParseArgument(expr ast.Expr) (*ast.FuncCall, error) {
 	if p.curToken.Type != lexer.ItemLeftParen {
-		return nil, expectedError(lexer.ItemLeftParen, p.peekToken, p.peekToken.Pos)
+		return nil, expectedError(lexer.ItemLeftParen, p.peekToken)
 	}
 	p.next() // consume left paren (
 
@@ -287,6 +284,6 @@ func init() {
 	precedenceOfOperator[lexer.ItemDiv] = 2
 }
 
-func expectedError(expected, actual fmt.Stringer, pos lexer.Pos) error {
-	return fmt.Errorf("expected: %s but got: %s at: %d", expected, actual, pos)
+func expectedError(expected, actual fmt.Stringer) error {
+	return fmt.Errorf("expected: %s but got: %s", expected, actual)
 }
