@@ -77,7 +77,7 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 		return nil, err
 	}
 	return &ast.Binding{
-		Export:    false,
+		Export:    !strings.HasPrefix(bindingName, "_"),
 		Name:      bindingName,
 		ParamList: parameterList,
 		Expr:      expr,
