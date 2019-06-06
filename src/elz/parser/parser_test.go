@@ -39,6 +39,61 @@ func TestParseImport(t *testing.T) {
 	}
 }
 
+func TestParseBindingType(t *testing.T) {
+	testCases := []struct {
+		code        string
+		expectedAst *ast.BindingType
+	}{
+		{
+			code: `a :: i32`,
+			expectedAst: &ast.BindingType{
+				Name: "a",
+				Type: []ast.Type{
+					&ast.ExistType{Name: "i32"},
+				},
+			},
+		},
+		{
+			code: `a :: i32 -> i32`,
+			expectedAst: &ast.BindingType{
+				Name: "a",
+				Type: []ast.Type{
+					&ast.ExistType{Name: "i32"},
+					&ast.ExistType{Name: "i32"},
+				},
+			},
+		},
+		{
+			code: `a :: 'a -> 'b`,
+			expectedAst: &ast.BindingType{
+				Name: "a",
+				Type: []ast.Type{
+					&ast.VariantType{Name: "a"},
+					&ast.VariantType{Name: "b"},
+				},
+			},
+		},
+		{
+			code: `a :: ()`,
+			expectedAst: &ast.BindingType{
+				Name: "a",
+				Type: []ast.Type{
+					&ast.VoidType{},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.code, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParseBindingType()
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedAst, actual)
+		})
+	}
+}
+
 func TestParseBinding(t *testing.T) {
 	testCases := []struct {
 		code        string

@@ -37,10 +37,12 @@ const (
 	ItemRightParen   // )
 	ItemLeftBracket  // [
 	ItemRightBracket // ]
+	ItemGreaterThan  // >
 	ItemPlus         // +
 	ItemMinus        // -
 	ItemMul          // *
 	ItemDiv          // /
+	ItemPrime        /// '
 	// Meta
 	ItemEOF
 )
@@ -62,10 +64,12 @@ func init() {
 	itemTypeToString[ItemRightParen] = "operator:right_paren"
 	itemTypeToString[ItemLeftBracket] = "operator:left_bracket"
 	itemTypeToString[ItemRightBracket] = "operator:right_bracket"
+	itemTypeToString[ItemGreaterThan] = "operator:greater_than"
 	itemTypeToString[ItemPlus] = "operator:plus"
 	itemTypeToString[ItemMinus] = "operator:minus"
 	itemTypeToString[ItemMul] = "operator:mul"
 	itemTypeToString[ItemDiv] = "operator:div"
+	itemTypeToString[ItemPrime] = "operator:prime"
 	itemTypeToString[ItemEOF] = "EOF"
 }
 
@@ -267,6 +271,10 @@ func lexWhiteSpace(l *Lexer) stateFn {
 		l.next()
 		l.emit(ItemMinus)
 		return lexWhiteSpace
+	case r == '>':
+		l.next()
+		l.emit(ItemGreaterThan)
+		return lexWhiteSpace
 	case r == '+':
 		l.next()
 		l.emit(ItemPlus)
@@ -286,6 +294,10 @@ func lexWhiteSpace(l *Lexer) stateFn {
 	case r == ']':
 		l.next()
 		l.emit(ItemRightBracket)
+		return lexWhiteSpace
+	case r == '\'':
+		l.next()
+		l.emit(ItemPrime)
 		return lexWhiteSpace
 	case '0' <= r && r <= '9':
 		return lexNumber

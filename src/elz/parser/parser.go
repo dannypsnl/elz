@@ -53,6 +53,70 @@ func (p *Parser) ParseImport() (*ast.Import, error) {
 	}, nil
 }
 
+func (p *Parser) ParseBindingType() (*ast.BindingType, error) {
+	if err := p.want(lexer.ItemIdent); err != nil {
+		return nil, err
+	}
+	bindingName := p.curToken.Val
+	p.next()
+	if err := p.want(lexer.ItemColon); err != nil {
+		return nil, err
+	}
+	p.next()
+	if err := p.want(lexer.ItemColon); err != nil {
+		return nil, err
+	}
+	p.next()
+
+	bindingType := make([]ast.Type, 0)
+	for {
+		t, err := p.ParseType()
+		if err != nil {
+			return nil, err
+		}
+		bindingType = append(bindingType, t)
+		if p.peekToken.Type == lexer.ItemMinus {
+			p.next()
+			p.next()
+			if err := p.want(lexer.ItemGreaterThan); err != nil {
+				return nil, err
+			}
+			p.next()
+		} else {
+			return &ast.BindingType{
+				Name: bindingName,
+				Type: bindingType,
+			}, nil
+		}
+	}
+}
+
+func (p *Parser) ParseType() (ast.Type, error) {
+	switch p.curToken.Type {
+	case lexer.ItemIdent:
+		accessChain, err := p.ParseAccessChain()
+		if err != nil {
+			return nil, err
+		}
+		return &ast.ExistType{Name: accessChain.Literal}, nil
+	case lexer.ItemPrime:
+		p.next()
+		if err := p.want(lexer.ItemIdent); err != nil {
+			return nil, err
+		}
+		return &ast.VariantType{Name: p.curToken.Val}, nil
+	case lexer.ItemLeftParen:
+		p.next()
+		if err := p.want(lexer.ItemRightParen); err != nil {
+			return nil, err
+		}
+		p.next()
+		return &ast.VoidType{}, nil
+	default:
+		return nil, fmt.Errorf("unexpected token at parsing type: %s", p.curToken)
+	}
+}
+
 func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	if err := p.want(lexer.ItemIdent); err != nil {
 		return nil, err

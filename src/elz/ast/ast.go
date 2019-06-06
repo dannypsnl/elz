@@ -25,6 +25,10 @@ type (
 	Import struct {
 		AccessChain *Ident
 	}
+	BindingType struct {
+		Name string
+		Type []Type
+	}
 	Binding struct {
 		Export    bool
 		Name      string
