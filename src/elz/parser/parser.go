@@ -13,6 +13,8 @@ type Parser struct {
 	// token system
 	curToken  lexer.Item
 	peekToken lexer.Item
+	// error reports
+	errors []error
 }
 
 func NewParser(name, code string) *Parser {
@@ -27,6 +29,61 @@ func NewParser(name, code string) *Parser {
 	return parser
 }
 
+func (p *Parser) ParseProgram() (*ast.Program, error) {
+	program := &ast.Program{}
+	for {
+		switch p.curToken.Type {
+		case lexer.ItemIdent:
+			if p.peekToken.Type == lexer.ItemColon {
+				bindingType, err := p.ParseBindingType()
+				if err != nil {
+					p.errors = append(p.errors, err)
+				} else {
+					program.AddBindingType(bindingType)
+					p.next()
+				}
+			} else {
+				binding, err := p.ParseBinding()
+				if err != nil {
+					p.errors = append(p.errors, err)
+				} else {
+					program.AddBinding(binding)
+				}
+				p.next()
+			}
+		case lexer.ItemKwImport:
+			importStmt, err := p.ParseImport()
+			if err != nil {
+				p.errors = append(p.errors, err)
+			} else {
+				program.AddImport(importStmt)
+				p.next()
+			}
+		case lexer.ItemKwType:
+			// FIXME: complete the type define parsing
+			return nil, fmt.Errorf("unimplemented type define yet")
+		case lexer.ItemEOF:
+			return program, p.reportErrors()
+		default:
+			return nil, fmt.Errorf("unexpected token: %s", p.curToken)
+		}
+	}
+}
+
+func (p *Parser) reportErrors() error {
+	if len(p.errors) == 0 {
+		return nil
+	}
+	buf := strings.Builder{}
+	for i, err := range p.errors {
+		buf.WriteString(fmt.Sprintf("error #%d\n", i+1))
+		buf.WriteString(err.Error())
+		buf.WriteRune('\n')
+		buf.WriteRune('\n')
+	}
+	return fmt.Errorf(buf.String())
+}
+
 func (p *Parser) next() {
 	p.curToken = p.peekToken
 	p.peekToken = p.lex.NextItem()
@@ -34,7 +91,7 @@ func (p *Parser) next() {
 
 func (p *Parser) want(wantType lexer.ItemType) error {
 	if p.curToken.Type != wantType {
-		return expectedError(wantType, p.curToken.Type)
+		return expectedError(wantType, p.curToken)
 	}
 	return nil
 }

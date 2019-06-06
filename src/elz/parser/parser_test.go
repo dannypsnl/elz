@@ -490,3 +490,17 @@ func TestParseBooleanLiteral(t *testing.T) {
 		})
 	}
 }
+
+func TestParseProgram(t *testing.T) {
+	code := `import foo::bar
+add :: i32 -> i32 -> i32
+add x y = x + y
+add_one y = add(1, y)
+`
+	p := parser.NewParser("test", code)
+	program, err := p.ParseProgram()
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(program.Imports))
+	assert.Equal(t, 1, len(program.BindingTypes))
+	assert.Equal(t, 2, len(program.Bindings))
+}

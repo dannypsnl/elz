@@ -12,12 +12,37 @@ type Tree struct {
 	typeDefines map[string]*ast.NewType
 }
 
-func NewTree() *Tree {
-	return &Tree{
+func NewTree(program *ast.Program) (*Tree, error) {
+	newTree := &Tree{
 		imports:     make([]string, 0),
 		bindings:    make(map[string]*Binding),
 		typeDefines: make(map[string]*ast.NewType),
 	}
+	for _, im := range program.Imports {
+		newTree.InsertImport(im.AccessChain.Literal)
+	}
+	for _, binding := range program.Bindings {
+		err := newTree.InsertBinding(binding)
+		if err != nil {
+			return nil, err
+		}
+	}
+	for _, bindingT := range program.BindingTypes {
+		err := newTree.InsertBindingType(bindingT)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return newTree, nil
+}
+
+func (t *Tree) InsertBindingType(bt *ast.BindingType) error {
+	_, exist := t.bindings[bt.Name]
+	if !exist {
+		return fmt.Errorf("no binding: %s exist", bt.Name)
+	}
+	t.bindings[bt.Name].Type = bt.Type
+	return nil
 }
 
 func (t *Tree) InsertBinding(b *ast.Binding) error {

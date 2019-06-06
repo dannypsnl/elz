@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/elz-lang/elz/src/elz/ast"
-	"github.com/elz-lang/elz/src/elz/builder"
 	"github.com/elz-lang/elz/src/elz/codegen"
+	"github.com/elz-lang/elz/src/elz/parser"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -60,7 +60,11 @@ addOne y = add(1, y)
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			tree := builder.NewFromCode(testCase.code)
+			p := parser.NewParser("codegen-test", testCase.code)
+			program, err := p.ParseProgram()
+			require.NoError(t, err)
+			tree, err := codegen.NewTree(program)
+			require.NoError(t, err)
 
 			binding, err := tree.GetBinding(testCase.bindName)
 			require.NoError(t, err)
@@ -122,7 +126,11 @@ add x y = x + y
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			tree := builder.NewFromCode(testCase.code)
+			p := parser.NewParser("codegen-test", testCase.code)
+			program, err := p.ParseProgram()
+			require.NoError(t, err)
+			tree, err := codegen.NewTree(program)
+			require.NoError(t, err)
 
 			binding, err := tree.GetBinding(testCase.bindName)
 			require.NoError(t, err)
