@@ -21,6 +21,14 @@ type (
 		Name   string
 		Fields []*Field
 	}
+	// FIXME: merge this with the codegen tree(originally approach of imports)
+	Import struct {
+		AccessChain *Ident
+	}
+	BindingType struct {
+		Name string
+		Type []Type
+	}
 	Binding struct {
 		Export    bool
 		Name      string
@@ -30,6 +38,8 @@ type (
 	}
 	FuncCall struct {
 		isExpr
+		X Expr
+		// FIXME: after complete parser, remove access chain this field & fix code generator
 		AccessChain string
 		ArgList     []*Arg
 	}
