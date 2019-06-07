@@ -60,8 +60,13 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 				p.next()
 			}
 		case lexer.ItemKwType:
-			// FIXME: complete the type define parsing
-			return nil, fmt.Errorf("unimplemented type define yet")
+			typeDef, err := p.ParseTypeDefine()
+			if err != nil {
+				p.errors = append(p.errors, err)
+			} else {
+				program.AddTypeDefine(typeDef)
+				p.next()
+			}
 		case lexer.ItemEOF:
 			if len(p.errors) != 0 {
 				return nil, p.reportErrors()
@@ -108,6 +113,60 @@ func (p *Parser) ParseImport() (*ast.Import, error) {
 	return &ast.Import{
 		AccessChain: accessChain,
 	}, nil
+}
+
+func (p *Parser) ParseTypeDefine() (*ast.TypeDefine, error) {
+	if err := p.want(lexer.ItemKwType); err != nil {
+		return nil, err
+	}
+	p.next()
+	if err := p.want(lexer.ItemIdent); err != nil {
+		return nil, err
+	}
+	typeDefName := p.curToken.Val
+	p.next()
+	if err := p.want(lexer.ItemAssign); err != nil {
+		return nil, err
+	}
+	p.next()
+	if err := p.want(lexer.ItemLeftParen); err != nil {
+		return nil, err
+	}
+	p.next()
+	fields := make([]*ast.Field, 0)
+	for p.curToken.Type != lexer.ItemRightParen {
+		field, err := p.ParseTypeField()
+		if err != nil {
+			return nil, err
+		}
+		p.next()
+		fields = append(fields, field)
+		if err := p.want(lexer.ItemComma); err != nil {
+			if err := p.want(lexer.ItemRightParen); err != nil {
+				return nil, err
+			}
+		} else {
+			p.next() // consume comma
+		}
+	}
+	return ast.NewTypeDefine(typeDefName, fields...), nil
+}
+
+func (p *Parser) ParseTypeField() (*ast.Field, error) {
+	if err := p.want(lexer.ItemIdent); err != nil {
+		return nil, err
+	}
+	fieldName := p.curToken.Val
+	p.next()
+	if err := p.want(lexer.ItemColon); err != nil {
+		return nil, err
+	}
+	p.next()
+	typ, err := p.ParseType()
+	if err != nil {
+		return nil, err
+	}
+	return ast.NewField(fieldName, typ), nil
 }
 
 func (p *Parser) ParseBindingType() (*ast.BindingType, error) {
@@ -370,11 +429,10 @@ func (p *Parser) ParseArgument(expr ast.Expr) (*ast.FuncCall, error) {
 		if err := p.want(lexer.ItemComma); err != nil {
 			if err := p.want(lexer.ItemRightParen); err != nil {
 				return nil, err
-			} else {
-				break
 			}
+		} else {
+			p.next() // consume comma
 		}
-		p.next() // consume comma
 	}
 	return &ast.FuncCall{
 		Func:    expr,

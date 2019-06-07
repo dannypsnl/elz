@@ -1,9 +1,14 @@
 package ast
 
 type Program struct {
+	TypeDefines  []*TypeDefine
 	Bindings     []*Binding
 	BindingTypes []*BindingType
 	Imports      []*Import
+}
+
+func (p *Program) AddTypeDefine(typeDef *TypeDefine) {
+	p.TypeDefines = append(p.TypeDefines, typeDef)
 }
 
 func (p *Program) AddBinding(b *Binding) {

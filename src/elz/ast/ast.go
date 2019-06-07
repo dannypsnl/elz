@@ -20,7 +20,7 @@ type (
 		Name string
 		Type
 	}
-	NewType struct {
+	TypeDefine struct {
 		Name   string
 		Fields []*Field
 	}
@@ -85,6 +85,16 @@ type (
 		Literal string
 	}
 )
+
+func NewTypeDefine(name string, fields ...*Field) *TypeDefine {
+	if fields == nil {
+		fields = make([]*Field, 0)
+	}
+	return &TypeDefine{
+		Name:   name,
+		Fields: fields,
+	}
+}
 
 func NewBinding(isFunc, export bool, name string, params []string, expr Expr) *Binding {
 	return &Binding{

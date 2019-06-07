@@ -24,7 +24,7 @@ func (g *Generator) GenerateTypes() {
 	}
 }
 
-func convert(def *ast.NewType) llvmtypes.Type {
+func convert(def *ast.TypeDefine) llvmtypes.Type {
 	newStruct := &llvmtypes.StructType{
 		Fields: make([]llvmtypes.Type, 0),
 		Opaque: false,
