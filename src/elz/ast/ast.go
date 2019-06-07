@@ -2,6 +2,7 @@ package ast
 
 import (
 	"github.com/sirupsen/logrus"
+	"strconv"
 )
 
 type isExpr struct{}
@@ -119,7 +120,11 @@ func NewIdent(literal string) *Ident {
 func NewInt(literal string) *Int     { return &Int{Literal: literal} }
 func NewFloat(literal string) *Float { return &Float{Literal: literal} }
 func NewString(literal string) *String {
-	return &String{Literal: literal}
+	str, err := strconv.Unquote(literal)
+	if err != nil {
+		logrus.Fatalf("parser bug, string can't be unquoted: %s", err)
+	}
+	return &String{Literal: str}
 }
 func NewList(exprList ...Expr) *List {
 	if len(exprList) == 0 {
