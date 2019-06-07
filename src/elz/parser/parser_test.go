@@ -318,7 +318,7 @@ func TestParseFunctionCall(t *testing.T) {
 			name: "no argument",
 			code: "a()",
 			expectedExpr: &ast.FuncCall{
-				X:       ast.NewIdent("a"),
+				Func:    ast.NewIdent("a"),
 				ArgList: []*ast.Arg{},
 			},
 		},
@@ -326,7 +326,7 @@ func TestParseFunctionCall(t *testing.T) {
 			name: "2 arguments, with optional end comma",
 			code: "a(1, 2,)",
 			expectedExpr: &ast.FuncCall{
-				X: ast.NewIdent("a"),
+				Func: ast.NewIdent("a"),
 				ArgList: []*ast.Arg{
 					ast.NewArg("", ast.NewInt("1")),
 					ast.NewArg("", ast.NewInt("2")),
@@ -337,7 +337,7 @@ func TestParseFunctionCall(t *testing.T) {
 			name: "2 arguments, one with name",
 			code: "a(left: 1, 2)",
 			expectedExpr: &ast.FuncCall{
-				X: ast.NewIdent("a"),
+				Func: ast.NewIdent("a"),
 				ArgList: []*ast.Arg{
 					ast.NewArg("left", ast.NewInt("1")),
 					ast.NewArg("", ast.NewInt("2")),
@@ -348,7 +348,7 @@ func TestParseFunctionCall(t *testing.T) {
 			name: "2 arguments with name",
 			code: "a(left: 1, right: 2)",
 			expectedExpr: &ast.FuncCall{
-				X: ast.NewIdent("a"),
+				Func: ast.NewIdent("a"),
 				ArgList: []*ast.Arg{
 					ast.NewArg("left", ast.NewInt("1")),
 					ast.NewArg("right", ast.NewInt("2")),
@@ -359,7 +359,7 @@ func TestParseFunctionCall(t *testing.T) {
 			name: "3 arguments, 2 with name",
 			code: "a(first: 1, mid: 2, 3)",
 			expectedExpr: &ast.FuncCall{
-				X: ast.NewIdent("a"),
+				Func: ast.NewIdent("a"),
 				ArgList: []*ast.Arg{
 					ast.NewArg("first", ast.NewInt("1")),
 					ast.NewArg("mid", ast.NewInt("2")),
@@ -371,14 +371,14 @@ func TestParseFunctionCall(t *testing.T) {
 			name: "nesting",
 			code: "a(b(), c())",
 			expectedExpr: &ast.FuncCall{
-				X: ast.NewIdent("a"),
+				Func: ast.NewIdent("a"),
 				ArgList: []*ast.Arg{
 					ast.NewArg("", &ast.FuncCall{
-						X:       ast.NewIdent("b"),
+						Func:    ast.NewIdent("b"),
 						ArgList: []*ast.Arg{},
 					}),
 					ast.NewArg("", &ast.FuncCall{
-						X:       ast.NewIdent("c"),
+						Func:    ast.NewIdent("c"),
 						ArgList: []*ast.Arg{},
 					}),
 				},
@@ -388,13 +388,13 @@ func TestParseFunctionCall(t *testing.T) {
 			name: "level 3 nesting",
 			code: "a(b(c()))",
 			expectedExpr: &ast.FuncCall{
-				X: ast.NewIdent("a"),
+				Func: ast.NewIdent("a"),
 				ArgList: []*ast.Arg{
 					ast.NewArg("", &ast.FuncCall{
-						X: ast.NewIdent("b"),
+						Func: ast.NewIdent("b"),
 						ArgList: []*ast.Arg{
 							ast.NewArg("", &ast.FuncCall{
-								X:       ast.NewIdent("c"),
+								Func:    ast.NewIdent("c"),
 								ArgList: []*ast.Arg{},
 							}),
 						},
@@ -489,4 +489,18 @@ func TestParseBooleanLiteral(t *testing.T) {
 			assert.Equal(t, tc.expectedExpr, actual)
 		})
 	}
+}
+
+func TestParseProgram(t *testing.T) {
+	code := `import foo::bar
+add :: i32 -> i32 -> i32
+add x y = x + y
+add_one y = add(1, y)
+`
+	p := parser.NewParser("test", code)
+	program, err := p.ParseProgram()
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(program.Imports))
+	assert.Equal(t, 1, len(program.BindingTypes))
+	assert.Equal(t, 2, len(program.Bindings))
 }

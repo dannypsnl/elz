@@ -23,6 +23,14 @@ func TestLexer(t *testing.T) {
 			item:  lexer.ItemMinus,
 		},
 		{
+			input: ":",
+			item:  lexer.ItemColon,
+		},
+		{
+			input: "::",
+			item:  lexer.ItemAccessor,
+		},
+		{
 			input: "name",
 			item:  lexer.ItemIdent,
 		},

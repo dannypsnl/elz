@@ -32,6 +32,7 @@ const (
 	// Operator
 	ItemAssign       // =
 	ItemColon        // :
+	ItemAccessor     // ::
 	ItemComma        // ,
 	ItemLeftParen    // (
 	ItemRightParen   // )
@@ -59,6 +60,7 @@ func init() {
 	itemTypeToString[ItemKwImport] = "keyword:import"
 	itemTypeToString[ItemAssign] = "operator:assign"
 	itemTypeToString[ItemColon] = "operator:colon"
+	itemTypeToString[ItemAccessor] = "operator:accessor"
 	itemTypeToString[ItemComma] = "operator:comma"
 	itemTypeToString[ItemLeftParen] = "operator:left_paren"
 	itemTypeToString[ItemRightParen] = "operator:right_paren"
@@ -257,7 +259,12 @@ func lexWhiteSpace(l *Lexer) stateFn {
 		return lexWhiteSpace
 	case r == ':':
 		l.next()
-		l.emit(ItemColon)
+		if l.peek() == ':' {
+			l.next()
+			l.emit(ItemAccessor)
+		} else {
+			l.emit(ItemColon)
+		}
 		return lexWhiteSpace
 	case r == ',':
 		l.next()

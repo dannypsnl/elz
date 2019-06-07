@@ -2,13 +2,14 @@ package compile
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
-	"github.com/elz-lang/elz/src/elz/builder"
 	"github.com/elz-lang/elz/src/elz/codegen"
+	"github.com/elz-lang/elz/src/elz/parser"
 
 	"github.com/spf13/cobra"
 )
@@ -83,7 +84,16 @@ func newCacheAgent() *cacheAgent {
 }
 
 func (c *cacheAgent) compile(rootDir, entryFile string) (*codegen.Tree, error) {
-	tree, err := builder.NewFromFile(entryFile)
+	code, err := ioutil.ReadFile(entryFile)
+	if err != nil {
+		return nil, err
+	}
+	p := parser.NewParser(entryFile, string(code))
+	program, err := p.ParseProgram()
+	if err != nil {
+		return nil, err
+	}
+	tree, err := codegen.NewTree(program)
 	if err != nil {
 		return nil, err
 	}
