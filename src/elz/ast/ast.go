@@ -1,8 +1,9 @@
 package ast
 
 import (
-	"github.com/sirupsen/logrus"
 	"strconv"
+
+	"github.com/sirupsen/logrus"
 )
 
 type isExpr struct{}
@@ -39,6 +40,11 @@ type (
 		ParamList []string
 		Expr      Expr
 		TypeList  []Type
+	}
+	AccessField struct {
+		isExpr
+		From   Expr
+		ByName string
 	}
 	FuncCall struct {
 		isExpr
@@ -86,6 +92,13 @@ type (
 		Literal string
 	}
 )
+
+func NewAccessField(from Expr, name string) *AccessField {
+	return &AccessField{
+		From:   from,
+		ByName: name,
+	}
+}
 
 func NewTypeDefine(export bool, name string, fields ...*Field) *TypeDefine {
 	if fields == nil {

@@ -300,10 +300,14 @@ func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) (as
 			}
 			lookahead = p.peekToken
 		}
-		lhs = &ast.BinaryExpr{
-			LExpr: lhs,
-			RExpr: rhs,
-			Op:    operator.Val,
+		if operator.Type == lexer.ItemDot {
+			lhs = ast.NewAccessField(lhs, rhs.(*ast.Ident).Literal)
+		} else {
+			lhs = &ast.BinaryExpr{
+				LExpr: lhs,
+				RExpr: rhs,
+				Op:    operator.Val,
+			}
 		}
 	}
 	return lhs, nil
@@ -482,6 +486,7 @@ func init() {
 	precedenceOfOperator[lexer.ItemMinus] = 1
 	precedenceOfOperator[lexer.ItemMul] = 2
 	precedenceOfOperator[lexer.ItemDiv] = 2
+	precedenceOfOperator[lexer.ItemDot] = 3
 }
 
 func expectedError(expected, actual fmt.Stringer) error {

@@ -95,7 +95,7 @@ func (t *Tree) GetExportTypeDefine(typeName string) (*ast.TypeDefine, error) {
 		return nil, err
 	}
 	if !typeDef.Export {
-		return nil, fmt.Errorf("no export type define call: %s", typeName)
+		return nil, fmt.Errorf("no export type call: %s", typeName)
 	}
 	return typeDef, nil
 }

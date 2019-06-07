@@ -1,5 +1,8 @@
 type Car = (
-  price: int
+  price: int,
+  seq: int,
 )
 
-main = printf("define Car\n")
+car = Car(price: 100, seq: 10)
+
+main = printf("price of car: %d, sequence number of car: %d\n", car.price, car.seq)

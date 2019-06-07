@@ -285,6 +285,13 @@ func TestParseBinaryExpression(t *testing.T) {
 				Op: "*",
 			},
 		},
+		{
+			code: `a.b`,
+			expectedExpr: ast.NewAccessField(
+				ast.NewIdent("a"),
+				"b",
+			),
+		},
 	}
 
 	for _, tc := range testCases {

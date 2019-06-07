@@ -37,7 +37,7 @@ type module struct {
 //
 // import format is `lib::lib::lib`,
 // but would only take last name as local name of the module
-func newModule(g *Generator, tree *Tree) *module {
+func newModule(g *Generator, name string, tree *Tree) *module {
 	imports := map[string]string{}
 	for _, importPath := range tree.imports {
 		accessChain := strings.Split(importPath, "::")
@@ -63,10 +63,38 @@ has the same name in the module`, mod1, importPath)
 		imports:       imports,
 	}
 	// init type map, we would add binding type at here
-	for _, b := range tree.bindings {
-		m.typeMap.Add(b.Name, types.NewBindingType(m, b.Binding))
+	for _, b := range m.bindings {
+		if b.IsFunc {
+			m.typeMap.Add(b.Name, types.NewBindingType(m, b.Binding))
+		}
 	}
-	for _, bind := range tree.bindings {
+	params := make([]string, 0)
+	for _, typeDef := range m.typeDefines {
+		for _, field := range typeDef.Fields {
+			params = append(params, field.Name)
+		}
+		newStruct := value.NewStruct(
+			m.generator.mod,
+			name,
+			m.generator.builtin["elz_malloc"].compilerProvidedImpl,
+			typeDef,
+		)
+		err := m.InsertBinding(ast.NewBinding(
+			true,
+			typeDef.Export,
+			typeDef.Name,
+			params,
+			newStruct,
+		))
+		if err != nil {
+			logrus.Fatalf("failed at insert constructor of type: %s", typeDef.Name)
+		}
+		bind, _ := m.GetBinding(typeDef.Name)
+		// FIXME: this would be a problem when we build generic constructor
+		bind.compilerProvidedImpl = newStruct.Constructor()
+		m.typeMap.Add(typeDef.Name, newStruct.ElzType())
+	}
+	for _, bind := range m.bindings {
 		bind.SetModule(m)
 	}
 	return m
@@ -135,6 +163,8 @@ func (m *module) InferTypeOf(expr ast.Expr, typeMap *types.TypeMap) (types.Type,
 			return nil, fmt.Errorf("extract element do not support key type: %s", kt)
 		}
 		return listT.(*types.List).ElemT, nil
+	case *value.Struct:
+		return expr.ElzType(), nil
 	default:
 		return nil, fmt.Errorf("unsupported type inference for expression: %#v yet", expr)
 	}
@@ -209,6 +239,32 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 			}
 		}
 		return nil, fmt.Errorf("unsupported operator: %s", expr.Op)
+	case *ast.AccessField:
+		le, err := m.genExpr(b, expr.From, binds, typeMap)
+		if err != nil {
+			return nil, err
+		}
+		lt, err := typeMap.GetTypeOfExpr(expr.From)
+		if err != nil {
+			return nil, err
+		}
+		st, ok := lt.(*types.Struct)
+		if !ok {
+			return nil, fmt.Errorf("access expression is not a structure type: %s", lt)
+		}
+		indices := -1
+		for i, field := range st.Fields {
+			if field.Name == expr.ByName {
+				indices = i
+			}
+		}
+		if indices == -1 {
+			return nil, fmt.Errorf("no field called: %s in type: %s", expr.ByName, lt)
+		}
+		firstField := b.NewExtractValue(le,
+			uint64(indices),
+		)
+		return firstField, nil
 	case *ast.Ident:
 		v, ok := binds[expr.Literal]
 		if ok {
@@ -228,10 +284,15 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if bind.IsFunc {
 			return bind, err
 		}
-		globalVarValue, err := m.genExpr(b, bind.Expr, binds, typeMap)
+		globalVarValue, err := m.genExpr(m.initFuncBlock, bind.Expr, binds, typeMap)
 		if err != nil {
 			return nil, err
 		}
+		globalT, err := typeMap.GetTypeOfExpr(bind.Expr)
+		if err != nil {
+			return nil, err
+		}
+		typeMap.Add(expr.Literal, globalT)
 		// declare global variable
 		globalVar := m.generator.mod.NewGlobal(bind.Name, globalVarValue.Type())
 		globalVar.Init = &constant.ZeroInitializer{}
