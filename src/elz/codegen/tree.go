@@ -89,6 +89,17 @@ func (t *Tree) GetTypeDefines() map[string]*ast.TypeDefine {
 	return t.typeDefines
 }
 
+func (t *Tree) GetExportTypeDefine(typeName string) (*ast.TypeDefine, error) {
+	typeDef, err := t.GetTypeDefine(typeName)
+	if err != nil {
+		return nil, err
+	}
+	if !typeDef.Export {
+		return nil, fmt.Errorf("no export type define call: %s", typeName)
+	}
+	return typeDef, nil
+}
+
 func (t *Tree) GetTypeDefine(typeName string) (*ast.TypeDefine, error) {
 	typDef, exist := t.typeDefines[typeName]
 	if !exist {

@@ -21,6 +21,7 @@ type (
 		Type
 	}
 	TypeDefine struct {
+		Export bool
 		Name   string
 		Fields []*Field
 	}
@@ -86,11 +87,12 @@ type (
 	}
 )
 
-func NewTypeDefine(name string, fields ...*Field) *TypeDefine {
+func NewTypeDefine(export bool, name string, fields ...*Field) *TypeDefine {
 	if fields == nil {
 		fields = make([]*Field, 0)
 	}
 	return &TypeDefine{
+		Export: export,
 		Name:   name,
 		Fields: fields,
 	}

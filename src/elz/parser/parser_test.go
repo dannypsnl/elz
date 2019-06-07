@@ -46,7 +46,11 @@ func TestParseType(t *testing.T) {
 	}{
 		{
 			code:        `type Foo = ()`,
-			expectedAst: ast.NewTypeDefine("Foo"),
+			expectedAst: ast.NewTypeDefine(true, "Foo"),
+		},
+		{
+			code:        `type _foo = ()`,
+			expectedAst: ast.NewTypeDefine(false, "_foo"),
 		},
 		{
 			code: `
@@ -55,6 +59,7 @@ type Foo = (
   b: i32
 )`,
 			expectedAst: ast.NewTypeDefine(
+				true,
 				"Foo",
 				ast.NewField("a", &ast.ExistType{Name: "i32"}),
 				ast.NewField("b", &ast.ExistType{Name: "i32"}),
@@ -67,6 +72,7 @@ type Foo = (
   b: i32,
 )`,
 			expectedAst: ast.NewTypeDefine(
+				true,
 				"Foo",
 				ast.NewField("a", &ast.ExistType{Name: "i32"}),
 				ast.NewField("b", &ast.ExistType{Name: "i32"}),

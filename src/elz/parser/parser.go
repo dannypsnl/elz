@@ -40,7 +40,6 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 					p.errors = append(p.errors, err)
 				} else {
 					program.AddBindingType(bindingType)
-					p.next()
 				}
 			} else {
 				binding, err := p.ParseBinding()
@@ -49,7 +48,6 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 				} else {
 					program.AddBinding(binding)
 				}
-				p.next()
 			}
 		case lexer.ItemKwImport:
 			importStmt, err := p.ParseImport()
@@ -57,7 +55,6 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 				p.errors = append(p.errors, err)
 			} else {
 				program.AddImport(importStmt)
-				p.next()
 			}
 		case lexer.ItemKwType:
 			typeDef, err := p.ParseTypeDefine()
@@ -65,7 +62,6 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 				p.errors = append(p.errors, err)
 			} else {
 				program.AddTypeDefine(typeDef)
-				p.next()
 			}
 		case lexer.ItemEOF:
 			if len(p.errors) != 0 {
@@ -110,6 +106,7 @@ func (p *Parser) ParseImport() (*ast.Import, error) {
 	if err != nil {
 		return nil, err
 	}
+	p.next()
 	return &ast.Import{
 		AccessChain: accessChain,
 	}, nil
@@ -149,7 +146,12 @@ func (p *Parser) ParseTypeDefine() (*ast.TypeDefine, error) {
 			p.next() // consume comma
 		}
 	}
-	return ast.NewTypeDefine(typeDefName, fields...), nil
+	p.next()
+	return ast.NewTypeDefine(
+		!strings.HasPrefix(typeDefName, "_"),
+		typeDefName,
+		fields...,
+	), nil
 }
 
 func (p *Parser) ParseTypeField() (*ast.Field, error) {
@@ -195,6 +197,7 @@ func (p *Parser) ParseBindingType() (*ast.BindingType, error) {
 			}
 			p.next()
 		} else {
+			p.next()
 			return &ast.BindingType{
 				Name: bindingName,
 				Type: bindingType,
@@ -263,6 +266,7 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	if err != nil {
 		return nil, err
 	}
+	p.next()
 	return ast.NewBinding(
 		isFunctionWithoutParameter || len(parameterList) > 0,
 		!strings.HasPrefix(bindingName, "_"),
