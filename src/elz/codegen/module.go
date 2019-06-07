@@ -143,9 +143,13 @@ func (m *module) InferTypeOf(expr ast.Expr, typeMap *types.TypeMap) (types.Type,
 func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *types.TypeMap) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := m.getBindingByAccessChain(expr.Func.(*ast.Ident).Literal)
+		v, err := m.genExpr(b, expr.Func, binds, typeMap)
 		if err != nil {
 			return nil, err
+		}
+		bind, isBinding := v.(*Binding)
+		if !isBinding {
+			return nil, fmt.Errorf("call a non-callable expression: %s", expr.Func)
 		}
 		f, err := bind.GetImpl(typeMap, expr.ArgList...)
 		if err != nil {
@@ -212,7 +216,17 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		}
 		bind, err := m.GetBinding(expr.Literal)
 		if err != nil {
-			return nil, err
+			chain := strings.Split(expr.Literal, "::")
+			if len(chain) >= 2 {
+				localModuleName := chain[len(chain)-2]
+				funcName := chain[len(chain)-1]
+				moduleName := m.imports[localModuleName]
+				return m.generator.allModule[moduleName].GetExportBinding(funcName)
+			}
+			return m.generator.getBuiltin(expr.Literal)
+		}
+		if bind.IsFunc {
+			return bind, err
 		}
 		globalVarValue, err := m.genExpr(b, bind.Expr, binds, typeMap)
 		if err != nil {
@@ -339,22 +353,4 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 	default:
 		return nil, fmt.Errorf("[Unsupport Yet] failed at generate expression: %#v", expr)
 	}
-}
-
-func (m *module) getBindingByAccessChain(accessChain string) (*Binding, error) {
-	chain := strings.Split(accessChain, "::")
-	if len(chain) >= 2 {
-		localModuleName := chain[len(chain)-2]
-		funcName := chain[len(chain)-1]
-		moduleName := m.imports[localModuleName]
-		return m.generator.allModule[moduleName].GetExportBinding(funcName)
-	}
-	if len(chain) == 1 {
-		bind, err := m.GetBinding(accessChain)
-		if err != nil {
-			return m.generator.getBuiltin(accessChain)
-		}
-		return bind, nil
-	}
-	return nil, fmt.Errorf("not supported access chain: %s", accessChain)
 }

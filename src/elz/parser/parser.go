@@ -176,9 +176,20 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	}
 	bindingName := p.curToken.Val
 	parameterList := make([]string, 0)
-	// consume binding name then start parameters parsing
-	for p.next(); p.curToken.Type == lexer.ItemIdent; p.next() {
-		parameterList = append(parameterList, p.curToken.Val)
+	isFunctionWithoutParameter := false
+	if p.peekToken.Type == lexer.ItemLeftParen {
+		p.next()
+		p.next()
+		if err := p.want(lexer.ItemRightParen); err != nil {
+			return nil, err
+		}
+		p.next()
+		isFunctionWithoutParameter = true
+	} else {
+		// consume binding name then start parameters parsing
+		for p.next(); p.curToken.Type == lexer.ItemIdent; p.next() {
+			parameterList = append(parameterList, p.curToken.Val)
+		}
 	}
 	if err := p.want(lexer.ItemAssign); err != nil {
 		return nil, err
@@ -193,12 +204,13 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ast.Binding{
-		Export:    !strings.HasPrefix(bindingName, "_"),
-		Name:      bindingName,
-		ParamList: parameterList,
-		Expr:      expr,
-	}, nil
+	return ast.NewBinding(
+		isFunctionWithoutParameter || len(parameterList) > 0,
+		!strings.HasPrefix(bindingName, "_"),
+		bindingName,
+		parameterList,
+		expr,
+	), nil
 }
 
 func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) (ast.Expr, error) {

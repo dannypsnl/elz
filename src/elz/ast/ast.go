@@ -23,7 +23,6 @@ type (
 		Name   string
 		Fields []*Field
 	}
-	// FIXME: merge this with the codegen tree(originally approach of imports)
 	Import struct {
 		AccessChain *Ident
 	}
@@ -32,11 +31,12 @@ type (
 		Type []Type
 	}
 	Binding struct {
+		IsFunc    bool
 		Export    bool
 		Name      string
 		ParamList []string
 		Expr      Expr
-		Type      []Type
+		TypeList  []Type
 	}
 	FuncCall struct {
 		isExpr
@@ -84,6 +84,17 @@ type (
 		Literal string
 	}
 )
+
+func NewBinding(isFunc, export bool, name string, params []string, expr Expr) *Binding {
+	return &Binding{
+		IsFunc:    isFunc,
+		Export:    export,
+		Name:      name,
+		ParamList: params,
+		Expr:      expr,
+		TypeList:  []Type{},
+	}
+}
 
 func NewField(name string, t Type) *Field {
 	return &Field{

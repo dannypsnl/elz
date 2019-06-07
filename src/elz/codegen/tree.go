@@ -41,7 +41,7 @@ func (t *Tree) InsertBindingType(bt *ast.BindingType) error {
 	if !exist {
 		return fmt.Errorf("no binding: %s exist", bt.Name)
 	}
-	t.bindings[bt.Name].Type = bt.Type
+	t.bindings[bt.Name].TypeList = bt.Type
 	return nil
 }
 

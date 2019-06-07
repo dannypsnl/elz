@@ -6,12 +6,14 @@ import (
 
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/types"
+	"github.com/elz-lang/elz/src/elz/value"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/enum"
 )
 
 type Binding struct {
+	value.Value
 	*ast.Binding
 
 	selfModule           *module
@@ -144,7 +146,7 @@ func (b *Binding) checkArg(args ...*ast.Arg) error {
 }
 
 func (b *Binding) typeCheck(typeList []types.Type) error {
-	if b.Type == nil {
+	if len(b.TypeList) == 0 {
 		return nil
 	}
 	var (
@@ -152,7 +154,7 @@ func (b *Binding) typeCheck(typeList []types.Type) error {
 		err            error
 		variantTypeMap = map[string]string{}
 	)
-	for i, requireT := range b.Type[:len(b.Type)-1] {
+	for i, requireT := range b.TypeList[:len(b.TypeList)-1] {
 		actualType := typeList[i]
 		switch requireT := requireT.(type) {
 		case *ast.ExistType:
