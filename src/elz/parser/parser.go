@@ -34,7 +34,7 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 	for {
 		switch p.curToken.Type {
 		case lexer.ItemIdent:
-			if p.peekToken.Type == lexer.ItemColon {
+			if p.peekToken.Type == lexer.ItemAccessor {
 				bindingType, err := p.ParseBindingType()
 				if err != nil {
 					p.errors = append(p.errors, err)
@@ -63,17 +63,17 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 			// FIXME: complete the type define parsing
 			return nil, fmt.Errorf("unimplemented type define yet")
 		case lexer.ItemEOF:
-			return program, p.reportErrors()
+			if len(p.errors) != 0 {
+				return nil, p.reportErrors()
+			}
+			return program, nil
 		default:
-			return nil, fmt.Errorf("unexpected token: %s", p.curToken)
+			return nil, fmt.Errorf("top level unexpected token: %s", p.curToken)
 		}
 	}
 }
 
 func (p *Parser) reportErrors() error {
-	if len(p.errors) == 0 {
-		return nil
-	}
 	buf := strings.Builder{}
 	for i, err := range p.errors {
 		buf.WriteString(fmt.Sprintf("error #%d\n", i+1))
@@ -116,11 +116,7 @@ func (p *Parser) ParseBindingType() (*ast.BindingType, error) {
 	}
 	bindingName := p.curToken.Val
 	p.next()
-	if err := p.want(lexer.ItemColon); err != nil {
-		return nil, err
-	}
-	p.next()
-	if err := p.want(lexer.ItemColon); err != nil {
+	if err := p.want(lexer.ItemAccessor); err != nil {
 		return nil, err
 	}
 	p.next()
@@ -380,19 +376,14 @@ func (p *Parser) ParseAccessChain() (*ast.Ident, error) {
 	}
 	var identifier strings.Builder
 	identifier.WriteString(p.curToken.Val)
-	for p.peekToken.Type == lexer.ItemColon {
+	for p.peekToken.Type == lexer.ItemAccessor {
 		p.next() // consume identifier
-		if p.peekToken.Type == lexer.ItemColon {
-			// match :: now
-			// consume ::
-			p.next()
-			p.next()
-			if err := p.want(lexer.ItemIdent); err != nil {
-				return nil, err
-			}
-			identifier.WriteString("::")
-			identifier.WriteString(p.curToken.Val)
+		p.next() // consume accessor ::
+		if err := p.want(lexer.ItemIdent); err != nil {
+			return nil, err
 		}
+		identifier.WriteString("::")
+		identifier.WriteString(p.curToken.Val)
 	}
 	return ast.NewIdent(identifier.String()), nil
 }
