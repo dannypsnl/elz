@@ -88,7 +88,7 @@ func (m *module) InferTypeOf(expr ast.Expr, typeMap *types.TypeMap) (types.Type,
 		if err != nil {
 			return nil, err
 		}
-		typeMap := types.NewTypeMap(m.typeMap)
+		typeMap := types.NewTypeMap(typeMap)
 		for i, paramType := range typeList {
 			paramName := bindingType.ParamList[i]
 			typeMap.Add(paramName, paramType)
