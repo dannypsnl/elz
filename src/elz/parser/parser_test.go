@@ -101,25 +101,37 @@ func TestParseBinding(t *testing.T) {
 	}{
 		{
 			code: `a = 1`,
-			expectedAst: &ast.Binding{
-				Export:    true,
-				Name:      "a",
-				ParamList: []string{},
-				Expr:      ast.NewInt("1"),
-			},
+			expectedAst: ast.NewBinding(
+				false,
+				true,
+				"a",
+				[]string{},
+				ast.NewInt("1"),
+			),
+		},
+		{
+			code: `a() = 1`,
+			expectedAst: ast.NewBinding(
+				true,
+				true,
+				"a",
+				[]string{},
+				ast.NewInt("1"),
+			),
 		},
 		{
 			code: `add x y = x + y`,
-			expectedAst: &ast.Binding{
-				Export:    true,
-				Name:      "add",
-				ParamList: []string{"x", "y"},
-				Expr: &ast.BinaryExpr{
+			expectedAst: ast.NewBinding(
+				true,
+				true,
+				"add",
+				[]string{"x", "y"},
+				&ast.BinaryExpr{
 					LExpr: ast.NewIdent("x"),
 					RExpr: ast.NewIdent("y"),
 					Op:    "+",
 				},
-			},
+			),
 		},
 	}
 

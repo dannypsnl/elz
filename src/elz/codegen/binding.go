@@ -6,12 +6,14 @@ import (
 
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/types"
+	"github.com/elz-lang/elz/src/elz/value"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/enum"
 )
 
 type Binding struct {
+	value.Value
 	*ast.Binding
 
 	selfModule           *module
@@ -33,13 +35,13 @@ func (b *Binding) SetModule(m *module) {
 	b.selfModule = m
 }
 
-func (b *Binding) GetReturnType(typeMap *typeMap, typeListOfArgs ...types.Type) (types.Type, error) {
+func (b *Binding) getReturnType(typeMap *types.TypeMap, typeListOfArgs ...types.Type) (types.Type, error) {
 	key := typeFormat(typeListOfArgs...)
 	t, ok := b.cacheOfType[key]
 	if ok {
 		return t, nil
 	}
-	inferT, err := b.selfModule.inferTypeOf(b.Expr, typeMap)
+	inferT, err := b.selfModule.InferTypeOf(b.Expr, typeMap)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +49,7 @@ func (b *Binding) GetReturnType(typeMap *typeMap, typeListOfArgs ...types.Type) 
 	return inferT, nil
 }
 
-func (b *Binding) GetImpl(typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, error) {
+func (b *Binding) GetImpl(typeMap *types.TypeMap, argList ...*ast.Arg) (*ir.Func, error) {
 	// FIXME: currently for convenience we skip all checking when it's a built-in function
 	// it should be fix after we can do more type checking
 	//
@@ -56,7 +58,10 @@ func (b *Binding) GetImpl(typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, erro
 	if b.compilerProvidedImpl != nil {
 		return b.compilerProvidedImpl, nil
 	}
-	typeListOfArgs := typeMap.convertArgsToTypeList(argList...)
+	typeListOfArgs, err := typeMap.ConvertArgsToTypeList(argList...)
+	if err != nil {
+		return nil, err
+	}
 	certainTypeFormatOfArgs := typeFormat(typeListOfArgs...)
 	// if we could get the implementation that we don't have to do any checking
 	// because it must already be checked
@@ -76,10 +81,10 @@ func (b *Binding) GetImpl(typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, erro
 	params := make([]*ir.Param, 0)
 	for i, paramType := range typeListOfArgs {
 		paramName := b.ParamList[i]
-		typeMap.add(paramName, paramType)
+		typeMap.Add(paramName, paramType)
 		params = append(params, ir.NewParam(paramName, paramType.LLVMType()))
 	}
-	returnType, err := b.GetReturnType(typeMap, typeListOfArgs...)
+	returnType, err := b.getReturnType(typeMap, typeListOfArgs...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +96,7 @@ func (b *Binding) GetImpl(typeMap *typeMap, argList ...*ast.Arg) (*ir.Func, erro
 	return function, nil
 }
 
-func generateNewImpl(bind *Binding, returnType types.Type, typeMap *typeMap, params []*ir.Param) (*ir.Func, error) {
+func generateNewImpl(bind *Binding, returnType types.Type, typeMap *types.TypeMap, params []*ir.Param) (*ir.Func, error) {
 	if len(params) != len(bind.ParamList) {
 		return nil, fmt.Errorf(`do not have enough arguments to evaluate binding: %s`, bind.Name)
 	}
@@ -113,7 +118,7 @@ func generateNewImpl(bind *Binding, returnType types.Type, typeMap *typeMap, par
 	return function, nil
 }
 
-func funcBody(m *module, b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) error {
+func funcBody(m *module, b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *types.TypeMap) error {
 	v, err := m.genExpr(b, expr, binds, typeMap)
 	if err != nil {
 		return err
@@ -141,7 +146,7 @@ func (b *Binding) checkArg(args ...*ast.Arg) error {
 }
 
 func (b *Binding) typeCheck(typeList []types.Type) error {
-	if b.Type == nil {
+	if len(b.TypeList) == 0 {
 		return nil
 	}
 	var (
@@ -149,7 +154,7 @@ func (b *Binding) typeCheck(typeList []types.Type) error {
 		err            error
 		variantTypeMap = map[string]string{}
 	)
-	for i, requireT := range b.Type[:len(b.Type)-1] {
+	for i, requireT := range b.TypeList[:len(b.TypeList)-1] {
 		actualType := typeList[i]
 		switch requireT := requireT.(type) {
 		case *ast.ExistType:

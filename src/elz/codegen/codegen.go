@@ -56,6 +56,7 @@ func (g *Generator) Generate() {
 	entryBinding, err := g.entryModule.GetBinding("main")
 	if err != nil {
 		logrus.Fatalf("no main function exist, no compile")
+		return // compiler notation
 	}
 	if len(entryBinding.ParamList) > 0 {
 		logrus.Fatalf("main function should not have any parameters")
@@ -65,7 +66,6 @@ func (g *Generator) Generate() {
 	// call init function of module to sure global variable would be initialized
 	b := impl.NewBlock("")
 
-	// NewRet(nil) is return void
 	g.entryModule.initFuncBlock.NewRet(nil)
 	b.NewCall(g.entryModule.initFunc)
 	for _, mod := range g.allModule {
@@ -73,7 +73,7 @@ func (g *Generator) Generate() {
 		b.NewCall(mod.initFunc)
 	}
 
-	_, err = g.entryModule.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), newTypeMap())
+	_, err = g.entryModule.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), g.entryModule.typeMap)
 	if err != nil {
 		logrus.Fatalf("report error: %s", err)
 	}
@@ -82,7 +82,7 @@ func (g *Generator) Generate() {
 
 func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
 	g.entryModule.initFuncBlock.NewRet(nil)
-	_, err := bind.GetImpl(newTypeMap(), exprList...)
+	_, err := bind.GetImpl(g.entryModule.typeMap, exprList...)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (g *Generator) typeOfOperator(op string, typeList ...types.Type) (types.Typ
 func (g *Generator) getBuiltin(name string) (*Binding, error) {
 	b, ok := g.builtin[name]
 	if !ok {
-		return nil, fmt.Errorf("no binding call: `%s`", name)
+		return nil, fmt.Errorf("no builtin binding call: `%s`", name)
 	}
 	return b, nil
 }
