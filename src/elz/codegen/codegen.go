@@ -73,7 +73,7 @@ func (g *Generator) Generate() {
 		b.NewCall(mod.initFunc)
 	}
 
-	_, err = g.entryModule.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), newTypeMap())
+	_, err = g.entryModule.genExpr(b, entryBinding.Expr, make(map[string]*ir.Param), g.entryModule.typeMap)
 	if err != nil {
 		logrus.Fatalf("report error: %s", err)
 	}
@@ -82,7 +82,7 @@ func (g *Generator) Generate() {
 
 func (g *Generator) Call(bind *Binding, exprList ...*ast.Arg) error {
 	g.entryModule.initFuncBlock.NewRet(nil)
-	_, err := bind.GetImpl(newTypeMap(), exprList...)
+	_, err := bind.GetImpl(g.entryModule.typeMap, exprList...)
 	if err != nil {
 		return err
 	}

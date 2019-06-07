@@ -20,6 +20,7 @@ import (
 type module struct {
 	*Tree
 	generator     *Generator
+	typeMap       *types.TypeMap
 	initFunc      *ir.Func
 	initFuncBlock *ir.Block
 	imports       map[string]string
@@ -50,13 +51,20 @@ has the same name in the module`, mod1, importPath)
 		}
 		imports[accessKey] = importPath
 	}
+
+	// init func declaration of module
 	initFunc := g.mod.NewFunc("init", llvmtypes.Void)
 	m := &module{
 		Tree:          tree,
 		generator:     g,
+		typeMap:       types.NewTypeMap(nil),
 		initFunc:      initFunc,
 		initFuncBlock: initFunc.NewBlock(""),
 		imports:       imports,
+	}
+	// init type map, we would add binding type at here
+	for _, b := range tree.bindings {
+		m.typeMap.Add(b.Name, types.NewBindingType(m, b.Binding))
 	}
 	for _, bind := range tree.bindings {
 		bind.SetModule(m)
@@ -65,30 +73,33 @@ has the same name in the module`, mod1, importPath)
 }
 
 // inference the return type by the expression we going to execute and input types
-func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error) {
+func (m *module) InferTypeOf(expr ast.Expr, typeMap *types.TypeMap) (types.Type, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := m.getBindingByAccessChain(expr.Func.(*ast.Ident).Literal)
+		funcType, err := m.InferTypeOf(expr.Func, typeMap)
 		if err != nil {
 			return nil, err
 		}
-		typeList := typeMap.convertArgsToTypeList(expr.ArgList...)
-		typeMap := newTypeMap()
+		bindingType, ok := funcType.(*types.BindingType)
+		if !ok {
+			return nil, fmt.Errorf("call a non-callable expression: %s", expr.Func)
+		}
+		typeList, err := typeMap.ConvertArgsToTypeList(expr.ArgList...)
+		if err != nil {
+			return nil, err
+		}
+		typeMap := types.NewTypeMap(m.typeMap)
 		for i, paramType := range typeList {
-			paramName := bind.ParamList[i]
-			typeMap.add(paramName, paramType)
+			paramName := bindingType.ParamList[i]
+			typeMap.Add(paramName, paramType)
 		}
-		t, err := bind.GetReturnType(typeMap, typeList...)
-		if err != nil {
-			return nil, err
-		}
-		return t, nil
+		return bindingType.GetReturnType(typeMap, typeList...)
 	case *ast.BinaryExpr:
-		lt, err := m.inferTypeOf(expr.LExpr, typeMap)
+		lt, err := m.InferTypeOf(expr.LExpr, typeMap)
 		if err != nil {
 			return nil, err
 		}
-		rt, err := m.inferTypeOf(expr.RExpr, typeMap)
+		rt, err := m.InferTypeOf(expr.RExpr, typeMap)
 		if err != nil {
 			return nil, err
 		}
@@ -99,13 +110,9 @@ func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error
 		}
 		return t, nil
 	case *ast.Ident:
-		t := typeMap.getTypeOfExpr(expr)
-		if t == nil {
-			return nil, fmt.Errorf("can't get type of identifier: %s", expr.Literal)
-		}
-		return t, nil
+		return typeMap.GetTypeOfExpr(expr)
 	case *ast.List:
-		elemT, err := m.inferTypeOf(expr.ExprList[0], typeMap)
+		elemT, err := m.InferTypeOf(expr.ExprList[0], typeMap)
 		if err != nil {
 			return nil, err
 		}
@@ -115,11 +122,11 @@ func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error
 		if !ok {
 			return nil, fmt.Errorf("extract element do not support ast: %#v", expr.X)
 		}
-		listT, err := m.inferTypeOf(list, typeMap)
+		listT, err := m.InferTypeOf(list, typeMap)
 		if err != nil {
 			return nil, err
 		}
-		keyT, err := m.inferTypeOf(expr.Key, typeMap)
+		keyT, err := m.InferTypeOf(expr.Key, typeMap)
 		if err != nil {
 			return nil, err
 		}
@@ -133,7 +140,7 @@ func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error
 	}
 }
 
-func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) (value.Value, error) {
+func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *types.TypeMap) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
 		bind, err := m.getBindingByAccessChain(expr.Func.(*ast.Ident).Literal)
@@ -162,8 +169,14 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		lt := typeMap.getTypeOfExpr(expr.LExpr)
-		rt := typeMap.getTypeOfExpr(expr.RExpr)
+		lt, err := typeMap.GetTypeOfExpr(expr.LExpr)
+		if err != nil {
+			return nil, err
+		}
+		rt, err := typeMap.GetTypeOfExpr(expr.RExpr)
+		if err != nil {
+			return nil, err
+		}
 		key := genKey(expr.Op, lt, rt)
 		if m.generator.isOperator(key) {
 			if lt.String() == "int" && rt.String() == "int" {
