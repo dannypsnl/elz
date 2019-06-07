@@ -1,6 +1,7 @@
 # elz
 
 [![Build Status](https://travis-ci.org/elz-lang/elz.svg)](https://travis-ci.org/elz-lang/elz)
+[![codecov](https://codecov.io/gh/elz-lang/elz/branch/master/graph/badge.svg)](https://codecov.io/gh/elz-lang/elz)
 
 [![asciicast](https://asciinema.org/a/229973.svg)](https://asciinema.org/a/229973)
 
