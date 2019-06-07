@@ -1,10 +1,10 @@
 package codegen
 
 import (
-	"github.com/sirupsen/logrus"
-
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/types"
+
+	"github.com/sirupsen/logrus"
 )
 
 type typeMap struct {

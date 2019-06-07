@@ -2,18 +2,19 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/elz-lang/elz/src/irutil"
-	"github.com/sirupsen/logrus"
 	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
 	"github.com/elz-lang/elz/src/elz/types"
 	"github.com/elz-lang/elz/src/elz/value"
+	"github.com/elz-lang/elz/src/irutil"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	llvmtypes "github.com/llir/llvm/ir/types"
 	llvmvalue "github.com/llir/llvm/ir/value"
+
+	"github.com/sirupsen/logrus"
 )
 
 type module struct {
