@@ -68,7 +68,7 @@ has the same name in the module`, mod1, importPath)
 func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := m.getBindingByAccessChain(expr.X.(*ast.Ident).Literal)
+		bind, err := m.getBindingByAccessChain(expr.Func.(*ast.Ident).Literal)
 		if err != nil {
 			return nil, err
 		}
@@ -136,7 +136,7 @@ func (m *module) inferTypeOf(expr ast.Expr, typeMap *typeMap) (types.Type, error
 func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *typeMap) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		bind, err := m.getBindingByAccessChain(expr.X.(*ast.Ident).Literal)
+		bind, err := m.getBindingByAccessChain(expr.Func.(*ast.Ident).Literal)
 		if err != nil {
 			return nil, err
 		}
@@ -306,7 +306,7 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		// rely on infer type checking the X and Key type already,
+		// rely on infer type checking the Func and Key type already,
 		// we don't check it again
 		x, err := m.genExpr(b, expr.X, binds, typeMap)
 		if err != nil {

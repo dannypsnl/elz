@@ -365,7 +365,7 @@ func (p *Parser) ParseArgument(expr ast.Expr) (*ast.FuncCall, error) {
 		p.next() // consume comma
 	}
 	return &ast.FuncCall{
-		X:       expr,
+		Func:    expr,
 		ArgList: args,
 	}, nil
 }

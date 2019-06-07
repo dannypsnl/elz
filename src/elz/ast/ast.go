@@ -40,7 +40,7 @@ type (
 	}
 	FuncCall struct {
 		isExpr
-		X       Expr
+		Func    Expr
 		ArgList []*Arg
 	}
 	Arg struct {
