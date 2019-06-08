@@ -33,6 +33,12 @@ func (t *TypeMap) GetTypeOfExpr(expr ast.Expr) (Type, error) {
 			return nil, fmt.Errorf("can't get type of identifier: %s", ident.Literal)
 		}
 		return typ, nil
+	} else if funcCall, isFuncCall := expr.(*ast.FuncCall); isFuncCall {
+		funcTyp, err := t.GetTypeOfExpr(funcCall.Func)
+		if err != nil {
+			return nil, err
+		}
+		return funcTyp, nil
 	}
 	return typeOfExpr(expr)
 }

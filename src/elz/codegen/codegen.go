@@ -40,10 +40,10 @@ func New(entryTree *Tree, allAstTree map[string]*Tree) *Generator {
 	}
 	allModule := make(map[string]*module)
 	for name, tree := range allAstTree {
-		allModule[name] = newModule(g, tree)
+		allModule[name] = newModule(g, name, tree)
 	}
 	g.allModule = allModule
-	g.entryModule = newModule(g, entryTree)
+	g.entryModule = newModule(g, "", entryTree)
 	return g
 }
 
@@ -61,7 +61,6 @@ func (g *Generator) Generate() {
 	if len(entryBinding.ParamList) > 0 {
 		logrus.Fatalf("main function should not have any parameters")
 	}
-	g.GenerateTypes()
 	impl := g.mod.NewFunc("main", llvmtypes.I64)
 	// call init function of module to sure global variable would be initialized
 	b := impl.NewBlock("")

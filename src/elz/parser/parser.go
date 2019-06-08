@@ -40,7 +40,6 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 					p.errors = append(p.errors, err)
 				} else {
 					program.AddBindingType(bindingType)
-					p.next()
 				}
 			} else {
 				binding, err := p.ParseBinding()
@@ -49,7 +48,6 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 				} else {
 					program.AddBinding(binding)
 				}
-				p.next()
 			}
 		case lexer.ItemKwImport:
 			importStmt, err := p.ParseImport()
@@ -57,11 +55,14 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 				p.errors = append(p.errors, err)
 			} else {
 				program.AddImport(importStmt)
-				p.next()
 			}
 		case lexer.ItemKwType:
-			// FIXME: complete the type define parsing
-			return nil, fmt.Errorf("unimplemented type define yet")
+			typeDef, err := p.ParseTypeDefine()
+			if err != nil {
+				p.errors = append(p.errors, err)
+			} else {
+				program.AddTypeDefine(typeDef)
+			}
 		case lexer.ItemEOF:
 			if len(p.errors) != 0 {
 				return nil, p.reportErrors()
@@ -105,9 +106,69 @@ func (p *Parser) ParseImport() (*ast.Import, error) {
 	if err != nil {
 		return nil, err
 	}
+	p.next()
 	return &ast.Import{
 		AccessChain: accessChain,
 	}, nil
+}
+
+func (p *Parser) ParseTypeDefine() (*ast.TypeDefine, error) {
+	if err := p.want(lexer.ItemKwType); err != nil {
+		return nil, err
+	}
+	p.next()
+	if err := p.want(lexer.ItemIdent); err != nil {
+		return nil, err
+	}
+	typeDefName := p.curToken.Val
+	p.next()
+	if err := p.want(lexer.ItemAssign); err != nil {
+		return nil, err
+	}
+	p.next()
+	if err := p.want(lexer.ItemLeftParen); err != nil {
+		return nil, err
+	}
+	p.next()
+	fields := make([]*ast.Field, 0)
+	for p.curToken.Type != lexer.ItemRightParen {
+		field, err := p.ParseTypeField()
+		if err != nil {
+			return nil, err
+		}
+		p.next()
+		fields = append(fields, field)
+		if err := p.want(lexer.ItemComma); err != nil {
+			if err := p.want(lexer.ItemRightParen); err != nil {
+				return nil, err
+			}
+		} else {
+			p.next() // consume comma
+		}
+	}
+	p.next()
+	return ast.NewTypeDefine(
+		!strings.HasPrefix(typeDefName, "_"),
+		typeDefName,
+		fields...,
+	), nil
+}
+
+func (p *Parser) ParseTypeField() (*ast.Field, error) {
+	if err := p.want(lexer.ItemIdent); err != nil {
+		return nil, err
+	}
+	fieldName := p.curToken.Val
+	p.next()
+	if err := p.want(lexer.ItemColon); err != nil {
+		return nil, err
+	}
+	p.next()
+	typ, err := p.ParseType()
+	if err != nil {
+		return nil, err
+	}
+	return ast.NewField(fieldName, typ), nil
 }
 
 func (p *Parser) ParseBindingType() (*ast.BindingType, error) {
@@ -136,6 +197,7 @@ func (p *Parser) ParseBindingType() (*ast.BindingType, error) {
 			}
 			p.next()
 		} else {
+			p.next()
 			return &ast.BindingType{
 				Name: bindingName,
 				Type: bindingType,
@@ -204,6 +266,7 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	if err != nil {
 		return nil, err
 	}
+	p.next()
 	return ast.NewBinding(
 		isFunctionWithoutParameter || len(parameterList) > 0,
 		!strings.HasPrefix(bindingName, "_"),
@@ -237,10 +300,14 @@ func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) (as
 			}
 			lookahead = p.peekToken
 		}
-		lhs = &ast.BinaryExpr{
-			LExpr: lhs,
-			RExpr: rhs,
-			Op:    operator.Val,
+		if operator.Type == lexer.ItemDot {
+			lhs = ast.NewAccessField(lhs, rhs.(*ast.Ident).Literal)
+		} else {
+			lhs = &ast.BinaryExpr{
+				LExpr: lhs,
+				RExpr: rhs,
+				Op:    operator.Val,
+			}
 		}
 	}
 	return lhs, nil
@@ -370,11 +437,10 @@ func (p *Parser) ParseArgument(expr ast.Expr) (*ast.FuncCall, error) {
 		if err := p.want(lexer.ItemComma); err != nil {
 			if err := p.want(lexer.ItemRightParen); err != nil {
 				return nil, err
-			} else {
-				break
 			}
+		} else {
+			p.next() // consume comma
 		}
-		p.next() // consume comma
 	}
 	return &ast.FuncCall{
 		Func:    expr,
@@ -420,6 +486,7 @@ func init() {
 	precedenceOfOperator[lexer.ItemMinus] = 1
 	precedenceOfOperator[lexer.ItemMul] = 2
 	precedenceOfOperator[lexer.ItemDiv] = 2
+	precedenceOfOperator[lexer.ItemDot] = 3
 }
 
 func expectedError(expected, actual fmt.Stringer) error {

@@ -39,6 +39,57 @@ func TestParseImport(t *testing.T) {
 	}
 }
 
+func TestParseType(t *testing.T) {
+	testCases := []struct {
+		code        string
+		expectedAst *ast.TypeDefine
+	}{
+		{
+			code:        `type Foo = ()`,
+			expectedAst: ast.NewTypeDefine(true, "Foo"),
+		},
+		{
+			code:        `type _foo = ()`,
+			expectedAst: ast.NewTypeDefine(false, "_foo"),
+		},
+		{
+			code: `
+type Foo = (
+  a: i32,
+  b: i32
+)`,
+			expectedAst: ast.NewTypeDefine(
+				true,
+				"Foo",
+				ast.NewField("a", &ast.ExistType{Name: "i32"}),
+				ast.NewField("b", &ast.ExistType{Name: "i32"}),
+			),
+		},
+		{
+			code: `
+type Foo = (
+  a: i32,
+  b: i32,
+)`,
+			expectedAst: ast.NewTypeDefine(
+				true,
+				"Foo",
+				ast.NewField("a", &ast.ExistType{Name: "i32"}),
+				ast.NewField("b", &ast.ExistType{Name: "i32"}),
+			),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.code, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParseTypeDefine()
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedAst, actual)
+		})
+	}
+}
+
 func TestParseBindingType(t *testing.T) {
 	testCases := []struct {
 		code        string
@@ -233,6 +284,13 @@ func TestParseBinaryExpression(t *testing.T) {
 				},
 				Op: "*",
 			},
+		},
+		{
+			code: `a.b`,
+			expectedExpr: ast.NewAccessField(
+				ast.NewIdent("a"),
+				"b",
+			),
 		},
 	}
 
@@ -505,6 +563,7 @@ func TestParseBooleanLiteral(t *testing.T) {
 
 func TestParseProgram(t *testing.T) {
 	code := `import foo::bar
+type Foo = ()
 add :: i32 -> i32 -> i32
 add x y = x + y
 add_one y = add(1, y)
@@ -513,6 +572,7 @@ add_one y = add(1, y)
 	program, err := p.ParseProgram()
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(program.Imports))
+	assert.Equal(t, 1, len(program.TypeDefines))
 	assert.Equal(t, 1, len(program.BindingTypes))
 	assert.Equal(t, 2, len(program.Bindings))
 }

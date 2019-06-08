@@ -9,17 +9,23 @@ import (
 type Tree struct {
 	imports     []string
 	bindings    map[string]*Binding
-	typeDefines map[string]*ast.NewType
+	typeDefines map[string]*ast.TypeDefine
 }
 
 func NewTree(program *ast.Program) (*Tree, error) {
 	newTree := &Tree{
 		imports:     make([]string, 0),
 		bindings:    make(map[string]*Binding),
-		typeDefines: make(map[string]*ast.NewType),
+		typeDefines: make(map[string]*ast.TypeDefine),
 	}
 	for _, im := range program.Imports {
 		newTree.InsertImport(im.AccessChain.Literal)
+	}
+	for _, typeDef := range program.TypeDefines {
+		err := newTree.InsertTypeDefine(typeDef)
+		if err != nil {
+			return nil, err
+		}
 	}
 	for _, binding := range program.Bindings {
 		err := newTree.InsertBinding(binding)
@@ -70,7 +76,7 @@ func (t *Tree) GetBinding(bindName string) (*Binding, error) {
 	return binding, nil
 }
 
-func (t *Tree) InsertTypeDefine(typDef *ast.NewType) error {
+func (t *Tree) InsertTypeDefine(typDef *ast.TypeDefine) error {
 	_, exist := t.typeDefines[typDef.Name]
 	if exist {
 		return fmt.Errorf("type: %s already exist", typDef.Name)
@@ -79,11 +85,22 @@ func (t *Tree) InsertTypeDefine(typDef *ast.NewType) error {
 	return nil
 }
 
-func (t *Tree) GetTypeDefines() map[string]*ast.NewType {
+func (t *Tree) GetTypeDefines() map[string]*ast.TypeDefine {
 	return t.typeDefines
 }
 
-func (t *Tree) GetTypeDefine(typeName string) (*ast.NewType, error) {
+func (t *Tree) GetExportTypeDefine(typeName string) (*ast.TypeDefine, error) {
+	typeDef, err := t.GetTypeDefine(typeName)
+	if err != nil {
+		return nil, err
+	}
+	if !typeDef.Export {
+		return nil, fmt.Errorf("no export type call: %s", typeName)
+	}
+	return typeDef, nil
+}
+
+func (t *Tree) GetTypeDefine(typeName string) (*ast.TypeDefine, error) {
 	typDef, exist := t.typeDefines[typeName]
 	if !exist {
 		return nil, fmt.Errorf("no type call: `%s`", typeName)
