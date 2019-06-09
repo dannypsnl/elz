@@ -262,7 +262,7 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	if err != nil {
 		return nil, err
 	}
-	expr, err := p.ParseExpression(primary, 0)
+	expr, err := p.ParseExpression(primary, Minimum)
 	if err != nil {
 		return nil, err
 	}
@@ -276,7 +276,7 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	), nil
 }
 
-func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary int) (ast.Expr, error) {
+func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary Precedence) (ast.Expr, error) {
 	lhs := leftHandSide
 	lookahead := p.peekToken
 	// precedence of lookahead would also break with not operator token
@@ -350,7 +350,7 @@ func (p *Parser) ParseUnary() (ast.Expr, error) {
 		if err != nil {
 			return nil, err
 		}
-		expr, err := p.ParseExpression(primary, 0)
+		expr, err := p.ParseExpression(primary, Minimum)
 		if err != nil {
 			return nil, err
 		}
@@ -367,7 +367,7 @@ func (p *Parser) ParseUnary() (ast.Expr, error) {
 			if err != nil {
 				return nil, err
 			}
-			expr, err := p.ParseExpression(primary, 0)
+			expr, err := p.ParseExpression(primary, Minimum)
 			if err != nil {
 				return nil, err
 			}
@@ -396,7 +396,7 @@ func (p *Parser) ParseElementAccess(expr ast.Expr) (*ast.ExtractElement, error) 
 	if err != nil {
 		return nil, err
 	}
-	keyExpr, err := p.ParseExpression(primary, 0)
+	keyExpr, err := p.ParseExpression(primary, Minimum)
 	if err != nil {
 		return nil, err
 	}
@@ -428,7 +428,7 @@ func (p *Parser) ParseArgument(expr ast.Expr) (*ast.FuncCall, error) {
 		if err != nil {
 			return nil, err
 		}
-		expr, err := p.ParseExpression(primary, 0)
+		expr, err := p.ParseExpression(primary, Minimum)
 		if err != nil {
 			return nil, err
 		}
@@ -464,29 +464,6 @@ func (p *Parser) ParseAccessChain() (*ast.Ident, error) {
 		identifier.WriteString(p.curToken.Val)
 	}
 	return ast.NewIdent(identifier.String()), nil
-}
-
-func precedence(token lexer.Item) int {
-	precedence, ok := precedenceOfOperator[token.Type]
-	if !ok {
-		return -1
-	}
-	return precedence
-}
-
-func isRightAssociative(token lexer.Item) bool {
-	// no right associative operator now
-	return false
-}
-
-var precedenceOfOperator = map[lexer.ItemType]int{}
-
-func init() {
-	precedenceOfOperator[lexer.ItemPlus] = 1
-	precedenceOfOperator[lexer.ItemMinus] = 1
-	precedenceOfOperator[lexer.ItemMul] = 2
-	precedenceOfOperator[lexer.ItemDiv] = 2
-	precedenceOfOperator[lexer.ItemDot] = 3
 }
 
 func expectedError(expected, actual fmt.Stringer) error {
