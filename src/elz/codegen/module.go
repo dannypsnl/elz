@@ -276,8 +276,12 @@ func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 		c.NewBr(caseStartBlock)
 
 		caseEndBlock := caseStartBlock.Parent.NewBlock("")
-
-		assignV := caseStartBlock.NewAlloca(llvmtypes.I64)
+		// use first of return type as result type of case of else expression
+		resultTypeOfCase, err := c.typeMap.GetTypeOfExpr(expr.CaseOf[0].Expr)
+		if err != nil {
+			return nil, err
+		}
+		assignV := caseStartBlock.NewAlloca(resultTypeOfCase.LLVMType())
 		caseElseBlock := caseStartBlock.Parent.NewBlock("")
 		c.setBlock(caseElseBlock)
 		elseExpr, err := m.genExpr(c, expr.Else)
@@ -293,7 +297,7 @@ func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 			if err != nil {
 				return nil, err
 			}
-			cond := c.NewICmp(irenum.IPredEQ, pattern, caseExpr)
+			cond := createCondition(c, pattern, caseExpr)
 			caseOfBlock := c.Parent.NewBlock("")
 			c.NewCondBr(cond, caseOfBlock, caseElseBlock)
 			c.restoreBlock()
@@ -463,4 +467,12 @@ func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 	default:
 		return nil, fmt.Errorf("[Unsupport Yet] failed at generate expression: %#v", expr)
 	}
+}
+
+func createCondition(c *context, x, y llvmvalue.Value) value.Value {
+	if x.Type() == llvmtypes.I64 && y.Type() == llvmtypes.I64 {
+		return c.NewICmp(irenum.IPredEQ, x, y)
+	}
+	logrus.Fatalf("unimplemented compare for (%s, %s) now", x, y)
+	panic("")
 }
