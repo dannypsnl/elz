@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/elz-lang/elz/src/elz/ast"
+	"github.com/elz-lang/elz/src/elz/internal/irutil"
 	"github.com/elz-lang/elz/src/elz/types"
-	"github.com/elz-lang/elz/src/irutil"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"

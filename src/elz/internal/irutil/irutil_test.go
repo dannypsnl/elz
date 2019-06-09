@@ -3,7 +3,7 @@ package irutil_test
 import (
 	"testing"
 
-	"github.com/elz-lang/elz/src/irutil"
+	"github.com/elz-lang/elz/src/elz/internal/irutil"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
