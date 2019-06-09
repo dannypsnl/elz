@@ -8,6 +8,7 @@ import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,6 +49,14 @@ func TestSizeOf(t *testing.T) {
 			name:     "int64",
 			llvmType: types.I64,
 			size:     64,
+		},
+		{
+			name: "structure",
+			llvmType: types.NewStruct(
+				types.I64,
+				types.I64,
+			),
+			size: 128,
 		},
 	}
 

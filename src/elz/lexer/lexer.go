@@ -111,13 +111,18 @@ type Lexer struct {
 	items  chan Item
 }
 
-func Lex(name, input string) *Lexer {
+func Lex(name, code string) *Lexer {
+	input := []rune(code)
+	line := Offset(1)
+	if isEndOfLine(input[0]) {
+		line++
+	}
 	l := &Lexer{
 		name:   name,
-		input:  []rune(input),
+		input:  input,
 		items:  make(chan Item),
 		state:  lexWhiteSpace,
-		line:   1,
+		line:   line,
 		pos:    0,
 		offset: 0,
 		start:  0,

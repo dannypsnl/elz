@@ -8,28 +8,39 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestLexingUnit(t *testing.T) {
+	testCases := map[string]lexer.ItemType{
+		"=":  lexer.ItemAssign,
+		":":  lexer.ItemColon,
+		"::": lexer.ItemAccessor,
+		".":  lexer.ItemDot,
+		",":  lexer.ItemComma,
+		"(":  lexer.ItemLeftParen,
+		")":  lexer.ItemRightParen,
+		"[":  lexer.ItemLeftBracket,
+		"]":  lexer.ItemRightBracket,
+		">":  lexer.ItemGreaterThan,
+		"+":  lexer.ItemPlus,
+		"-":  lexer.ItemMinus,
+		"*":  lexer.ItemMul,
+		"/":  lexer.ItemDiv,
+		"'":  lexer.ItemPrime,
+	}
+
+	for code, itemType := range testCases {
+		lex := lexer.Lex("test", code)
+		item := lex.NextItem()
+		assert.Equal(t, itemType.String(), item.Type.String())
+		assert.Equal(t, code, item.Val)
+	}
+}
+
 func TestLexer(t *testing.T) {
 	testCases := []struct {
 		input string
 		val   string
 		item  lexer.ItemType
 	}{
-		{
-			input: "+",
-			item:  lexer.ItemPlus,
-		},
-		{
-			input: "-",
-			item:  lexer.ItemMinus,
-		},
-		{
-			input: ":",
-			item:  lexer.ItemColon,
-		},
-		{
-			input: "::",
-			item:  lexer.ItemAccessor,
-		},
 		{
 			input: "name",
 			item:  lexer.ItemIdent,
@@ -73,7 +84,7 @@ func TestLexerPosition(t *testing.T) {
 	}{
 		{` 1`, lexer.Pos{Line: 1, Pos: 1}},
 		{`  1`, lexer.Pos{Line: 1, Pos: 2}},
-		{`  
+		{`
 1`, lexer.Pos{Line: 2, Pos: 1}},
 	}
 
