@@ -15,6 +15,9 @@ func TestLexingUnit(t *testing.T) {
 		"type":   lexer.ItemKwType,
 		"true":   lexer.ItemKwTrue,
 		"false":  lexer.ItemKwFalse,
+		"case":   lexer.ItemKwCase,
+		"of":     lexer.ItemKwOf,
+		"else":   lexer.ItemKwElse,
 		// identifier
 		"name": lexer.ItemIdent,
 		// operators

@@ -27,6 +27,9 @@ const (
 	// Keywords
 	ItemKwTrue   // true
 	ItemKwFalse  // false
+	ItemKwCase   // case
+	ItemKwOf     // of
+	ItemKwElse   // else
 	ItemKwType   // type
 	ItemKwImport // import module
 	// Operator
@@ -59,6 +62,9 @@ func init() {
 	itemTypeToString[ItemString] = "string"
 	itemTypeToString[ItemKwTrue] = "keyword:true"
 	itemTypeToString[ItemKwFalse] = "keyword:false"
+	itemTypeToString[ItemKwCase] = "keyword:case"
+	itemTypeToString[ItemKwOf] = "keyword:of"
+	itemTypeToString[ItemKwElse] = "keyword:else"
 	itemTypeToString[ItemKwType] = "keyword:type"
 	itemTypeToString[ItemKwImport] = "keyword:import"
 	itemTypeToString[ItemAssign] = "operator:assign"
@@ -189,6 +195,12 @@ func (l *Lexer) emit(t ItemType) {
 		l.items <- l.newItem(ItemKwTrue, value)
 	case "false":
 		l.items <- l.newItem(ItemKwFalse, value)
+	case "case":
+		l.items <- l.newItem(ItemKwCase, value)
+	case "of":
+		l.items <- l.newItem(ItemKwOf, value)
+	case "else":
+		l.items <- l.newItem(ItemKwElse, value)
 	case "type":
 		l.items <- l.newItem(ItemKwType, value)
 	case "import":
