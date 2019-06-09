@@ -1,5 +1,13 @@
 ## latest
 
+- case of
+    ```
+    case x
+    of 1:
+      1
+    else:
+      2
+    ```
 - improve install message, add:
     ```
     installing elz compiler...
