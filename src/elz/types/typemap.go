@@ -72,6 +72,14 @@ func typeOfExpr(e ast.Expr) (Type, error) {
 		return &Float{}, nil
 	case *ast.String:
 		return &String{}, nil
+	case *ast.List:
+		elemT, err := typeOfExpr(e.ExprList[0])
+		if err != nil {
+			return nil, err
+		}
+		return &List{
+			ElemT: elemT,
+		}, nil
 	default:
 		return nil, fmt.Errorf("you can't use expression: `%#v` to get type directly", e)
 	}
