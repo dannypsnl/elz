@@ -304,6 +304,36 @@ func TestParseBinaryExpression(t *testing.T) {
 	}
 }
 
+func TestParseCaseOf(t *testing.T) {
+	testCases := []struct {
+		code     string
+		expected *ast.CaseOf
+	}{
+		{
+			code: `case x of 1: 2 else: 10`,
+			expected: ast.NewCaseOf(
+				ast.NewIdent("x"),
+				ast.NewInt("10"),
+				[]*ast.Of{
+					ast.NewOf(
+						ast.NewInt("1"),
+						ast.NewInt("2"),
+					),
+				},
+			),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.code, func(t *testing.T) {
+			p := parser.NewParser("test", tc.code)
+			actual, err := p.ParseCaseOf()
+			require.NoError(t, err)
+			assert.Equal(t, tc.expected, actual)
+		})
+	}
+}
+
 func TestParseListLiteral(t *testing.T) {
 	testCases := []struct {
 		code         string

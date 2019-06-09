@@ -41,6 +41,15 @@ type (
 		Expr      Expr
 		TypeList  []Type
 	}
+	CaseOf struct {
+		isExpr
+		Case, Else Expr
+		CaseOf     []*Of
+	}
+	Of struct {
+		Pattern Expr
+		Expr
+	}
 	AccessField struct {
 		isExpr
 		From   Expr
@@ -92,6 +101,24 @@ type (
 		Literal string
 	}
 )
+
+func NewOf(pattern, do Expr) *Of {
+	return &Of{
+		Pattern: pattern,
+		Expr:    do,
+	}
+}
+func NewCaseOf(caseExpr Expr, elseExpr Expr, ofs []*Of) *CaseOf {
+	caseOf := ofs
+	if caseOf == nil {
+		caseOf = make([]*Of, 0)
+	}
+	return &CaseOf{
+		Case:   caseExpr,
+		Else:   elseExpr,
+		CaseOf: caseOf,
+	}
+}
 
 func NewAccessField(from Expr, name string) *AccessField {
 	return &AccessField{
