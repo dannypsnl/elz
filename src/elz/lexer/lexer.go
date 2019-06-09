@@ -57,6 +57,8 @@ func init() {
 	itemTypeToString[ItemIdent] = "identifier"
 	itemTypeToString[ItemNumber] = "number"
 	itemTypeToString[ItemString] = "string"
+	itemTypeToString[ItemKwTrue] = "keyword:true"
+	itemTypeToString[ItemKwFalse] = "keyword:false"
 	itemTypeToString[ItemKwType] = "keyword:type"
 	itemTypeToString[ItemKwImport] = "keyword:import"
 	itemTypeToString[ItemAssign] = "operator:assign"

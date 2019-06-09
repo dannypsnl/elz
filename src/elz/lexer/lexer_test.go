@@ -10,6 +10,14 @@ import (
 
 func TestLexingUnit(t *testing.T) {
 	testCases := map[string]lexer.ItemType{
+		// keyword
+		"import": lexer.ItemKwImport,
+		"type":   lexer.ItemKwType,
+		"true":   lexer.ItemKwTrue,
+		"false":  lexer.ItemKwFalse,
+		// identifier
+		"name": lexer.ItemIdent,
+		// operators
 		"=":  lexer.ItemAssign,
 		":":  lexer.ItemColon,
 		"::": lexer.ItemAccessor,
@@ -25,6 +33,13 @@ func TestLexingUnit(t *testing.T) {
 		"*":  lexer.ItemMul,
 		"/":  lexer.ItemDiv,
 		"'":  lexer.ItemPrime,
+		// string
+		`"string"`: lexer.ItemString,
+		// number
+		"1":    lexer.ItemNumber,
+		"3.14": lexer.ItemNumber,
+		"0x0":  lexer.ItemNumber,
+		"1e7":  lexer.ItemNumber,
 	}
 
 	for code, itemType := range testCases {
@@ -32,48 +47,6 @@ func TestLexingUnit(t *testing.T) {
 		item := lex.NextItem()
 		assert.Equal(t, itemType.String(), item.Type.String())
 		assert.Equal(t, code, item.Val)
-	}
-}
-
-func TestLexer(t *testing.T) {
-	testCases := []struct {
-		input string
-		val   string
-		item  lexer.ItemType
-	}{
-		{
-			input: "name",
-			item:  lexer.ItemIdent,
-		},
-		{
-			input: `"string"`,
-			item:  lexer.ItemString,
-		},
-		{
-			input: "1",
-			item:  lexer.ItemNumber,
-		},
-		{
-			input: "3.14",
-			item:  lexer.ItemNumber,
-		},
-		{
-			input: "0x0",
-			item:  lexer.ItemNumber,
-		},
-		{
-			input: "1e7",
-			item:  lexer.ItemNumber,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.input, func(t *testing.T) {
-			lex := lexer.Lex("test", testCase.input)
-			item := lex.NextItem()
-			assert.Equal(t, testCase.item.String(), item.Type.String())
-			assert.Equal(t, testCase.input, item.Val)
-		})
 	}
 }
 
