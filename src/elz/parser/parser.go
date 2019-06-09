@@ -377,8 +377,61 @@ func (p *Parser) ParseUnary() (ast.Expr, error) {
 			}
 		}
 		return ast.NewList(listElem...), nil
+	case lexer.ItemKwCase:
+		return p.ParseCaseOf()
 	default:
 		return nil, fmt.Errorf("unsupported primary token: %s", p.curToken)
+	}
+}
+
+func (p *Parser) ParseCaseOf() (*ast.CaseOf, error) {
+	if err := p.want(lexer.ItemKwCase); err != nil {
+		return nil, err
+	}
+	p.next()
+	caseExpr, err := p.ParseExpression(nil, Minimum)
+	if err != nil {
+		return nil, err
+	}
+	p.next() // consume end of expression
+	caseOf := make([]*ast.Of, 0)
+	for {
+		if err := p.want(lexer.ItemKwOf); err != nil {
+			return nil, err
+		}
+		p.next()
+		pattern, err := p.ParseExpression(nil, Minimum)
+		if err != nil {
+			return nil, err
+		}
+		p.next()
+		if err := p.want(lexer.ItemColon); err != nil {
+			return nil, err
+		}
+		p.next()
+		do, err := p.ParseExpression(nil, Minimum)
+		if err != nil {
+			return nil, err
+		}
+		p.next()
+		caseOf = append(caseOf, ast.NewOf(pattern, do))
+		if err := p.want(lexer.ItemKwElse); err != nil {
+		} else {
+			p.next()
+			if err := p.want(lexer.ItemColon); err != nil {
+				return nil, err
+			}
+			p.next()
+			elseExpr, err := p.ParseExpression(nil, Minimum)
+			if err != nil {
+				return nil, err
+			}
+			return ast.NewCaseOf(
+				caseExpr,
+				elseExpr,
+				caseOf,
+			), nil
+		}
 	}
 }
 
