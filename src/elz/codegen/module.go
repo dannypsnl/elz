@@ -11,6 +11,7 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
+	irenum "github.com/llir/llvm/ir/enum"
 	llvmtypes "github.com/llir/llvm/ir/types"
 	llvmvalue "github.com/llir/llvm/ir/value"
 
@@ -170,10 +171,24 @@ func (m *module) InferTypeOf(expr ast.Expr, typeMap *types.TypeMap) (types.Type,
 	}
 }
 
-func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *types.TypeMap) (value.Value, error) {
+type context struct {
+	*ir.Block
+	binds   map[string]*ir.Param
+	typeMap *types.TypeMap
+}
+
+func newContext(block *ir.Block, typeMap *types.TypeMap) *context {
+	return &context{
+		Block:   block,
+		binds:   make(map[string]*ir.Param),
+		typeMap: typeMap,
+	}
+}
+
+func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
-		v, err := m.genExpr(b, expr.Func, binds, typeMap)
+		v, err := m.genExpr(c, expr.Func)
 		if err != nil {
 			return nil, err
 		}
@@ -181,33 +196,33 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if !isBinding {
 			return nil, fmt.Errorf("call a non-callable expression: %s", expr.Func)
 		}
-		f, err := bind.GetImpl(typeMap, expr.ArgList...)
+		f, err := bind.GetImpl(c.typeMap, expr.ArgList...)
 		if err != nil {
 			return nil, err
 		}
 		valueList := make([]llvmvalue.Value, 0)
 		for _, arg := range expr.ArgList {
-			e, err := m.genExpr(b, arg.Expr, binds, typeMap)
+			e, err := m.genExpr(c, arg.Expr)
 			if err != nil {
 				return nil, err
 			}
 			valueList = append(valueList, e)
 		}
-		return b.NewCall(f, valueList...), nil
+		return c.NewCall(f, valueList...), nil
 	case *ast.BinaryExpr:
-		x, err := m.genExpr(b, expr.LExpr, binds, typeMap)
+		x, err := m.genExpr(c, expr.LExpr)
 		if err != nil {
 			return nil, err
 		}
-		y, err := m.genExpr(b, expr.RExpr, binds, typeMap)
+		y, err := m.genExpr(c, expr.RExpr)
 		if err != nil {
 			return nil, err
 		}
-		lt, err := typeMap.GetTypeOfExpr(expr.LExpr)
+		lt, err := c.typeMap.GetTypeOfExpr(expr.LExpr)
 		if err != nil {
 			return nil, err
 		}
-		rt, err := typeMap.GetTypeOfExpr(expr.RExpr)
+		rt, err := c.typeMap.GetTypeOfExpr(expr.RExpr)
 		if err != nil {
 			return nil, err
 		}
@@ -216,35 +231,35 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 			if lt.String() == "int" && rt.String() == "int" {
 				switch expr.Op {
 				case "+":
-					return b.NewAdd(x, y), nil
+					return c.NewAdd(x, y), nil
 				case "-":
-					return b.NewSub(x, y), nil
+					return c.NewSub(x, y), nil
 				case "*":
-					return b.NewMul(x, y), nil
+					return c.NewMul(x, y), nil
 				case "/":
-					return b.NewSDiv(x, y), nil
+					return c.NewSDiv(x, y), nil
 				}
 			}
 			if lt.String() == "f64" && rt.String() == "f64" {
 				switch expr.Op {
 				case "+":
-					return b.NewFAdd(x, y), nil
+					return c.NewFAdd(x, y), nil
 				case "-":
-					return b.NewFSub(x, y), nil
+					return c.NewFSub(x, y), nil
 				case "*":
-					return b.NewFMul(x, y), nil
+					return c.NewFMul(x, y), nil
 				case "/":
-					return b.NewFDiv(x, y), nil
+					return c.NewFDiv(x, y), nil
 				}
 			}
 		}
 		return nil, fmt.Errorf("unsupported operator: %s", expr.Op)
 	case *ast.AccessField:
-		le, err := m.genExpr(b, expr.From, binds, typeMap)
+		le, err := m.genExpr(c, expr.From)
 		if err != nil {
 			return nil, err
 		}
-		lt, err := typeMap.GetTypeOfExpr(expr.From)
+		lt, err := c.typeMap.GetTypeOfExpr(expr.From)
 		if err != nil {
 			return nil, err
 		}
@@ -261,12 +276,51 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if indices == -1 {
 			return nil, fmt.Errorf("no field called: %s in type: %s", expr.ByName, lt)
 		}
-		firstField := b.NewExtractValue(le,
+		firstField := c.NewExtractValue(le,
 			uint64(indices),
 		)
 		return firstField, nil
+	case *ast.CaseOf:
+		caseExpr, err := m.genExpr(c, expr.Case)
+		if err != nil {
+			return nil, err
+		}
+
+		caseStartBlock := c.Parent.NewBlock("")
+		c.NewBr(caseStartBlock)
+
+		caseEndBlock := caseStartBlock.Parent.NewBlock("")
+
+		assignV := caseStartBlock.NewAlloca(llvmtypes.I64)
+		caseElseBlock := caseStartBlock.Parent.NewBlock("")
+		c.Block = caseElseBlock
+		elseExpr, err := m.genExpr(c, expr.Else)
+		if err != nil {
+			return nil, err
+		}
+		caseElseBlock.NewStore(elseExpr, assignV)
+		caseElseBlock.NewBr(caseEndBlock)
+		for _, of := range expr.CaseOf {
+			c.Block = caseStartBlock
+			pattern, err := m.genExpr(c, of.Pattern)
+			if err != nil {
+				return nil, err
+			}
+			cond := caseStartBlock.NewICmp(irenum.IPredEQ, pattern, caseExpr)
+			caseOfBlock := caseStartBlock.Parent.NewBlock("")
+			caseStartBlock.NewCondBr(cond, caseOfBlock, caseElseBlock)
+			c.Block = caseOfBlock
+			do, err := m.genExpr(c, of.Expr)
+			if err != nil {
+				return nil, err
+			}
+			caseOfBlock.NewStore(do, assignV)
+			caseOfBlock.NewBr(caseEndBlock)
+		}
+		c.Block = caseEndBlock
+		return c.NewLoad(assignV), nil
 	case *ast.Ident:
-		v, ok := binds[expr.Literal]
+		v, ok := c.binds[expr.Literal]
 		if ok {
 			return v, nil
 		}
@@ -284,15 +338,18 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if bind.IsFunc {
 			return bind, err
 		}
-		globalVarValue, err := m.genExpr(m.initFuncBlock, bind.Expr, binds, typeMap)
+		b := c.Block
+		c.Block = m.initFuncBlock
+		globalVarValue, err := m.genExpr(c, bind.Expr)
+		c.Block = b
 		if err != nil {
 			return nil, err
 		}
-		globalT, err := typeMap.GetTypeOfExpr(bind.Expr)
+		globalT, err := c.typeMap.GetTypeOfExpr(bind.Expr)
 		if err != nil {
 			return nil, err
 		}
-		typeMap.Add(expr.Literal, globalT)
+		c.typeMap.Add(expr.Literal, globalT)
 		// declare global variable
 		globalVar := m.generator.mod.NewGlobal(bind.Name, globalVarValue.Type())
 		globalVar.Init = &constant.ZeroInitializer{}
@@ -314,19 +371,19 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		str := m.generator.mod.NewGlobal("", llvmtypes.NewArray(uint64(len(expr.Literal)), llvmtypes.I8))
 		str.Align = 1
 		str.Init = constant.NewCharArrayFromString(expr.Literal)
-		strGEP := b.NewGetElementPtr(str,
+		strGEP := c.NewGetElementPtr(str,
 			constant.NewInt(llvmtypes.I64, 0),
 			constant.NewInt(llvmtypes.I64, 0),
 		)
-		x := b.NewAlloca(llvmtypes.NewPointer(llvmtypes.I8))
-		b.NewStore(strGEP, x)
-		return b.NewLoad(x), nil
+		x := c.NewAlloca(llvmtypes.NewPointer(llvmtypes.I8))
+		c.NewStore(strGEP, x)
+		return c.NewLoad(x), nil
 	case *ast.List:
 		newList, err := m.generator.getBuiltin("new_list")
 		if err != nil {
 			return nil, err
 		}
-		newListImpl, err := newList.GetImpl(typeMap)
+		newListImpl, err := newList.GetImpl(c.typeMap)
 		if err != nil {
 			return nil, err
 		}
@@ -334,7 +391,7 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		elzMallocImpl, err := elzMalloc.GetImpl(typeMap)
+		elzMallocImpl, err := elzMalloc.GetImpl(c.typeMap)
 		if err != nil {
 			return nil, err
 		}
@@ -349,40 +406,43 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		)
 		tmpListPtr.Align = ir.Align(1)
 		var elemT llvmtypes.Type
+		backup := c.Block
+		c.Block = m.initFuncBlock
 		// storing ast list into tmp list
-		initBlock := m.initFuncBlock
 		for i, e := range expr.ExprList {
-			llvmExpr, err := m.genExpr(initBlock, e, binds, typeMap)
+			llvmExpr, err := m.genExpr(c, e)
 			if err != nil {
 				return nil, err
 			}
 			if i == 0 {
 				elemT = llvmExpr.Type()
 			}
-			indexI := initBlock.NewGetElementPtr(
+			indexI := c.NewGetElementPtr(
 				tmpListPtr,
 				constant.NewInt(llvmtypes.I64, 0),
 				constant.NewInt(llvmtypes.I64, int64(i)),
 			)
 			size := constant.NewInt(llvmtypes.I64, irutil.SizeOf(elemT))
-			exprMalloca := initBlock.NewCall(elzMallocImpl, size)
-			storeTo := initBlock.NewBitCast(exprMalloca, llvmtypes.NewPointer(llvmExpr.Type()))
+			exprMalloca := c.NewCall(elzMallocImpl, size)
+			storeTo := c.NewBitCast(exprMalloca, llvmtypes.NewPointer(llvmExpr.Type()))
 
-			initBlock.NewStore(llvmExpr, storeTo)
-			initBlock.NewStore(exprMalloca, indexI)
+			c.NewStore(llvmExpr, storeTo)
+			c.NewStore(exprMalloca, indexI)
 		}
 		// get this temporary array's address
-		elems := initBlock.NewGetElementPtr(tmpListPtr,
+		elems := c.NewGetElementPtr(tmpListPtr,
 			constant.NewInt(llvmtypes.I64, 0),
 			constant.NewInt(llvmtypes.I64, 0),
 		)
+		call := c.NewCall(newListImpl,
+			// size
+			constant.NewInt(llvmtypes.I64, int64(len(expr.ExprList))),
+			// elements
+			elems,
+		)
+		c.Block = backup
 		return value.NewWrap(
-			initBlock.NewCall(newListImpl,
-				// size
-				constant.NewInt(llvmtypes.I64, int64(len(expr.ExprList))),
-				// elements
-				elems,
-			),
+			call,
 			elemT,
 		), nil
 	case *ast.ExtractElement:
@@ -390,25 +450,25 @@ func (m *module) genExpr(b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 		if err != nil {
 			return nil, err
 		}
-		listIndexImpl, err := listIndex.GetImpl(typeMap)
+		listIndexImpl, err := listIndex.GetImpl(c.typeMap)
 		if err != nil {
 			return nil, err
 		}
 		// rely on infer type checking the Func and Key type already,
 		// we don't check it again
-		x, err := m.genExpr(b, expr.X, binds, typeMap)
+		x, err := m.genExpr(c, expr.X)
 		if err != nil {
 			return nil, err
 		}
 		if strings.HasPrefix(x.Type().String(), "%list") {
-			key, err := m.genExpr(b, expr.Key, binds, typeMap)
+			key, err := m.genExpr(c, expr.Key)
 			if err != nil {
 				return nil, err
 			}
-			elemPtr := b.NewCall(listIndexImpl, x, key)
+			elemPtr := c.NewCall(listIndexImpl, x, key)
 			// x value of extract element must be a wrapper, so we using type assertion here
-			convertedPtr := b.NewBitCast(elemPtr, llvmtypes.NewPointer(x.(*value.Wrapper).ElemT))
-			return b.NewLoad(convertedPtr), nil
+			convertedPtr := c.NewBitCast(elemPtr, llvmtypes.NewPointer(x.(*value.Wrapper).ElemT))
+			return c.NewLoad(convertedPtr), nil
 		}
 		return nil, fmt.Errorf("unknown x value: %s", x)
 	default:

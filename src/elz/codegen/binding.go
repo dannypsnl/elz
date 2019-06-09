@@ -119,7 +119,9 @@ func generateNewImpl(bind *Binding, returnType types.Type, typeMap *types.TypeMa
 }
 
 func funcBody(m *module, b *ir.Block, expr ast.Expr, binds map[string]*ir.Param, typeMap *types.TypeMap) error {
-	v, err := m.genExpr(b, expr, binds, typeMap)
+	newCtx := newContext(b, typeMap)
+	newCtx.binds = binds
+	v, err := m.genExpr(newCtx, expr)
 	if err != nil {
 		return err
 	}
