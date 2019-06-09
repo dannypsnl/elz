@@ -1,32 +1,35 @@
 package codegen
 
 import (
+	"github.com/elz-lang/elz/src/elz/internal/collection/stack"
 	"github.com/elz-lang/elz/src/elz/types"
 
 	"github.com/llir/llvm/ir"
 )
 
 type context struct {
-	backupBlock *ir.Block
+	stack *stack.Stack
 	*ir.Block
 	binds   map[string]*ir.Param
 	typeMap *types.TypeMap
 }
 
 func newContext(block *ir.Block, typeMap *types.TypeMap) *context {
+	s := stack.New()
+	s.Push(block)
 	return &context{
-		backupBlock: block,
-		Block:       block,
-		binds:       make(map[string]*ir.Param),
-		typeMap:     typeMap,
+		stack:   s,
+		Block:   s.Last().(*ir.Block),
+		binds:   make(map[string]*ir.Param),
+		typeMap: typeMap,
 	}
 }
 
 func (c *context) setBlock(b *ir.Block) {
-	c.backupBlock = c.Block
+	c.stack.Push(c.Block)
 	c.Block = b
 }
 
 func (c *context) restoreBlock() {
-	c.Block = c.backupBlock
+	c.Block = c.stack.Pop().(*ir.Block)
 }
