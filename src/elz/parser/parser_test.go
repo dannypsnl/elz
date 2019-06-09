@@ -297,9 +297,7 @@ func TestParseBinaryExpression(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.code, func(t *testing.T) {
 			p := parser.NewParser("test", tc.code)
-			primary, err := p.ParsePrimary()
-			require.NoError(t, err)
-			actual, err := p.ParseExpression(primary, parser.Minimum)
+			actual, err := p.ParseExpression(nil, parser.Minimum)
 			require.NoError(t, err)
 			assert.Equal(t, tc.expectedExpr, actual)
 		})

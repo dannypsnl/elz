@@ -258,11 +258,7 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	}
 	// consume assign
 	p.next()
-	primary, err := p.ParsePrimary()
-	if err != nil {
-		return nil, err
-	}
-	expr, err := p.ParseExpression(primary, Minimum)
+	expr, err := p.ParseExpression(nil, Minimum)
 	if err != nil {
 		return nil, err
 	}
@@ -278,6 +274,13 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 
 func (p *Parser) ParseExpression(leftHandSide ast.Expr, previousPrimary Precedence) (ast.Expr, error) {
 	lhs := leftHandSide
+	if lhs == nil {
+		primary, err := p.ParsePrimary()
+		if err != nil {
+			return nil, err
+		}
+		lhs = primary
+	}
 	lookahead := p.peekToken
 	// precedence of lookahead would also break with not operator token
 	// since the precedence would be -1
@@ -346,11 +349,7 @@ func (p *Parser) ParseUnary() (ast.Expr, error) {
 		return ast.NewBool(p.curToken.Val), nil
 	case lexer.ItemLeftParen:
 		p.next() // consume left paren (
-		primary, err := p.ParsePrimary()
-		if err != nil {
-			return nil, err
-		}
-		expr, err := p.ParseExpression(primary, Minimum)
+		expr, err := p.ParseExpression(nil, Minimum)
 		if err != nil {
 			return nil, err
 		}
@@ -363,11 +362,7 @@ func (p *Parser) ParseUnary() (ast.Expr, error) {
 		listElem := make([]ast.Expr, 0)
 		for p.peekToken.Type != lexer.ItemRightBracket {
 			p.next()
-			primary, err := p.ParsePrimary()
-			if err != nil {
-				return nil, err
-			}
-			expr, err := p.ParseExpression(primary, Minimum)
+			expr, err := p.ParseExpression(nil, Minimum)
 			if err != nil {
 				return nil, err
 			}
@@ -392,11 +387,7 @@ func (p *Parser) ParseElementAccess(expr ast.Expr) (*ast.ExtractElement, error) 
 		return nil, expectedError(lexer.ItemLeftBracket, p.peekToken)
 	}
 	p.next() // consume left bracket [
-	primary, err := p.ParsePrimary()
-	if err != nil {
-		return nil, err
-	}
-	keyExpr, err := p.ParseExpression(primary, Minimum)
+	keyExpr, err := p.ParseExpression(nil, Minimum)
 	if err != nil {
 		return nil, err
 	}
@@ -424,11 +415,7 @@ func (p *Parser) ParseArgument(expr ast.Expr) (*ast.FuncCall, error) {
 				p.next() // consume colon :
 			}
 		}
-		primary, err := p.ParsePrimary()
-		if err != nil {
-			return nil, err
-		}
-		expr, err := p.ParseExpression(primary, Minimum)
+		expr, err := p.ParseExpression(nil, Minimum)
 		if err != nil {
 			return nil, err
 		}
