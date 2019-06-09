@@ -171,20 +171,6 @@ func (m *module) InferTypeOf(expr ast.Expr, typeMap *types.TypeMap) (types.Type,
 	}
 }
 
-type context struct {
-	*ir.Block
-	binds   map[string]*ir.Param
-	typeMap *types.TypeMap
-}
-
-func newContext(block *ir.Block, typeMap *types.TypeMap) *context {
-	return &context{
-		Block:   block,
-		binds:   make(map[string]*ir.Param),
-		typeMap: typeMap,
-	}
-}
-
 func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 	switch expr := expr.(type) {
 	case *ast.FuncCall:
@@ -293,31 +279,34 @@ func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 
 		assignV := caseStartBlock.NewAlloca(llvmtypes.I64)
 		caseElseBlock := caseStartBlock.Parent.NewBlock("")
-		c.Block = caseElseBlock
+		c.setBlock(caseElseBlock)
 		elseExpr, err := m.genExpr(c, expr.Else)
 		if err != nil {
 			return nil, err
 		}
-		caseElseBlock.NewStore(elseExpr, assignV)
-		caseElseBlock.NewBr(caseEndBlock)
+		c.NewStore(elseExpr, assignV)
+		c.NewBr(caseEndBlock)
+		c.restoreBlock()
 		for _, of := range expr.CaseOf {
-			c.Block = caseStartBlock
+			c.setBlock(caseStartBlock)
 			pattern, err := m.genExpr(c, of.Pattern)
 			if err != nil {
 				return nil, err
 			}
-			cond := caseStartBlock.NewICmp(irenum.IPredEQ, pattern, caseExpr)
-			caseOfBlock := caseStartBlock.Parent.NewBlock("")
-			caseStartBlock.NewCondBr(cond, caseOfBlock, caseElseBlock)
-			c.Block = caseOfBlock
+			cond := c.NewICmp(irenum.IPredEQ, pattern, caseExpr)
+			caseOfBlock := c.Parent.NewBlock("")
+			c.NewCondBr(cond, caseOfBlock, caseElseBlock)
+			c.restoreBlock()
+			c.setBlock(caseOfBlock)
 			do, err := m.genExpr(c, of.Expr)
 			if err != nil {
 				return nil, err
 			}
-			caseOfBlock.NewStore(do, assignV)
-			caseOfBlock.NewBr(caseEndBlock)
+			c.NewStore(do, assignV)
+			c.NewBr(caseEndBlock)
+			c.restoreBlock()
 		}
-		c.Block = caseEndBlock
+		c.setBlock(caseEndBlock)
 		return c.NewLoad(assignV), nil
 	case *ast.Ident:
 		v, ok := c.binds[expr.Literal]
@@ -338,15 +327,15 @@ func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 		if bind.IsFunc {
 			return bind, err
 		}
-		b := c.Block
-		c.Block = m.initFuncBlock
+		c.setBlock(m.initFuncBlock)
 		globalVarValue, err := m.genExpr(c, bind.Expr)
-		c.Block = b
+		c.restoreBlock()
 		if err != nil {
 			return nil, err
 		}
 		globalT, err := c.typeMap.GetTypeOfExpr(bind.Expr)
 		if err != nil {
+			logrus.Infof("failed?")
 			return nil, err
 		}
 		c.typeMap.Add(expr.Literal, globalT)
@@ -355,14 +344,16 @@ func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 		globalVar.Init = &constant.ZeroInitializer{}
 		globalVar.Align = 1
 		// store the temporary value into global variable in init function
-		m.initFuncBlock.NewStore(globalVarValue, globalVar)
+		c.setBlock(m.initFuncBlock)
+		c.NewStore(globalVarValue, globalVar)
+		c.restoreBlock()
 		if v, ok := globalVarValue.(*value.Wrapper); ok {
 			return value.NewWrap(
-				b.NewLoad(globalVar),
+				c.NewLoad(globalVar),
 				v.ElemT,
 			), nil
 		}
-		return b.NewLoad(globalVar), nil
+		return c.NewLoad(globalVar), nil
 	case *ast.Int:
 		return constant.NewIntFromString(llvmtypes.I64, expr.Literal)
 	case *ast.Float:
@@ -406,8 +397,7 @@ func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 		)
 		tmpListPtr.Align = ir.Align(1)
 		var elemT llvmtypes.Type
-		backup := c.Block
-		c.Block = m.initFuncBlock
+		c.setBlock(m.initFuncBlock)
 		// storing ast list into tmp list
 		for i, e := range expr.ExprList {
 			llvmExpr, err := m.genExpr(c, e)
@@ -440,7 +430,7 @@ func (m *module) genExpr(c *context, expr ast.Expr) (value.Value, error) {
 			// elements
 			elems,
 		)
-		c.Block = backup
+		c.restoreBlock()
 		return value.NewWrap(
 			call,
 			elemT,
