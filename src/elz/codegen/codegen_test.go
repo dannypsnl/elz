@@ -21,7 +21,7 @@ func TestBindingCodegen(t *testing.T) {
 	}{
 		{
 			name:     "call by generator",
-			code:     `add(x: int, y: int) = x + y`,
+			code:     `add(x: int, y: int): int = x + y`,
 			bindName: "add",
 			args: []*ast.Arg{
 				ast.NewArg("", ast.NewInt("1")),
@@ -36,8 +36,8 @@ func TestBindingCodegen(t *testing.T) {
 		{
 			name: "call function in function",
 			code: `
-add(x: int, y: int) = x + y
-addOne(y: int) = add(1, y)
+add(x: int, y: int): int = x + y
+addOne(y: int): int = add(1, y)
 `,
 			bindName: "addOne",
 			args: []*ast.Arg{

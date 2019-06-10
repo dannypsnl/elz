@@ -226,6 +226,9 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 			}
 		}
 		p.next()
+		if err := p.want(lexer.ItemColon); err != nil {
+			return nil, err
+		}
 	}
 	var returnTyp ast.Type
 	if p.curToken.Type == lexer.ItemColon {
