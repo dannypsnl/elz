@@ -80,9 +80,9 @@ func (b *Binding) GetImpl(typeMap *types.TypeMap, argList ...*ast.Arg) (*ir.Func
 	// - create parameters of IR
 	params := make([]*ir.Param, 0)
 	for i, paramType := range typeListOfArgs {
-		paramName := b.ParamList[i]
-		typeMap.Add(paramName, paramType)
-		params = append(params, ir.NewParam(paramName, paramType.LLVMType()))
+		param := b.ParamList[i]
+		typeMap.Add(param.Name, paramType)
+		params = append(params, ir.NewParam(param.Name, paramType.LLVMType()))
 	}
 	returnType, err := b.getReturnType(typeMap, typeListOfArgs...)
 	if err != nil {
@@ -109,7 +109,7 @@ func generateNewImpl(bind *Binding, returnType types.Type, typeMap *types.TypeMa
 	block := function.NewBlock("")
 	binds := make(map[string]*ir.Param)
 	for i, p := range params {
-		binds[bind.ParamList[i]] = p
+		binds[bind.ParamList[i].Name] = p
 	}
 	err := funcBody(bind.selfModule, block, bind.Expr, binds, typeMap)
 	if err != nil {
@@ -135,9 +135,9 @@ func (b *Binding) checkArg(args ...*ast.Arg) error {
 		argName := arg.Ident
 		// allow ignore argument name like: `add(1, 2)`
 		if argName == "" {
-			argName = argNameMustBe
+			argName = argNameMustBe.Name
 		}
-		if argNameMustBe != argName {
+		if argNameMustBe.Name != argName {
 			return fmt.Errorf(`argument name must be parameter name(or empty), for example:
   assert that should_be = ...
   assert(that: 1+2, should_be: 3)

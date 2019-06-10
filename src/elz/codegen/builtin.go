@@ -17,7 +17,7 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 	printfBind := NewBinding(&ast.Binding{
 		Name: "printf",
 		// format: ...
-		ParamList: []string{"format"},
+		ParamList: []*ast.Param{ast.NewParam("format", &ast.VariantType{})},
 	})
 	printfImpl := mod.NewFunc("printf", llvmtypes.I64,
 		ir.NewParam("format", llvmtypes.NewPointer(llvmtypes.I8)),
@@ -29,7 +29,7 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 	elzMallocBind := NewBinding(&ast.Binding{
 		Name: "elz_malloc",
 		// size: size_t(aka int)
-		ParamList: []string{"size"},
+		ParamList: []*ast.Param{ast.NewParam("size", &ast.VariantType{})},
 	})
 	elzMallocBind.compilerProvidedImpl = mod.NewFunc("elz_malloc", llvmtypes.NewPointer(llvmtypes.I8),
 		ir.NewParam("size", llvmtypes.I64),
@@ -39,7 +39,10 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 	newListBind := NewBinding(&ast.Binding{
 		Name: "new_list",
 		// size: int, elements: void **
-		ParamList: []string{"size", "elements"},
+		ParamList: []*ast.Param{
+			ast.NewParam("size", &ast.VariantType{}),
+			ast.NewParam("elements", &ast.VariantType{}),
+		},
 	})
 	newListBind.compilerProvidedImpl = mod.NewFunc("new_list", listPointerType,
 		ir.NewParam("size", llvmtypes.I64),
@@ -50,7 +53,10 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 	listIndexBind := NewBinding(&ast.Binding{
 		Name: "list_index",
 		// list: list, index: i64
-		ParamList: []string{"list", "index"},
+		ParamList: []*ast.Param{
+			ast.NewParam("list", &ast.VariantType{}),
+			ast.NewParam("index", &ast.VariantType{}),
+		},
 	})
 	listIndexBind.compilerProvidedImpl = mod.NewFunc("list_index", llvmtypes.NewPointer(llvmtypes.I8),
 		ir.NewParam("list", listPointerType),
@@ -59,8 +65,10 @@ func generateBuiltin(mod *ir.Module) map[string]*Binding {
 	builtins["list_index"] = listIndexBind
 
 	listLengthBind := NewBinding(&ast.Binding{
-		Name:      "list_length",
-		ParamList: []string{"list"},
+		Name: "list_length",
+		ParamList: []*ast.Param{
+			ast.NewParam("list", &ast.VariantType{}),
+		},
 	})
 	listLengthBind.compilerProvidedImpl = mod.NewFunc("list_length", llvmtypes.I64,
 		ir.NewParam("list", listPointerType),
