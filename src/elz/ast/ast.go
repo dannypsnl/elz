@@ -33,13 +33,17 @@ type (
 		Name string
 		Type []Type
 	}
+	Param struct {
+		Name string
+		Type
+	}
 	Binding struct {
-		IsFunc    bool
-		Export    bool
-		Name      string
-		ParamList []string
-		Expr      Expr
-		TypeList  []Type
+		IsFunc     bool
+		Export     bool
+		Name       string
+		ReturnType Type
+		ParamList  []*Param
+		Expr       Expr
 	}
 	CaseOf struct {
 		isExpr
@@ -138,14 +142,23 @@ func NewTypeDefine(export bool, name string, fields ...*Field) *TypeDefine {
 	}
 }
 
-func NewBinding(isFunc, export bool, name string, params []string, expr Expr) *Binding {
+func NewParam(name string, typ Type) *Param {
+	return &Param{
+		Name: name,
+		Type: typ,
+	}
+}
+func NewBinding(isFunc, export bool, name string, returnType Type, params []*Param, expr Expr) *Binding {
+	if params == nil {
+		params = make([]*Param, 0)
+	}
 	return &Binding{
-		IsFunc:    isFunc,
-		Export:    export,
-		Name:      name,
-		ParamList: params,
-		Expr:      expr,
-		TypeList:  []Type{},
+		IsFunc:     isFunc,
+		Export:     export,
+		Name:       name,
+		ReturnType: returnType,
+		ParamList:  params,
+		Expr:       expr,
 	}
 }
 

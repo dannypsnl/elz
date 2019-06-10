@@ -90,61 +90,6 @@ type Foo = (
 	}
 }
 
-func TestParseBindingType(t *testing.T) {
-	testCases := []struct {
-		code        string
-		expectedAst *ast.BindingType
-	}{
-		{
-			code: `a :: i32`,
-			expectedAst: &ast.BindingType{
-				Name: "a",
-				Type: []ast.Type{
-					&ast.ExistType{Name: "i32"},
-				},
-			},
-		},
-		{
-			code: `a :: i32 -> i32`,
-			expectedAst: &ast.BindingType{
-				Name: "a",
-				Type: []ast.Type{
-					&ast.ExistType{Name: "i32"},
-					&ast.ExistType{Name: "i32"},
-				},
-			},
-		},
-		{
-			code: `a :: 'a -> 'b`,
-			expectedAst: &ast.BindingType{
-				Name: "a",
-				Type: []ast.Type{
-					&ast.VariantType{Name: "a"},
-					&ast.VariantType{Name: "b"},
-				},
-			},
-		},
-		{
-			code: `a :: ()`,
-			expectedAst: &ast.BindingType{
-				Name: "a",
-				Type: []ast.Type{
-					&ast.VoidType{},
-				},
-			},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.code, func(t *testing.T) {
-			p := parser.NewParser("test", tc.code)
-			actual, err := p.ParseBindingType()
-			require.NoError(t, err)
-			assert.Equal(t, tc.expectedAst, actual)
-		})
-	}
-}
-
 func TestParseBinding(t *testing.T) {
 	testCases := []struct {
 		code        string
@@ -156,27 +101,33 @@ func TestParseBinding(t *testing.T) {
 				false,
 				true,
 				"a",
-				[]string{},
+				nil,
+				nil,
 				ast.NewInt("1"),
 			),
 		},
 		{
-			code: `a() = 1`,
+			code: `a(): int = 1`,
 			expectedAst: ast.NewBinding(
 				true,
 				true,
 				"a",
-				[]string{},
+				&ast.ExistType{Name: "int"},
+				nil,
 				ast.NewInt("1"),
 			),
 		},
 		{
-			code: `add x y = x + y`,
+			code: `add(x: int, y: int): int = x + y`,
 			expectedAst: ast.NewBinding(
 				true,
 				true,
 				"add",
-				[]string{"x", "y"},
+				&ast.ExistType{Name: "int"},
+				[]*ast.Param{
+					ast.NewParam("x", &ast.ExistType{Name: "int"}),
+					ast.NewParam("y", &ast.ExistType{Name: "int"}),
+				},
 				&ast.BinaryExpr{
 					LExpr: ast.NewIdent("x"),
 					RExpr: ast.NewIdent("y"),
@@ -590,15 +541,13 @@ func TestParseBooleanLiteral(t *testing.T) {
 func TestParseProgram(t *testing.T) {
 	code := `import foo::bar
 type Foo = ()
-add :: i32 -> i32 -> i32
-add x y = x + y
-add_one y = add(1, y)
+add(x: int, y: int): int = x + y
+add_one(y: int): int = add(1, y)
 `
 	p := parser.NewParser("test", code)
 	program, err := p.ParseProgram()
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(program.Imports))
 	assert.Equal(t, 1, len(program.TypeDefines))
-	assert.Equal(t, 1, len(program.BindingTypes))
 	assert.Equal(t, 2, len(program.Bindings))
 }

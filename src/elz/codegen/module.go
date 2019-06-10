@@ -69,10 +69,10 @@ has the same name in the module`, mod1, importPath)
 			m.typeMap.Add(b.Name, types.NewBindingType(m, b.Binding))
 		}
 	}
-	params := make([]string, 0)
+	params := make([]*ast.Param, 0)
 	for _, typeDef := range m.typeDefines {
 		for _, field := range typeDef.Fields {
-			params = append(params, field.Name)
+			params = append(params, ast.NewParam(field.Name, field.Type))
 		}
 		newStruct := value.NewStruct(
 			m.generator.mod,
@@ -84,6 +84,7 @@ has the same name in the module`, mod1, importPath)
 			true,
 			typeDef.Export,
 			typeDef.Name,
+			&ast.VariantType{},
 			params,
 			newStruct,
 		))
@@ -119,8 +120,8 @@ func (m *module) InferTypeOf(expr ast.Expr, typeMap *types.TypeMap) (types.Type,
 		}
 		typeMap := types.NewTypeMap(typeMap)
 		for i, paramType := range typeList {
-			paramName := bindingType.ParamList[i]
-			typeMap.Add(paramName, paramType)
+			param := bindingType.ParamList[i]
+			typeMap.Add(param.Name, paramType)
 		}
 		return bindingType.GetReturnType(typeMap, typeList...)
 	case *ast.BinaryExpr:

@@ -1,1 +1,1 @@
-add x y = x + y
+add(x: int, y: int): int = x + y

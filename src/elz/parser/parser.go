@@ -34,20 +34,11 @@ func (p *Parser) ParseProgram() (*ast.Program, error) {
 	for {
 		switch p.curToken.Type {
 		case lexer.ItemIdent:
-			if p.peekToken.Type == lexer.ItemAccessor {
-				bindingType, err := p.ParseBindingType()
-				if err != nil {
-					p.errors = append(p.errors, err)
-				} else {
-					program.AddBindingType(bindingType)
-				}
+			binding, err := p.ParseBinding()
+			if err != nil {
+				p.errors = append(p.errors, err)
 			} else {
-				binding, err := p.ParseBinding()
-				if err != nil {
-					p.errors = append(p.errors, err)
-				} else {
-					program.AddBinding(binding)
-				}
+				program.AddBinding(binding)
 			}
 		case lexer.ItemKwImport:
 			importStmt, err := p.ParseImport()
@@ -171,41 +162,6 @@ func (p *Parser) ParseTypeField() (*ast.Field, error) {
 	return ast.NewField(fieldName, typ), nil
 }
 
-func (p *Parser) ParseBindingType() (*ast.BindingType, error) {
-	if err := p.want(lexer.ItemIdent); err != nil {
-		return nil, err
-	}
-	bindingName := p.curToken.Val
-	p.next()
-	if err := p.want(lexer.ItemAccessor); err != nil {
-		return nil, err
-	}
-	p.next()
-
-	bindingType := make([]ast.Type, 0)
-	for {
-		t, err := p.ParseType()
-		if err != nil {
-			return nil, err
-		}
-		bindingType = append(bindingType, t)
-		if p.peekToken.Type == lexer.ItemMinus {
-			p.next()
-			p.next()
-			if err := p.want(lexer.ItemGreaterThan); err != nil {
-				return nil, err
-			}
-			p.next()
-		} else {
-			p.next()
-			return &ast.BindingType{
-				Name: bindingName,
-				Type: bindingType,
-			}, nil
-		}
-	}
-}
-
 func (p *Parser) ParseType() (ast.Type, error) {
 	switch p.curToken.Type {
 	case lexer.ItemIdent:
@@ -237,21 +193,52 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 		return nil, err
 	}
 	bindingName := p.curToken.Val
-	parameterList := make([]string, 0)
-	isFunctionWithoutParameter := false
-	if p.peekToken.Type == lexer.ItemLeftParen {
+	p.next()
+	parameterList := make([]*ast.Param, 0)
+	isFunction := false
+	if p.curToken.Type == lexer.ItemLeftParen {
+		isFunction = true
 		p.next()
+		for p.curToken.Type != lexer.ItemRightParen {
+			if err := p.want(lexer.ItemIdent); err != nil {
+				return nil, err
+			}
+			paramName := p.curToken.Val
+			p.next()
+			if err := p.want(lexer.ItemColon); err != nil {
+				return nil, err
+			}
+			p.next()
+			typ, err := p.ParseType()
+			if err != nil {
+				return nil, err
+			}
+			p.next()
+			parameterList = append(parameterList, ast.NewParam(paramName, typ))
+			if err := p.want(lexer.ItemComma); err != nil {
+				if err := p.want(lexer.ItemRightParen); err != nil {
+					return nil, err
+				} else {
+					break
+				}
+			} else {
+				p.next()
+			}
+		}
 		p.next()
-		if err := p.want(lexer.ItemRightParen); err != nil {
+		if err := p.want(lexer.ItemColon); err != nil {
+			return nil, err
+		}
+	}
+	var returnTyp ast.Type
+	if p.curToken.Type == lexer.ItemColon {
+		p.next()
+		var err error
+		returnTyp, err = p.ParseType()
+		if err != nil {
 			return nil, err
 		}
 		p.next()
-		isFunctionWithoutParameter = true
-	} else {
-		// consume binding name then start parameters parsing
-		for p.next(); p.curToken.Type == lexer.ItemIdent; p.next() {
-			parameterList = append(parameterList, p.curToken.Val)
-		}
 	}
 	if err := p.want(lexer.ItemAssign); err != nil {
 		return nil, err
@@ -264,9 +251,10 @@ func (p *Parser) ParseBinding() (*ast.Binding, error) {
 	}
 	p.next()
 	return ast.NewBinding(
-		isFunctionWithoutParameter || len(parameterList) > 0,
+		isFunction,
 		!strings.HasPrefix(bindingName, "_"),
 		bindingName,
+		returnTyp,
 		parameterList,
 		expr,
 	), nil

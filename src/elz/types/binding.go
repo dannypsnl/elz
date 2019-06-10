@@ -49,8 +49,8 @@ func (b *BindingType) GetReturnType(typeMap *TypeMap, typeListOfArgs ...Type) (T
 
 func (b *BindingType) String() string {
 	fs := make([]fmt.Stringer, 0)
-	for _, t := range b.Binding.TypeList {
-		fs = append(fs, t)
+	for _, p := range b.Binding.ParamList {
+		fs = append(fs, p.Type)
 	}
 	return typeFormat(fs...)
 }

@@ -80,9 +80,9 @@ func (b *Binding) GetImpl(typeMap *types.TypeMap, argList ...*ast.Arg) (*ir.Func
 	// - create parameters of IR
 	params := make([]*ir.Param, 0)
 	for i, paramType := range typeListOfArgs {
-		paramName := b.ParamList[i]
-		typeMap.Add(paramName, paramType)
-		params = append(params, ir.NewParam(paramName, paramType.LLVMType()))
+		param := b.ParamList[i]
+		typeMap.Add(param.Name, paramType)
+		params = append(params, ir.NewParam(param.Name, paramType.LLVMType()))
 	}
 	returnType, err := b.getReturnType(typeMap, typeListOfArgs...)
 	if err != nil {
@@ -109,7 +109,7 @@ func generateNewImpl(bind *Binding, returnType types.Type, typeMap *types.TypeMa
 	block := function.NewBlock("")
 	binds := make(map[string]*ir.Param)
 	for i, p := range params {
-		binds[bind.ParamList[i]] = p
+		binds[bind.ParamList[i].Name] = p
 	}
 	err := funcBody(bind.selfModule, block, bind.Expr, binds, typeMap)
 	if err != nil {
@@ -131,13 +131,13 @@ func funcBody(m *module, b *ir.Block, expr ast.Expr, binds map[string]*ir.Param,
 
 func (b *Binding) checkArg(args ...*ast.Arg) error {
 	for i, arg := range args {
-		argNameMustBe := b.ParamList[i]
+		param := b.ParamList[i]
 		argName := arg.Ident
 		// allow ignore argument name like: `add(1, 2)`
 		if argName == "" {
-			argName = argNameMustBe
+			argName = param.Name
 		}
-		if argNameMustBe != argName {
+		if param.Name != argName {
 			return fmt.Errorf(`argument name must be parameter name(or empty), for example:
   assert that should_be = ...
   assert(that: 1+2, should_be: 3)
@@ -148,20 +148,21 @@ func (b *Binding) checkArg(args ...*ast.Arg) error {
 }
 
 func (b *Binding) typeCheck(typeList []types.Type) error {
-	if len(b.TypeList) == 0 {
+	if len(b.ParamList) == 0 {
 		return nil
 	}
 	var (
 		builder        strings.Builder
-		err            error
+		hasTypeError   bool
 		variantTypeMap = map[string]string{}
 	)
-	for i, requireT := range b.TypeList[:len(b.TypeList)-1] {
+	builder.WriteRune('(')
+	for i, param := range b.ParamList {
 		actualType := typeList[i]
-		switch requireT := requireT.(type) {
+		switch requireT := param.Type.(type) {
 		case *ast.ExistType:
 			if requireT.Name != actualType.String() {
-				err = fmt.Errorf("")
+				hasTypeError = true
 			}
 		case *ast.VariantType:
 			t, exist := variantTypeMap[requireT.Name]
@@ -170,18 +171,28 @@ func (b *Binding) typeCheck(typeList []types.Type) error {
 				t = actualType.String()
 			}
 			if t != actualType.String() {
-				err = fmt.Errorf("")
+				hasTypeError = true
 			}
 		case *ast.VoidType:
 		}
-		builder.WriteString(requireT.String())
-		builder.WriteString(" -> ")
+		if i != 0 {
+			builder.WriteRune(',')
+			builder.WriteRune(' ')
+		}
+		builder.WriteString(param.Name)
+		builder.WriteRune(':')
+		builder.WriteRune(' ')
+		builder.WriteString(param.Type.String())
 	}
+	builder.WriteRune(')')
+	builder.WriteRune(':')
+	builder.WriteRune(' ')
+	builder.WriteString(b.ReturnType.String())
 	requireT := builder.String()
-	requireType := b.Name + " :: " + requireT[:len(requireT)-4]
-	if err != nil {
-		// Format would like: `bindName :: type -> type -> type`
-		actualCallTypeFormat := b.Name + " :: " + typeFormat(typeList...)
+	requireType := b.Name + requireT
+	if hasTypeError {
+		// Format would like: `bindName(type, type, type)`
+		actualCallTypeFormat := b.Name + typeFormat(typeList...)
 		return fmt.Errorf("require type: `%s` but get: `%s`", requireType, actualCallTypeFormat)
 	}
 	return nil
