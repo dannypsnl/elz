@@ -33,22 +33,7 @@ func NewTree(program *ast.Program) (*Tree, error) {
 			return nil, err
 		}
 	}
-	for _, bindingT := range program.BindingTypes {
-		err := newTree.InsertBindingType(bindingT)
-		if err != nil {
-			return nil, err
-		}
-	}
 	return newTree, nil
-}
-
-func (t *Tree) InsertBindingType(bt *ast.BindingType) error {
-	_, exist := t.bindings[bt.Name]
-	if !exist {
-		return fmt.Errorf("no binding: %s exist", bt.Name)
-	}
-	t.bindings[bt.Name].TypeList = bt.Type
-	return nil
 }
 
 func (t *Tree) InsertBinding(b *ast.Binding) error {

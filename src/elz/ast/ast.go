@@ -38,12 +38,12 @@ type (
 		Type
 	}
 	Binding struct {
-		IsFunc    bool
-		Export    bool
-		Name      string
-		ParamList []*Param
-		Expr      Expr
-		TypeList  []Type
+		IsFunc     bool
+		Export     bool
+		Name       string
+		ReturnType Type
+		ParamList  []*Param
+		Expr       Expr
 	}
 	CaseOf struct {
 		isExpr
@@ -153,11 +153,12 @@ func NewBinding(isFunc, export bool, name string, returnType Type, params []*Par
 		params = make([]*Param, 0)
 	}
 	return &Binding{
-		IsFunc:    isFunc,
-		Export:    export,
-		Name:      name,
-		ParamList: params,
-		Expr:      expr,
+		IsFunc:     isFunc,
+		Export:     export,
+		Name:       name,
+		ReturnType: returnType,
+		ParamList:  params,
+		Expr:       expr,
 	}
 }
 

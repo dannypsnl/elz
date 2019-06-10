@@ -28,8 +28,8 @@ type Generator struct {
 
 func New(entryTree *Tree, allAstTree map[string]*Tree) *Generator {
 	typMap := make(map[string]types.Type)
-	typMap["+ :: int -> int"] = &types.Int{}
-	typMap["+ :: f64 -> f64"] = &types.Float{}
+	typMap["+(int, int)"] = &types.Int{}
+	typMap["+(f64, f64)"] = &types.Float{}
 
 	mod := ir.NewModule()
 	builtin := generateBuiltin(mod)
@@ -114,19 +114,20 @@ func (g *Generator) getBuiltin(name string) (*Binding, error) {
 func genKey(bindName string, typeList ...types.Type) string {
 	var b strings.Builder
 	b.WriteString(bindName)
-	b.WriteString(" :: ")
 	b.WriteString(typeFormat(typeList...))
 	return b.String()
 }
 
 func typeFormat(typeList ...types.Type) string {
 	var b strings.Builder
+	b.WriteRune('(')
 	if len(typeList) > 0 {
 		for _, t := range typeList[:len(typeList)-1] {
 			b.WriteString(t.String())
-			b.WriteString(" -> ")
+			b.WriteString(", ")
 		}
 		b.WriteString(typeList[len(typeList)-1].String())
 	}
+	b.WriteRune(')')
 	return b.String()
 }

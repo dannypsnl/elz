@@ -101,7 +101,7 @@ func TestParseBinding(t *testing.T) {
 				false,
 				true,
 				"a",
-				&ast.ExistType{Name: "int"},
+				nil,
 				nil,
 				ast.NewInt("1"),
 			),
