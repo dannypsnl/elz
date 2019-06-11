@@ -62,6 +62,7 @@ var (
 			linkCmd := exec.Command("clang", tmpObject,
 				filepath.Join(homeDir, ".elz/core/list.o"),
 				filepath.Join(homeDir, ".elz/core/memory.o"),
+				filepath.Join(homeDir, ".elz/core/string.o"),
 			)
 			defer os.Remove(tmpObject)
 			if err := linkCmd.Run(); err != nil {
