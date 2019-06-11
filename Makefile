@@ -12,9 +12,6 @@ deps:
 	@$(GO_MOD) go get ./...
 test: deps generate
 	@$(GO_MOD) go test ./... -count 1 -cover -failfast
-	@$(MAKE) -C $(shell pwd)/core/list test
-	@$(MAKE) -C $(shell pwd)/core/memory test
-	@$(MAKE) -C $(shell pwd)/core/string test
 generate:
 	@$(GO_MOD) go generate ./...
 coverage: deps
