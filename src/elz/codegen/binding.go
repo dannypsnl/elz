@@ -36,7 +36,7 @@ func (b *Binding) SetModule(m *module) {
 }
 
 func (b *Binding) getReturnType(typeMap *types.TypeMap, typeListOfArgs ...types.Type) (types.Type, error) {
-	key := typeFormat(typeListOfArgs...)
+	key := types.TypeFormat(typeListOfArgs...)
 	t, ok := b.cacheOfType[key]
 	if ok {
 		return t, nil
@@ -62,7 +62,7 @@ func (b *Binding) GetImpl(typeMap *types.TypeMap, argList ...*ast.Arg) (*ir.Func
 	if err != nil {
 		return nil, err
 	}
-	certainTypeFormatOfArgs := typeFormat(typeListOfArgs...)
+	certainTypeFormatOfArgs := types.TypeFormat(typeListOfArgs...)
 	// if we could get the implementation that we don't have to do any checking
 	// because it must already be checked
 	impl, getImpl := b.cacheOfImpl[certainTypeFormatOfArgs]
@@ -192,7 +192,7 @@ func (b *Binding) typeCheck(typeList []types.Type) error {
 	requireType := b.Name + requireT
 	if hasTypeError {
 		// Format would like: `bindName(type, type, type)`
-		actualCallTypeFormat := b.Name + typeFormat(typeList...)
+		actualCallTypeFormat := b.Name + types.TypeFormat(typeList...)
 		return fmt.Errorf("require type: `%s` but get: `%s`", requireType, actualCallTypeFormat)
 	}
 	return nil

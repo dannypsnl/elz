@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/elz-lang/elz/src/elz/ast"
@@ -30,11 +29,7 @@ func NewBindingType(m Module, binding *ast.Binding) Type {
 }
 
 func (b *BindingType) GetReturnType(typeMap *TypeMap, typeListOfArgs ...Type) (Type, error) {
-	fs := make([]fmt.Stringer, 0)
-	for _, t := range typeListOfArgs {
-		fs = append(fs, t)
-	}
-	key := typeFormat(fs...)
+	key := TypeFormat(typeListOfArgs...)
 	t, ok := b.cacheOfType[key]
 	if ok {
 		return t, nil
@@ -48,11 +43,17 @@ func (b *BindingType) GetReturnType(typeMap *TypeMap, typeListOfArgs ...Type) (T
 }
 
 func (b *BindingType) String() string {
-	fs := make([]fmt.Stringer, 0)
-	for _, p := range b.Binding.ParamList {
-		fs = append(fs, p.Type)
+	var buf strings.Builder
+	buf.WriteRune('(')
+	for i, t := range b.Binding.ParamList {
+		if i != 0 {
+			buf.WriteRune(',')
+			buf.WriteRune(' ')
+		}
+		buf.WriteString(t.String())
 	}
-	return typeFormat(fs...)
+	buf.WriteRune(')')
+	return buf.String()
 }
 
 // LLVMType of binding type shouldn't be used
@@ -60,7 +61,7 @@ func (b *BindingType) LLVMType() types.Type {
 	panic("LLVMType of BindingType shouldn't be used, since it might not have real underlying type")
 }
 
-func typeFormat(typeList ...fmt.Stringer) string {
+func TypeFormat(typeList ...Type) string {
 	var b strings.Builder
 	b.WriteRune('(')
 	for i, t := range typeList {
