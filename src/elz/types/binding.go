@@ -62,12 +62,14 @@ func (b *BindingType) LLVMType() types.Type {
 
 func typeFormat(typeList ...fmt.Stringer) string {
 	var b strings.Builder
-	if len(typeList) > 0 {
-		for _, t := range typeList[:len(typeList)-1] {
-			b.WriteString(t.String())
-			b.WriteString(" -> ")
+	b.WriteRune('(')
+	for i, t := range typeList {
+		if i != 0 {
+			b.WriteRune(',')
+			b.WriteRune(' ')
 		}
-		b.WriteString(typeList[len(typeList)-1].String())
+		b.WriteString(t.String())
 	}
+	b.WriteRune(')')
 	return b.String()
 }
