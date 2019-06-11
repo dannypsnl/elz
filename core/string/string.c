@@ -1,7 +1,6 @@
 #include "string.h"
 
 #include <stdlib.h>
-
 #include <stdio.h>
 
 struct String *new_string(int size, char *str) {
@@ -55,4 +54,11 @@ void delete_string(struct String *string) {
     next = next->tail;
     free(prev);
   }
+}
+
+void elz_println(struct String *str) {
+  char *cstr = (char *)malloc(sizeof(char) * string_length(str));
+  printf(cstr);
+  printf("\n");
+  delete[] cstr;
 }

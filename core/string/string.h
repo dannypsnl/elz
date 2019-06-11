@@ -15,6 +15,9 @@ uint64_t string_length(struct String *string);
 char string_index(struct String *string, uint64_t index);
 void delete_string(struct String *string);
 
+// Print APIs
+void elz_println(struct String *str);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
