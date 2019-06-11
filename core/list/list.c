@@ -50,14 +50,6 @@ void *list_index(struct List *list, uint64_t index) {
   return NULL;
 }
 
-void for_each(struct List *list, void f(void *)) {
-  struct List *next = list;
-  while (next != NULL && next->head != NULL) {
-    f(next->head);
-    next = next->tail;
-  }
-}
-
 void delete_list(struct List *list) {
   struct List *next = list;
   while (next != NULL) {
