@@ -276,6 +276,9 @@ func lexWhiteSpace(l *Lexer) stateFn {
 		return lexWhiteSpace
 	case r == '/':
 		l.next()
+		if l.peek() == '/' {
+			return lexComment
+		}
 		l.emit(ItemDiv)
 		return lexWhiteSpace
 	case r == ':':
@@ -338,6 +341,12 @@ func lexWhiteSpace(l *Lexer) stateFn {
 	default:
 		panic(fmt.Sprintf("don't know what to do with: %q", r))
 	}
+}
+
+func lexComment(l *Lexer) stateFn {
+	for r := l.next(); !isEndOfLine(r); r = l.next() {
+	}
+	return lexWhiteSpace
 }
 
 func lexString(l *Lexer) stateFn {
