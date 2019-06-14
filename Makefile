@@ -12,6 +12,7 @@ deps:
 	@$(GO_MOD) go get ./...
 test: deps generate
 	@$(GO_MOD) go test ./... -count 1 -cover -failfast
+	@$(MAKE) -C compiler test
 generate:
 	@$(GO_MOD) go generate ./...
 coverage: deps
