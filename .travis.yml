@@ -10,6 +10,11 @@ matrix:
   allow_failures:
     - go: master
   fast_finish: true
+  include:
+  - language: rust
+    script:
+      - cd compiler
+      - cargo test
 
 before_script:
   - go generate ./...
