@@ -73,11 +73,35 @@ add(x: int, y: int): int {
                 Parameter(Type::Defined("int".to_string()), "x".to_string()),
                 Parameter(Type::Defined("int".to_string()), "y".to_string())
             ],
-            Block::from(vec![Statement::Return(Expr::Binary(
+            Some(Block::from(vec![Statement::Return(Expr::Binary(
                 Box::new(Expr::Identifier("x".to_string())),
                 Box::new(Expr::Identifier("y".to_string())),
                 Operator::Plus
-            ))])
+            ))]))
+        )
+    );
+}
+
+#[test]
+fn test_parse_function_declare() {
+    let mut parser = Parser::new(
+        "\
+add(x: int, y: int): int;
+"
+        .to_string(),
+    );
+
+    let bind = parser.parse_function().unwrap();
+    assert_eq!(
+        bind,
+        Top::FuncDefine(
+            Type::Defined("int".to_string()),
+            "add".to_string(),
+            vec![
+                Parameter(Type::Defined("int".to_string()), "x".to_string()),
+                Parameter(Type::Defined("int".to_string()), "y".to_string())
+            ],
+            None
         )
     );
 }

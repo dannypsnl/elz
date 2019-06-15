@@ -170,13 +170,33 @@ impl Parser {
     /// }
     /// ```
     pub fn parse_function(&mut self) -> Result<Top> {
+        let func = self.parse_function_declare()?;
+        if self.peek(0)?.tk_type() == &TkType::Semicolon {
+            self.predict_and_consume(vec![TkType::Semicolon])?;
+            Ok(func)
+        } else {
+            let block = self.parse_block()?;
+            if let Top::FuncDefine(return_type, func_name, params, None) = func {
+                Ok(Top::FuncDefine(return_type, func_name, params, Some(block)))
+            } else {
+                panic!(
+                    "parse_function_declare do not return FuncDefine: {:?}",
+                    func
+                )
+            }
+        }
+    }
+    /// parse_function_declare:
+    /// ```
+    /// add(x: int, y: int): int
+    /// ```
+    pub fn parse_function_declare(&mut self) -> Result<Top> {
         self.predict(vec![TkType::Ident])?;
         let func_name = self.take()?.value();
         let params = self.parse_parameters()?;
         self.predict_and_consume(vec![TkType::Colon])?;
         let return_type = self.parse_type()?;
-        let block = self.parse_block()?;
-        Ok(Top::FuncDefine(return_type, func_name, params, block))
+        Ok(Top::FuncDefine(return_type, func_name, params, None))
     }
     /// parse_block:
     /// ```
