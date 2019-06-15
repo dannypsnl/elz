@@ -17,6 +17,42 @@ import foo::bar
 }
 
 #[test]
+fn test_global_variable() {
+    let mut parser = Parser::new(
+        "\
+x: int = 1
+"
+        .to_string(),
+    );
+
+    let import = parser.parse_global_variable().unwrap();
+    assert_eq!(
+        import,
+        Top::GlobalVariable(
+            Some(Type::Defined("int".to_string())),
+            "x".to_string(),
+            Expr::Int(1)
+        )
+    );
+}
+
+#[test]
+fn test_global_variable_without_type() {
+    let mut parser = Parser::new(
+        "\
+x = 1
+"
+        .to_string(),
+    );
+
+    let import = parser.parse_global_variable().unwrap();
+    assert_eq!(
+        import,
+        Top::GlobalVariable(None, "x".to_string(), Expr::Int(1))
+    );
+}
+
+#[test]
 fn test_parse_function() {
     let mut parser = Parser::new(
         "\

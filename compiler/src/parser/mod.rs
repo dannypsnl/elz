@@ -20,8 +20,13 @@ impl Parser {
         let mut program = vec![];
         match self.peek(0)?.tk_type() {
             TkType::Ident => {
-                let f = self.parse_function()?;
-                program.push(f);
+                program.push(
+                    if self.predict(vec![TkType::Ident, TkType::LParen]).is_ok() {
+                        self.parse_function()?
+                    } else {
+                        self.parse_global_variable()?
+                    },
+                );
             }
             TkType::Type => {
                 let t = self.parse_type_define()?;
@@ -137,6 +142,26 @@ impl Parser {
             let params = self.parse_parameters()?;
             Ok(SubType { tag, params })
         }
+    }
+    /// parse_global_variable:
+    /// ```
+    /// x: int = 1
+    /// ```
+    pub fn parse_global_variable(&mut self) -> Result<Top> {
+        self.predict(vec![TkType::Ident])?;
+        let variable_name = self.take()?.value();
+        let typ = if self.predict(vec![TkType::Colon]).is_ok() {
+            self.predict_and_consume(vec![TkType::Colon])?;
+            Some(self.parse_type()?)
+        } else {
+            None
+        };
+        self.predict_and_consume(vec![TkType::Assign])?;
+        Ok(Top::GlobalVariable(
+            typ,
+            variable_name,
+            self.parse_expression(None, 1)?,
+        ))
     }
     /// parse_function:
     /// ```

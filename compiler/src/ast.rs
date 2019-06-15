@@ -30,6 +30,8 @@ pub enum Top {
     Import(Vec<String>),
     /// FuncDefine: ReturnType, Name, Parameters, Block
     FuncDefine(Type, String, Vec<Parameter>, Block),
+    /// GlobalVariable: Type, Name, Expr
+    GlobalVariable(Option<Type>, String, Expr),
     /// StructureTypeDefine: Name, Unsure Types, Fields
     StructureTypeDefine(String, Vec<Type>, Vec<Parameter>),
     /// TaggedUnionTypeDefine: Name, Unsure Types, Subtypes
