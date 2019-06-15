@@ -45,9 +45,8 @@ type Car (
     let type_define = parser.parse_type_define().unwrap();
     assert_eq!(
         type_define,
-        Top::TypeDefine(
+        Top::StructureTypeDefine(
             "Car".to_string(),
-            vec![],
             vec![],
             vec![
                 Parameter(Type::Defined("string".to_string()), "name".to_string()),
@@ -72,7 +71,7 @@ type Option 'a (
     let type_define = parser.parse_type_define().unwrap();
     assert_eq!(
         type_define,
-        Top::TypeDefine(
+        Top::TaggedUnionTypeDefine(
             "Option".to_string(),
             vec![Type::Unsure("a".to_string())],
             vec![
@@ -85,7 +84,6 @@ type Option 'a (
                     params: vec![]
                 },
             ],
-            vec![]
         )
     );
 }

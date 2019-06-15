@@ -28,8 +28,10 @@ pub struct Parameter(pub Type, pub String);
 pub enum Top {
     /// FuncDefine: ReturnType, Name, Parameters, Block
     FuncDefine(Type, String, Vec<Parameter>, Block),
-    /// TypeDefine: Name, Unsure Types, Subtypes, Fields
-    TypeDefine(String, Vec<Type>, Vec<SubType>, Vec<Parameter>),
+    /// StructureTypeDefine: Name, Unsure Types, Fields
+    StructureTypeDefine(String, Vec<Type>, Vec<Parameter>),
+    /// TaggedUnionTypeDefine: Name, Unsure Types, Subtypes
+    TaggedUnionTypeDefine(String, Vec<Type>, Vec<SubType>),
 }
 #[derive(Debug, PartialEq)]
 pub struct SubType {

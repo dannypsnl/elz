@@ -53,10 +53,13 @@ impl Parser {
         while self.peek(0)?.tk_type() != &TkType::LParen {
             unsure_types.push(self.parse_unsure_type()?);
         }
-        if self.predict(vec![TkType::LParen,TkType::Ident, TkType::Colon]).is_ok() {
+        if self
+            .predict(vec![TkType::LParen, TkType::Ident, TkType::Colon])
+            .is_ok()
+        {
             // structure type
             let params = self.parse_parameters()?;
-            Ok(Top::TypeDefine(type_name, unsure_types, vec![], params))
+            Ok(Top::StructureTypeDefine(type_name, unsure_types, params))
         } else if
         // Just(a: 'a) | Nothing
         self.predict(vec![TkType::LParen,TkType::Ident, TkType::LParen]).is_ok() ||
@@ -72,7 +75,11 @@ impl Parser {
                 subtypes.push(self.parse_tagged_subtype()?);
             }
             self.predict_and_consume(vec![TkType::RParen])?;
-            Ok(Top::TypeDefine(type_name, unsure_types, subtypes, vec![]))
+            Ok(Top::TaggedUnionTypeDefine(
+                type_name,
+                unsure_types,
+                subtypes,
+            ))
         } else {
             Err(ParseError::new(format!(
                 "{} {} can't be a part of type define",
