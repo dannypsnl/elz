@@ -26,6 +26,8 @@ impl Block {
 pub struct Parameter(pub Type, pub String);
 #[derive(Debug, PartialEq)]
 pub enum Top {
+    /// Import
+    Import(Vec<String>),
     /// FuncDefine: ReturnType, Name, Parameters, Block
     FuncDefine(Type, String, Vec<Parameter>, Block),
     /// StructureTypeDefine: Name, Unsure Types, Fields

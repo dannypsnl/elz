@@ -7,6 +7,8 @@ pub enum TkType {
     Return,
     /// type
     Type,
+    /// import
+    Import,
     /// e.g. 1, 10, 34
     Num,
     /// +
@@ -27,6 +29,8 @@ pub enum TkType {
     RBrace,
     /// :
     Colon,
+    /// ::
+    Accessor,
     /// ;
     Semicolon,
     /// '
@@ -107,6 +111,7 @@ impl Lexer {
             let tok = match s.as_str() {
                 "return" => self.new_token(TkType::Return, s),
                 "type" => self.new_token(TkType::Type, s),
+                "import" => self.new_token(TkType::Import, s),
                 _ => self.new_token(token_type, s),
             };
             self.tokens.push(tok);
@@ -161,8 +166,15 @@ fn whitespace(lexer: &mut Lexer) -> State {
             State::Fn(consume)
         }
         Some(':') => {
-            lexer.emit(TkType::Colon);
-            State::Fn(consume)
+            lexer.next();
+            if lexer.peek() == Some(':') {
+                lexer.next();
+                lexer.emit(TkType::Accessor);
+                State::Fn(whitespace)
+            } else {
+                lexer.emit(TkType::Colon);
+                State::Fn(consume)
+            }
         }
         Some(';') => {
             lexer.emit(TkType::Semicolon);
@@ -219,6 +231,20 @@ pub fn lex(source: String) -> Vec<Token> {
 mod tests {
     use self::TkType::*;
     use super::*;
+
+    #[test]
+    fn test_import() {
+        assert_eq!(
+            lex("import foo::bar".to_string()),
+            vec![
+                Token((1, 0), Import, "import".to_string()),
+                Token((1, 7), Ident, "foo".to_string()),
+                Token((1, 10), Accessor, "::".to_string()),
+                Token((1, 12), Ident, "bar".to_string()),
+                Token((1, 15), EOF, "".to_string()),
+            ]
+        )
+    }
 
     #[test]
     fn get_number_tokens() {

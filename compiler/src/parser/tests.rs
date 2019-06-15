@@ -1,6 +1,22 @@
 use super::*;
 
 #[test]
+fn test_parse_import() {
+    let mut parser = Parser::new(
+        "\
+import foo::bar
+"
+        .to_string(),
+    );
+
+    let import = parser.parse_import().unwrap();
+    assert_eq!(
+        import,
+        Top::Import(vec!["foo".to_string(), "bar".to_string()])
+    );
+}
+
+#[test]
 fn test_parse_function() {
     let mut parser = Parser::new(
         "\

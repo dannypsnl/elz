@@ -27,11 +27,39 @@ impl Parser {
                 let t = self.parse_type_define()?;
                 program.push(t);
             }
+            TkType::Import => {
+                let i = self.parse_import()?;
+                program.push(i);
+            }
             _ => {
                 panic!("unsupport yet");
             }
         }
         Ok(program)
+    }
+    /// parse_import:
+    /// ```
+    /// import foo::bar
+    /// import pkg::hello
+    /// ```
+    pub fn parse_import(&mut self) -> Result<Top> {
+        self.predict_and_consume(vec![TkType::Import])?;
+        Ok(Top::Import(self.parse_access_chain()?))
+    }
+    /// parse_access_chain:
+    /// ```
+    /// foo::bar
+    /// ```
+    pub fn parse_access_chain(&mut self) -> Result<Vec<String>> {
+        let mut chain = vec![];
+        self.predict(vec![TkType::Ident])?;
+        chain.push(self.take()?.value());
+        while self.peek(0)?.tk_type() == &TkType::Accessor {
+            self.predict_and_consume(vec![TkType::Accessor])?;
+            self.predict(vec![TkType::Ident])?;
+            chain.push(self.take()?.value());
+        }
+        Ok(chain)
     }
     /// parse_type_define:
     ///
