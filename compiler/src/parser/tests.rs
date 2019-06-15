@@ -89,6 +89,8 @@ fn test_parse_contract() {
 contract Show (
   to_string(from: Self): string;
 )
+
+Show::to_string(from: int): string;
 "
         .to_string(),
     );
@@ -107,6 +109,23 @@ contract Show (
                 )],
                 None
             )]
+        )
+    );
+
+    let contract_func = parser.parse_contract_function().unwrap();
+    assert_eq!(
+        contract_func,
+        Top::ContractFuncDefine(
+            "Show".to_string(),
+            Box::new(Top::FuncDefine(
+                Type::Defined("string".to_string()),
+                "to_string".to_string(),
+                vec![Parameter(
+                    Type::Defined("int".to_string()),
+                    "from".to_string()
+                )],
+                None
+            ))
         )
     );
 }

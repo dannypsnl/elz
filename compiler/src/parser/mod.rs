@@ -23,6 +23,8 @@ impl Parser {
                 program.push(
                     if self.predict(vec![TkType::Ident, TkType::LParen]).is_ok() {
                         self.parse_function()?
+                    } else if self.predict(vec![TkType::Ident, TkType::Accessor]).is_ok() {
+                        self.parse_contract_function()?
                     } else {
                         self.parse_global_variable()?
                     },
@@ -184,7 +186,15 @@ impl Parser {
             self.predict_and_consume(vec![TkType::Semicolon])?;
             func_declare_set.push(func_declare);
         }
+        self.predict_and_consume(vec![TkType::RParen])?;
         Ok(Top::Contract(contract_name, func_declare_set))
+    }
+    pub fn parse_contract_function(&mut self) -> Result<Top> {
+        self.predict(vec![TkType::Ident])?;
+        let contract_name = self.take()?.value();
+        self.predict_and_consume(vec![TkType::Accessor])?;
+        let func = self.parse_function()?;
+        Ok(Top::ContractFuncDefine(contract_name, Box::new(func)))
     }
     /// parse_function:
     /// ```

@@ -30,6 +30,8 @@ pub enum Top {
     Import(Vec<String>),
     /// Contract: Name, FuncDefines
     Contract(String, Vec<Top>),
+    /// ContractFuncDefine: contract name, function define
+    ContractFuncDefine(String, Box<Top>),
     /// FuncDefine: ReturnType, Name, Parameters, Block
     FuncDefine(Type, String, Vec<Parameter>, Option<Block>),
     /// GlobalVariable: Type, Name, Expr
