@@ -29,6 +29,76 @@ impl Parser {
         }
         Ok(program)
     }
+    /// parse_type_define:
+    ///
+    /// * tagged union type
+    ///     ```
+    ///     type Option 'a (
+    ///       Just(a: 'a)
+    ///       | Nothing
+    ///     )
+    ///     ```
+    /// * structure type
+    ///     ```
+    ///     type Car (
+    ///       name: string,
+    ///       price: int,
+    ///     )
+    ///     ```
+    pub fn parse_type_define(&mut self) -> Result<Top> {
+        self.predict_and_consume(vec![TkType::Type])?;
+        self.predict(vec![TkType::Ident])?;
+        let type_name = self.take()?.value();
+        let mut unsure_types = vec![];
+        while self.peek(0)?.tk_type() != &TkType::LParen {
+            unsure_types.push(self.parse_unsure_type()?);
+        }
+        if self.predict(vec![TkType::LParen,TkType::Ident, TkType::Colon]).is_ok() {
+            // structure type
+            let params = self.parse_parameters()?;
+            Ok(Top::TypeDefine(type_name, unsure_types, vec![], params))
+        } else if
+        // Just(a: 'a) | Nothing
+        self.predict(vec![TkType::LParen,TkType::Ident, TkType::LParen]).is_ok() ||
+            // Red | Blue | Green
+             self.predict(vec![TkType::LParen,TkType::Ident, TkType::VerticalLine]).is_ok()
+        {
+            // tagged union type
+            self.predict_and_consume(vec![TkType::LParen])?;
+            let mut subtypes = vec![];
+            subtypes.push(self.parse_tagged_subtype()?);
+            while self.peek(0)?.tk_type() == &TkType::VerticalLine {
+                self.predict_and_consume(vec![TkType::VerticalLine])?;
+                subtypes.push(self.parse_tagged_subtype()?);
+            }
+            self.predict_and_consume(vec![TkType::RParen])?;
+            Ok(Top::TypeDefine(type_name, unsure_types, subtypes, vec![]))
+        } else {
+            Err(ParseError::new(format!(
+                "{} {} can't be a part of type define",
+                self.peek(0)?.value(),
+                self.peek(1)?.value(),
+            )))
+        }
+    }
+    /// parse_tagged_subtype:
+    /// ```
+    /// Just(a: 'a)
+    /// Nothing
+    /// ```
+    pub fn parse_tagged_subtype(&mut self) -> Result<SubType> {
+        self.predict(vec![TkType::Ident])?;
+        let tag = self.take()?.value();
+        if self.predict(vec![TkType::LParen]).is_err() {
+            Ok(SubType {
+                tag,
+                params: vec![],
+            })
+        } else {
+            let params = self.parse_parameters()?;
+            Ok(SubType { tag, params })
+        }
+    }
     /// parse_function:
     /// ```
     /// add(x: int, y: int): int {
@@ -37,12 +107,12 @@ impl Parser {
     /// ```
     pub fn parse_function(&mut self) -> Result<Top> {
         self.predict(vec![TkType::Ident])?;
-        let func_name = self.take()?;
+        let func_name = self.take()?.value();
         let params = self.parse_parameters()?;
         self.predict_and_consume(vec![TkType::Colon])?;
         let return_type = self.parse_type()?;
         let block = self.parse_block()?;
-        Ok(Top::Func(return_type, func_name.value(), params, block))
+        Ok(Top::FuncDefine(return_type, func_name, params, block))
     }
     /// parse_block:
     /// ```
@@ -122,7 +192,7 @@ impl Parser {
             }
             TkType::Ident => Ok(Expr::Identifier(self.take()?.value())),
             _ => Err(ParseError::new(format!(
-                "unimplement primary for {:?}",
+                "unimplemented primary for {:?}",
                 self.peek(0)?
             ))),
         }
@@ -155,12 +225,25 @@ impl Parser {
     }
     /// parse_type:
     /// ```
-    /// int
+    /// int, 'a
     /// ```
     pub fn parse_type(&mut self) -> Result<Type> {
-        self.predict(vec![TkType::Ident])?;
-        let typ = self.take()?.value();
-        Ok(Type::Normal(typ))
+        match self.peek(0)?.tk_type() {
+            TkType::Prime => self.parse_unsure_type(),
+            TkType::Ident =>Ok(Type::Defined(self.take()?.value())),
+            _ => Err(ParseError::new(format!(
+                    "expected `'` for unsure type(e.g. `'element`) or <identifier> for defined type but got {:?} while parsing type",
+                    self.peek(0)?,
+                )))
+        }
+    }
+    /// parse_unsure_type:
+    /// ```
+    /// 'a, 'b
+    /// ```
+    pub fn parse_unsure_type(&mut self) -> Result<Type> {
+        self.predict_and_consume(vec![TkType::Prime])?;
+        Ok(Type::Unsure(self.take()?.value()))
     }
 }
 
