@@ -28,6 +28,8 @@ pub struct Parameter(pub Type, pub String);
 pub enum Top {
     /// Import
     Import(Vec<String>),
+    /// Contract: Name, FuncDefines
+    Contract(String, Vec<Top>),
     /// FuncDefine: ReturnType, Name, Parameters, Block
     FuncDefine(Type, String, Vec<Parameter>, Option<Block>),
     /// GlobalVariable: Type, Name, Expr

@@ -83,6 +83,35 @@ add(x: int, y: int): int {
 }
 
 #[test]
+fn test_parse_contract() {
+    let mut parser = Parser::new(
+        "\
+contract Show (
+  to_string(from: Self): string;
+)
+"
+        .to_string(),
+    );
+
+    let contract = parser.parse_contract().unwrap();
+    assert_eq!(
+        contract,
+        Top::Contract(
+            "Show".to_string(),
+            vec![Top::FuncDefine(
+                Type::Defined("string".to_string()),
+                "to_string".to_string(),
+                vec![Parameter(
+                    Type::Defined("Self".to_string()),
+                    "from".to_string()
+                )],
+                None
+            )]
+        )
+    );
+}
+
+#[test]
 fn test_parse_function_declare() {
     let mut parser = Parser::new(
         "\

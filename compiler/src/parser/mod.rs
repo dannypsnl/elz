@@ -36,6 +36,10 @@ impl Parser {
                 let i = self.parse_import()?;
                 program.push(i);
             }
+            TkType::Contract => {
+                let c = self.parse_contract()?;
+                program.push(c);
+            }
             _ => {
                 panic!("unsupport yet");
             }
@@ -162,6 +166,25 @@ impl Parser {
             variable_name,
             self.parse_expression(None, 1)?,
         ))
+    }
+    /// parse_contract:
+    /// ```
+    /// contract Show (
+    ///   to_string(from: Self): string;
+    /// )
+    /// ```
+    pub fn parse_contract(&mut self) -> Result<Top> {
+        self.predict_and_consume(vec![TkType::Contract])?;
+        self.predict(vec![TkType::Ident])?;
+        let contract_name = self.take()?.value();
+        self.predict_and_consume(vec![TkType::LParen])?;
+        let mut func_declare_set = vec![];
+        while self.peek(0)?.tk_type() != &TkType::RParen {
+            let func_declare = self.parse_function_declare()?;
+            self.predict_and_consume(vec![TkType::Semicolon])?;
+            func_declare_set.push(func_declare);
+        }
+        Ok(Top::Contract(contract_name, func_declare_set))
     }
     /// parse_function:
     /// ```

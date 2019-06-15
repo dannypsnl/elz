@@ -9,6 +9,8 @@ pub enum TkType {
     Type,
     /// import
     Import,
+    /// contract
+    Contract,
     /// e.g. 1, 10, 34
     Num,
     /// +
@@ -112,6 +114,7 @@ impl Lexer {
                 "return" => self.new_token(TkType::Return, s),
                 "type" => self.new_token(TkType::Type, s),
                 "import" => self.new_token(TkType::Import, s),
+                "contract" => self.new_token(TkType::Contract, s),
                 _ => self.new_token(token_type, s),
             };
             self.tokens.push(tok);
@@ -132,7 +135,6 @@ fn whitespace(lexer: &mut Lexer) -> State {
 
     match lexer.peek() {
         Some(_c @ '0'..='9') => State::Fn(number),
-        Some(_c @ 'a'..='z') | Some(_c @ 'A'..='Z') => State::Fn(ident),
         Some('=') => {
             lexer.emit(TkType::Assign);
             State::Fn(consume)
@@ -189,7 +191,13 @@ fn whitespace(lexer: &mut Lexer) -> State {
             State::Fn(consume)
         }
         None => State::EOF,
-        Some(c) => panic!("Not implemented for {} yet", c),
+        Some(c) => {
+            if identifier_set(c) {
+                State::Fn(ident)
+            } else {
+                panic!("Not implemented for {} yet", c);
+            }
+        }
     }
 }
 
@@ -198,9 +206,13 @@ fn consume(lexer: &mut Lexer) -> State {
     State::Fn(whitespace)
 }
 
+fn identifier_set(c: char) -> bool {
+    c.is_alphanumeric() || c == '_'
+}
+
 fn ident(lexer: &mut Lexer) -> State {
     while let Some(c) = lexer.next() {
-        if !c.is_alphanumeric() {
+        if !identifier_set(c) {
             break;
         }
     }
