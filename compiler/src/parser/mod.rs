@@ -23,6 +23,10 @@ impl Parser {
                 let f = self.parse_function()?;
                 program.push(f);
             }
+            TkType::Type => {
+                let t = self.parse_type_define()?;
+                program.push(t);
+            }
             _ => {
                 panic!("unsupport yet");
             }
