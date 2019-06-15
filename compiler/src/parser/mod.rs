@@ -49,7 +49,7 @@ impl Parser {
         Ok(program)
     }
     /// parse_import:
-    /// ```
+    /// ```ignore
     /// import foo::bar
     /// import pkg::hello
     /// ```
@@ -58,7 +58,7 @@ impl Parser {
         Ok(Top::Import(self.parse_access_chain()?))
     }
     /// parse_access_chain:
-    /// ```
+    /// ```ignore
     /// foo::bar
     /// ```
     pub fn parse_access_chain(&mut self) -> Result<Vec<String>> {
@@ -75,14 +75,14 @@ impl Parser {
     /// parse_type_define:
     ///
     /// * tagged union type
-    ///     ```
+    ///     ```ignore
     ///     type Option 'a (
     ///       Just(a: 'a)
     ///       | Nothing
     ///     )
     ///     ```
     /// * structure type
-    ///     ```
+    ///     ```ignore
     ///     type Car (
     ///       name: string,
     ///       price: int,
@@ -132,7 +132,7 @@ impl Parser {
         }
     }
     /// parse_tagged_subtype:
-    /// ```
+    /// ```ignore
     /// Just(a: 'a)
     /// Nothing
     /// ```
@@ -150,7 +150,7 @@ impl Parser {
         }
     }
     /// parse_global_variable:
-    /// ```
+    /// ```ignore
     /// x: int = 1
     /// ```
     pub fn parse_global_variable(&mut self) -> Result<Top> {
@@ -170,7 +170,7 @@ impl Parser {
         ))
     }
     /// parse_contract:
-    /// ```
+    /// ```ignore
     /// contract Show (
     ///   to_string(from: Self): string;
     /// )
@@ -197,7 +197,7 @@ impl Parser {
         Ok(Top::ContractFuncDefine(contract_name, Box::new(func)))
     }
     /// parse_function:
-    /// ```
+    /// ```ignore
     /// add(x: int, y: int): int {
     ///   return x + y;
     /// }
@@ -220,7 +220,7 @@ impl Parser {
         }
     }
     /// parse_function_declare:
-    /// ```
+    /// ```ignore
     /// add(x: int, y: int): int
     /// ```
     pub fn parse_function_declare(&mut self) -> Result<Top> {
@@ -232,7 +232,7 @@ impl Parser {
         Ok(Top::FuncDefine(return_type, func_name, params, None))
     }
     /// parse_block:
-    /// ```
+    /// ```ignore
     /// {
     ///   <statement>*
     /// }
@@ -247,7 +247,7 @@ impl Parser {
         Ok(block)
     }
     /// parse_statement:
-    /// ```
+    /// ```ignore
     /// return 1;
     /// ```
     pub fn parse_statement(&mut self) -> Result<Statement> {
@@ -262,7 +262,7 @@ impl Parser {
         stmt
     }
     /// parse_expression:
-    /// ```
+    /// ```ignore
     /// 1 + 2
     /// ```
     pub fn parse_expression(
@@ -289,7 +289,7 @@ impl Parser {
         Ok(lhs)
     }
     /// parse_primary:
-    /// ```
+    /// ```ignore
     /// 1, x
     /// ```
     pub fn parse_primary(&mut self) -> Result<Expr> {
@@ -315,7 +315,7 @@ impl Parser {
         }
     }
     /// parse_parameters:
-    /// ```
+    /// ```ignore
     /// (x: int, y: int)
     /// ```
     pub fn parse_parameters(&mut self) -> Result<Vec<Parameter>> {
@@ -341,7 +341,7 @@ impl Parser {
         }
     }
     /// parse_type:
-    /// ```
+    /// ```ignore
     /// int, 'a
     /// ```
     pub fn parse_type(&mut self) -> Result<Type> {
@@ -355,7 +355,7 @@ impl Parser {
         }
     }
     /// parse_unsure_type:
-    /// ```
+    /// ```ignore
     /// 'a, 'b
     /// ```
     pub fn parse_unsure_type(&mut self) -> Result<Type> {

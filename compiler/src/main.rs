@@ -1,8 +1,6 @@
-pub mod ast;
-pub mod lexer;
-pub mod parser;
+use compiler;
 
-use parser::Parser;
+use compiler::parser::Parser;
 
 fn main() {
     let mut parser = Parser::new("add(x: int, y: int): int { return x + y; }".to_string());

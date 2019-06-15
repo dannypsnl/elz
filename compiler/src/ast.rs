@@ -49,7 +49,7 @@ pub struct SubType {
 #[derive(Debug, PartialEq)]
 pub enum Statement {
     /// Return:
-    /// ```
+    /// ```ignore
     /// return <Expr>
     /// ```
     Return(Expr),
