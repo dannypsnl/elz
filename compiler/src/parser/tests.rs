@@ -1,4 +1,5 @@
 use super::*;
+use crate::ast::Statement::Return;
 
 #[test]
 fn test_parse_import() {
@@ -6,7 +7,7 @@ fn test_parse_import() {
         "\
 import foo::bar
 "
-        .to_string(),
+            .to_string(),
     );
 
     let import = parser.parse_import().unwrap();
@@ -22,7 +23,7 @@ fn test_global_variable() {
         "\
 x: int = 1
 "
-        .to_string(),
+            .to_string(),
     );
 
     let import = parser.parse_global_variable().unwrap();
@@ -31,7 +32,7 @@ x: int = 1
         Top::GlobalVariable(
             Some(Type::Defined("int".to_string())),
             "x".to_string(),
-            Expr::Int(1)
+            Expr::Int(1),
         )
     );
 }
@@ -42,7 +43,7 @@ fn test_global_variable_without_type() {
         "\
 x = 1
 "
-        .to_string(),
+            .to_string(),
     );
 
     let import = parser.parse_global_variable().unwrap();
@@ -60,7 +61,7 @@ add(x: int, y: int): int {
   return x + y;
 }
 "
-        .to_string(),
+            .to_string(),
     );
 
     let bind = parser.parse_function().unwrap();
@@ -76,8 +77,8 @@ add(x: int, y: int): int {
             Some(Block::from(vec![Statement::Return(Expr::Binary(
                 Box::new(Expr::Identifier("x".to_string())),
                 Box::new(Expr::Identifier("y".to_string())),
-                Operator::Plus
-            ))]))
+                Operator::Plus,
+            ))])),
         )
     );
 }
@@ -89,10 +90,8 @@ fn test_parse_contract() {
 contract Show (
   to_string(from: Self): string;
 )
-
-Show::to_string(from: int): string;
 "
-        .to_string(),
+            .to_string(),
     );
 
     let contract = parser.parse_contract().unwrap();
@@ -105,29 +104,52 @@ Show::to_string(from: int): string;
                 "to_string".to_string(),
                 vec![Parameter(
                     Type::Defined("Self".to_string()),
-                    "from".to_string()
+                    "from".to_string(),
                 )],
-                None
-            )]
+                None,
+            )],
         )
+    );
+}
+
+#[test]
+fn test_parse_impl_contract() {
+    let mut parser = Parser::new(
+        "\
+impl Show for int (
+  to_string(from: int): string {
+    return sprintf(\"%d\", from);
+  }
+)
+"
+            .to_string(),
     );
 
-    let contract_func = parser.parse_contract_function().unwrap();
+    let impl_contract = parser.parse_impl_contract().unwrap();
     assert_eq!(
-        contract_func,
-        Top::ContractFuncDefine(
-            "Show".to_string(),
-            Box::new(Top::FuncDefine(
-                Type::Defined("string".to_string()),
-                "to_string".to_string(),
-                vec![Parameter(
-                    Type::Defined("int".to_string()),
-                    "from".to_string()
-                )],
-                None
-            ))
+        impl_contract,
+        Top::ImplContract(
+            vec!["Show".to_string()],
+            vec![
+                Top::FuncDefine(
+                    Type::Defined("string".to_string()),
+                    "to_string".to_string(),
+                    vec![Parameter(Type::Defined("int".to_string()), "from".to_string())],
+                    Some(Block::from(
+                        vec![
+                            Return(Expr::FuncCall(
+                                Box::new(Expr::Identifier("sprintf".to_string())),
+                                vec![
+                                    Expr::Argument("".to_string(), Box::new(Expr::String("\"%d\"".to_string()))),
+                                    Expr::Argument("".to_string(), Box::new(Expr::Identifier("from".to_string())))
+                                ],
+                            ))
+                        ]
+                    )),
+                )
+            ],
         )
-    );
+    )
 }
 
 #[test]
@@ -136,7 +158,7 @@ fn test_parse_function_declare() {
         "\
 add(x: int, y: int): int;
 "
-        .to_string(),
+            .to_string(),
     );
 
     let bind = parser.parse_function().unwrap();
@@ -149,7 +171,7 @@ add(x: int, y: int): int;
                 Parameter(Type::Defined("int".to_string()), "x".to_string()),
                 Parameter(Type::Defined("int".to_string()), "y".to_string())
             ],
-            None
+            None,
         )
     );
 }
@@ -163,7 +185,7 @@ type Car (
   price: int
 )
 "
-        .to_string(),
+            .to_string(),
     );
 
     let type_define = parser.parse_type_define().unwrap();
@@ -189,7 +211,7 @@ type Option 'a (
   | Nothing
 )
 "
-        .to_string(),
+            .to_string(),
     );
 
     let type_define = parser.parse_type_define().unwrap();
@@ -201,11 +223,11 @@ type Option 'a (
             vec![
                 SubType {
                     tag: "Just".to_string(),
-                    params: vec![Parameter(Type::Unsure("a".to_string()), "a".to_string()),]
+                    params: vec![Parameter(Type::Unsure("a".to_string()), "a".to_string()), ],
                 },
                 SubType {
                     tag: "Nothing".to_string(),
-                    params: vec![]
+                    params: vec![],
                 },
             ],
         )

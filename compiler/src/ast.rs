@@ -7,10 +7,12 @@ pub enum Type {
     /// Unsure: 'a, 'element, 'key, 'value
     Unsure(String),
 }
+
 #[derive(Debug, PartialEq)]
 pub struct Block {
     statements: Vec<Statement>,
 }
+
 impl Block {
     pub fn new() -> Block {
         Block::from(vec![])
@@ -22,16 +24,18 @@ impl Block {
         self.statements.push(stmt);
     }
 }
+
 #[derive(Debug, PartialEq)]
 pub struct Parameter(pub Type, pub String);
+
 #[derive(Debug, PartialEq)]
 pub enum Top {
     /// Import
     Import(Vec<String>),
     /// Contract: Name, FuncDefines
     Contract(String, Vec<Top>),
-    /// ContractFuncDefine: contract name, function define
-    ContractFuncDefine(String, Box<Top>),
+    /// ContractFuncDefine: contract name, function define list
+    ImplContract(Vec<String>, Vec<Top>),
     /// FuncDefine: ReturnType, Name, Parameters, Block
     FuncDefine(Type, String, Vec<Parameter>, Option<Block>),
     /// GlobalVariable: Type, Name, Expr
@@ -41,11 +45,13 @@ pub enum Top {
     /// TaggedUnionTypeDefine: Name, Unsure Types, Subtypes
     TaggedUnionTypeDefine(String, Vec<Type>, Vec<SubType>),
 }
+
 #[derive(Debug, PartialEq)]
 pub struct SubType {
     pub tag: String,
     pub params: Vec<Parameter>,
 }
+
 #[derive(Debug, PartialEq)]
 pub enum Statement {
     /// Return:
@@ -54,17 +60,23 @@ pub enum Statement {
     /// ```
     Return(Expr),
 }
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expr {
     Binary(Box<Expr>, Box<Expr>, Operator),
     F64(f64),
     Int(i64),
+    String(String),
+    Argument(String, Box<Expr>),
+    FuncCall(Box<Expr>, Vec<Expr>),
     Identifier(String),
 }
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Operator {
     Plus,
 }
+
 impl Operator {
     pub fn from_token(token: Token) -> Operator {
         match token.tk_type() {

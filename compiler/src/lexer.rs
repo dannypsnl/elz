@@ -11,8 +11,14 @@ pub enum TkType {
     Import,
     /// contract
     Contract,
+    /// impl
+    Impl,
+    /// for
+    For,
     /// e.g. 1, 10, 34
     Num,
+    /// "string_literal"
+    String,
     /// +
     Plus,
     /// *
@@ -115,6 +121,8 @@ impl Lexer {
                 "type" => self.new_token(TkType::Type, s),
                 "import" => self.new_token(TkType::Import, s),
                 "contract" => self.new_token(TkType::Contract, s),
+                "impl" => self.new_token(TkType::Impl, s),
+                "for" => self.new_token(TkType::For, s),
                 _ => self.new_token(token_type, s),
             };
             self.tokens.push(tok);
@@ -190,7 +198,7 @@ fn whitespace(lexer: &mut Lexer) -> State {
             lexer.emit(TkType::VerticalLine);
             State::Fn(consume)
         }
-        None => State::EOF,
+        Some('"') => State::Fn(string),
         Some(c) => {
             if identifier_set(c) {
                 State::Fn(ident)
@@ -198,6 +206,7 @@ fn whitespace(lexer: &mut Lexer) -> State {
                 panic!("Not implemented for {} yet", c);
             }
         }
+        None => State::EOF,
     }
 }
 
@@ -217,6 +226,18 @@ fn ident(lexer: &mut Lexer) -> State {
         }
     }
     lexer.emit(TkType::Ident);
+    State::Fn(whitespace)
+}
+
+fn string(lexer: &mut Lexer) -> State {
+    lexer.next();
+    while let Some(c) = lexer.next() {
+        if c == '"' {
+            break;
+        }
+    }
+    lexer.next();
+    lexer.emit(TkType::String);
     State::Fn(whitespace)
 }
 

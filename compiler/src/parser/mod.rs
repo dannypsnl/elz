@@ -23,8 +23,6 @@ impl Parser {
                 program.push(
                     if self.predict(vec![TkType::Ident, TkType::LParen]).is_ok() {
                         self.parse_function()?
-                    } else if self.predict(vec![TkType::Ident, TkType::Accessor]).is_ok() {
-                        self.parse_contract_function()?
                     } else {
                         self.parse_global_variable()?
                     },
@@ -105,9 +103,9 @@ impl Parser {
             Ok(Top::StructureTypeDefine(type_name, unsure_types, params))
         } else if
         // Just(a: 'a) | Nothing
-        self.predict(vec![TkType::LParen,TkType::Ident, TkType::LParen]).is_ok() ||
+        self.predict(vec![TkType::LParen, TkType::Ident, TkType::LParen]).is_ok() ||
             // Red | Blue | Green
-             self.predict(vec![TkType::LParen,TkType::Ident, TkType::VerticalLine]).is_ok()
+            self.predict(vec![TkType::LParen, TkType::Ident, TkType::VerticalLine]).is_ok()
         {
             // tagged union type
             self.predict_and_consume(vec![TkType::LParen])?;
@@ -189,12 +187,32 @@ impl Parser {
         self.predict_and_consume(vec![TkType::RParen])?;
         Ok(Top::Contract(contract_name, func_declare_set))
     }
-    pub fn parse_contract_function(&mut self) -> Result<Top> {
-        self.predict(vec![TkType::Ident])?;
-        let contract_name = self.take()?.value();
-        self.predict_and_consume(vec![TkType::Accessor])?;
-        let func = self.parse_function()?;
-        Ok(Top::ContractFuncDefine(contract_name, Box::new(func)))
+    /// parse_impl_contract
+    /// ```ignore
+    /// type Car (
+    ///   name: string,
+    ///   price: int
+    /// )
+    ///
+    /// impl Comparable for Car (
+    ///   equal(c1: Car, c2: Car): bool {
+    ///     return c1.name == c2.name;
+    ///   }
+    /// )
+    /// ```
+    pub fn parse_impl_contract(&mut self) -> Result<Top> {
+        self.predict_and_consume(vec![TkType::Impl])?;
+        let access_chain = self.parse_access_chain()?;
+        self.predict_and_consume(vec![TkType::For])?;
+        self.parse_type()?;
+        self.predict_and_consume(vec![TkType::LParen])?;
+        let mut func_defines = vec![];
+        while self.peek(0)?.tk_type() != &TkType::RParen {
+            let func_define = self.parse_function()?;
+            func_defines.push(func_define);
+        }
+        self.predict_and_consume(vec![TkType::RParen])?;
+        Ok(Top::ImplContract(access_chain, func_defines))
     }
     /// parse_function:
     /// ```ignore
@@ -244,6 +262,7 @@ impl Parser {
             let stmt = self.parse_statement()?;
             block.append(stmt);
         }
+        self.predict_and_consume(vec![TkType::RBrace])?;
         Ok(block)
     }
     /// parse_statement:
@@ -279,20 +298,35 @@ impl Parser {
             lookahead = self.peek(0)?;
             while precedence(lookahead.clone()) > precedence(operator.clone())
                 || (is_right_associative(lookahead.clone())
-                    && (precedence(lookahead.clone()) == precedence(operator.clone())))
-            {
-                rhs = self.parse_expression(Some(lhs.clone()), precedence(lookahead.clone()))?;
-                lookahead = self.peek(0)?;
-            }
+                && (precedence(lookahead.clone()) == precedence(operator.clone())))
+                {
+                    rhs = self.parse_expression(Some(lhs.clone()), precedence(lookahead.clone()))?;
+                    lookahead = self.peek(0)?;
+                }
             lhs = Expr::Binary(Box::new(lhs), Box::new(rhs), Operator::from_token(operator));
         }
         Ok(lhs)
     }
     /// parse_primary:
     /// ```ignore
-    /// 1, x
+    /// foo()
     /// ```
     pub fn parse_primary(&mut self) -> Result<Expr> {
+        let unary = self.parse_unary()?;
+        match self.peek(0)?.tk_type() {
+            TkType::LParen => {
+                self.parse_argument(unary)
+            }
+            _ => Ok(unary)
+        }
+    }
+    /// parse_unary:
+    /// ```ignore
+    /// <number>
+    /// | <string_literal>
+    /// | <identifier>
+    /// ```
+    pub fn parse_unary(&mut self) -> Result<Expr> {
         match self.peek(0)?.tk_type() {
             TkType::Num => {
                 let num = self.take()?.value();
@@ -308,11 +342,35 @@ impl Parser {
                 }
             }
             TkType::Ident => Ok(Expr::Identifier(self.take()?.value())),
+            TkType::String => Ok(Expr::String(self.take()?.value())),
             _ => Err(ParseError::new(format!(
                 "unimplemented primary for {:?}",
                 self.peek(0)?
             ))),
         }
+    }
+    pub fn parse_argument(&mut self, func: Expr) -> Result<Expr> {
+        self.predict_and_consume(vec![TkType::LParen])?;
+
+        let mut args = vec![];
+        while self.peek(0)?.tk_type() != &TkType::RParen {
+            let identifier =
+                if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
+                    let identifier = self.take()?.value();
+                    self.predict_and_consume(vec![TkType::Colon])?;
+                    identifier
+                } else { "".to_string() };
+            let expr = self.parse_expression(None, 1)?;
+            args.push(Expr::Argument(identifier, Box::new(expr)));
+            if self.predict(vec![TkType::Comma]).is_err() {
+                break;
+            } else {
+                self.predict_and_consume(vec![TkType::Comma])?;
+            }
+        }
+        self.predict_and_consume(vec![TkType::RParen])?;
+
+        Ok(Expr::FuncCall(Box::new(func), args))
     }
     /// parse_parameters:
     /// ```ignore
@@ -347,11 +405,11 @@ impl Parser {
     pub fn parse_type(&mut self) -> Result<Type> {
         match self.peek(0)?.tk_type() {
             TkType::Prime => self.parse_unsure_type(),
-            TkType::Ident =>Ok(Type::Defined(self.take()?.value())),
+            TkType::Ident => Ok(Type::Defined(self.take()?.value())),
             _ => Err(ParseError::new(format!(
-                    "expected `'` for unsure type(e.g. `'element`) or <identifier> for defined type but got {:?} while parsing type",
-                    self.peek(0)?,
-                )))
+                "expected `'` for unsure type(e.g. `'element`) or <identifier> for defined type but got {:?} while parsing type",
+                self.peek(0)?,
+            )))
         }
     }
     /// parse_unsure_type:
@@ -367,6 +425,7 @@ impl Parser {
 fn is_right_associative(_op: Token) -> bool {
     false
 }
+
 fn precedence(op: Token) -> u64 {
     match op.tk_type() {
         TkType::Plus => 2,
