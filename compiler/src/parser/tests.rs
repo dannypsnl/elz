@@ -1,4 +1,5 @@
 use super::*;
+use crate::lexer::TkType::Accessor;
 
 #[test]
 fn test_parse_import() {
@@ -12,7 +13,7 @@ import foo::bar
     let import = parser.parse_import().unwrap();
     assert_eq!(
         import,
-        Top::Import(vec!["foo".to_string(), "bar".to_string()])
+        Top::Import(AccessChain::from("foo::bar"))
     );
 }
 
@@ -99,8 +100,8 @@ add(x: int, y: int): int {
                 Parameter(Type::Defined("int".to_string()), "y".to_string())
             ],
             Some(Block::from(vec![Statement::Return(Expr::Binary(
-                Box::new(Expr::Identifier("x".to_string())),
-                Box::new(Expr::Identifier("y".to_string())),
+                Box::new(Expr::Identifier(AccessChain::from("x"))),
+                Box::new(Expr::Identifier(AccessChain::from("y"))),
                 Operator::Plus,
             ))])),
         ),
@@ -157,7 +158,7 @@ impl Show for int (
     assert_eq!(
         impl_contract,
         Top::ImplContract(
-            vec!["Show".to_string()],
+            AccessChain::from("Show"),
             vec![
                 Func::new(
                     Type::Defined(
@@ -167,10 +168,10 @@ impl Show for int (
                     Some(Block::from(
                         vec![
                             Statement::Return(Expr::FuncCall(
-                                Box::new(Expr::Identifier("sprintf".to_string())),
+                                Box::new(Expr::Identifier(AccessChain::from("sprintf"))),
                                 vec![
                                     Expr::Argument("".to_string(), Box::new(Expr::String("\"%d\"".to_string()))),
-                                    Expr::Argument("".to_string(), Box::new(Expr::Identifier("from".to_string())))
+                                    Expr::Argument("".to_string(), Box::new(Expr::Identifier(AccessChain::from("from"))))
                                 ],
                             ))
                         ]
@@ -228,7 +229,7 @@ type Option 'a (
             vec![
                 SubType {
                     tag: "Just".to_string(),
-                    params: vec![Parameter(Type::Unsure("a".to_string()), "a".to_string()), ],
+                    params: vec![Parameter(Type::Unsure("a".to_string()), "a".to_string())],
                 },
                 SubType {
                     tag: "Nothing".to_string(),

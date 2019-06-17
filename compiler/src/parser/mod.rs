@@ -59,7 +59,7 @@ impl Parser {
     /// ```ignore
     /// foo::bar
     /// ```
-    pub fn parse_access_chain(&mut self) -> Result<Vec<String>> {
+    pub fn parse_access_chain(&mut self) -> Result<AccessChain> {
         let mut chain = vec![];
         self.predict(vec![TkType::Ident])?;
         chain.push(self.take()?.value());
@@ -68,7 +68,7 @@ impl Parser {
             self.predict(vec![TkType::Ident])?;
             chain.push(self.take()?.value());
         }
-        Ok(chain)
+        Ok(AccessChain(chain))
     }
     /// parse_type_define:
     ///
@@ -334,7 +334,7 @@ impl Parser {
                     )
                 }
             }
-            TkType::Ident => Ok(Expr::Identifier(self.take()?.value())),
+            TkType::Ident => Ok(Expr::Identifier(self.parse_access_chain()?)),
             TkType::String => Ok(Expr::String(self.take()?.value())),
             _ => Err(ParseError::new(format!(
                 "unimplemented primary for {:?}",

@@ -31,11 +31,11 @@ pub struct Parameter(pub Type, pub String);
 #[derive(Debug, PartialEq)]
 pub enum Top {
     /// Import
-    Import(Vec<String>),
+    Import(AccessChain),
     /// Contract: Name, FuncDefines
     Contract(String, Vec<Func>),
     /// ContractFuncDefine: contract name, function define list
-    ImplContract(Vec<String>, Vec<Func>),
+    ImplContract(AccessChain, Vec<Func>),
     /// FuncDefine
     FuncDefine(Func),
     /// GlobalVariable: Type, Name, Expr
@@ -44,6 +44,18 @@ pub enum Top {
     StructureTypeDefine(String, Vec<Type>, Vec<Parameter>),
     /// TaggedUnionTypeDefine: Name, Unsure Types, Subtypes
     TaggedUnionTypeDefine(String, Vec<Type>, Vec<SubType>),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct AccessChain(pub Vec<String>);
+
+impl AccessChain {
+    pub fn from(s: &str) -> AccessChain {
+        AccessChain::from_string(s.to_string())
+    }
+    pub fn from_string(s: String) -> AccessChain {
+        AccessChain(s.split("::").map(|s| s.to_string()).collect())
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -92,7 +104,7 @@ pub enum Expr {
     String(String),
     Argument(String, Box<Expr>),
     FuncCall(Box<Expr>, Vec<Expr>),
-    Identifier(String),
+    Identifier(AccessChain),
 }
 
 #[derive(Clone, Debug, PartialEq)]
