@@ -1,5 +1,4 @@
 use super::*;
-use crate::ast::Statement::Return;
 
 #[test]
 fn test_parse_import() {
@@ -167,7 +166,7 @@ impl Show for int (
                     vec![Parameter(Type::Defined("int".to_string()), "from".to_string())],
                     Some(Block::from(
                         vec![
-                            Return(Expr::FuncCall(
+                            Statement::Return(Expr::FuncCall(
                                 Box::new(Expr::Identifier("sprintf".to_string())),
                                 vec![
                                     Expr::Argument("".to_string(), Box::new(Expr::String("\"%d\"".to_string()))),
