@@ -68,7 +68,7 @@ enum State {
 }
 
 struct Lexer {
-    code: String,
+    code: Vec<char>,
     tokens: Vec<Token>,
     state_fn: State,
     start: usize,
@@ -81,7 +81,7 @@ struct Lexer {
 impl Lexer {
     fn new(code: String) -> Lexer {
         Lexer {
-            code: code,
+            code: code.chars().collect(),
             tokens: vec![],
             state_fn: State::Fn(whitespace),
             start: 0,
@@ -96,11 +96,14 @@ impl Lexer {
         self.start = self.offset;
     }
     fn peek(&self) -> Option<char> {
-        self.code.chars().nth(self.offset)
+        match self.code.get(self.offset) {
+            Some(c) => Some(*c),
+            None => None,
+        }
     }
     fn next(&mut self) -> Option<char> {
         self.offset += 1;
-        let c = self.code.chars().nth(self.offset);
+        let c = self.peek();
         match c {
             Some('\n') => {
                 self.pos = 0;
@@ -114,19 +117,17 @@ impl Lexer {
         Token((self.line, self.pos), token_type, value)
     }
     fn emit(&mut self, token_type: TkType) {
-        unsafe {
-            let s = self.code.get_unchecked(self.start..self.offset).to_string();
-            let tok = match s.as_str() {
-                "return" => self.new_token(TkType::Return, s),
-                "type" => self.new_token(TkType::Type, s),
-                "import" => self.new_token(TkType::Import, s),
-                "contract" => self.new_token(TkType::Contract, s),
-                "impl" => self.new_token(TkType::Impl, s),
-                "for" => self.new_token(TkType::For, s),
-                _ => self.new_token(token_type, s),
-            };
-            self.tokens.push(tok);
-        }
+        let s: String = self.code[self.start..self.offset].into_iter().collect();
+        let tok = match s.as_str() {
+            "return" => self.new_token(TkType::Return, s),
+            "type" => self.new_token(TkType::Type, s),
+            "import" => self.new_token(TkType::Import, s),
+            "contract" => self.new_token(TkType::Contract, s),
+            "impl" => self.new_token(TkType::Impl, s),
+            "for" => self.new_token(TkType::For, s),
+            _ => self.new_token(token_type, s),
+        };
+        self.tokens.push(tok);
         self.ignore();
     }
 }
@@ -144,36 +145,44 @@ fn whitespace(lexer: &mut Lexer) -> State {
     match lexer.peek() {
         Some(_c @ '0'..='9') => State::Fn(number),
         Some('=') => {
+            lexer.next();
             lexer.emit(TkType::Assign);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some(',') => {
+            lexer.next();
             lexer.emit(TkType::Comma);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some('+') => {
+            lexer.next();
             lexer.emit(TkType::Plus);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some('*') => {
+            lexer.next();
             lexer.emit(TkType::Star);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some('(') => {
+            lexer.next();
             lexer.emit(TkType::LParen);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some(')') => {
+            lexer.next();
             lexer.emit(TkType::RParen);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some('{') => {
+            lexer.next();
             lexer.emit(TkType::LBrace);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some('}') => {
+            lexer.next();
             lexer.emit(TkType::RBrace);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some(':') => {
             lexer.next();
@@ -183,23 +192,27 @@ fn whitespace(lexer: &mut Lexer) -> State {
                 State::Fn(whitespace)
             } else {
                 lexer.emit(TkType::Colon);
-                State::Fn(consume)
+                State::Fn(whitespace)
             }
         }
         Some(';') => {
+            lexer.next();
             lexer.emit(TkType::Semicolon);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some('\'') => {
+            lexer.next();
             lexer.emit(TkType::Prime);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some('|') => {
+            lexer.next();
             lexer.emit(TkType::VerticalLine);
-            State::Fn(consume)
+            State::Fn(whitespace)
         }
         Some('"') => State::Fn(string),
         Some(c) => {
+            println!("char {:?}", c);
             if identifier_set(c) {
                 State::Fn(ident)
             } else {
@@ -208,11 +221,6 @@ fn whitespace(lexer: &mut Lexer) -> State {
         }
         None => State::EOF,
     }
-}
-
-fn consume(lexer: &mut Lexer) -> State {
-    lexer.next();
-    State::Fn(whitespace)
 }
 
 fn identifier_set(c: char) -> bool {
@@ -277,6 +285,23 @@ mod tests {
                 Token((1, 15), EOF, "".to_string()),
             ]
         )
+    }
+
+    #[test]
+    fn test_unicode_identifier_a() {
+        let code = "測試: int = 1";
+
+        assert_eq!(
+            lex(code.to_string()),
+            vec![
+                Token((1, 0), Ident, "測試".to_string()),
+                Token((1, 2), Colon, ":".to_string()),
+                Token((1, 4), Ident, "int".to_string()),
+                Token((1, 8), Assign, "=".to_string()),
+                Token((1, 10), Num, "1".to_string()),
+                Token((1, 11), EOF, "".to_string()),
+            ]
+        );
     }
 
     #[test]
