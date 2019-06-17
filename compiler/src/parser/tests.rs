@@ -30,7 +30,7 @@ x: int = 1
     assert_eq!(
         import,
         Top::GlobalVariable(
-            Some(Type::Defined("int".to_string())),
+            Some(Type::Defined(AccessChain::from("int"))),
             "x".to_string(),
             Expr::Int(1),
         )
@@ -67,11 +67,11 @@ add(x: int, y: int): int;
     assert_eq!(
         bind,
         Func::new(
-            Type::Defined("int".to_string()),
+            Type::Defined(AccessChain::from("int")),
             "add".to_string(),
             vec![
-                Parameter(Type::Defined("int".to_string()), "x".to_string()),
-                Parameter(Type::Defined("int".to_string()), "y".to_string())
+                Parameter(Type::Defined(AccessChain::from("int")), "x".to_string()),
+                Parameter(Type::Defined(AccessChain::from("int")), "y".to_string())
             ],
             None,
         ),
@@ -93,11 +93,11 @@ add(x: int, y: int): int {
     assert_eq!(
         bind,
         Func::new(
-            Type::Defined("int".to_string()),
+            Type::Defined(AccessChain::from("int")),
             "add".to_string(),
             vec![
-                Parameter(Type::Defined("int".to_string()), "x".to_string()),
-                Parameter(Type::Defined("int".to_string()), "y".to_string())
+                Parameter(Type::Defined(AccessChain::from("int")), "x".to_string()),
+                Parameter(Type::Defined(AccessChain::from("int")), "y".to_string())
             ],
             Some(Block::from(vec![Statement::Return(Expr::Binary(
                 Box::new(Expr::Identifier(AccessChain::from("x"))),
@@ -126,11 +126,11 @@ contract Show (
             "Show".to_string(),
             vec![
                 Func::new(
-                    Type::Defined("string".to_string()),
+                    Type::Defined(AccessChain::from("string")),
                     "to_string".to_string(),
                     vec![
                         Parameter(
-                            Type::Defined("Self".to_string()),
+                            Type::Defined(AccessChain::from("Self")),
                             "from".to_string(),
                         ),
                     ],
@@ -161,10 +161,9 @@ impl Show for int (
             AccessChain::from("Show"),
             vec![
                 Func::new(
-                    Type::Defined(
-                        "string".to_string()),
+                    Type::Defined(AccessChain::from("string")),
                     "to_string".to_string(),
-                    vec![Parameter(Type::Defined("int".to_string()), "from".to_string())],
+                    vec![Parameter(Type::Defined(AccessChain::from("int")), "from".to_string())],
                     Some(Block::from(
                         vec![
                             Statement::Return(Expr::FuncCall(
@@ -201,8 +200,8 @@ type Car (
             "Car".to_string(),
             vec![],
             vec![
-                Parameter(Type::Defined("string".to_string()), "name".to_string()),
-                Parameter(Type::Defined("int".to_string()), "price".to_string()),
+                Parameter(Type::Defined(AccessChain::from("string")), "name".to_string()),
+                Parameter(Type::Defined(AccessChain::from("int")), "price".to_string()),
             ],
         )
     );

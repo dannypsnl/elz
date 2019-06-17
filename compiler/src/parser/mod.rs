@@ -398,7 +398,7 @@ impl Parser {
     pub fn parse_type(&mut self) -> Result<Type> {
         match self.peek(0)?.tk_type() {
             TkType::Prime => self.parse_unsure_type(),
-            TkType::Ident => Ok(Type::Defined(self.take()?.value())),
+            TkType::Ident => Ok(Type::Defined(self.parse_access_chain()?)),
             _ => Err(ParseError::new(format!(
                 "expected `'` for unsure type(e.g. `'element`) or <identifier> for defined type but got {:?} while parsing type",
                 self.peek(0)?,

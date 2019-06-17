@@ -3,7 +3,7 @@ use super::lexer::{TkType, Token};
 #[derive(Debug, PartialEq)]
 pub enum Type {
     /// Defined: int, f64, string
-    Defined(String),
+    Defined(AccessChain),
     /// Unsure: 'a, 'element, 'key, 'value
     Unsure(String),
 }
