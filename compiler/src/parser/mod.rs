@@ -22,7 +22,7 @@ impl Parser {
             TkType::Ident => {
                 program.push(
                     if self.predict(vec![TkType::Ident, TkType::LParen]).is_ok() {
-                        self.parse_function()?
+                        Top::FuncDefine(self.parse_function()?)
                     } else {
                         self.parse_global_variable()?
                     },
@@ -220,34 +220,27 @@ impl Parser {
     ///   return x + y;
     /// }
     /// ```
-    pub fn parse_function(&mut self) -> Result<Top> {
-        let func = self.parse_function_declare()?;
+    pub fn parse_function(&mut self) -> Result<Func> {
+        let mut func = self.parse_function_declare()?;
         if self.peek(0)?.tk_type() == &TkType::Semicolon {
             self.predict_and_consume(vec![TkType::Semicolon])?;
-            Ok(func)
         } else {
             let block = self.parse_block()?;
-            if let Top::FuncDefine(return_type, func_name, params, None) = func {
-                Ok(Top::FuncDefine(return_type, func_name, params, Some(block)))
-            } else {
-                panic!(
-                    "parse_function_declare do not return FuncDefine: {:?}",
-                    func
-                )
-            }
+            func.set_body(block);
         }
+        Ok(func)
     }
     /// parse_function_declare:
     /// ```ignore
     /// add(x: int, y: int): int
     /// ```
-    pub fn parse_function_declare(&mut self) -> Result<Top> {
+    pub fn parse_function_declare(&mut self) -> Result<Func> {
         self.predict(vec![TkType::Ident])?;
         let func_name = self.take()?.value();
         let params = self.parse_parameters()?;
         self.predict_and_consume(vec![TkType::Colon])?;
         let return_type = self.parse_type()?;
-        Ok(Top::FuncDefine(return_type, func_name, params, None))
+        Ok(Func::new(return_type, func_name, params, None))
     }
     /// parse_block:
     /// ```ignore

@@ -53,6 +53,31 @@ x = 1
     );
 }
 
+
+#[test]
+fn test_parse_function_declare() {
+    let mut parser = Parser::new(
+        "\
+add(x: int, y: int): int;
+"
+            .to_string(),
+    );
+
+    let bind = parser.parse_function().unwrap();
+    assert_eq!(
+        bind,
+        Func::new(
+            Type::Defined("int".to_string()),
+            "add".to_string(),
+            vec![
+                Parameter(Type::Defined("int".to_string()), "x".to_string()),
+                Parameter(Type::Defined("int".to_string()), "y".to_string())
+            ],
+            None,
+        ),
+    );
+}
+
 #[test]
 fn test_parse_function() {
     let mut parser = Parser::new(
@@ -67,7 +92,7 @@ add(x: int, y: int): int {
     let bind = parser.parse_function().unwrap();
     assert_eq!(
         bind,
-        Top::FuncDefine(
+        Func::new(
             Type::Defined("int".to_string()),
             "add".to_string(),
             vec![
@@ -79,7 +104,7 @@ add(x: int, y: int): int {
                 Box::new(Expr::Identifier("y".to_string())),
                 Operator::Plus,
             ))])),
-        )
+        ),
     );
 }
 
@@ -99,15 +124,19 @@ contract Show (
         contract,
         Top::Contract(
             "Show".to_string(),
-            vec![Top::FuncDefine(
-                Type::Defined("string".to_string()),
-                "to_string".to_string(),
-                vec![Parameter(
-                    Type::Defined("Self".to_string()),
-                    "from".to_string(),
-                )],
-                None,
-            )],
+            vec![
+                Func::new(
+                    Type::Defined("string".to_string()),
+                    "to_string".to_string(),
+                    vec![
+                        Parameter(
+                            Type::Defined("Self".to_string()),
+                            "from".to_string(),
+                        ),
+                    ],
+                    None,
+                ),
+            ],
         )
     );
 }
@@ -131,8 +160,9 @@ impl Show for int (
         Top::ImplContract(
             vec!["Show".to_string()],
             vec![
-                Top::FuncDefine(
-                    Type::Defined("string".to_string()),
+                Func::new(
+                    Type::Defined(
+                        "string".to_string()),
                     "to_string".to_string(),
                     vec![Parameter(Type::Defined("int".to_string()), "from".to_string())],
                     Some(Block::from(
@@ -146,34 +176,10 @@ impl Show for int (
                             ))
                         ]
                     )),
-                )
+                ),
             ],
         )
     )
-}
-
-#[test]
-fn test_parse_function_declare() {
-    let mut parser = Parser::new(
-        "\
-add(x: int, y: int): int;
-"
-            .to_string(),
-    );
-
-    let bind = parser.parse_function().unwrap();
-    assert_eq!(
-        bind,
-        Top::FuncDefine(
-            Type::Defined("int".to_string()),
-            "add".to_string(),
-            vec![
-                Parameter(Type::Defined("int".to_string()), "x".to_string()),
-                Parameter(Type::Defined("int".to_string()), "y".to_string())
-            ],
-            None,
-        )
-    );
 }
 
 #[test]

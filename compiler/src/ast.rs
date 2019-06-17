@@ -33,17 +33,40 @@ pub enum Top {
     /// Import
     Import(Vec<String>),
     /// Contract: Name, FuncDefines
-    Contract(String, Vec<Top>),
+    Contract(String, Vec<Func>),
     /// ContractFuncDefine: contract name, function define list
-    ImplContract(Vec<String>, Vec<Top>),
-    /// FuncDefine: ReturnType, Name, Parameters, Block
-    FuncDefine(Type, String, Vec<Parameter>, Option<Block>),
+    ImplContract(Vec<String>, Vec<Func>),
+    /// FuncDefine
+    FuncDefine(Func),
     /// GlobalVariable: Type, Name, Expr
     GlobalVariable(Option<Type>, String, Expr),
     /// StructureTypeDefine: Name, Unsure Types, Fields
     StructureTypeDefine(String, Vec<Type>, Vec<Parameter>),
     /// TaggedUnionTypeDefine: Name, Unsure Types, Subtypes
     TaggedUnionTypeDefine(String, Vec<Type>, Vec<SubType>),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Func {
+    pub  return_type: Type,
+    pub name: String,
+    pub  parameters: Vec<Parameter>,
+    body: Option<Block>,
+}
+
+impl Func {
+    pub fn new(return_type: Type, name: String, parameters: Vec<Parameter>, body: Option<Block>) -> Func {
+        Func {
+            return_type,
+            name,
+            parameters,
+            body,
+        }
+    }
+
+    pub fn set_body(&mut self, block: Block) {
+        self.body = Some(block);
+    }
 }
 
 #[derive(Debug, PartialEq)]
