@@ -1,5 +1,4 @@
 use super::*;
-use crate::lexer::TkType::Accessor;
 
 #[test]
 fn test_parse_import() {

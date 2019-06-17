@@ -321,6 +321,7 @@ impl Parser {
     /// ```
     pub fn parse_unary(&mut self) -> Result<Expr> {
         match self.peek(0)?.tk_type() {
+            // FIXME: lexer should emit int & float token directly
             TkType::Num => {
                 let num = self.take()?.value();
                 if num.parse::<i64>().is_ok() {
@@ -329,7 +330,7 @@ impl Parser {
                     Ok(Expr::F64(num.parse::<f64>().unwrap()))
                 } else {
                     panic!(
-                        "lexing error, number token can't be convert to number: {:?}",
+                        "lexing bug causes a number token can't be convert to number: {:?}",
                         num
                     )
                 }
@@ -432,11 +433,11 @@ impl Parser {
     pub fn new(code: String) -> Parser {
         let tokens = lexer::lex(code);
         Parser {
-            tokens: tokens,
+            tokens,
             offset: 0,
         }
     }
-    /// peek get the token by current add n
+    /// peek get the token by (current position + n)
     pub fn peek(&self, n: usize) -> Result<Token> {
         self.get_token(self.offset + n)
     }
@@ -445,7 +446,7 @@ impl Parser {
         self.take()?;
         Ok(())
     }
-    /// take add current token position
+    /// take increment current token position
     pub fn take(&mut self) -> Result<Token> {
         self.offset += 1;
         self.get_token(self.offset - 1)
