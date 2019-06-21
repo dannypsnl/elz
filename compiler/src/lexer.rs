@@ -64,6 +64,13 @@ impl Token {
     }
 }
 
+impl std::fmt::Display for Token {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let (line, pos) = self.location();
+        write!(f, "loc: ({}, {}), type: {:?}, `{}`", line, pos, self.tk_type(), self.value())
+    }
+}
+
 enum State {
     Fn(fn(&mut Lexer) -> State),
     EOF,

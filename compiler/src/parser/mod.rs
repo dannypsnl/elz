@@ -18,17 +18,25 @@ pub struct Parser {
 impl Parser {
     pub fn parse_program(&mut self) -> Result<Vec<Top>> {
         let mut program = vec![];
-        match self.peek(0)?.tk_type() {
-            TkType::Let => {
-                program.push(self.parse_binding()?);
-            }
-            TkType::Type => {
-                program.push(self.parse_type_define()?);
-            }
-            _ => {
-                panic!("unsupported yet");
+        while self.peek(0)?.tk_type() != &TkType::EOF {
+            match self.peek(0)?.tk_type() {
+                TkType::Let => {
+                    program.push(self.parse_binding()?);
+                }
+                TkType::Type => {
+                    program.push(self.parse_type_define()?);
+                }
+                _ => {
+                    while
+                        self.peek(0)?.tk_type() != &TkType::Let &&
+                            self.peek(0)?.tk_type() != &TkType::Type {
+                        println!("{} skipped!", self.peek(0)?);
+                        self.take()?;
+                    }
+                }
             }
         }
+
         Ok(program)
     }
     pub fn parse_binding(&mut self) -> Result<Top> {
