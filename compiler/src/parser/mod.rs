@@ -32,10 +32,6 @@ impl Parser {
                 let t = self.parse_type_define()?;
                 program.push(t);
             }
-            TkType::Import => {
-                let i = self.parse_import()?;
-                program.push(i);
-            }
             TkType::Contract => {
                 let c = self.parse_contract()?;
                 program.push(c);
@@ -45,15 +41,6 @@ impl Parser {
             }
         }
         Ok(program)
-    }
-    /// parse_import:
-    /// ```ignore
-    /// import foo::bar
-    /// import pkg::hello
-    /// ```
-    pub fn parse_import(&mut self) -> Result<Top> {
-        self.predict_and_consume(vec![TkType::Import])?;
-        Ok(Top::Import(self.parse_access_chain()?))
     }
     /// parse_access_chain:
     /// ```ignore

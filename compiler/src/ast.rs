@@ -30,8 +30,6 @@ pub struct Parameter(pub Type, pub String);
 
 #[derive(Debug, PartialEq)]
 pub enum Top {
-    /// Import
-    Import(AccessChain),
     /// Contract: Name, FuncDefines
     Contract(String, Vec<Func>),
     /// ContractFuncDefine: contract name, function define list

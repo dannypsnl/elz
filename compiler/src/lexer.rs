@@ -7,8 +7,6 @@ pub enum TkType {
     Return,
     /// type
     Type,
-    /// import
-    Import,
     /// contract
     Contract,
     /// impl
@@ -121,7 +119,6 @@ impl Lexer {
         let tok = match s.as_str() {
             "return" => self.new_token(TkType::Return, s),
             "type" => self.new_token(TkType::Type, s),
-            "import" => self.new_token(TkType::Import, s),
             "contract" => self.new_token(TkType::Contract, s),
             "impl" => self.new_token(TkType::Impl, s),
             "for" => self.new_token(TkType::For, s),
@@ -272,20 +269,6 @@ pub fn lex(source: String) -> Vec<Token> {
 mod tests {
     use self::TkType::*;
     use super::*;
-
-    #[test]
-    fn test_import() {
-        assert_eq!(
-            lex("import foo::bar".to_string()),
-            vec![
-                Token((1, 0), Import, "import".to_string()),
-                Token((1, 7), Ident, "foo".to_string()),
-                Token((1, 10), Accessor, "::".to_string()),
-                Token((1, 12), Ident, "bar".to_string()),
-                Token((1, 15), EOF, "".to_string()),
-            ]
-        )
-    }
 
     #[test]
     fn test_unicode_identifier_a() {
