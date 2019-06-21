@@ -1,6 +1,6 @@
 use super::lexer::{TkType, Token};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Type {
     /// Defined: int, f64, string
     Defined(AccessChain),
@@ -8,7 +8,7 @@ pub enum Type {
     Unsure(String),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Block {
     statements: Vec<Statement>,
 }
@@ -17,27 +17,24 @@ impl Block {
     pub fn new() -> Block {
         Block::from(vec![])
     }
-    pub fn from(stmts: Vec<Statement>) -> Block {
-        Block { statements: stmts }
+    pub fn from(statements: Vec<Statement>) -> Block {
+        Block { statements }
     }
     pub fn append(&mut self, stmt: Statement) {
         self.statements.push(stmt);
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Parameter(pub Type, pub String);
 
 #[derive(Debug, PartialEq)]
 pub enum Top {
+    Binding(String, Expr),
     /// Contract: Name, FuncDefines
-    Contract(String, Vec<Func>),
+    Contract(String, Vec<Lambda>),
     /// ContractFuncDefine: contract name, function define list
-    ImplContract(AccessChain, Vec<Func>),
-    /// FuncDefine
-    FuncDefine(Func),
-    /// GlobalVariable: Type, Name, Expr
-    GlobalVariable(Option<Type>, String, Expr),
+    ImplContract(AccessChain, Vec<Lambda>),
     /// StructureTypeDefine: Name, Unsure Types, Fields
     StructureTypeDefine(String, Vec<Type>, Vec<Parameter>),
     /// TaggedUnionTypeDefine: Name, Unsure Types, Subtypes
@@ -56,26 +53,20 @@ impl AccessChain {
     }
 }
 
-#[derive(Debug, PartialEq)]
-pub struct Func {
+#[derive(Clone, Debug, PartialEq)]
+pub struct Lambda {
     pub  return_type: Type,
-    pub name: String,
     pub  parameters: Vec<Parameter>,
     body: Option<Block>,
 }
 
-impl Func {
-    pub fn new(return_type: Type, name: String, parameters: Vec<Parameter>, body: Option<Block>) -> Func {
-        Func {
+impl Lambda {
+    pub fn new(return_type: Type, parameters: Vec<Parameter>, body: Option<Block>) -> Lambda {
+        Lambda {
             return_type,
-            name,
             parameters,
             body,
         }
-    }
-
-    pub fn set_body(&mut self, block: Block) {
-        self.body = Some(block);
     }
 }
 
@@ -85,7 +76,7 @@ pub struct SubType {
     pub params: Vec<Parameter>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
     /// Return:
     /// ```ignore
@@ -96,6 +87,7 @@ pub enum Statement {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expr {
+    Lambda(Lambda),
     Binary(Box<Expr>, Box<Expr>, Operator),
     F64(f64),
     Int(i64),

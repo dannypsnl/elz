@@ -19,28 +19,25 @@ impl Parser {
     pub fn parse_program(&mut self) -> Result<Vec<Top>> {
         let mut program = vec![];
         match self.peek(0)?.tk_type() {
-            TkType::Ident => {
-                program.push(
-                    if self.predict(vec![TkType::Ident, TkType::LParen]).is_ok() {
-                        Top::FuncDefine(self.parse_function()?)
-                    } else {
-                        self.parse_global_variable()?
-                    },
-                );
+            TkType::Let => {
+                program.push(self.parse_binding()?);
             }
             TkType::Type => {
-                let t = self.parse_type_define()?;
-                program.push(t);
-            }
-            TkType::Contract => {
-                let c = self.parse_contract()?;
-                program.push(c);
+                program.push(self.parse_type_define()?);
             }
             _ => {
-                panic!("unsupport yet");
+                panic!("unsupported yet");
             }
         }
         Ok(program)
+    }
+    pub fn parse_binding(&mut self) -> Result<Top> {
+        self.predict_and_consume(vec![TkType::Let])?;
+        self.predict(vec![TkType::Ident])?;
+        let binding_name = self.take()?.value();
+        self.predict_and_consume(vec![TkType::Assign])?;
+        let expr = self.parse_expression(None, 1)?;
+        Ok(Top::Binding(binding_name, expr))
     }
     /// parse_access_chain:
     /// ```ignore
@@ -134,100 +131,25 @@ impl Parser {
             Ok(SubType { tag, params })
         }
     }
-    /// parse_global_variable:
+    /// parse_lambda:
     /// ```ignore
-    /// x: int = 1
-    /// ```
-    pub fn parse_global_variable(&mut self) -> Result<Top> {
-        self.predict(vec![TkType::Ident])?;
-        let variable_name = self.take()?.value();
-        let typ = if self.predict(vec![TkType::Colon]).is_ok() {
-            self.predict_and_consume(vec![TkType::Colon])?;
-            Some(self.parse_type()?)
-        } else {
-            None
-        };
-        self.predict_and_consume(vec![TkType::Assign])?;
-        Ok(Top::GlobalVariable(
-            typ,
-            variable_name,
-            self.parse_expression(None, 1)?,
-        ))
-    }
-    /// parse_contract:
-    /// ```ignore
-    /// contract Show (
-    ///   to_string(from: Self): string;
-    /// )
-    /// ```
-    pub fn parse_contract(&mut self) -> Result<Top> {
-        self.predict_and_consume(vec![TkType::Contract])?;
-        self.predict(vec![TkType::Ident])?;
-        let contract_name = self.take()?.value();
-        self.predict_and_consume(vec![TkType::LParen])?;
-        let mut func_declare_set = vec![];
-        while self.peek(0)?.tk_type() != &TkType::RParen {
-            let func_declare = self.parse_function_declare()?;
-            self.predict_and_consume(vec![TkType::Semicolon])?;
-            func_declare_set.push(func_declare);
-        }
-        self.predict_and_consume(vec![TkType::RParen])?;
-        Ok(Top::Contract(contract_name, func_declare_set))
-    }
-    /// parse_impl_contract
-    /// ```ignore
-    /// type Car (
-    ///   name: string,
-    ///   price: int
-    /// )
-    ///
-    /// impl Comparable for Car (
-    ///   equal(c1: Car, c2: Car): bool {
-    ///     return c1.name == c2.name;
-    ///   }
-    /// )
-    /// ```
-    pub fn parse_impl_contract(&mut self) -> Result<Top> {
-        self.predict_and_consume(vec![TkType::Impl])?;
-        let access_chain = self.parse_access_chain()?;
-        self.predict_and_consume(vec![TkType::For])?;
-        self.parse_type()?;
-        self.predict_and_consume(vec![TkType::LParen])?;
-        let mut func_defines = vec![];
-        while self.peek(0)?.tk_type() != &TkType::RParen {
-            let func_define = self.parse_function()?;
-            func_defines.push(func_define);
-        }
-        self.predict_and_consume(vec![TkType::RParen])?;
-        Ok(Top::ImplContract(access_chain, func_defines))
-    }
-    /// parse_function:
-    /// ```ignore
-    /// add(x: int, y: int): int {
+    /// (x: int, y: int): int => {
     ///   return x + y;
     /// }
+    /// (x: int, y: int): int => return x + y
     /// ```
-    pub fn parse_function(&mut self) -> Result<Func> {
-        let mut func = self.parse_function_declare()?;
-        if self.peek(0)?.tk_type() == &TkType::Semicolon {
-            self.predict_and_consume(vec![TkType::Semicolon])?;
-        } else {
-            let block = self.parse_block()?;
-            func.set_body(block);
-        }
-        Ok(func)
-    }
-    /// parse_function_declare:
-    /// ```ignore
-    /// add(x: int, y: int): int
-    /// ```
-    pub fn parse_function_declare(&mut self) -> Result<Func> {
-        self.predict(vec![TkType::Ident])?;
-        let func_name = self.take()?.value();
+    pub fn parse_lambda(&mut self) -> Result<Lambda> {
         let params = self.parse_parameters()?;
         self.predict_and_consume(vec![TkType::Colon])?;
         let return_type = self.parse_type()?;
-        Ok(Func::new(return_type, func_name, params, None))
+        let body = if self.peek(0)?.tk_type() == &TkType::Semicolon {
+            self.predict_and_consume(vec![TkType::Semicolon])?;
+            None
+        } else {
+            self.predict_and_consume(vec![TkType::Arrow])?;
+            Some(self.parse_block()?)
+        };
+        Ok(Lambda::new(return_type, params, body))
     }
     /// parse_block:
     /// ```ignore
@@ -305,16 +227,17 @@ impl Parser {
     /// <number>
     /// | <string_literal>
     /// | <identifier>
+    /// | <lambda>
     /// ```
     pub fn parse_unary(&mut self) -> Result<Expr> {
-        match self.peek(0)?.tk_type() {
+        Ok(match self.peek(0)?.tk_type() {
             // FIXME: lexer should emit int & float token directly
             TkType::Num => {
                 let num = self.take()?.value();
                 if num.parse::<i64>().is_ok() {
-                    Ok(Expr::Int(num.parse::<i64>().unwrap()))
+                    Expr::Int(num.parse::<i64>().unwrap())
                 } else if num.parse::<f64>().is_ok() {
-                    Ok(Expr::F64(num.parse::<f64>().unwrap()))
+                    Expr::F64(num.parse::<f64>().unwrap())
                 } else {
                     panic!(
                         "lexing bug causes a number token can't be convert to number: {:?}",
@@ -322,13 +245,14 @@ impl Parser {
                     )
                 }
             }
-            TkType::Ident => Ok(Expr::Identifier(self.parse_access_chain()?)),
-            TkType::String => Ok(Expr::String(self.take()?.value())),
-            _ => Err(ParseError::new(format!(
+            TkType::Ident => Expr::Identifier(self.parse_access_chain()?),
+            TkType::String => Expr::String(self.take()?.value()),
+            TkType::LParen => Expr::Lambda(self.parse_lambda()?),
+            _ => panic!(
                 "unimplemented primary for {:?}",
                 self.peek(0)?
-            ))),
-        }
+            ),
+        })
     }
     pub fn parse_argument(&mut self, func: Expr) -> Result<Expr> {
         self.predict_and_consume(vec![TkType::LParen])?;

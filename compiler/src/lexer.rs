@@ -3,6 +3,8 @@ pub enum TkType {
     EOF,
     /// e.g. a, ab, foo
     Ident,
+    /// let
+    Let,
     /// return
     Return,
     /// type
@@ -25,6 +27,8 @@ pub enum TkType {
     Comma,
     /// =
     Assign,
+    /// =>
+    Arrow,
     /// (
     LParen,
     /// )
@@ -117,6 +121,7 @@ impl Lexer {
     fn emit(&mut self, token_type: TkType) {
         let s: String = self.code[self.start..self.offset].into_iter().collect();
         let tok = match s.as_str() {
+            "let" => self.new_token(TkType::Let, s),
             "return" => self.new_token(TkType::Return, s),
             "type" => self.new_token(TkType::Type, s),
             "contract" => self.new_token(TkType::Contract, s),
@@ -143,7 +148,12 @@ fn whitespace(lexer: &mut Lexer) -> State {
         Some(_c @ '0'..='9') => State::Fn(number),
         Some('=') => {
             lexer.next();
-            lexer.emit(TkType::Assign);
+            if lexer.peek() == Some('>') {
+                lexer.next();
+                lexer.emit(TkType::Arrow);
+            } else {
+                lexer.emit(TkType::Assign);
+            }
             State::Fn(whitespace)
         }
         Some(',') => {
@@ -186,11 +196,10 @@ fn whitespace(lexer: &mut Lexer) -> State {
             if lexer.peek() == Some(':') {
                 lexer.next();
                 lexer.emit(TkType::Accessor);
-                State::Fn(whitespace)
             } else {
                 lexer.emit(TkType::Colon);
-                State::Fn(whitespace)
             }
+            State::Fn(whitespace)
         }
         Some(';') => {
             lexer.next();
@@ -209,7 +218,6 @@ fn whitespace(lexer: &mut Lexer) -> State {
         }
         Some('"') => State::Fn(string),
         Some(c) => {
-            println!("char {:?}", c);
             if identifier_set(c) {
                 State::Fn(ident)
             } else {
