@@ -20,8 +20,8 @@ let add = (x: int, y: int): int => {
             Expr::Lambda(Lambda::new(
                 Defined(AccessChain::from("int")),
                 vec![
-                Parameter(Defined(AccessChain::from("int")), "x".to_string()),
-                Parameter(Defined(AccessChain::from("int")), "y".to_string()),
+                    Parameter(Defined(AccessChain::from("int")), "x".to_string()),
+                    Parameter(Defined(AccessChain::from("int")), "y".to_string()),
                 ],
                 Some(Block::from(vec![
                     Statement::Return(Expr::Binary(
