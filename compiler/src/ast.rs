@@ -31,10 +31,6 @@ pub struct Parameter(pub Type, pub String);
 #[derive(Debug, PartialEq)]
 pub enum Top {
     Binding(String, Expr),
-    /// Contract: Name, FuncDefines
-    Contract(String, Vec<Lambda>),
-    /// ContractFuncDefine: contract name, function define list
-    ImplContract(AccessChain, Vec<Lambda>),
     /// StructureTypeDefine: Name, Unsure Types, Fields
     StructureTypeDefine(String, Vec<Type>, Vec<Parameter>),
     /// TaggedUnionTypeDefine: Name, Unsure Types, Subtypes
