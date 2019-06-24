@@ -3,7 +3,7 @@ use super::lexer::{TkType, Token};
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
     /// Defined: int, f64, string
-    Defined(AccessChain),
+    Defined(String),
     /// Unsure: 'a, 'element, 'key, 'value
     Unsure(String),
 }
@@ -30,23 +30,11 @@ pub struct Parameter(pub Type, pub String);
 
 #[derive(Debug, PartialEq)]
 pub enum Top {
-    Binding(String, Expr),
+    Binding(String, Type, Expr),
     /// StructureTypeDefine: Name, Unsure Types, Fields
     StructureTypeDefine(String, Vec<Type>, Vec<Parameter>),
     /// TaggedUnionTypeDefine: Name, Unsure Types, Subtypes
     TaggedUnionTypeDefine(String, Vec<Type>, Vec<SubType>),
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct AccessChain(pub Vec<String>);
-
-impl AccessChain {
-    pub fn from(s: &str) -> AccessChain {
-        AccessChain::from_string(s.to_string())
-    }
-    pub fn from_string(s: String) -> AccessChain {
-        AccessChain(s.split("::").map(|s| s.to_string()).collect())
-    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -88,9 +76,14 @@ pub enum Expr {
     F64(f64),
     Int(i64),
     String(String),
-    Argument(String, Box<Expr>),
-    FuncCall(Box<Expr>, Vec<Expr>),
-    Identifier(AccessChain),
+    FuncCall(Box<Expr>, Vec<Argument>),
+    Identifier(String),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Argument {
+    pub name: String,
+    pub expr: Expr,
 }
 
 #[derive(Clone, Debug, PartialEq)]

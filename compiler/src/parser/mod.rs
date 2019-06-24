@@ -43,15 +43,20 @@ impl Parser {
         self.predict_and_consume(vec![TkType::Let])?;
         self.predict(vec![TkType::Ident])?;
         let binding_name = self.take()?.value();
+        let typ = if self.predict(vec![TkType::Colon]).is_ok() {
+            self.parse_type()?
+        } else {
+            Type::Unsure("a".to_string())
+        };
         self.predict_and_consume(vec![TkType::Assign])?;
         let expr = self.parse_expression(None, 1)?;
-        Ok(Top::Binding(binding_name, expr))
+        Ok(Top::Binding(binding_name, typ, expr))
     }
     /// parse_access_chain:
     /// ```ignore
     /// foo::bar
     /// ```
-    pub fn parse_access_chain(&mut self) -> Result<AccessChain> {
+    pub fn parse_access_chain(&mut self) -> Result<String> {
         let mut chain = vec![];
         self.predict(vec![TkType::Ident])?;
         chain.push(self.take()?.value());
@@ -60,7 +65,7 @@ impl Parser {
             self.predict(vec![TkType::Ident])?;
             chain.push(self.take()?.value());
         }
-        Ok(AccessChain(chain))
+        Ok(chain.join("::"))
     }
     /// parse_type_define:
     ///
@@ -274,7 +279,7 @@ impl Parser {
                     identifier
                 } else { "".to_string() };
             let expr = self.parse_expression(None, 1)?;
-            args.push(Expr::Argument(identifier, Box::new(expr)));
+            args.push(Argument { name: identifier, expr });
             if self.predict(vec![TkType::Comma]).is_err() {
                 break;
             } else {

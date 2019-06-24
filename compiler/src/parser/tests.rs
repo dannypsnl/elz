@@ -17,16 +17,17 @@ let add = (x: int, y: int): int => {
         binding,
         Top::Binding(
             "add".to_string(),
+            Type::Unsure("a".to_string()),
             Expr::Lambda(Lambda::new(
-                Defined(AccessChain::from("int")),
+                Defined("int".to_string()),
                 vec![
-                    Parameter(Defined(AccessChain::from("int")), "x".to_string()),
-                    Parameter(Defined(AccessChain::from("int")), "y".to_string()),
+                    Parameter(Defined("int".to_string()), "x".to_string()),
+                    Parameter(Defined("int".to_string()), "y".to_string()),
                 ],
                 Some(Block::from(vec![
                     Statement::Return(Expr::Binary(
-                        Box::new(Expr::Identifier(AccessChain::from("x"))),
-                        Box::new(Expr::Identifier(AccessChain::from("y"))),
+                        Box::new(Expr::Identifier("x".to_string())),
+                        Box::new(Expr::Identifier("y".to_string())),
                         Operator::Plus,
                     )),
                 ])),
@@ -54,8 +55,8 @@ type Car (
             "Car".to_string(),
             vec![],
             vec![
-                Parameter(Type::Defined(AccessChain::from("string")), "name".to_string()),
-                Parameter(Type::Defined(AccessChain::from("int")), "price".to_string()),
+                Parameter(Type::Defined("string".to_string()), "name".to_string()),
+                Parameter(Type::Defined("int".to_string()), "price".to_string()),
             ],
         )
     );
