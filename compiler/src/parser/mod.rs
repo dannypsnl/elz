@@ -27,12 +27,8 @@ impl Parser {
                     program.push(self.parse_type_define()?);
                 }
                 _ => {
-                    while
-                        self.peek(0)?.tk_type() != &TkType::Let &&
-                            self.peek(0)?.tk_type() != &TkType::Type {
-                        println!("{} skipped!", self.peek(0)?);
-                        self.take()?;
-                    }
+                    println!("{} skipped!", self.peek(0)?);
+                    self.take()?;
                 }
             }
         }
@@ -43,7 +39,7 @@ impl Parser {
         self.predict_and_consume(vec![TkType::Let])?;
         self.predict(vec![TkType::Ident])?;
         let binding_name = self.take()?.value();
-        let typ = if self.predict(vec![TkType::Colon]).is_ok() {
+        let typ = if self.predict_and_consume(vec![TkType::Colon]).is_ok() {
             self.parse_type()?
         } else {
             Type::Unsure("a".to_string())
