@@ -13,7 +13,7 @@ pub struct Context {
 }
 
 
-pub fn infer_expr<'a>(c: &mut Context, expr: Expr, substitution: &'a mut Substitution) -> Result<(Type, &'a mut Substitution), String> {
+pub fn infer_expr<'start_infer>(c: &mut Context, expr: Expr, substitution: &'start_infer mut Substitution) -> Result<(Type, &'start_infer mut Substitution), String> {
     match expr {
         Expr::Int(_) => Ok((Type::I64, substitution)),
         Expr::F64(_) => Ok((Type::F64, substitution)),
