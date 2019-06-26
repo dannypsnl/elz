@@ -154,9 +154,12 @@ impl Parser {
         let body = if self.peek(0)?.tk_type() == &TkType::Semicolon {
             self.predict_and_consume(vec![TkType::Semicolon])?;
             None
+        } else if self.predict(vec![TkType::Arrow, TkType::LBrace]).is_ok() {
+            self.predict_and_consume(vec![TkType::Arrow])?;
+            Some(Box::new(self.parse_block()?))
         } else {
             self.predict_and_consume(vec![TkType::Arrow])?;
-            Some(self.parse_block()?)
+            Some(Box::new(self.parse_expression(None, 1)?))
         };
         Ok(Lambda::new(return_type, params, body))
     }
@@ -166,7 +169,7 @@ impl Parser {
     ///   <statement>*
     /// }
     /// ```
-    pub fn parse_block(&mut self) -> Result<Block> {
+    pub fn parse_block(&mut self) -> Result<Expr> {
         self.predict_and_consume(vec![TkType::LBrace])?;
         let mut block = Block::new();
         while self.peek(0)?.tk_type() != &TkType::RBrace {
@@ -174,7 +177,7 @@ impl Parser {
             block.append(stmt);
         }
         self.predict_and_consume(vec![TkType::RBrace])?;
-        Ok(block)
+        Ok(Expr::Block(block))
     }
     /// parse_statement:
     /// ```ignore

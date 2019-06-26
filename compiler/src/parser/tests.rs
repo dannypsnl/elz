@@ -5,9 +5,7 @@ use crate::ast::Type::Defined;
 fn test_parse_binding() {
     let mut parser = Parser::new(
         "\
-let add = (x: int, y: int): int => {
-  return x + y;
-}
+let add = (x: int, y: int): int => x + y
 "
             .to_string(),
     );
@@ -24,13 +22,11 @@ let add = (x: int, y: int): int => {
                     Parameter(Defined("int".to_string()), "x".to_string()),
                     Parameter(Defined("int".to_string()), "y".to_string()),
                 ],
-                Some(Block::from(vec![
-                    Statement::Return(Expr::Binary(
-                        Box::new(Expr::Identifier("x".to_string())),
-                        Box::new(Expr::Identifier("y".to_string())),
-                        Operator::Plus,
-                    )),
-                ])),
+                Some(Box::new(Expr::Binary(
+                    Box::new(Expr::Identifier("x".to_string())),
+                    Box::new(Expr::Identifier("y".to_string())),
+                    Operator::Plus,
+                ))),
             )),
         )
     )

@@ -41,11 +41,11 @@ pub enum Top {
 pub struct Lambda {
     pub  return_type: Type,
     pub  parameters: Vec<Parameter>,
-    body: Option<Block>,
+    pub body: Option<Box<Expr>>,
 }
 
 impl Lambda {
-    pub fn new(return_type: Type, parameters: Vec<Parameter>, body: Option<Block>) -> Lambda {
+    pub fn new(return_type: Type, parameters: Vec<Parameter>, body: Option<Box<Expr>>) -> Lambda {
         Lambda {
             return_type,
             parameters,
@@ -78,6 +78,7 @@ pub enum Expr {
     String(String),
     FuncCall(Box<Expr>, Vec<Argument>),
     Identifier(String),
+    Block(Block),
 }
 
 #[derive(Clone, Debug, PartialEq)]

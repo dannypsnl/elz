@@ -1,3 +1,4 @@
+use super::ast;
 use super::ast::*;
 use std::collections::HashMap;
 
@@ -38,16 +39,14 @@ pub fn infer_expr<'start_infer>(c: &mut Context, expr: Expr, substitution: &'sta
         Expr::Int(_) => Ok((Type::I64, substitution)),
         Expr::F64(_) => Ok((Type::F64, substitution)),
         Expr::String(_) => Ok((Type::String, substitution)),
-        Expr::Identifier(access_chain) => {
-            Ok((c.get(&access_chain)?, substitution))
-        }
+        Expr::Identifier(access_chain) => Ok((c.get(&access_chain)?, substitution)),
         Expr::Binary(left_e, right_e, op) => {
             let (t1, substitution) = infer_expr(c, *left_e, substitution)?;
             let (t2, substitution) = infer_expr(c, *right_e, substitution)?;
             match op {
                 Operator::Plus => {
-                    let substitution = unify((Type::I64, t1), substitution)?;
-                    let substitution = unify((Type::I64, t2), substitution)?;
+                    let substitution = unify((&Type::I64, &t1), substitution)?;
+                    let substitution = unify((&Type::I64, &t2), substitution)?;
                     Ok((Type::I64, substitution))
                 }
             }
@@ -57,8 +56,14 @@ pub fn infer_expr<'start_infer>(c: &mut Context, expr: Expr, substitution: &'sta
             let mut pts = vec![];
             for param in lambda.parameters {
                 let param_type = Type::from_ast_type(c, param.0)?;
+                c.type_environment.insert(param.1, param_type.clone());
                 pts.push(param_type);
             }
+            let (expression_type, substitution) = match lambda.body {
+                Some(expr) => infer_expr(c, *expr, substitution)?,
+                None => (Type::from_ast_type(c, ast::Type::Unsure("a".to_string()))?, substitution)
+            };
+            let substitution = unify((&return_type, &expression_type), substitution)?;
             Ok((
                 Type::Lambda(pts, Box::new(return_type)),
                 substitution
@@ -69,11 +74,32 @@ pub fn infer_expr<'start_infer>(c: &mut Context, expr: Expr, substitution: &'sta
 }
 
 
-pub fn unify(target: (Type, Type), sub: &mut Substitution) -> Result<&mut Substitution, String> {
+pub fn unify<'start_infer>(target: (&Type, &Type), sub: &'start_infer mut Substitution) -> Result<&'start_infer mut Substitution, String> {
     if target.0 == target.1 {
         Ok(sub)
     } else {
-        Err("unimplemented".to_string())
+        match target {
+            (Type::TypeVar(x), t) |
+            (t, Type::TypeVar(x)) => {
+                occurs(x, t)?;
+                sub.0.insert(x.clone(), t.clone());
+                Ok(sub)
+            }
+            _ => unimplemented!()
+        }
+    }
+}
+
+pub fn occurs(x: &TypeVar, t: &Type) -> Result<(), String> {
+    match t {
+        Type::TypeVar(id) => {
+            if id.0 == x.0 {
+                Err("cyclic type detected".to_string())
+            } else {
+                Ok(())
+            }
+        }
+        _ => Ok(())
     }
 }
 
