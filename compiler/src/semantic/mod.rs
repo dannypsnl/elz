@@ -9,7 +9,27 @@ use types::Type;
 use types::TypeVar;
 
 pub struct Context {
-    type_environment: HashMap<String, Type>
+    type_environment: HashMap<String, Type>,
+    type_var_id: HashMap<String, u64>,
+    count: u64,
+}
+
+impl Context {
+    /// new returns a new context for inference expression
+    pub fn new() -> Context {
+        Context {
+            type_environment: HashMap::new(),
+            type_var_id: HashMap::new(),
+            count: 0,
+        }
+    }
+
+    fn get(&self, key: &String) -> Result<Type, String> {
+        match self.type_environment.get(key) {
+            Some(t) => Ok(t.clone()),
+            None => Err("not found".to_string())
+        }
+    }
 }
 
 
@@ -19,10 +39,7 @@ pub fn infer_expr<'start_infer>(c: &mut Context, expr: Expr, substitution: &'sta
         Expr::F64(_) => Ok((Type::F64, substitution)),
         Expr::String(_) => Ok((Type::String, substitution)),
         Expr::Identifier(access_chain) => {
-            match c.type_environment.get(&access_chain) {
-                Some(t) => Ok((t.clone(), substitution)),
-                None => Err("not found".to_string())
-            }
+            Ok((c.get(&access_chain)?, substitution))
         }
         Expr::Binary(left_e, right_e, op) => {
             let (t1, substitution) = infer_expr(c, *left_e, substitution)?;
@@ -34,6 +51,18 @@ pub fn infer_expr<'start_infer>(c: &mut Context, expr: Expr, substitution: &'sta
                     Ok((Type::I64, substitution))
                 }
             }
+        }
+        Expr::Lambda(lambda) => {
+            let return_type = Type::from_ast_type(c, lambda.return_type)?;
+            let mut pts = vec![];
+            for param in lambda.parameters {
+                let param_type = Type::from_ast_type(c, param.0)?;
+                pts.push(param_type);
+            }
+            Ok((
+                Type::Lambda(pts, Box::new(return_type)),
+                substitution
+            ))
         }
         _ => unimplemented!()
     }
@@ -51,4 +80,10 @@ pub fn unify(target: (Type, Type), sub: &mut Substitution) -> Result<&mut Substi
 
 pub struct Substitution(HashMap<TypeVar, Type>);
 
-impl Substitution {}
+impl Substitution {
+    pub fn new() -> Substitution {
+        Substitution(
+            HashMap::new()
+        )
+    }
+}
