@@ -1,33 +1,15 @@
-use super::{
-    infer_expr,
-    Substitution,
-    Context,
-    types::{
-        TypeVar,
-        Type,
-    },
-};
 use super::super::ast;
-use super::super::ast::{
-    Expr,
-    Operator,
-    Lambda,
-};
+use super::super::ast::{Expr, Lambda, Operator};
+use super::types::{Type, TypeVar};
+use super::{infer_expr, Context, Substitution};
 
 #[test]
 fn test_infer_binary() {
     use Expr::Int;
-    let expr = Expr::Binary(
-        Box::new(Int(1)),
-        Box::new(Int(2)),
-        Operator::Plus,
-    );
+    let expr = Expr::Binary(Box::new(Int(1)), Box::new(Int(2)), Operator::Plus);
     let mut sub = Substitution::new();
     let t = infer_expr(&mut Context::new(), expr, &mut sub).unwrap();
-    assert_eq!(
-        t.0,
-        Type::I64
-    );
+    assert_eq!(t.0, Type::I64);
 }
 
 #[test]
@@ -45,15 +27,29 @@ fn test_infer_lambda() {
         ))),
     ));
     let mut sub = Substitution::new();
-    let (return_type, _) = infer_expr(&mut Context::new(), expr, &mut sub).unwrap();
+    let (return_type, _) = infer_expr(&mut Context::new(), expr.clone(), &mut sub).unwrap();
     assert_eq!(
         return_type,
         Type::Lambda(
-            vec![
-                Type::TypeVar(TypeVar(0)),
-                Type::TypeVar(TypeVar(1))
-            ],
+            vec![Type::TypeVar(TypeVar(0)), Type::TypeVar(TypeVar(1))],
             Box::new(Type::TypeVar(TypeVar(0))),
         )
     );
+
+    let func_call = Expr::FuncCall(
+        Box::new(expr),
+        vec![
+            ast::Argument {
+                name: "".to_string(),
+                expr: Expr::Int(1),
+            },
+            ast::Argument {
+                name: "".to_string(),
+                expr: Expr::Int(2),
+            },
+        ],
+    );
+    let (return_type, sub) = infer_expr(&mut Context::new(), func_call, &mut sub).unwrap();
+    // substitution the return type should be integer
+    assert_eq!(Type::I64, sub.get(&return_type));
 }

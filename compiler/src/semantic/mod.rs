@@ -71,6 +71,23 @@ pub fn infer_expr<'start_infer>(
             let substitution = unify((&return_type, &expression_type), substitution)?;
             Ok((Type::Lambda(pts, Box::new(return_type)), substitution))
         }
+        Expr::FuncCall(func, args) => {
+            let (typ, substitution) = infer_expr(c, *func, substitution)?;
+            match typ {
+                Type::Lambda(params, return_type) => {
+                    if params.len() != args.len() {
+                        return Err("mismatched arguments".to_string());
+                    }
+                    for i in 0..params.len() {
+                        let (arg_type, substitution) =
+                            infer_expr(c, args[i].expr.clone(), substitution)?;
+                        unify((&arg_type, &params[i]), substitution)?;
+                    }
+                    Ok((*return_type, substitution))
+                }
+                _ => unimplemented!(),
+            }
+        }
         _ => unimplemented!(),
     }
 }
