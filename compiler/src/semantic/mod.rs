@@ -2,10 +2,9 @@ use super::ast;
 use super::ast::*;
 use std::collections::HashMap;
 
-mod types;
 #[cfg(test)]
 mod tests;
-
+mod types;
 use types::Type;
 use types::TypeVar;
 
@@ -28,13 +27,16 @@ impl Context {
     fn get(&self, key: &String) -> Result<Type, String> {
         match self.type_environment.get(key) {
             Some(t) => Ok(t.clone()),
-            None => Err("not found".to_string())
+            None => Err("not found".to_string()),
         }
     }
 }
 
-
-pub fn infer_expr<'start_infer>(c: &mut Context, expr: Expr, substitution: &'start_infer mut Substitution) -> Result<(Type, &'start_infer mut Substitution), String> {
+pub fn infer_expr<'start_infer>(
+    c: &mut Context,
+    expr: Expr,
+    substitution: &'start_infer mut Substitution,
+) -> Result<(Type, &'start_infer mut Substitution), String> {
     match expr {
         Expr::Int(_) => Ok((Type::I64, substitution)),
         Expr::F64(_) => Ok((Type::F64, substitution)),
@@ -61,31 +63,34 @@ pub fn infer_expr<'start_infer>(c: &mut Context, expr: Expr, substitution: &'sta
             }
             let (expression_type, substitution) = match lambda.body {
                 Some(expr) => infer_expr(c, *expr, substitution)?,
-                None => (Type::from_ast_type(c, ast::Type::Unsure("a".to_string()))?, substitution)
+                None => (
+                    Type::from_ast_type(c, ast::Type::Unsure("a".to_string()))?,
+                    substitution,
+                ),
             };
             let substitution = unify((&return_type, &expression_type), substitution)?;
-            Ok((
-                Type::Lambda(pts, Box::new(return_type)),
-                substitution
-            ))
+            Ok((Type::Lambda(pts, Box::new(return_type)), substitution))
         }
-        _ => unimplemented!()
+        _ => unimplemented!(),
     }
 }
 
-
-pub fn unify<'start_infer>(target: (&Type, &Type), sub: &'start_infer mut Substitution) -> Result<&'start_infer mut Substitution, String> {
-    if target.0 == target.1 {
+pub fn unify<'start_infer>(
+    target: (&Type, &Type),
+    sub: &'start_infer mut Substitution,
+) -> Result<&'start_infer mut Substitution, String> {
+    let (x, t) = target;
+    let (sub_x, sub_t) = (sub.get(x), sub.get(t));
+    if sub_x == sub_t {
         Ok(sub)
     } else {
         match target {
-            (Type::TypeVar(x), t) |
-            (t, Type::TypeVar(x)) => {
+            (Type::TypeVar(x), t) | (t, Type::TypeVar(x)) => {
                 occurs(x, t)?;
                 sub.0.insert(x.clone(), t.clone());
                 Ok(sub)
             }
-            _ => unimplemented!()
+            _ => unimplemented!(),
         }
     }
 }
@@ -99,7 +104,7 @@ pub fn occurs(x: &TypeVar, t: &Type) -> Result<(), String> {
                 Ok(())
             }
         }
-        _ => Ok(())
+        _ => Ok(()),
     }
 }
 
@@ -108,8 +113,16 @@ pub struct Substitution(HashMap<TypeVar, Type>);
 
 impl Substitution {
     pub fn new() -> Substitution {
-        Substitution(
-            HashMap::new()
-        )
+        Substitution(HashMap::new())
+    }
+
+    fn get(&self, t: &Type) -> Type {
+        match t {
+            Type::TypeVar(t) => match self.0.get(&t) {
+                Some(t) => t.clone(),
+                None => Type::TypeVar(t.clone()),
+            },
+            _ => t.clone(),
+        }
     }
 }
