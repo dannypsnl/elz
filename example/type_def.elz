@@ -1,8 +1,0 @@
-type Car = (
-  price: int,
-  seq: int,
-)
-
-car = Car(price: 100, seq: 10)
-
-main = printf("price of car: %d, sequence number of car: %d\n", car.price, car.seq)

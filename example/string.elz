@@ -1,4 +1,0 @@
-str = "hello, world"
-
-main(): int =
-  println(str)
