@@ -16,6 +16,7 @@ use error::{
 
 pub struct Context<'current, 'parent> {
     parent: Option<&'current Context<'parent, 'parent>>,
+    type_map: HashMap<String, Type>,
     type_environment: HashMap<String, Type>,
     type_var_id: HashMap<String, u64>,
     count: u64,
@@ -26,6 +27,7 @@ impl<'current, 'parent> Context<'current, 'parent> {
     pub fn new() -> Context<'current, 'static> {
         Context {
             parent: None,
+            type_map: HashMap::new(),
             type_environment: HashMap::new(),
             type_var_id: HashMap::new(),
             count: 0,
@@ -34,21 +36,39 @@ impl<'current, 'parent> Context<'current, 'parent> {
     pub fn with_parent(ctx: &'parent Context<'_, 'parent>) -> Context<'current, 'parent> {
         Context {
             parent: Some(ctx),
+            type_map: HashMap::new(),
             type_environment: HashMap::new(),
             type_var_id: HashMap::new(),
             count: 0,
         }
     }
 
-    fn get(&self, key: &String) -> Result<Type> {
+    fn get_type(&self, type_name: &String) -> Result<Type> {
+        match self.type_map.get(type_name) {
+            Some(t) => Ok(t.clone()),
+            None => if let Some(p_ctx) = self.parent {
+                p_ctx.get_type(type_name)
+            } else {
+                Err(CheckError::not_found(type_name.clone()))
+            },
+        }
+    }
+    fn add_type(&mut self, type_name: String, typ: Type) {
+        self.type_map.insert(type_name, typ);
+    }
+
+    fn get_identifier(&self, key: &String) -> Result<Type> {
         match self.type_environment.get(key) {
             Some(t) => Ok(t.clone()),
             None => if let Some(p_ctx) = self.parent {
-                p_ctx.get(key)
+                p_ctx.get_identifier(key)
             } else {
                 Err(CheckError::not_found(key.clone()))
             },
         }
+    }
+    fn add_identifier(&mut self, key: String, typ: Type) {
+        self.type_environment.insert(key, typ);
     }
 }
 
@@ -58,7 +78,7 @@ pub fn check_program(program: Vec<ast::Top>) -> Result<()> {
 
     let mut ctx = Context::new();
 
-    ctx.type_environment.insert("int".to_string(), types::Type::I64);
+    ctx.add_type("int".to_string(), types::Type::I64);
     for top_elem in program {
         match top_elem {
             Top::Binding(name, typ, expr) => {
@@ -66,11 +86,11 @@ pub fn check_program(program: Vec<ast::Top>) -> Result<()> {
                     Type::Unsure(_) => {
                         let mut c = Context::with_parent(&ctx);
                         let mut sub = Substitution::new();
-                        ctx.type_environment.insert(name, infer_expr(&mut c, expr, &mut sub)?.0)
+                        ctx.add_identifier(name, infer_expr(&mut c, expr, &mut sub)?.0)
                     }
                     Type::Defined(_) => {
                         let mut c = Context::with_parent(&ctx);
-                        ctx.type_environment.insert(name, types::Type::from_ast_type(&mut c, typ)?)
+                        ctx.add_identifier(name, types::Type::from_ast_type(&mut c, typ)?)
                     }
                 }
             }
@@ -89,7 +109,7 @@ pub fn infer_expr<'start_infer>(
         Expr::Int(_) => Ok((Type::I64, substitution)),
         Expr::F64(_) => Ok((Type::F64, substitution)),
         Expr::String(_) => Ok((Type::String, substitution)),
-        Expr::Identifier(access_chain) => Ok((c.get(&access_chain)?, substitution)),
+        Expr::Identifier(access_chain) => Ok((c.get_identifier(&access_chain)?, substitution)),
         Expr::Binary(left_e, right_e, op) => {
             let (t1, substitution) = infer_expr(c, *left_e, substitution)?;
             let (t2, substitution) = infer_expr(c, *right_e, substitution)?;
@@ -104,15 +124,17 @@ pub fn infer_expr<'start_infer>(
         Expr::Lambda(lambda) => {
             let return_type = Type::from_ast_type(c, lambda.return_type)?;
             let mut pts = vec![];
+            let mut new_ctx = Context::with_parent(c);
             for param in lambda.parameters {
-                let param_type = Type::from_ast_type(c, param.0)?;
-                c.type_environment.insert(param.1, param_type.clone());
+                let ast::Parameter(param_defined_type, param_name) = param;
+                let param_type = Type::from_ast_type(&mut new_ctx, param_defined_type)?;
+                new_ctx.add_identifier(param_name, param_type.clone());
                 pts.push(param_type);
             }
             let (expression_type, substitution) = match lambda.body {
-                Some(expr) => infer_expr(c, *expr, substitution)?,
+                Some(expr) => infer_expr(&mut new_ctx, *expr, substitution)?,
                 None => (
-                    Type::from_ast_type(c, ast::Type::Unsure("a".to_string()))?,
+                    Type::from_ast_type(&mut new_ctx, ast::Type::Unsure("a".to_string()))?,
                     substitution,
                 ),
             };
