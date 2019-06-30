@@ -1,5 +1,6 @@
 use super::super::ast;
 use super::Context;
+use super::error::CheckError;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
@@ -12,7 +13,7 @@ pub enum Type {
 }
 
 impl Type {
-    pub fn from_ast_type(c: &mut Context, t: ast::Type) -> Result<Type, String> {
+    pub fn from_ast_type(c: &mut Context, t: ast::Type) -> Result<Type, CheckError> {
         match t {
             ast::Type::Defined(name) => c.get(&name),
             ast::Type::Unsure(name) => {

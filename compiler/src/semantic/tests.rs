@@ -1,7 +1,22 @@
 use super::super::ast;
 use super::super::ast::{Expr, Lambda, Operator};
 use super::types::{Type, TypeVar};
-use super::{infer_expr, Context, Substitution};
+use super::{infer_expr, check_program, Context, Substitution};
+
+#[test]
+fn test_program() {
+    use super::super::parser;
+
+    let mut parser = parser::Parser::new("\
+let a = 1
+
+let add_one = (x: int): int => a + x
+".to_string());
+
+    let program = parser.parse_program().unwrap();
+
+    check_program(program).unwrap();
+}
 
 #[test]
 fn test_infer_binary() {

@@ -5,38 +5,86 @@ use std::collections::HashMap;
 #[cfg(test)]
 mod tests;
 mod types;
+mod error;
+
 use types::Type;
 use types::TypeVar;
+use error::{
+    Result,
+    CheckError,
+};
 
-pub struct Context {
+pub struct Context<'current, 'parent> {
+    parent: Option<&'current Context<'parent, 'parent>>,
     type_environment: HashMap<String, Type>,
     type_var_id: HashMap<String, u64>,
     count: u64,
 }
 
-impl Context {
+impl<'current, 'parent> Context<'current, 'parent> {
     /// new returns a new context for inference expression
-    pub fn new() -> Context {
+    pub fn new() -> Context<'current, 'static> {
         Context {
+            parent: None,
+            type_environment: HashMap::new(),
+            type_var_id: HashMap::new(),
+            count: 0,
+        }
+    }
+    pub fn with_parent(ctx: &'parent Context<'_, 'parent>) -> Context<'current, 'parent> {
+        Context {
+            parent: Some(ctx),
             type_environment: HashMap::new(),
             type_var_id: HashMap::new(),
             count: 0,
         }
     }
 
-    fn get(&self, key: &String) -> Result<Type, String> {
+    fn get(&self, key: &String) -> Result<Type> {
         match self.type_environment.get(key) {
             Some(t) => Ok(t.clone()),
-            None => Err("not found".to_string()),
+            None => if let Some(p_ctx) = self.parent {
+                p_ctx.get(key)
+            } else {
+                Err(CheckError::not_found(key.clone()))
+            },
         }
     }
+}
+
+#[allow(mutable_borrow_reservation_conflict)]
+pub fn check_program(program: Vec<ast::Top>) -> Result<()> {
+    use ast::Type;
+
+    let mut ctx = Context::new();
+
+    ctx.type_environment.insert("int".to_string(), types::Type::I64);
+    for top_elem in program {
+        match top_elem {
+            Top::Binding(name, typ, expr) => {
+                match typ {
+                    Type::Unsure(_) => {
+                        let mut c = Context::with_parent(&ctx);
+                        let mut sub = Substitution::new();
+                        ctx.type_environment.insert(name, infer_expr(&mut c, expr, &mut sub)?.0)
+                    }
+                    Type::Defined(_) => {
+                        let mut c = Context::with_parent(&ctx);
+                        ctx.type_environment.insert(name, types::Type::from_ast_type(&mut c, typ)?)
+                    }
+                }
+            }
+            _ => unimplemented!()
+        };
+    }
+    Ok(())
 }
 
 pub fn infer_expr<'start_infer>(
     c: &mut Context,
     expr: Expr,
     substitution: &'start_infer mut Substitution,
-) -> Result<(Type, &'start_infer mut Substitution), String> {
+) -> Result<(Type, &'start_infer mut Substitution)> {
     match expr {
         Expr::Int(_) => Ok((Type::I64, substitution)),
         Expr::F64(_) => Ok((Type::F64, substitution)),
@@ -76,7 +124,7 @@ pub fn infer_expr<'start_infer>(
             match typ {
                 Type::Lambda(params, return_type) => {
                     if params.len() != args.len() {
-                        return Err("mismatched arguments".to_string());
+                        return Err(CheckError::MismatchedArguments);
                     }
                     for i in 0..params.len() {
                         let (arg_type, substitution) =
@@ -95,7 +143,7 @@ pub fn infer_expr<'start_infer>(
 pub fn unify<'start_infer>(
     target: (&Type, &Type),
     sub: &'start_infer mut Substitution,
-) -> Result<&'start_infer mut Substitution, String> {
+) -> Result<&'start_infer mut Substitution> {
     let (x, t) = target;
     let (sub_x, sub_t) = (sub.get(x), sub.get(t));
     if sub_x == sub_t {
@@ -112,11 +160,11 @@ pub fn unify<'start_infer>(
     }
 }
 
-pub fn occurs(x: &TypeVar, t: &Type) -> Result<(), String> {
+pub fn occurs(x: &TypeVar, t: &Type) -> Result<()> {
     match t {
         Type::TypeVar(id) => {
             if id.0 == x.0 {
-                Err("cyclic type detected".to_string())
+                Err(CheckError::CyclicType)
             } else {
                 Ok(())
             }
