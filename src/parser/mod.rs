@@ -291,29 +291,30 @@ impl Parser {
     }
     /// parse_parameters:
     /// ```ignore
+    /// ()
     /// (x: int, y: int)
     /// ```
     pub fn parse_parameters(&mut self) -> Result<Vec<Parameter>> {
         self.predict_and_consume(vec![TkType::LParen])?;
         let mut params = vec![];
-        loop {
+        while self.peek(0)?.tk_type() != &TkType::RParen {
             self.predict(vec![TkType::Ident, TkType::Colon])?;
             let param_name = self.take()?.value();
             self.consume()?;
             let typ = self.parse_type()?;
             params.push(Parameter(typ, param_name));
-            if self.predict(vec![TkType::Comma]).is_ok() {
-                self.consume()?;
-            } else if self.predict(vec![TkType::RParen]).is_ok() {
-                self.consume()?;
-                return Ok(params);
-            } else {
-                return Err(ParseError::new(format!(
+            match self.peek(0)?.tk_type() {
+                TkType::Comma => self.consume()?,
+                TkType::RParen => (),
+                _ => return Err(ParseError::new(format!(
                     "expected `,` or `)` but got unexpected: {:?} while parsing parameters",
                     self.peek(0)?,
-                )));
+                ))),
             }
         }
+        self.predict_and_consume(vec![TkType::RParen])?;
+
+        Ok(params)
     }
     /// parse_type:
     /// ```ignore
