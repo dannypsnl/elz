@@ -181,15 +181,28 @@ impl Parser {
     }
     /// parse_statement:
     /// ```ignore
+    /// let a = 1;
     /// return 1;
     /// ```
     pub fn parse_statement(&mut self) -> Result<Statement> {
         let stmt = match self.peek(0)?.tk_type() {
+            TkType::Let => {
+                self.consume()?;
+                let name = self.parse_access_chain()?;
+                let typ = if self.predict_and_consume(vec![TkType::Colon]).is_ok() {
+                    self.parse_type()?
+                } else {
+                    Type::Unsure("a".to_string())
+                };
+                self.predict_and_consume(vec![TkType::Assign])?;
+                let expr = self.parse_expression(None, 1)?;
+                Ok(Statement::Let { name, typ, expr })
+            }
             TkType::Return => {
                 self.consume()?;
                 Ok(Statement::Return(self.parse_expression(None, 1)?))
             }
-            _ => Err(ParseError::new(format!("unimplement"))),
+            _ => unimplemented!()
         };
         self.predict_and_consume(vec![TkType::Semicolon])?;
         stmt

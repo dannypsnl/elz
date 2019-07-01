@@ -10,7 +10,7 @@ pub enum Type {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Block {
-    statements: Vec<Statement>,
+    pub statements: Vec<Statement>,
 }
 
 impl Block {
@@ -62,6 +62,11 @@ pub struct SubType {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
+    /// Let:
+    /// ```ignore
+    /// let <name>: <typ> = <expr>
+    /// ```
+    Let { name: String, typ: Type, expr: Expr },
     /// Return:
     /// ```ignore
     /// return <Expr>

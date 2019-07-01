@@ -2,12 +2,31 @@ use super::*;
 use crate::ast::Type::Defined;
 
 #[test]
+fn test_statement() {
+    let mut parser = Parser::new(
+        "\
+let foo: int = 1;
+".to_string(),
+    );
+
+    let statement = parser.parse_statement().unwrap();
+    assert_eq!(
+        statement,
+        Statement::Let {
+            name: "foo".to_string(),
+            typ: Type::Defined("int".to_string()),
+            expr: Expr::Int(1),
+        }
+    )
+}
+
+
+#[test]
 fn test_parse_binding() {
     let mut parser = Parser::new(
         "\
 let add = (x: int, y: int): int => x + y
-"
-            .to_string(),
+".to_string(),
     );
 
     let binding = parser.parse_binding().unwrap();
@@ -40,8 +59,7 @@ type Car (
   name: string,
   price: int
 )
-"
-            .to_string(),
+".to_string(),
     );
 
     let type_define = parser.parse_type_define().unwrap();
@@ -66,8 +84,7 @@ type Option 'a (
   Just(a: 'a)
   | Nothing
 )
-"
-            .to_string(),
+".to_string(),
     );
 
     let type_define = parser.parse_type_define().unwrap();
