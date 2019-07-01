@@ -62,6 +62,11 @@ pub struct SubType {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
+    /// Let:
+    /// ```ignore
+    /// let <name>: <typ> = <expr>
+    /// ```
+    Let { name: String, typ: Type, expr: Expr },
     /// Return:
     /// ```ignore
     /// return <Expr>
