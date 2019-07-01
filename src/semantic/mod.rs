@@ -127,18 +127,18 @@ pub fn infer_expr<'start_infer>(
         Expr::Block(block) => {
             let mut return_type = Type::Unit;
             let mut substitution = substitution;
+            let c = &mut Context::with_parent(c);
             for stmt in block.statements {
                 match stmt {
                     Statement::Let { name, typ, expr } => {
+                        let mut binding_ctx = Context::with_parent(c);
                         match typ {
                             ast::Type::Unsure(_) => {
-                                let mut binding_ctx = Context::with_parent(c);
                                 let (typ, sub) = infer_expr(&mut binding_ctx, expr, substitution)?;
                                 substitution = sub;
                                 c.add_identifier(name, typ);
                             }
                             ast::Type::Defined(_) => {
-                                let mut binding_ctx = Context::with_parent(c);
                                 c.add_identifier(name, types::Type::from_ast_type(&mut binding_ctx, typ)?);
                             }
                         }
