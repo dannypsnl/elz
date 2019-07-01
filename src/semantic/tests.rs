@@ -1,5 +1,5 @@
 use super::super::ast;
-use super::super::ast::{Expr, Lambda, Operator};
+use super::super::ast::{Statement, Expr, Lambda, Operator};
 use super::types::{Type, TypeVar};
 use super::{infer_expr, check_program, Context, Substitution};
 
@@ -16,6 +16,28 @@ let add_one = (x: int): int => a + x
     let program = parser.parse_program().unwrap();
 
     check_program(program).unwrap();
+}
+
+#[test]
+fn test_infer_block() {
+    use ast::Block;
+    use ast::Type::*;
+    let block = Block {
+        statements: vec![
+            Statement::Let {
+                name: "foo".to_string(),
+                typ: Defined("int".to_string()),
+                expr: Expr::Int(1),
+            },
+            Statement::Return(Expr::F64(1.8)),
+        ]
+    };
+
+    let sub = &mut Substitution::new();
+    let (typ, sub) = infer_expr(&mut Context::new(), Expr::Block(block), sub).unwrap();
+    assert_eq!(
+        sub.get(&typ), Type::F64,
+    )
 }
 
 #[test]

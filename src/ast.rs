@@ -10,7 +10,7 @@ pub enum Type {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Block {
-    statements: Vec<Statement>,
+    pub statements: Vec<Statement>,
 }
 
 impl Block {

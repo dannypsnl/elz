@@ -25,13 +25,16 @@ pub struct Context<'current, 'parent> {
 impl<'current, 'parent> Context<'current, 'parent> {
     /// new returns a new context for inference expression
     pub fn new() -> Context<'current, 'static> {
-        Context {
+        let mut ctx = Context {
             parent: None,
             type_map: HashMap::new(),
             type_environment: HashMap::new(),
             type_var_id: HashMap::new(),
             count: 0,
-        }
+        };
+        ctx.add_type("int".to_string(), types::Type::I64);
+
+        ctx
     }
     pub fn with_parent(ctx: &'parent Context<'_, 'parent>) -> Context<'current, 'parent> {
         Context {
@@ -78,7 +81,6 @@ pub fn check_program(program: Vec<ast::Top>) -> Result<()> {
 
     let mut ctx = Context::new();
 
-    ctx.add_type("int".to_string(), types::Type::I64);
     for top_elem in program {
         match top_elem {
             Top::Binding(name, typ, expr) => {
@@ -100,6 +102,7 @@ pub fn check_program(program: Vec<ast::Top>) -> Result<()> {
     Ok(())
 }
 
+#[allow(mutable_borrow_reservation_conflict)]
 pub fn infer_expr<'start_infer>(
     c: &mut Context,
     expr: Expr,
@@ -120,6 +123,34 @@ pub fn infer_expr<'start_infer>(
                     Ok((Type::I64, substitution))
                 }
             }
+        }
+        Expr::Block(block) => {
+            let mut return_type = Type::Unit;
+            let mut substitution = substitution;
+            for stmt in block.statements {
+                match stmt {
+                    Statement::Let { name, typ, expr } => {
+                        match typ {
+                            ast::Type::Unsure(_) => {
+                                let mut binding_ctx = Context::with_parent(c);
+                                let (typ, sub) = infer_expr(&mut binding_ctx, expr, substitution)?;
+                                substitution = sub;
+                                c.add_identifier(name, typ);
+                            }
+                            ast::Type::Defined(_) => {
+                                let mut binding_ctx = Context::with_parent(c);
+                                c.add_identifier(name, types::Type::from_ast_type(&mut binding_ctx, typ)?);
+                            }
+                        }
+                    }
+                    Statement::Return(expr) => {
+                        let (rt, sub) = infer_expr(c, expr, substitution)?;
+                        return_type = rt;
+                        substitution = sub;
+                    }
+                }
+            }
+            Ok((return_type, substitution))
         }
         Expr::Lambda(lambda) => {
             let return_type = Type::from_ast_type(c, lambda.return_type)?;
@@ -158,7 +189,6 @@ pub fn infer_expr<'start_infer>(
                 _ => unimplemented!(),
             }
         }
-        _ => unimplemented!(),
     }
 }
 

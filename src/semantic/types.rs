@@ -4,6 +4,7 @@ use super::error::CheckError;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
+    Unit,
     I64,
     F64,
     String,
