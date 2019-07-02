@@ -88,9 +88,9 @@ struct Lexer {
 }
 
 impl Lexer {
-    fn new(code: String) -> Lexer {
+    fn new<T: Into<String>>(code: T) -> Lexer {
         Lexer {
-            code: code.chars().collect(),
+            code: code.into().chars().collect(),
             tokens: vec![],
             state_fn: State::Fn(whitespace),
             start: 0,
@@ -271,7 +271,7 @@ fn number(lexer: &mut Lexer) -> State {
     State::Fn(whitespace)
 }
 
-pub fn lex(source: String) -> Vec<Token> {
+pub fn lex<T: Into<String>>(source: T) -> Vec<Token> {
     let mut lexer = Lexer::new(source);
     while let State::Fn(f) = lexer.state_fn {
         lexer.state_fn = f(&mut lexer);
@@ -290,7 +290,7 @@ mod tests {
         let code = "測試: int = 1";
 
         assert_eq!(
-            lex(code.to_string()),
+            lex(code),
             vec![
                 Token((1, 0), Ident, "測試".to_string()),
                 Token((1, 2), Colon, ":".to_string()),
@@ -304,7 +304,7 @@ mod tests {
 
     #[test]
     fn get_number_tokens() {
-        let ts = lex("10 30".to_string());
+        let ts = lex("10 30");
         assert_eq!(
             ts,
             vec![
@@ -317,7 +317,7 @@ mod tests {
 
     #[test]
     fn get_ident_tokens() {
-        let ts = lex(" abc6".to_string());
+        let ts = lex(" abc6");
         assert_eq!(
             ts,
             vec![

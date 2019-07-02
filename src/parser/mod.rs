@@ -367,7 +367,7 @@ fn precedence(op: Token) -> u64 {
 /// This block puts helpers
 impl Parser {
     /// new create Parser from code
-    pub fn new(code: String) -> Parser {
+    pub fn new<T: Into<String>>(code: T) -> Parser {
         let tokens = lexer::lex(code);
         Parser {
             tokens,
