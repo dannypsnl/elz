@@ -1,8 +1,11 @@
+use super::types::Type;
+
 pub type Result<T> = std::result::Result<T, CheckError>;
 
 #[derive(Debug)]
 pub enum CheckError {
     NotFound(String),
+    TypeMismatched(Type, Type),
     MismatchedArguments,
     CyclicType,
 }
@@ -19,6 +22,9 @@ impl CheckError {
     pub fn mismatch_arguments() -> CheckError {
         MismatchedArguments
     }
+    pub fn type_mismatched(expect: Type, actual: Type) -> CheckError {
+        TypeMismatched(expect, actual)
+    }
 }
 
 impl std::fmt::Display for CheckError {
@@ -27,6 +33,7 @@ impl std::fmt::Display for CheckError {
             NotFound(name) => write!(f, "no any identifier name: {}", name),
             CyclicType => write!(f, "cyclic type detected"),
             MismatchedArguments => write!(f, "mismatched arguments"),
+            TypeMismatched(expect, actual) => write!(f, "expected: {} but got: {}", expect, actual),
         }
     }
 }
@@ -37,6 +44,7 @@ impl std::error::Error for CheckError {
             NotFound(_) => "not found",
             CyclicType => "cyclic type detected",
             MismatchedArguments => "mismatched arguments",
+            TypeMismatched(_, _) => "type mismatched",
         }
     }
 }

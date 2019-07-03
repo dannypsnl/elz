@@ -3,6 +3,7 @@ use elz;
 use std::fs;
 use clap::{App, SubCommand, Arg};
 use elz::parser::Parser;
+use elz::semantic;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("elz")
@@ -26,6 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Parser::new(code);
 
         let program = parser.parse_program()?;
+        semantic::check_program(&program)?;
         println!("{:?}", program);
     }
 

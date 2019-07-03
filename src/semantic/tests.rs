@@ -15,7 +15,7 @@ let add_one = (x: int): int => a + x
 
     let program = parser.parse_program().unwrap();
 
-    check_program(program).unwrap();
+    check_program(&program).unwrap();
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn test_infer_block() {
     };
 
     let sub = &mut Substitution::new();
-    let (typ, sub) = infer_expr(&mut Context::new(), Expr::Block(block), sub).unwrap();
+    let (typ, sub) = infer_expr(&mut Context::new(), &Expr::Block(block), sub).unwrap();
     assert_eq!(
         sub.get(&typ), Type::F64,
     )
@@ -45,7 +45,7 @@ fn test_infer_binary() {
     use Expr::Int;
     let expr = Expr::Binary(Box::new(Int(1)), Box::new(Int(2)), Operator::Plus);
     let mut sub = Substitution::new();
-    let t = infer_expr(&mut Context::new(), expr, &mut sub).unwrap();
+    let t = infer_expr(&mut Context::new(), &expr, &mut sub).unwrap();
     assert_eq!(t.0, Type::I64);
 }
 
@@ -64,7 +64,7 @@ fn test_infer_lambda() {
         ))),
     ));
     let mut sub = Substitution::new();
-    let (return_type, _) = infer_expr(&mut Context::new(), expr.clone(), &mut sub).unwrap();
+    let (return_type, _) = infer_expr(&mut Context::new(), &expr, &mut sub).unwrap();
     assert_eq!(
         return_type,
         Type::Lambda(
@@ -86,7 +86,7 @@ fn test_infer_lambda() {
             },
         ],
     );
-    let (return_type, sub) = infer_expr(&mut Context::new(), func_call, &mut sub).unwrap();
+    let (return_type, sub) = infer_expr(&mut Context::new(), &func_call, &mut sub).unwrap();
     // substitution the return type should be integer
     assert_eq!(Type::I64, sub.get(&return_type));
 }
