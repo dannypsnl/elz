@@ -14,17 +14,17 @@ use error::{
     CheckError,
 };
 
-pub struct Context<'current, 'parent> {
-    parent: Option<&'current Context<'parent, 'parent>>,
+pub struct Context {
+    parent: Option<*const Context>,
     type_map: HashMap<String, Type>,
     type_environment: HashMap<String, Type>,
     type_var_id: HashMap<String, u64>,
     count: u64,
 }
 
-impl<'current, 'parent> Context<'current, 'parent> {
+impl Context {
     /// new returns a new context for inference expression
-    pub fn new() -> Context<'current, 'static> {
+    pub fn new() -> Context {
         let mut ctx = Context {
             parent: None,
             type_map: HashMap::new(),
@@ -36,7 +36,7 @@ impl<'current, 'parent> Context<'current, 'parent> {
 
         ctx
     }
-    pub fn with_parent(ctx: &'parent Context<'_, 'parent>) -> Context<'current, 'parent> {
+    pub fn with_parent(ctx: &Context) -> Context {
         Context {
             parent: Some(ctx),
             type_map: HashMap::new(),
@@ -50,7 +50,7 @@ impl<'current, 'parent> Context<'current, 'parent> {
         match self.type_map.get(type_name) {
             Some(t) => Ok(t.clone()),
             None => if let Some(p_ctx) = self.parent {
-                p_ctx.get_type(type_name)
+                unsafe { p_ctx.as_ref() }.unwrap().get_type(type_name)
             } else {
                 Err(CheckError::not_found(type_name.clone()))
             },
@@ -64,7 +64,7 @@ impl<'current, 'parent> Context<'current, 'parent> {
         match self.type_environment.get(key) {
             Some(t) => Ok(t.clone()),
             None => if let Some(p_ctx) = self.parent {
-                p_ctx.get_identifier(key)
+                unsafe { p_ctx.as_ref() }.unwrap().get_identifier(key)
             } else {
                 Err(CheckError::not_found(key.clone()))
             },
