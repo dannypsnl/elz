@@ -1,6 +1,18 @@
 use super::ast;
-use super::ast::{Expr, Top};
+use super::ast::Top;
 use std::collections::HashMap;
+
+pub enum MIRError {
+    Message(String),
+}
+
+impl MIRError {
+    fn new<T: Into<String>>(message: T) -> MIRError {
+        MIRError::Message(message.into())
+    }
+}
+
+type Result<T> = std::result::Result<T, MIRError>;
 
 pub enum Type {
     /// use as placeholder, and won't do any checking
@@ -19,9 +31,9 @@ pub struct Context {
     binding_map: HashMap<String, Bind>,
 }
 
-pub struct Bind(String, Expr);
+pub struct Bind(String, ast::Expr);
 
-pub fn generate_mir_program(program: &Vec<ast::Top>) {
+pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<()> {
     let mut ctx = Context {
         parent: None,
         binding_map: HashMap::new(),
@@ -38,34 +50,47 @@ pub fn generate_mir_program(program: &Vec<ast::Top>) {
 
     let main_binding = ctx.binding_map.get("main").unwrap();
     let Bind(name, expr) = main_binding;
-    if let Expr::Lambda(lambda) = expr {
+    if let ast::Expr::Lambda(lambda) = expr {
         if let Some(expr) = lambda.body.clone() {
-            if let Expr::Block(block) = expr.as_ref() {
+            if let ast::Expr::Block(block) = expr.as_ref() {
                 let mut stmts = vec![];
                 for stmt in &block.statements {
-                    stmts.push(generate_stmt_mir(stmt));
+                    stmts.push(generate_stmt_mir(stmt)?);
                 }
                 let f = Function {
                     name: name.clone(),
                     block: stmts,
                 };
+                Ok(())
             } else {
-                panic!("main lambda must be a block");
+                Err(MIRError::new("main lambda must be a block"))
             }
         } else {
-            panic!("main lambda can't have an empty body");
+            Err(MIRError::new("main lambda can't have an empty body"))
         }
     } else {
-        panic!("main is the entry point of executable and must be a lambda");
+        Err(MIRError::new(
+            "main is the entry point of executable and must be a lambda",
+        ))
     }
 }
 
-pub fn generate_stmt_mir(stmt: &ast::Statement) -> Statement {
+pub fn generate_stmt_mir(stmt: &ast::Statement) -> Result<Statement> {
     use ast::Statement::*;
-    match stmt {
-        Return(e) => Statement::Return,
+    let stmt = match stmt {
+        Return(e) => Statement::Return(generate_expr_mir(e)?),
         _ => unimplemented!(),
-    }
+    };
+    Ok(stmt)
+}
+
+pub fn generate_expr_mir(expr: &ast::Expr) -> Result<Expr> {
+    use ast::Expr::*;
+    let expr = match expr {
+        Int(i) => Expr::Int(*i),
+        _ => unimplemented!(),
+    };
+    Ok(expr)
 }
 
 pub struct Function {
@@ -74,5 +99,9 @@ pub struct Function {
 }
 
 pub enum Statement {
-    Return,
+    Return(Expr),
+}
+
+pub enum Expr {
+    Int(i64),
 }
