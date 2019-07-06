@@ -2,17 +2,14 @@ use super::ast;
 use super::ast::*;
 use std::collections::HashMap;
 
+mod error;
 #[cfg(test)]
 mod tests;
 mod types;
-mod error;
 
+use error::{CheckError, Result};
 use types::Type;
 use types::TypeVar;
-use error::{
-    Result,
-    CheckError,
-};
 
 pub struct Context {
     parent: Option<*const Context>,
@@ -49,11 +46,13 @@ impl Context {
     fn get_type(&self, type_name: &String) -> Result<Type> {
         match self.type_map.get(type_name) {
             Some(t) => Ok(t.clone()),
-            None => if let Some(p_ctx) = self.parent {
-                unsafe { p_ctx.as_ref() }.unwrap().get_type(type_name)
-            } else {
-                Err(CheckError::not_found(type_name.clone()))
-            },
+            None => {
+                if let Some(p_ctx) = self.parent {
+                    unsafe { p_ctx.as_ref() }.unwrap().get_type(type_name)
+                } else {
+                    Err(CheckError::not_found(type_name.clone()))
+                }
+            }
         }
     }
     fn add_type(&mut self, type_name: String, typ: Type) {
@@ -63,11 +62,13 @@ impl Context {
     fn get_identifier(&self, key: &String) -> Result<Type> {
         match self.type_environment.get(key) {
             Some(t) => Ok(t.clone()),
-            None => if let Some(p_ctx) = self.parent {
-                unsafe { p_ctx.as_ref() }.unwrap().get_identifier(key)
-            } else {
-                Err(CheckError::not_found(key.clone()))
-            },
+            None => {
+                if let Some(p_ctx) = self.parent {
+                    unsafe { p_ctx.as_ref() }.unwrap().get_identifier(key)
+                } else {
+                    Err(CheckError::not_found(key.clone()))
+                }
+            }
         }
     }
     fn add_identifier(&mut self, key: String, typ: Type) {
@@ -83,26 +84,24 @@ pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
 
     for top_elem in program {
         match top_elem {
-            Top::Binding(name, typ, expr) => {
-                match typ {
-                    Type::Unsure(_) => {
-                        let mut c = Context::with_parent(&ctx);
-                        let mut sub = Substitution::new();
-                        ctx.add_identifier(name.clone(), infer_expr(&mut c, expr, &mut sub)?.0)
-                    }
-                    Type::Defined(_) => {
-                        let mut c = Context::with_parent(&ctx);
-                        let mut sub = Substitution::new();
-                        let expr_type = infer_expr(&mut c, expr, &mut sub)?.0;
-                        let defined_type = types::Type::from_ast_type(&mut c, typ.clone())?;
-                        if expr_type != defined_type {
-                            return Err(CheckError::type_mismatched(defined_type, expr_type));
-                        }
-                        ctx.add_identifier(name.clone(), defined_type)
-                    }
+            Top::Binding(name, typ, expr) => match typ {
+                Type::Unsure(_) => {
+                    let mut c = Context::with_parent(&ctx);
+                    let mut sub = Substitution::new();
+                    ctx.add_identifier(name.clone(), infer_expr(&mut c, expr, &mut sub)?.0)
                 }
-            }
-            _ => unimplemented!()
+                Type::Defined(_) => {
+                    let mut c = Context::with_parent(&ctx);
+                    let mut sub = Substitution::new();
+                    let expr_type = infer_expr(&mut c, expr, &mut sub)?.0;
+                    let defined_type = types::Type::from_ast_type(&mut c, typ.clone())?;
+                    if expr_type != defined_type {
+                        return Err(CheckError::type_mismatched(defined_type, expr_type));
+                    }
+                    ctx.add_identifier(name.clone(), defined_type)
+                }
+            },
+            _ => unimplemented!(),
         };
     }
     Ok(())
@@ -145,7 +144,10 @@ pub fn infer_expr<'start_infer>(
                                 c.add_identifier(name.clone(), typ);
                             }
                             ast::Type::Defined(_) => {
-                                c.add_identifier(name.clone(), types::Type::from_ast_type(&mut binding_ctx, typ.clone())?);
+                                c.add_identifier(
+                                    name.clone(),
+                                    types::Type::from_ast_type(&mut binding_ctx, typ.clone())?,
+                                );
                             }
                         }
                     }
@@ -186,8 +188,7 @@ pub fn infer_expr<'start_infer>(
                         return Err(CheckError::MismatchedArguments);
                     }
                     for i in 0..params.len() {
-                        let (arg_type, substitution) =
-                            infer_expr(c, &args[i].expr, substitution)?;
+                        let (arg_type, substitution) = infer_expr(c, &args[i].expr, substitution)?;
                         unify((&arg_type, &params[i]), substitution)?;
                     }
                     Ok((*return_type, substitution))
@@ -236,7 +237,6 @@ pub fn occurs(x: &TypeVar, t: &Type) -> Result<()> {
         _ => Ok(()),
     }
 }
-
 
 pub struct Substitution(HashMap<TypeVar, Type>);
 

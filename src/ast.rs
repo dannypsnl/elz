@@ -39,8 +39,8 @@ pub enum Top {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Lambda {
-    pub  return_type: Type,
-    pub  parameters: Vec<Parameter>,
+    pub return_type: Type,
+    pub parameters: Vec<Parameter>,
     pub body: Option<Box<Expr>>,
 }
 

@@ -1,6 +1,6 @@
 use super::super::ast;
-use super::Context;
 use super::error::CheckError;
+use super::Context;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {

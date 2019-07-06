@@ -1,17 +1,20 @@
 use super::super::ast;
-use super::super::ast::{Statement, Expr, Lambda, Operator};
+use super::super::ast::{Expr, Lambda, Operator, Statement};
 use super::types::{Type, TypeVar};
-use super::{infer_expr, check_program, Context, Substitution};
+use super::{check_program, infer_expr, Context, Substitution};
 
 #[test]
 fn test_program() {
     use super::super::parser;
 
-    let mut parser = parser::Parser::new("\
+    let mut parser = parser::Parser::new(
+        "\
 let a = 1
 
 let add_one = (x: int): int => a + x
-".to_string());
+"
+        .to_string(),
+    );
 
     let program = parser.parse_program().unwrap();
 
@@ -30,14 +33,12 @@ fn test_infer_block() {
                 expr: Expr::Int(1),
             },
             Statement::Return(Expr::F64(1.8)),
-        ]
+        ],
     };
 
     let sub = &mut Substitution::new();
     let (typ, sub) = infer_expr(&mut Context::new(), &Expr::Block(block), sub).unwrap();
-    assert_eq!(
-        sub.get(&typ), Type::F64,
-    )
+    assert_eq!(sub.get(&typ), Type::F64,)
 }
 
 #[test]

@@ -202,7 +202,7 @@ impl Parser {
                 self.consume()?;
                 Ok(Statement::Return(self.parse_expression(None, 1)?))
             }
-            _ => unimplemented!()
+            _ => unimplemented!(),
         };
         self.predict_and_consume(vec![TkType::Semicolon])?;
         stmt
@@ -225,11 +225,11 @@ impl Parser {
             lookahead = self.peek(0)?;
             while precedence(lookahead.clone()) > precedence(operator.clone())
                 || (is_right_associative(lookahead.clone())
-                && (precedence(lookahead.clone()) == precedence(operator.clone())))
-                {
-                    rhs = self.parse_expression(Some(lhs.clone()), precedence(lookahead.clone()))?;
-                    lookahead = self.peek(0)?;
-                }
+                    && (precedence(lookahead.clone()) == precedence(operator.clone())))
+            {
+                rhs = self.parse_expression(Some(lhs.clone()), precedence(lookahead.clone()))?;
+                lookahead = self.peek(0)?;
+            }
             lhs = Expr::Binary(Box::new(lhs), Box::new(rhs), Operator::from_token(operator));
         }
         Ok(lhs)
@@ -241,10 +241,8 @@ impl Parser {
     pub fn parse_primary(&mut self) -> Result<Expr> {
         let unary = self.parse_unary()?;
         match self.peek(0)?.tk_type() {
-            TkType::LParen => {
-                self.parse_argument(unary)
-            }
-            _ => Ok(unary)
+            TkType::LParen => self.parse_argument(unary),
+            _ => Ok(unary),
         }
     }
     /// parse_unary:
@@ -273,10 +271,7 @@ impl Parser {
             TkType::Ident => Expr::Identifier(self.parse_access_chain()?),
             TkType::String => Expr::String(self.take()?.value()),
             TkType::LParen => Expr::Lambda(self.parse_lambda()?),
-            _ => panic!(
-                "unimplemented primary for {:?}",
-                self.peek(0)?
-            ),
+            _ => panic!("unimplemented primary for {:?}", self.peek(0)?),
         })
     }
     pub fn parse_argument(&mut self, func: Expr) -> Result<Expr> {
@@ -284,14 +279,18 @@ impl Parser {
 
         let mut args = vec![];
         while self.peek(0)?.tk_type() != &TkType::RParen {
-            let identifier =
-                if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
-                    let identifier = self.take()?.value();
-                    self.predict_and_consume(vec![TkType::Colon])?;
-                    identifier
-                } else { "".to_string() };
+            let identifier = if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
+                let identifier = self.take()?.value();
+                self.predict_and_consume(vec![TkType::Colon])?;
+                identifier
+            } else {
+                "".to_string()
+            };
             let expr = self.parse_expression(None, 1)?;
-            args.push(Argument { name: identifier, expr });
+            args.push(Argument {
+                name: identifier,
+                expr,
+            });
             if self.predict(vec![TkType::Comma]).is_err() {
                 break;
             } else {
@@ -319,10 +318,12 @@ impl Parser {
             match self.peek(0)?.tk_type() {
                 TkType::Comma => self.consume()?,
                 TkType::RParen => (),
-                _ => return Err(ParseError::new(format!(
-                    "expected `,` or `)` but got unexpected: {:?} while parsing parameters",
-                    self.peek(0)?,
-                ))),
+                _ => {
+                    return Err(ParseError::new(format!(
+                        "expected `,` or `)` but got unexpected: {:?} while parsing parameters",
+                        self.peek(0)?,
+                    )))
+                }
             }
         }
         self.predict_and_consume(vec![TkType::RParen])?;
@@ -369,10 +370,7 @@ impl Parser {
     /// new create Parser from code
     pub fn new<T: Into<String>>(code: T) -> Parser {
         let tokens = lexer::lex(code);
-        Parser {
-            tokens,
-            offset: 0,
-        }
+        Parser { tokens, offset: 0 }
     }
     /// peek get the token by (current position + n)
     pub fn peek(&self, n: usize) -> Result<Token> {

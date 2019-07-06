@@ -20,7 +20,6 @@ let foo: int = 1;
     )
 }
 
-
 #[test]
 fn test_parse_binding() {
     let mut parser = Parser::new(
