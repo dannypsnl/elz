@@ -1,9 +1,10 @@
-use elz;
-
 use clap::{App, Arg, SubCommand};
+use elz;
+use elz::mir;
 use elz::parser::Parser;
 use elz::semantic;
 use std::fs;
+use elz::mir::MIRError;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("elz")
@@ -25,11 +26,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let code = fs::read_to_string(compile_file).expect("failed at read content of input file");
 
         let mut parser = Parser::new(code);
-
+        // run parser
         let program = parser.parse_program()?;
+        // type inference and check
         semantic::check_program(&program)?;
-        println!("{:?}", program);
+        // generate MIR
+        let mir = mir::generate_mir_program(&program);
+        match mir {
+            Ok(_) => unimplemented!(),
+            Err(err) => if err == MIRError::NoMain {
+                // if no main then we only check the program
+                Ok(())
+            } else {
+                Err(Box::new(err))
+            },
+        }
+    } else {
+        Ok(())
     }
-
-    Ok(())
 }

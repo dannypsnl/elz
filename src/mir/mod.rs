@@ -2,9 +2,28 @@ use super::ast;
 use super::ast::Top;
 use std::collections::HashMap;
 
+#[derive(Debug, PartialEq)]
 pub enum MIRError {
+    NoMain,
     Message(String),
 }
+
+
+impl std::fmt::Display for MIRError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "MIRError: {}", self)
+    }
+}
+
+impl std::error::Error for MIRError {
+    fn description(&self) -> &str {
+        match self {
+            MIRError::NoMain => "no main",
+            MIRError::Message(s) => s.as_str(),
+        }
+    }
+}
+
 
 impl MIRError {
     fn new<T: Into<String>>(message: T) -> MIRError {
@@ -33,7 +52,11 @@ pub struct Context {
 
 pub struct Bind(String, ast::Expr);
 
-pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<()> {
+pub struct MIR {
+    functions: Vec<Function>,
+}
+
+pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<MIR> {
     let mut ctx = Context {
         parent: None,
         binding_map: HashMap::new(),
@@ -48,8 +71,14 @@ pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<()> {
         };
     }
 
-    let main_binding = ctx.binding_map.get("main").unwrap();
-    let Bind(name, expr) = main_binding;
+    let main_binding = ctx.binding_map.get("main");
+    if main_binding.is_none() {
+        return Err(MIRError::NoMain);
+    }
+
+    let mut mir = MIR { functions: vec![] };
+
+    let Bind(name, expr) = main_binding.unwrap();
     if let ast::Expr::Lambda(lambda) = expr {
         if let Some(expr) = lambda.body.clone() {
             if let ast::Expr::Block(block) = expr.as_ref() {
@@ -61,7 +90,8 @@ pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<()> {
                     name: name.clone(),
                     block: stmts,
                 };
-                Ok(())
+                mir.functions.push(f);
+                Ok(mir)
             } else {
                 Err(MIRError::new("main lambda must be a block"))
             }
