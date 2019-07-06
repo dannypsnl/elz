@@ -8,6 +8,7 @@ mod tests;
 
 use error::ParseError;
 use error::Result;
+use crate::lexer::TkType::RParen;
 
 /// Parser is a parsing helper
 pub struct Parser {
@@ -225,11 +226,11 @@ impl Parser {
             lookahead = self.peek(0)?;
             while precedence(lookahead.clone()) > precedence(operator.clone())
                 || (is_right_associative(lookahead.clone())
-                    && (precedence(lookahead.clone()) == precedence(operator.clone())))
-            {
-                rhs = self.parse_expression(Some(lhs.clone()), precedence(lookahead.clone()))?;
-                lookahead = self.peek(0)?;
-            }
+                && (precedence(lookahead.clone()) == precedence(operator.clone())))
+                {
+                    rhs = self.parse_expression(Some(lhs.clone()), precedence(lookahead.clone()))?;
+                    lookahead = self.peek(0)?;
+                }
             lhs = Expr::Binary(Box::new(lhs), Box::new(rhs), Operator::from_token(operator));
         }
         Ok(lhs)
@@ -332,12 +333,18 @@ impl Parser {
     }
     /// parse_type:
     /// ```ignore
-    /// int, 'a
+    /// <identifier>
+    /// | ' <identifier>
+    /// | ()
     /// ```
     pub fn parse_type(&mut self) -> Result<Type> {
         match self.peek(0)?.tk_type() {
             TkType::Prime => self.parse_unsure_type(),
             TkType::Ident => Ok(Type::Defined(self.parse_access_chain()?)),
+            TkType::LParen => {
+                self.predict_and_consume(vec![TkType::LParen, RParen])?;
+                Ok(Type::Unit)
+            }
             _ => Err(ParseError::new(format!(
                 "expected `'` for unsure type(e.g. `'element`) or <identifier> for defined type but got {:?} while parsing type",
                 self.peek(0)?,

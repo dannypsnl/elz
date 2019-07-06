@@ -8,7 +8,6 @@ pub enum MIRError {
     Message(String),
 }
 
-
 impl std::fmt::Display for MIRError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "MIRError: {}", self)
@@ -23,7 +22,6 @@ impl std::error::Error for MIRError {
         }
     }
 }
-
 
 impl MIRError {
     fn new<T: Into<String>>(message: T) -> MIRError {
@@ -80,23 +78,27 @@ pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<MIR> {
 
     let Bind(name, expr) = main_binding.unwrap();
     if let ast::Expr::Lambda(lambda) = expr {
-        if let Some(expr) = lambda.body.clone() {
-            if let ast::Expr::Block(block) = expr.as_ref() {
-                let mut stmts = vec![];
-                for stmt in &block.statements {
-                    stmts.push(generate_stmt_mir(stmt)?);
+        if lambda.return_type == ast::Type::Unit {
+            if let Some(expr) = lambda.body.clone() {
+                if let ast::Expr::Block(block) = expr.as_ref() {
+                    let mut stmts = vec![];
+                    for stmt in &block.statements {
+                        stmts.push(generate_stmt_mir(stmt)?);
+                    }
+                    let f = Function {
+                        name: name.clone(),
+                        block: stmts,
+                    };
+                    mir.functions.push(f);
+                    Ok(mir)
+                } else {
+                    Err(MIRError::new("main lambda must be a block"))
                 }
-                let f = Function {
-                    name: name.clone(),
-                    block: stmts,
-                };
-                mir.functions.push(f);
-                Ok(mir)
             } else {
-                Err(MIRError::new("main lambda must be a block"))
+                Err(MIRError::new("main lambda can't have an empty body"))
             }
         } else {
-            Err(MIRError::new("main lambda can't have an empty body"))
+            Err(MIRError::new("main lambda must return unit type"))
         }
     } else {
         Err(MIRError::new(

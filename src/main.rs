@@ -1,10 +1,10 @@
 use clap::{App, Arg, SubCommand};
 use elz;
 use elz::mir;
+use elz::mir::MIRError;
 use elz::parser::Parser;
 use elz::semantic;
 use std::fs;
-use elz::mir::MIRError;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("elz")
@@ -34,12 +34,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mir = mir::generate_mir_program(&program);
         match mir {
             Ok(_) => unimplemented!(),
-            Err(err) => if err == MIRError::NoMain {
-                // if no main then we only check the program
-                Ok(())
-            } else {
-                Err(Box::new(err))
-            },
+            Err(err) => {
+                if err == MIRError::NoMain {
+                    // if no main then we only check the program
+                    Ok(())
+                } else {
+                    Err(Box::new(err))
+                }
+            }
         }
     } else {
         Ok(())
