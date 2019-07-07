@@ -94,7 +94,7 @@ pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
                     let mut c = Context::with_parent(&ctx);
                     let mut sub = Substitution::new();
                     let expr_type = infer_expr(&mut c, expr, &mut sub)?.0;
-                    let defined_type = types::Type::from_ast_type(&mut c, typ.clone())?;
+                    let defined_type = types::Type::from_ast_type(&mut c, typ)?;
                     if expr_type != defined_type {
                         return Err(CheckError::type_mismatched(defined_type, expr_type));
                     }
@@ -146,7 +146,7 @@ pub fn infer_expr<'start_infer>(
                             ast::Type::Defined(_) => {
                                 c.add_identifier(
                                     name.clone(),
-                                    types::Type::from_ast_type(&mut binding_ctx, typ.clone())?,
+                                    types::Type::from_ast_type(&mut binding_ctx, typ)?,
                                 );
                             }
                         }
@@ -161,19 +161,25 @@ pub fn infer_expr<'start_infer>(
             Ok((return_type, substitution))
         }
         Expr::Lambda(lambda) => {
-            let return_type = Type::from_ast_type(c, lambda.return_type.clone())?;
-            let mut pts = vec![];
+            let return_type = Type::from_ast_type(c, &lambda.return_type)?;
             let mut new_ctx = Context::with_parent(c);
-            for param in &lambda.parameters {
-                let ast::Parameter(param_defined_type, param_name) = param;
-                let param_type = Type::from_ast_type(&mut new_ctx, param_defined_type.clone())?;
-                new_ctx.add_identifier(param_name.clone(), param_type.clone());
-                pts.push(param_type);
-            }
+            let pts: Result<Vec<_>> = lambda
+                .parameters
+                .iter()
+                .map(|param| {
+                    let ast::Parameter(param_defined_type, param_name) = param;
+                    let param_type = Type::from_ast_type(&mut new_ctx, param_defined_type);
+                    if let Ok(typ) = &param_type {
+                        new_ctx.add_identifier(param_name.clone(), typ.clone());
+                    }
+                    param_type
+                })
+                .collect();
+            let pts = pts?;
             let (expression_type, substitution) = match &lambda.body {
                 Some(expr) => infer_expr(&mut new_ctx, expr, substitution)?,
                 None => (
-                    Type::from_ast_type(&mut new_ctx, ast::Type::Unsure("a".to_string()))?,
+                    Type::from_ast_type(&mut new_ctx, &ast::Type::Unsure("a".to_string()))?,
                     substitution,
                 ),
             };

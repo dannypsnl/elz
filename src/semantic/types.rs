@@ -1,6 +1,6 @@
 use super::super::ast;
-use super::error::CheckError;
 use super::Context;
+use super::Result;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
@@ -14,14 +14,14 @@ pub enum Type {
 }
 
 impl Type {
-    pub fn from_ast_type(c: &mut Context, t: ast::Type) -> Result<Type, CheckError> {
+    pub fn from_ast_type(c: &mut Context, t: &ast::Type) -> Result<Type> {
         match t {
             ast::Type::Defined(name) => c.get_type(&name),
             ast::Type::Unsure(name) => {
-                let id = match c.type_var_id.get(&name) {
+                let id = match c.type_var_id.get(name) {
                     Some(&id) => id,
                     None => {
-                        c.type_var_id.insert(name, c.count);
+                        c.type_var_id.insert(name.clone(), c.count);
                         c.count += 1;
                         c.count - 1
                     }

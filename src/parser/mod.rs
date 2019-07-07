@@ -322,7 +322,7 @@ impl Parser {
                     return Err(ParseError::new(format!(
                         "expected `,` or `)` but got unexpected: {:?} while parsing parameters",
                         self.peek(0)?,
-                    )))
+                    )));
                 }
             }
         }
