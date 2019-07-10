@@ -2,6 +2,9 @@ use super::ast;
 use super::ast::Top;
 use std::collections::HashMap;
 
+mod main_checks;
+use main_checks::*;
+
 #[derive(Debug, PartialEq)]
 pub enum MIRError {
     NoMain,
@@ -69,42 +72,23 @@ pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<MIR> {
         };
     }
 
-    let main_binding = ctx.binding_map.get("main");
-    if main_binding.is_none() {
-        return Err(MIRError::NoMain);
-    }
+    let Bind(name, expr) = get_main_binding(&ctx)?;
 
     let mut mir = MIR { functions: vec![] };
-
-    let Bind(name, expr) = main_binding.unwrap();
-    if let ast::Expr::Lambda(lambda) = expr {
-        if lambda.return_type == ast::Type::Unit {
-            if let Some(expr) = lambda.body.clone() {
-                if let ast::Expr::Block(block) = expr.as_ref() {
-                    let mut stmts = vec![];
-                    for stmt in &block.statements {
-                        stmts.push(generate_stmt_mir(stmt)?);
-                    }
-                    let f = Function {
-                        name: name.clone(),
-                        block: stmts,
-                    };
-                    mir.functions.push(f);
-                    Ok(mir)
-                } else {
-                    Err(MIRError::new("main lambda must be a block"))
-                }
-            } else {
-                Err(MIRError::new("main lambda can't have an empty body"))
-            }
-        } else {
-            Err(MIRError::new("main lambda must return unit type"))
-        }
-    } else {
-        Err(MIRError::new(
-            "main is the entry point of executable and must be a lambda",
-        ))
+    let lambda = check_main_is_lambda(expr)?;
+    check_main_return_type(lambda)?;
+    let expr = ensure_main_body_is_not_empty(lambda)?;
+    let block = check_main_body_is_block(expr.as_ref())?;
+    let mut stmts = vec![];
+    for stmt in &block.statements {
+        stmts.push(generate_stmt_mir(stmt)?);
     }
+    let f = Function {
+        name: name.clone(),
+        block: stmts,
+    };
+    mir.functions.push(f);
+    Ok(mir)
 }
 
 pub fn generate_stmt_mir(stmt: &ast::Statement) -> Result<Statement> {
