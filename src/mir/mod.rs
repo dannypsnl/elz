@@ -2,6 +2,7 @@ use super::ast;
 use super::ast::Top;
 use std::collections::HashMap;
 
+mod mir;
 mod main_checks;
 use main_checks::*;
 
@@ -34,18 +35,6 @@ impl MIRError {
 
 type Result<T> = std::result::Result<T, MIRError>;
 
-pub enum Type {
-    /// use as placeholder, and won't do any checking
-    /// since semantic should ensure all mismatched aren't
-    /// existed.
-    Unsure,
-    Void,
-    I64,
-    F64,
-    Bool,
-    String,
-}
-
 pub struct Context {
     parent: Option<*const Context>,
     binding_map: HashMap<String, Bind>,
@@ -53,11 +42,7 @@ pub struct Context {
 
 pub struct Bind(String, ast::Expr);
 
-pub struct MIR {
-    functions: Vec<Function>,
-}
-
-pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<MIR> {
+pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<mir::MIR> {
     let mut ctx = Context {
         parent: None,
         binding_map: HashMap::new(),
@@ -74,7 +59,7 @@ pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<MIR> {
 
     let Bind(name, expr) = get_main_binding(&ctx)?;
 
-    let mut mir = MIR { functions: vec![] };
+    let mut mir = mir::MIR { functions: vec![] };
     let lambda = check_main_is_lambda(expr)?;
     check_main_return_type(lambda)?;
     let expr = ensure_main_body_is_not_empty(lambda)?;
@@ -83,41 +68,32 @@ pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<MIR> {
     for stmt in &block.statements {
         stmts.push(generate_stmt_mir(stmt)?);
     }
-    let f = Function {
-        name: name.clone(),
+    let f = mir::Function {
+        name: std::borrow::Cow::from(name.clone()),
         block: stmts,
     };
     mir.functions.push(f);
     Ok(mir)
 }
 
-pub fn generate_stmt_mir(stmt: &ast::Statement) -> Result<Statement> {
+pub fn generate_stmt_mir(stmt: &ast::Statement) -> Result<mir::Statement> {
     use ast::Statement::*;
     let stmt = match stmt {
-        Return(e) => Statement::Return(generate_expr_mir(e)?),
+        Return(e) => mir::Statement {
+            statement: mir::mod_Statement::OneOfstatement::return_pb(generate_expr_mir(e)?),
+        },
         _ => unimplemented!(),
     };
     Ok(stmt)
 }
 
-pub fn generate_expr_mir(expr: &ast::Expr) -> Result<Expr> {
+pub fn generate_expr_mir(expr: &ast::Expr) -> Result<mir::Expr> {
     use ast::Expr::*;
     let expr = match expr {
-        Int(i) => Expr::Int(*i),
+        Int(i) => mir::Expr {
+            expr: mir::mod_Expr::OneOfexpr::int(*i),
+        },
         _ => unimplemented!(),
     };
     Ok(expr)
-}
-
-pub struct Function {
-    name: String,
-    block: Vec<Statement>,
-}
-
-pub enum Statement {
-    Return(Expr),
-}
-
-pub enum Expr {
-    Int(i64),
 }

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package mir;
+
+option go_package = "mir";
+
+message MIR {
+  repeated Function functions = 1;
+}
+
+message Function {
+  string name = 1;
+  repeated Statement block = 2;
+}
+
+message Statement {
+  oneof statement {
+    Expr return = 1;
+  }
+}
+
+message Expr {
+  oneof expr {
+    int64 int = 1;
+  }
+}
