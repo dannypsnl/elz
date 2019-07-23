@@ -4,5 +4,5 @@
 **/*.rs.bk
 *.out
 *.ll
-*.so
+*.a
 libcode_generate.h

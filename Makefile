@@ -15,4 +15,4 @@ test: generate go-build
 build: generate go-build
 	@cargo build
 go-build: src/code_generate/code_generate.go
-	@go build -o libcode_generate.so -buildmode=c-shared src/code_generate/code_generate.go
+	@go build -o libcode_generate.a -buildmode=c-archive src/code_generate/code_generate.go
