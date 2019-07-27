@@ -9,11 +9,6 @@ use std::ffi::CString;
 use std::fs;
 use std::os::raw::c_char;
 
-#[link(name = "code_generate")]
-extern "C" {
-    fn generate(s: *const c_char);
-}
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("elz")
         .author("Danny Lin <dannypsnl@gmail.com>")
@@ -49,14 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Err(Box::new(err))
                 }
             }
-            Ok(mir_program) => {
-                let out_vec = serialize_into_vec(&mir_program).expect("Cannot write MIR!");
-                let c_str = CString::new(out_vec)?;
-                unsafe {
-                    generate(c_str.as_ptr());
-                }
-                Ok(())
-            }
+            Ok(mir_program) => Ok(()),
         }
     } else {
         Ok(())
