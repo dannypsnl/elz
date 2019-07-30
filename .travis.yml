@@ -3,9 +3,6 @@ language: rust
 # This caches $HOME/.cargo and $TRAVIS_BUILD_DIR/target
 cache:
   cargo: true
-  directories:
-    - $HOME/go
-    - $HOME/protobuf
 
 rust:
   - stable
@@ -17,24 +14,8 @@ matrix:
     - rust: nightly
   fast_finish: true
 
-before_install:
-  - export PATH=$HOME/protobuf/bin:$PATH
-  - export GOPATH=$HOME/go
-  - export GOBIN=$GOPATH/bin
-  - export PATH=$GOBIN:$PATH
-install:
-  - which pb-rs || cargo install pb-rs
-  - which protoc || mkdir -p $HOME/protobuf && pushd $HOME/protobuf
-    && curl -LO 'https://github.com/google/protobuf/releases/download/v3.4.0/protoc-3.4.0-linux-x86_64.zip'
-    && unzip -o protoc-3.4.0-linux-x86_64.zip
-    && popd
-  - which go || mkdir -p $HOME/go && pushd $HOME/go
-    && curl -LO 'https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz'
-    && tar zxf go1.12.7.linux-amd64.tar.gz
-    && popd
-  - which protoc-gen-go || go get -u github.com/golang/protobuf/protoc-gen-go
 script:
-  - make test
+  - cargo test
 # TODO: find a coverage lib for Rust
 #after_success:
 #- bash <(curl -s https://codecov.io/bash)

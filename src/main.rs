@@ -5,7 +5,6 @@ use elz::mir::MIRError;
 use elz::parser::Parser;
 use elz::semantic;
 use std::fs;
-use std::os::raw::c_char;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("elz")
@@ -42,7 +41,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Err(Box::new(err))
                 }
             }
-            Ok(mir_program) => Ok(()),
+            Ok(mir_program) => {
+                let g = elz::codegenerate::Generator::new(mir_program);
+                g.generate();
+                Ok(())
+            }
         }
     } else {
         Ok(())
