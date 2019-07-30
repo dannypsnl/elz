@@ -4,8 +4,6 @@ use elz::mir;
 use elz::mir::MIRError;
 use elz::parser::Parser;
 use elz::semantic;
-use quick_protobuf::serialize_into_vec;
-use std::ffi::CString;
 use std::fs;
 use std::os::raw::c_char;
 

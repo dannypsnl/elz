@@ -6,5 +6,4 @@ edition = "2018"
 
 [dependencies]
 clap = "2.33.0"
-quick-protobuf = "0.6.2"
 inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "llvm8-0" }
