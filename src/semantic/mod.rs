@@ -84,23 +84,28 @@ pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
 
     for top_elem in program {
         match top_elem {
-            Top::Binding(name, typ, expr) => match typ {
-                Type::Unsure(_) => {
-                    let mut c = Context::with_parent(&ctx);
-                    let mut sub = Substitution::new();
-                    ctx.add_identifier(name.clone(), infer_expr(&mut c, expr, &mut sub)?.0)
-                }
-                Type::Defined(_) | Type::Unit => {
-                    let mut c = Context::with_parent(&ctx);
-                    let mut sub = Substitution::new();
-                    let expr_type = infer_expr(&mut c, expr, &mut sub)?.0;
-                    let defined_type = types::Type::from_ast_type(&mut c, typ)?;
-                    if expr_type != defined_type {
-                        return Err(CheckError::type_mismatched(defined_type, expr_type));
+            Top::Binding(name, typ, expr) => {
+                let expr_type = match typ {
+                    Type::Unsure(_) => {
+                        let (expr_type, _) = infer_expr(
+                            &mut Context::with_parent(&ctx),
+                            expr,
+                            &mut Substitution::new(),
+                        )?;
+                        expr_type
                     }
-                    ctx.add_identifier(name.clone(), defined_type)
-                }
-            },
+                    Type::Defined(_) | Type::Unit => {
+                        let mut c = Context::with_parent(&ctx);
+                        let (expr_type, _) = infer_expr(&mut c, expr, &mut Substitution::new())?;
+                        let defined_type = types::Type::from_ast_type(&mut c, typ)?;
+                        if expr_type != defined_type {
+                            return Err(CheckError::type_mismatched(defined_type, expr_type));
+                        }
+                        defined_type
+                    }
+                };
+                ctx.add_identifier(name.clone(), expr_type);
+            }
             _ => unimplemented!(),
         };
     }
