@@ -4,3 +4,5 @@
 **/*.rs.bk
 *.out
 *.ll
+*.a
+libcode_generate.h

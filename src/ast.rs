@@ -2,6 +2,8 @@ use super::lexer::{TkType, Token};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
+    /// Unit: ()
+    Unit,
     /// Defined: int, f64, string
     Defined(String),
     /// Unsure: 'a, 'element, 'key, 'value

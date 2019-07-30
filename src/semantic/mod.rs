@@ -90,7 +90,7 @@ pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
                     let mut sub = Substitution::new();
                     ctx.add_identifier(name.clone(), infer_expr(&mut c, expr, &mut sub)?.0)
                 }
-                Type::Defined(_) => {
+                Type::Defined(_) | Type::Unit => {
                     let mut c = Context::with_parent(&ctx);
                     let mut sub = Substitution::new();
                     let expr_type = infer_expr(&mut c, expr, &mut sub)?.0;
@@ -143,7 +143,7 @@ pub fn infer_expr<'start_infer>(
                                 substitution = sub;
                                 c.add_identifier(name.clone(), typ);
                             }
-                            ast::Type::Defined(_) => {
+                            ast::Type::Defined(_) | ast::Type::Unit => {
                                 c.add_identifier(
                                     name.clone(),
                                     types::Type::from_ast_type(&mut binding_ctx, typ)?,

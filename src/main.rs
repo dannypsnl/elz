@@ -1,6 +1,7 @@
-use elz;
-
 use clap::{App, Arg, SubCommand};
+use elz;
+use elz::mir;
+use elz::mir::MIRError;
 use elz::parser::Parser;
 use elz::semantic;
 use std::fs;
@@ -25,11 +26,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let code = fs::read_to_string(compile_file).expect("failed at read content of input file");
 
         let mut parser = Parser::new(code);
-
+        // run parser
         let program = parser.parse_program()?;
+        // type inference and check
         semantic::check_program(&program)?;
-        println!("{:?}", program);
+        // generate MIR
+        let mir = mir::generate_mir_program(&program);
+        match mir {
+            Err(err) => {
+                if err == MIRError::NoMain {
+                    // if no main then we only check the program
+                    Ok(())
+                } else {
+                    Err(Box::new(err))
+                }
+            }
+            Ok(mir_program) => {
+                let g = elz::codegenerate::Generator::new(mir_program);
+                g.generate();
+                Ok(())
+            }
+        }
+    } else {
+        Ok(())
     }
-
-    Ok(())
 }

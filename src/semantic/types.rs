@@ -16,6 +16,7 @@ pub enum Type {
 impl Type {
     pub fn from_ast_type(c: &mut Context, t: &ast::Type) -> Result<Type> {
         match t {
+            ast::Type::Unit => Ok(Type::Unit),
             ast::Type::Defined(name) => c.get_type(&name),
             ast::Type::Unsure(name) => {
                 let id = match c.type_var_id.get(name) {

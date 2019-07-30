@@ -6,6 +6,7 @@ mod error;
 #[cfg(test)]
 mod tests;
 
+use crate::lexer::TkType::RParen;
 use error::ParseError;
 use error::Result;
 
@@ -332,12 +333,18 @@ impl Parser {
     }
     /// parse_type:
     /// ```ignore
-    /// int, 'a
+    /// <identifier>
+    /// | ' <identifier>
+    /// | ()
     /// ```
     pub fn parse_type(&mut self) -> Result<Type> {
         match self.peek(0)?.tk_type() {
             TkType::Prime => self.parse_unsure_type(),
             TkType::Ident => Ok(Type::Defined(self.parse_access_chain()?)),
+            TkType::LParen => {
+                self.predict_and_consume(vec![TkType::LParen, RParen])?;
+                Ok(Type::Unit)
+            }
             _ => Err(ParseError::new(format!(
                 "expected `'` for unsure type(e.g. `'element`) or <identifier> for defined type but got {:?} while parsing type",
                 self.peek(0)?,
