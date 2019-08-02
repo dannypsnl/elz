@@ -29,6 +29,11 @@ impl Type {
                 };
                 Ok(Type::TypeVar(TypeVar(id)))
             }
+            ast::Type::None => {
+                c.count += 1;
+                let id = c.count - 1;
+                Ok(Type::TypeVar(TypeVar(id)))
+            }
         }
     }
 }

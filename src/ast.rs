@@ -8,6 +8,8 @@ pub enum Type {
     Defined(String),
     /// Unsure: 'a, 'element, 'key, 'value
     Unsure(String),
+    /// None: when user didn't give one
+    None,
 }
 
 #[derive(Clone, Debug, PartialEq)]

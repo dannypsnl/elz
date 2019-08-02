@@ -43,7 +43,7 @@ impl Parser {
         let typ = if self.predict_and_consume(vec![TkType::Colon]).is_ok() {
             self.parse_type()?
         } else {
-            Type::Unsure("a".to_string())
+            Type::None
         };
         self.predict_and_consume(vec![TkType::Assign])?;
         let expr = self.parse_expression(None, 1)?;
@@ -193,7 +193,7 @@ impl Parser {
                 let typ = if self.predict_and_consume(vec![TkType::Colon]).is_ok() {
                     self.parse_type()?
                 } else {
-                    Type::Unsure("a".to_string())
+                    Type::None
                 };
                 self.predict_and_consume(vec![TkType::Assign])?;
                 let expr = self.parse_expression(None, 1)?;

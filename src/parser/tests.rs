@@ -33,7 +33,7 @@ let add = (x: int, y: int): int => x + y
         binding,
         Top::Binding(
             "add".to_string(),
-            Type::Unsure("a".to_string()),
+            Type::None,
             Expr::Lambda(Lambda::new(
                 Defined("int".to_string()),
                 vec![

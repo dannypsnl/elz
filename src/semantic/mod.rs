@@ -86,7 +86,7 @@ pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
         match top_elem {
             Top::Binding(name, typ, expr) => {
                 let expr_type = match typ {
-                    Type::Unsure(_) => {
+                    Type::None | Type::Unsure(_) => {
                         let (expr_type, _) = infer_expr(
                             &mut Context::with_parent(&ctx),
                             expr,
@@ -143,7 +143,7 @@ pub fn infer_expr<'start_infer>(
                     Statement::Let { name, typ, expr } => {
                         let mut binding_ctx = Context::with_parent(c);
                         match typ {
-                            ast::Type::Unsure(_) => {
+                            ast::Type::None | ast::Type::Unsure(_) => {
                                 let (typ, sub) = infer_expr(&mut binding_ctx, &expr, substitution)?;
                                 substitution = sub;
                                 c.add_identifier(name.clone(), typ);
