@@ -44,6 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Ok(mir_program) => {
                 let g = elz::codegenerate::Generator::new(mir_program);
                 g.generate();
+                g.binary();
                 Ok(())
             }
         }

@@ -1,33 +1,43 @@
 use super::mir;
-use super::mir::MIR;
 use inkwell;
+use mir::MIR;
 
 pub struct Generator {
     program: MIR,
     context: inkwell::context::Context,
     module: inkwell::module::Module,
+    builder: inkwell::builder::Builder,
 }
 
 impl Generator {
     pub fn new(program: MIR) -> Generator {
         let context = inkwell::context::Context::create();
         let module = context.create_module("");
+        let builder = context.create_builder();
         Generator {
             program,
             context,
             module,
+            builder,
         }
     }
 
     pub fn generate(&self) {
-        for f in &self.program.functions {
-            self.generate_function(f)
+        match self.program.binary_entry {
+            Some(_) => {
+                let i64 = self.context.i64_type();
+                let ft = i64.fn_type(&[], false);
+                let main_fn = self.module.add_function("main", ft, None);
+                let main_entry = main_fn.append_basic_block("");
+                self.builder.position_at_end(&main_entry);
+                self.builder.build_return(Some(&i64.const_int(0, false)));
+            }
+            None => (),
         }
     }
 
-    fn generate_function(&self, f: &mir::Function) {
-        let i64 = self.context.i64_type();
-        let ft = i64.fn_type(&[], false);
-        self.module.add_function(f.name.as_str(), ft, None);
+    pub fn binary(&self) {
+        let f = std::fs::File::create("test.bc").expect("failed at create file");
+        self.module.write_bitcode_to_file(&f, true, true);
     }
 }
