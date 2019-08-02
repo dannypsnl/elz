@@ -3,6 +3,8 @@ pub enum TkType {
     EOF,
     /// e.g. a, ab, foo
     Ident,
+    /// namespace
+    Namespace,
     /// let
     Let,
     /// return
@@ -135,6 +137,7 @@ impl Lexer {
     fn emit(&mut self, token_type: TkType) {
         let s: String = self.code[self.start..self.offset].into_iter().collect();
         let tok = match s.as_str() {
+            "namespace" => self.new_token(TkType::Namespace, s),
             "let" => self.new_token(TkType::Let, s),
             "return" => self.new_token(TkType::Return, s),
             "type" => self.new_token(TkType::Type, s),

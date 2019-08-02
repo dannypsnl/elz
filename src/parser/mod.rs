@@ -17,9 +17,9 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn parse_all(&mut self) -> Result<Vec<Top>> {
+    pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<Top>> {
         let mut program = vec![];
-        while self.peek(0)?.tk_type() != &TkType::EOF {
+        while  self.peek(0)?.tk_type() != &end_token_type {
             match self.peek(0)?.tk_type() {
                 TkType::Let => {
                     program.push(self.parse_binding()?);
@@ -27,14 +27,24 @@ impl Parser {
                 TkType::Type => {
                     program.push(self.parse_type_define()?);
                 }
+                TkType::Namespace => {
+                    program.push(self.parse_namespace()?);
+                }
                 _ => {
                     println!("{} skipped!", self.peek(0)?);
                     self.take()?;
                 }
             }
         }
-
         Ok(program)
+    }
+    pub fn parse_namespace(&mut self) -> Result<Top> {
+        self.predict_and_consume(vec![TkType::Namespace])?;
+        let namespace_name = self.parse_access_chain()?;
+        self.predict_and_consume(vec![TkType::LBrace])?;
+        let definiations = self.parse_all(TkType::RBrace)?;
+        self.predict_and_consume(vec![TkType::RBrace])?;
+        Ok(Top::Namespace(namespace_name, definiations))
     }
     pub fn parse_binding(&mut self) -> Result<Top> {
         self.predict_and_consume(vec![TkType::Let])?;
@@ -376,7 +386,7 @@ fn precedence(op: Token) -> u64 {
 impl Parser {
     pub fn parse_program<T: Into<String>>(code: T) -> Result<Vec<Top>> {
         let mut parser = Parser::new(code);
-        parser.parse_all()
+        parser.parse_all(TkType::EOF)
     }
     /// new create Parser from code
     pub fn new<T: Into<String>>(code: T) -> Parser {

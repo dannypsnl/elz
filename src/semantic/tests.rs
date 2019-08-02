@@ -7,11 +7,14 @@ use super::{check_program, infer_expr, Context, Substitution};
 fn test_program() {
     use super::super::parser::Parser;
 
-    let program = Parser::parse_program("\
+    let program = Parser::parse_program(
+        "\
 let a = 1
 
 let add_one = (x: int): int => a + x
-").unwrap();
+",
+    )
+    .unwrap();
 
     check_program(&program).unwrap();
 }
