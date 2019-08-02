@@ -17,7 +17,7 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn parse_program(&mut self) -> Result<Vec<Top>> {
+    pub fn parse_all(&mut self) -> Result<Vec<Top>> {
         let mut program = vec![];
         while self.peek(0)?.tk_type() != &TkType::EOF {
             match self.peek(0)?.tk_type() {
@@ -374,6 +374,10 @@ fn precedence(op: Token) -> u64 {
 
 /// This block puts helpers
 impl Parser {
+    pub fn parse_program<T: Into<String>>(code: T) -> Result<Vec<Top>> {
+        let mut parser = Parser::new(code);
+        parser.parse_all()
+    }
     /// new create Parser from code
     pub fn new<T: Into<String>>(code: T) -> Parser {
         let tokens = lexer::lex(code);

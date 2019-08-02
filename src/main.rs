@@ -25,9 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let compile_file = compile.value_of("INPUT").unwrap();
         let code = fs::read_to_string(compile_file).expect("failed at read content of input file");
 
-        let mut parser = Parser::new(code);
-        // run parser
-        let program = parser.parse_program()?;
+        let program = Parser::parse_program(code)?;
         // type inference and check
         semantic::check_program(&program)?;
         // generate MIR
