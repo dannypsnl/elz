@@ -19,7 +19,7 @@ pub struct Parser {
 impl Parser {
     pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<Top>> {
         let mut program = vec![];
-        while  self.peek(0)?.tk_type() != &end_token_type {
+        while self.peek(0)?.tk_type() != &end_token_type {
             match self.peek(0)?.tk_type() {
                 TkType::Let => {
                     program.push(self.parse_binding()?);

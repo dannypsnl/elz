@@ -1,7 +1,3 @@
-use super::super::ast;
-use super::Context;
-use super::Result;
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
     Unit,
@@ -11,31 +7,6 @@ pub enum Type {
     Bool,
     TypeVar(TypeVar),
     Lambda(Vec<Type>, Box<Type>),
-}
-
-impl Type {
-    pub fn from_ast_type(c: &mut Context, t: &ast::Type) -> Result<Type> {
-        match t {
-            ast::Type::Unit => Ok(Type::Unit),
-            ast::Type::Defined(name) => c.get_type(&name),
-            ast::Type::Unsure(name) => {
-                let id = match c.type_var_id.get(name) {
-                    Some(&id) => id,
-                    None => {
-                        c.type_var_id.insert(name.clone(), c.count);
-                        c.count += 1;
-                        c.count - 1
-                    }
-                };
-                Ok(Type::TypeVar(TypeVar(id)))
-            }
-            ast::Type::None => {
-                c.count += 1;
-                let id = c.count - 1;
-                Ok(Type::TypeVar(TypeVar(id)))
-            }
-        }
-    }
 }
 
 impl std::fmt::Display for Type {

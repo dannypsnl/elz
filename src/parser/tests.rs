@@ -18,7 +18,7 @@ namespace math {
             "math".to_string(),
             vec![Top::Binding(
                 "add".to_string(),
-                Type::Unsure("a".to_string()),
+                Type::None,
                 Expr::Lambda(Lambda::new(
                     Defined("int".to_string()),
                     vec![
