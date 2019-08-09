@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 mod context;
 mod error;
+mod helper;
 #[cfg(test)]
 mod tests;
 mod types;
@@ -16,11 +17,13 @@ use types::{Type, TypeVar};
 pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
     use ast::Type;
 
+    let remapped = helper::flat_package("", program);
+
     let mut ctx = Context::new();
 
-    for top_elem in program {
+    for (name, top_elem) in remapped {
         match top_elem {
-            Top::Binding(name, typ, expr) => {
+            Top::Binding(_, typ, expr) => {
                 let expr_type = match typ {
                     Type::None | Type::Unsure(_) => {
                         let (expr_type, _) = infer_expr(
@@ -41,9 +44,6 @@ pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
                     }
                 };
                 ctx.add_identifier(name.clone(), expr_type);
-            }
-            Top::Namespace(_name, _elements) => {
-                unimplemented!();
             }
             _ => unimplemented!(),
         };
