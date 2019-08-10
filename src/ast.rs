@@ -34,6 +34,7 @@ pub struct Parameter(pub Type, pub String);
 
 #[derive(Debug, PartialEq)]
 pub enum Top {
+    Namespace(String, Vec<Top>),
     Binding(String, Type, Expr),
     /// StructureTypeDefine: Name, Unsure Types, Fields
     StructureTypeDefine(String, Vec<Type>, Vec<Parameter>),

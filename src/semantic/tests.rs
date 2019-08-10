@@ -5,18 +5,16 @@ use super::{check_program, infer_expr, Context, Substitution};
 
 #[test]
 fn test_program() {
-    use super::super::parser;
+    use super::super::parser::Parser;
 
-    let mut parser = parser::Parser::new(
+    let program = Parser::parse_program(
         "\
 let a = 1
 
 let add_one = (x: int): int => a + x
-"
-        .to_string(),
-    );
-
-    let program = parser.parse_program().unwrap();
+",
+    )
+    .unwrap();
 
     check_program(&program).unwrap();
 }

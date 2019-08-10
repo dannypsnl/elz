@@ -2,89 +2,28 @@ use super::ast;
 use super::ast::*;
 use std::collections::HashMap;
 
+mod context;
 mod error;
+mod helper;
 #[cfg(test)]
 mod tests;
 mod types;
 
+use context::Context;
 use error::{CheckError, Result};
-use types::Type;
-use types::TypeVar;
-
-pub struct Context {
-    parent: Option<*const Context>,
-    type_map: HashMap<String, Type>,
-    type_environment: HashMap<String, Type>,
-    type_var_id: HashMap<String, u64>,
-    count: u64,
-}
-
-impl Context {
-    /// new returns a new context for inference expression
-    pub fn new() -> Context {
-        let mut ctx = Context {
-            parent: None,
-            type_map: HashMap::new(),
-            type_environment: HashMap::new(),
-            type_var_id: HashMap::new(),
-            count: 0,
-        };
-        ctx.add_type("int".to_string(), types::Type::I64);
-
-        ctx
-    }
-    pub fn with_parent(ctx: &Context) -> Context {
-        Context {
-            parent: Some(ctx),
-            type_map: HashMap::new(),
-            type_environment: HashMap::new(),
-            type_var_id: HashMap::new(),
-            count: 0,
-        }
-    }
-
-    fn get_type(&self, type_name: &String) -> Result<Type> {
-        match self.type_map.get(type_name) {
-            Some(t) => Ok(t.clone()),
-            None => {
-                if let Some(p_ctx) = self.parent {
-                    unsafe { p_ctx.as_ref() }.unwrap().get_type(type_name)
-                } else {
-                    Err(CheckError::not_found(type_name.clone()))
-                }
-            }
-        }
-    }
-    fn add_type(&mut self, type_name: String, typ: Type) {
-        self.type_map.insert(type_name, typ);
-    }
-
-    fn get_identifier(&self, key: &String) -> Result<Type> {
-        match self.type_environment.get(key) {
-            Some(t) => Ok(t.clone()),
-            None => {
-                if let Some(p_ctx) = self.parent {
-                    unsafe { p_ctx.as_ref() }.unwrap().get_identifier(key)
-                } else {
-                    Err(CheckError::not_found(key.clone()))
-                }
-            }
-        }
-    }
-    fn add_identifier(&mut self, key: String, typ: Type) {
-        self.type_environment.insert(key, typ);
-    }
-}
+use types::{Type, TypeVar};
 
 #[allow(mutable_borrow_reservation_conflict)]
 pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
     use ast::Type;
 
+    let remapped = helper::flat_package("", program);
+
     let mut ctx = Context::new();
 
-    for top_elem in program {
+    for (name, top_elem) in remapped {
         match top_elem {
-            Top::Binding(name, typ, expr) => {
+            Top::Binding(_, typ, expr) => {
                 let expr_type = match typ {
                     Type::None | Type::Unsure(_) => {
                         let (expr_type, _) = infer_expr(
@@ -97,7 +36,7 @@ pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
                     Type::Defined(_) | Type::Unit => {
                         let mut c = Context::with_parent(&ctx);
                         let (expr_type, _) = infer_expr(&mut c, expr, &mut Substitution::new())?;
-                        let defined_type = types::Type::from_ast_type(&mut c, typ)?;
+                        let defined_type = c.from_ast_type(typ)?;
                         if expr_type != defined_type {
                             return Err(CheckError::type_mismatched(defined_type, expr_type));
                         }
@@ -149,10 +88,7 @@ pub fn infer_expr<'start_infer>(
                                 c.add_identifier(name.clone(), typ);
                             }
                             ast::Type::Defined(_) | ast::Type::Unit => {
-                                c.add_identifier(
-                                    name.clone(),
-                                    types::Type::from_ast_type(&mut binding_ctx, typ)?,
-                                );
+                                c.add_identifier(name.clone(), binding_ctx.from_ast_type(typ)?);
                             }
                         }
                     }
@@ -166,14 +102,14 @@ pub fn infer_expr<'start_infer>(
             Ok((return_type, substitution))
         }
         Expr::Lambda(lambda) => {
-            let return_type = Type::from_ast_type(c, &lambda.return_type)?;
+            let return_type = c.from_ast_type(&lambda.return_type)?;
             let mut new_ctx = Context::with_parent(c);
             let pts: Result<Vec<_>> = lambda
                 .parameters
                 .iter()
                 .map(|param| {
                     let ast::Parameter(param_defined_type, param_name) = param;
-                    let param_type = Type::from_ast_type(&mut new_ctx, param_defined_type);
+                    let param_type = new_ctx.from_ast_type(param_defined_type);
                     if let Ok(typ) = &param_type {
                         new_ctx.add_identifier(param_name.clone(), typ.clone());
                     }
@@ -184,7 +120,7 @@ pub fn infer_expr<'start_infer>(
             let (expression_type, substitution) = match &lambda.body {
                 Some(expr) => infer_expr(&mut new_ctx, expr, substitution)?,
                 None => (
-                    Type::from_ast_type(&mut new_ctx, &ast::Type::Unsure("a".to_string()))?,
+                    new_ctx.from_ast_type(&ast::Type::Unsure("a".to_string()))?,
                     substitution,
                 ),
             };

@@ -2,6 +2,41 @@ use super::*;
 use crate::ast::Type::Defined;
 
 #[test]
+fn test_parse_namepsace() {
+    let mut parser = Parser::new(
+        "\
+namespace math {
+  let add = (x: int, y: int): int => x + y
+}
+",
+    );
+
+    let namespace = parser.parse_namespace().unwrap();
+    assert_eq!(
+        namespace,
+        Top::Namespace(
+            "math".to_string(),
+            vec![Top::Binding(
+                "add".to_string(),
+                Type::None,
+                Expr::Lambda(Lambda::new(
+                    Defined("int".to_string()),
+                    vec![
+                        Parameter(Defined("int".to_string()), "x".to_string()),
+                        Parameter(Defined("int".to_string()), "y".to_string()),
+                    ],
+                    Some(Box::new(Expr::Binary(
+                        Box::new(Expr::Identifier("x".to_string())),
+                        Box::new(Expr::Identifier("y".to_string())),
+                        Operator::Plus,
+                    ))),
+                )),
+            )]
+        ),
+    );
+}
+
+#[test]
 fn test_statement() {
     let mut parser = Parser::new(
         "\
