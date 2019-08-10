@@ -1,6 +1,4 @@
 use super::super::ast;
-use super::Bind;
-use super::Context;
 use super::MIRError;
 use super::Result;
 
@@ -31,12 +29,5 @@ pub(crate) fn check_main_is_lambda(expr: &ast::Expr) -> Result<&ast::Lambda> {
         _ => Err(MIRError::new(
             "main is the entry point of executable and must be a lambda",
         )),
-    }
-}
-
-pub(crate) fn get_main_binding(ctx: &Context) -> Result<&Bind> {
-    match ctx.binding_map.get("main") {
-        Some(bind) => Ok(bind),
-        None => Err(MIRError::NoMain),
     }
 }
