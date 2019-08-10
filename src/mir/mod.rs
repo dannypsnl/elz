@@ -62,19 +62,20 @@ pub fn generate_mir_program(program: &Vec<ast::Top>) -> Result<MIR> {
     };
 
     mir.binary_entry = match ctx.binding_map.get("main") {
-        Some(m) => {
-            let Bind(name, expr) = m;
+        Some(main_bind) => {
+            let Bind(name, expr) = main_bind;
             let lambda = check_main_is_lambda(expr)?;
             check_main_return_type(lambda)?;
             let expr = ensure_main_body_is_not_empty(lambda)?;
             let block = check_main_body_is_block(expr.as_ref())?;
-            let mut stmts = vec![];
-            for stmt in &block.statements {
-                stmts.push(generate_stmt_mir(stmt)?);
-            }
+            let statements: Result<Vec<_>> = block.clone()
+                .statements
+                .into_iter()
+                .map(|stmt| generate_stmt_mir(&stmt))
+                .collect();
             let main_fn = Function {
                 name: name.clone(),
-                block: stmts,
+                block: statements?,
             };
             Some(main_fn)
         }
