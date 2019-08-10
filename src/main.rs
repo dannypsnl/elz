@@ -15,7 +15,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Arg::with_name("INPUT")
                         .help("input file to compile")
                         .required(true)
-                        .index(1)
                         .min_values(1),
                 ),
         )
