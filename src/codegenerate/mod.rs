@@ -23,17 +23,12 @@ impl Generator {
     }
 
     pub fn generate(&self) {
-        match self.program.binary_entry {
-            Some(_) => {
-                let i64 = self.context.i64_type();
-                let ft = i64.fn_type(&[], false);
-                let main_fn = self.module.add_function("main", ft, None);
-                let main_entry = main_fn.append_basic_block("");
-                self.builder.position_at_end(&main_entry);
-                self.builder.build_return(Some(&i64.const_int(0, false)));
-            }
-            None => (),
-        }
+        let i64 = self.context.i64_type();
+        let ft = i64.fn_type(&[], false);
+        let main_fn = self.module.add_function("main", ft, None);
+        let main_entry = main_fn.append_basic_block("");
+        self.builder.position_at_end(&main_entry);
+        self.builder.build_return(Some(&i64.const_int(0, false)));
     }
 
     pub fn binary(&self) {

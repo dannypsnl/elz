@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 mod context;
 mod error;
-mod helper;
+pub mod helper;
 #[cfg(test)]
 mod tests;
 mod types;
@@ -14,10 +14,8 @@ use error::{CheckError, Result};
 use types::{Type, TypeVar};
 
 #[allow(mutable_borrow_reservation_conflict)]
-pub fn check_program(program: &Vec<ast::Top>) -> Result<()> {
+pub fn check_program(remapped: &HashMap<String, &Top>) -> Result<()> {
     use ast::Type;
-
-    let remapped = helper::flat_package("", program);
 
     let mut ctx = Context::new();
 

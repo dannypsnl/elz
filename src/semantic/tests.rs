@@ -1,5 +1,6 @@
 use super::super::ast;
 use super::super::ast::{Expr, Lambda, Operator, Statement};
+use super::helper;
 use super::types::{Type, TypeVar};
 use super::{check_program, infer_expr, Context, Substitution};
 
@@ -16,7 +17,7 @@ let add_one = (x: int): int => a + x
     )
     .unwrap();
 
-    check_program(&program).unwrap();
+    check_program(&helper::flat_package("", &program)).unwrap();
 }
 
 #[test]

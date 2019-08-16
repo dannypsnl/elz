@@ -35,13 +35,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             })
             .collect();
 
+        let remapped = semantic::helper::flat_package("", &program);
+
         // type inference and check
-        semantic::check_program(&program)?;
-        // generate MIR
-        let mir = mir::generate_mir_program(&program).expect("MIR: {}");
-        let g = elz::codegenerate::Generator::new(mir);
-        g.generate();
-        g.binary();
+        semantic::check_program(&remapped)?;
+
+        if let Some(_) = remapped.get("main") {
+            // generate MIR when main binding exist
+            let mir = mir::generate_mir_program(remapped).expect("MIR: {}");
+            let g = elz::codegenerate::Generator::new(mir);
+            g.generate();
+            g.binary();
+        }
     }
     Ok(())
 }
