@@ -1,6 +1,5 @@
 use clap::{App, Arg, SubCommand};
 use elz;
-use elz::mir;
 use elz::parser::Parser;
 use elz::semantic;
 use std::fs;
@@ -39,14 +38,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // type inference and check
         semantic::check_program(&remapped)?;
-
-        if let Some(_) = remapped.get("main") {
-            // generate MIR when main binding exist
-            let mir = mir::generate_mir_program(remapped).expect("MIR: {}");
-            let g = elz::codegenerate::Generator::new(mir);
-            g.generate();
-            g.binary();
-        }
     }
     Ok(())
 }
