@@ -1,50 +1,29 @@
-use super::types::Type;
-
-pub type Result<T> = std::result::Result<T, CheckError>;
+use crate::lexer::Location;
 
 #[derive(Debug)]
-pub enum CheckError {
-    NotFound(String),
-    TypeMismatched(Type, Type),
-    MismatchedArguments,
-    CyclicType,
+pub enum SemanticError {
+    NameRedefined(String, Location),
 }
 
-use CheckError::*;
-
-impl CheckError {
-    pub fn not_found(identifier: String) -> CheckError {
-        NotFound(identifier)
-    }
-    pub fn cyclic_type() -> CheckError {
-        CyclicType
-    }
-    pub fn mismatch_arguments() -> CheckError {
-        MismatchedArguments
-    }
-    pub fn type_mismatched(expect: Type, actual: Type) -> CheckError {
-        TypeMismatched(expect, actual)
+impl SemanticError {
+    pub fn name_redefined<T: ToString>(name: T, location: Location) -> SemanticError {
+        SemanticError::NameRedefined(name.to_string(), location)
     }
 }
 
-impl std::fmt::Display for CheckError {
+impl std::fmt::Display for SemanticError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        use SemanticError::*;
         match self {
-            NotFound(name) => write!(f, "no any identifier name: {}", name),
-            CyclicType => write!(f, "cyclic type detected"),
-            MismatchedArguments => write!(f, "mismatched arguments"),
-            TypeMismatched(expect, actual) => write!(f, "expected: {} but got: {}", expect, actual),
+            NameRedefined(name, loc) => write!(f, "{:?} name: {} be redefined", loc, name),
         }
     }
 }
-
-impl std::error::Error for CheckError {
+impl std::error::Error for SemanticError {
     fn description(&self) -> &str {
+        use SemanticError::*;
         match self {
-            NotFound(_) => "not found",
-            CyclicType => "cyclic type detected",
-            MismatchedArguments => "mismatched arguments",
-            TypeMismatched(_, _) => "type mismatched",
+            NameRedefined(_, _) => "name redefined",
         }
     }
 }

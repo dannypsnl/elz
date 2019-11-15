@@ -1,7 +1,6 @@
 use clap::{App, Arg, SubCommand};
-use elz;
 use elz::parser::Parser;
-use elz::semantic;
+use elz::semantic::check_program;
 use std::fs;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,24 +19,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .get_matches();
 
     if let Some(compile) = matches.subcommand_matches("compile") {
-        let compile_files: Vec<_> = compile.values_of("INPUT").unwrap().collect();
+        let files: Vec<_> = compile.values_of("INPUT").unwrap().collect();
 
-        let program = compile_files
-            .into_iter()
-            .flat_map(|source_code| {
-                let code = fs::read_to_string(source_code).expect(
-                    format!("failed at read content of input file: {}", source_code).as_str(),
-                );
-
-                Parser::parse_program(code)
-                    .expect(format!("failed at compile file: {}", source_code).as_str())
-            })
-            .collect();
-
-        let remapped = semantic::helper::flat_package("", &program);
-
-        // type inference and check
-        semantic::check_program(&remapped)?;
+        // FIXME: for now to make code simple we only handle the first input file.
+        let code = fs::read_to_string(files[0])?;
+        let program = Parser::parse_program(code)?;
+        // check program
+        check_program(program)?;
     }
     Ok(())
 }

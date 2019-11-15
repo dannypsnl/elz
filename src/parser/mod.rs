@@ -6,7 +6,6 @@ mod error;
 #[cfg(test)]
 mod tests;
 
-use crate::lexer::TkType::RParen;
 use error::ParseError;
 use error::Result;
 
@@ -17,53 +16,112 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<Top>> {
+    pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<TopAst>> {
         let mut program = vec![];
         while self.peek(0)?.tk_type() != &end_token_type {
-            match self.peek(0)?.tk_type() {
-                TkType::Let => {
-                    program.push(self.parse_binding()?);
+            let tok = self.peek(0)?;
+            match tok.tk_type() {
+                TkType::Ident => {
+                    // found `<identifier> :`
+                    if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
+                        let v = self.parse_variable()?;
+                        program.push(TopAst::Variable(v));
+                    } else {
+                        // else we just seems it as a function to parse
+                        let f = self.parse_function()?;
+                        program.push(TopAst::Function(f));
+                    }
                 }
-                TkType::Type => {
-                    program.push(self.parse_type_define()?);
-                }
-                TkType::Namespace => {
-                    program.push(self.parse_namespace()?);
-                }
-                _ => {
-                    println!("{} skipped!", self.peek(0)?);
-                    self.take()?;
-                }
+                _ => unimplemented!(),
             }
         }
         Ok(program)
     }
-    pub fn parse_namespace(&mut self) -> Result<Top> {
-        self.predict_and_consume(vec![TkType::Namespace])?;
-        let namespace_name = self.parse_access_chain()?;
-        self.predict_and_consume(vec![TkType::LBrace])?;
-        let definiations = self.parse_all(TkType::RBrace)?;
-        self.predict_and_consume(vec![TkType::RBrace])?;
-        Ok(Top::Namespace(namespace_name, definiations))
-    }
-    pub fn parse_binding(&mut self) -> Result<Top> {
-        self.predict_and_consume(vec![TkType::Let])?;
-        self.predict(vec![TkType::Ident])?;
-        let binding_name = self.take()?.value();
-        let typ = if self.predict_and_consume(vec![TkType::Colon]).is_ok() {
-            self.parse_type()?
-        } else {
-            Type::None
-        };
+    /// parse_variable:
+    ///
+    /// handle `x: int = 1`
+    pub fn parse_variable(&mut self) -> Result<Variable> {
+        let loc = self.peek(0)?.location();
+        // x: int = 1;
+        let var_name = self.parse_identifier()?;
+        // : int = 1;
+        self.predict_and_consume(vec![TkType::Colon])?;
+        // int = 1;
+        let typ = self.parse_type()?;
+        // = 1;
         self.predict_and_consume(vec![TkType::Assign])?;
-        let expr = self.parse_expression(None, 1)?;
-        Ok(Top::Binding(binding_name, typ, expr))
+        let expr = self.parse_expression(None, None)?;
+        Ok(Variable::new(loc, var_name, typ, expr))
     }
-    /// parse_access_chain:
-    /// ```ignore
+    /// parse_function:
+    ///
+    /// handle `main(): void {}` or `add(x: int, y: int): int = x + y`
+    pub fn parse_function(&mut self) -> Result<Function> {
+        let loc = self.peek(0)?.location();
+        // main(): void {}
+        let fn_name = self.parse_identifier()?;
+        // (): void {}
+        let tok = self.peek(0)?;
+        if tok.tk_type() == &TkType::LParen {
+            let params = self.parse_parameters()?;
+            // : void {}
+            self.predict_and_consume(vec![TkType::Colon])?;
+            // void {}
+            let ret_typ = self.parse_type()?;
+            // {}
+            let body = self.parse_body()?;
+            // now parsing done
+            Ok(Function::new(loc, fn_name, params, ret_typ, body))
+        } else {
+            Err(ParseError::not_expected_token(vec![TkType::LParen], tok))
+        }
+    }
+    /// parse_parameters:
+    ///
+    /// ()
+    /// (x: int, y: int)
+    fn parse_parameters(&mut self) -> Result<Vec<Parameter>> {
+        self.predict_and_consume(vec![TkType::LParen])?;
+        let mut params = vec![];
+        while self.peek(0)?.tk_type() != &TkType::RParen {
+            self.predict(vec![TkType::Ident, TkType::Colon])?;
+            let param_name = self.take()?.value();
+            self.consume()?;
+            let typ = self.parse_type()?;
+            params.push(Parameter(typ, param_name));
+            let tok = self.peek(0)?;
+            match tok.tk_type() {
+                TkType::Comma => self.consume()?,
+                TkType::RParen => (),
+                _ => {
+                    return Err(ParseError::not_expected_token(
+                        vec![TkType::Comma, TkType::RParen],
+                        tok,
+                    ));
+                }
+            }
+        }
+        self.predict_and_consume(vec![TkType::RParen])?;
+        Ok(params)
+    }
+    fn parse_body(&mut self) -> Result<Body> {
+        let tok = self.peek(0)?;
+        match tok.tk_type() {
+            TkType::LBrace => Ok(Body::Block(self.parse_block()?)),
+            TkType::Assign => {
+                self.predict_and_consume(vec![TkType::Assign])?;
+                Ok(Body::Expr(self.parse_expression(None, None)?))
+            }
+            _ => Err(ParseError::not_expected_token(
+                vec![TkType::LBrace, TkType::Assign],
+                tok,
+            )),
+        }
+    }
+    /// parse_identifier:
+    ///
     /// foo::bar
-    /// ```
-    pub fn parse_access_chain(&mut self) -> Result<String> {
+    pub fn parse_identifier(&mut self) -> Result<String> {
         let mut chain = vec![];
         self.predict(vec![TkType::Ident])?;
         chain.push(self.take()?.value());
@@ -74,113 +132,23 @@ impl Parser {
         }
         Ok(chain.join("::"))
     }
-    /// parse_type_define:
+
+    /// parse_type:
     ///
-    /// * tagged union type
-    ///     ```ignore
-    ///     type Option 'a (
-    ///       Just(a: 'a)
-    ///       | Nothing
-    ///     )
-    ///     ```
-    /// * structure type
-    ///     ```ignore
-    ///     type Car (
-    ///       name: string,
-    ///       price: int,
-    ///     )
-    ///     ```
-    pub fn parse_type_define(&mut self) -> Result<Top> {
-        self.predict_and_consume(vec![TkType::Type])?;
-        self.predict(vec![TkType::Ident])?;
-        let type_name = self.take()?.value();
-        let mut unsure_types = vec![];
-        while self.peek(0)?.tk_type() != &TkType::LParen {
-            unsure_types.push(self.parse_unsure_type()?);
-        }
-        if self
-            .predict(vec![TkType::LParen, TkType::Ident, TkType::Colon])
-            .is_ok()
-        {
-            // structure type
-            let params = self.parse_parameters()?;
-            Ok(Top::StructureTypeDefine(type_name, unsure_types, params))
-        } else if
-        // Just(a: 'a) | Nothing
-        self.predict(vec![TkType::LParen, TkType::Ident, TkType::LParen]).is_ok() ||
-            // Red | Blue | Green
-            self.predict(vec![TkType::LParen, TkType::Ident, TkType::VerticalLine]).is_ok()
-        {
-            // tagged union type
-            self.predict_and_consume(vec![TkType::LParen])?;
-            let mut subtypes = vec![];
-            subtypes.push(self.parse_tagged_subtype()?);
-            while self.peek(0)?.tk_type() == &TkType::VerticalLine {
-                self.predict_and_consume(vec![TkType::VerticalLine])?;
-                subtypes.push(self.parse_tagged_subtype()?);
-            }
-            self.predict_and_consume(vec![TkType::RParen])?;
-            Ok(Top::TaggedUnionTypeDefine(
-                type_name,
-                unsure_types,
-                subtypes,
-            ))
-        } else {
-            Err(ParseError::new(format!(
-                "{} {} can't be a part of type define",
-                self.peek(0)?.value(),
-                self.peek(1)?.value(),
-            )))
-        }
+    /// <identifier>
+    pub fn parse_type(&mut self) -> Result<ParsedType> {
+        Ok(ParsedType::new(self.parse_identifier()?))
     }
-    /// parse_tagged_subtype:
-    /// ```ignore
-    /// Just(a: 'a)
-    /// Nothing
-    /// ```
-    pub fn parse_tagged_subtype(&mut self) -> Result<SubType> {
-        self.predict(vec![TkType::Ident])?;
-        let tag = self.take()?.value();
-        if self.predict(vec![TkType::LParen]).is_err() {
-            Ok(SubType {
-                tag,
-                params: vec![],
-            })
-        } else {
-            let params = self.parse_parameters()?;
-            Ok(SubType { tag, params })
-        }
-    }
-    /// parse_lambda:
-    /// ```ignore
-    /// (x: int, y: int): int => {
-    ///   return x + y;
-    /// }
-    /// (x: int, y: int): int => return x + y
-    /// ```
-    pub fn parse_lambda(&mut self) -> Result<Lambda> {
-        let params = self.parse_parameters()?;
-        self.predict_and_consume(vec![TkType::Colon])?;
-        let return_type = self.parse_type()?;
-        let body = if self.peek(0)?.tk_type() == &TkType::Semicolon {
-            self.predict_and_consume(vec![TkType::Semicolon])?;
-            None
-        } else if self.predict(vec![TkType::Arrow, TkType::LBrace]).is_ok() {
-            self.predict_and_consume(vec![TkType::Arrow])?;
-            Some(Box::new(self.parse_block()?))
-        } else {
-            self.predict_and_consume(vec![TkType::Arrow])?;
-            Some(Box::new(self.parse_expression(None, 1)?))
-        };
-        Ok(Lambda::new(return_type, params, body))
-    }
+}
+
+// for block
+impl Parser {
     /// parse_block:
-    /// ```ignore
+    ///
     /// {
     ///   <statement>*
     /// }
-    /// ```
-    pub fn parse_block(&mut self) -> Result<Expr> {
+    pub fn parse_block(&mut self) -> Result<Block> {
         self.predict_and_consume(vec![TkType::LBrace])?;
         let mut block = Block::new();
         while self.peek(0)?.tk_type() != &TkType::RBrace {
@@ -188,48 +156,35 @@ impl Parser {
             block.append(stmt);
         }
         self.predict_and_consume(vec![TkType::RBrace])?;
-        Ok(Expr::Block(block))
+        Ok(block)
     }
-    /// parse_statement:
-    /// ```ignore
-    /// let a = 1;
-    /// return 1;
-    /// ```
     pub fn parse_statement(&mut self) -> Result<Statement> {
         let stmt = match self.peek(0)?.tk_type() {
-            TkType::Let => {
-                self.consume()?;
-                let name = self.parse_access_chain()?;
-                let typ = if self.predict_and_consume(vec![TkType::Colon]).is_ok() {
-                    self.parse_type()?
-                } else {
-                    Type::None
-                };
-                self.predict_and_consume(vec![TkType::Assign])?;
-                let expr = self.parse_expression(None, 1)?;
-                Ok(Statement::Let { name, typ, expr })
-            }
+            // `return 1;`
             TkType::Return => {
                 self.consume()?;
-                Ok(Statement::Return(self.parse_expression(None, 1)?))
+                Ok(Statement::Return(self.parse_expression(None, None)?))
             }
             _ => unimplemented!(),
         };
         self.predict_and_consume(vec![TkType::Semicolon])?;
         stmt
     }
+}
+
+// for expression
+impl Parser {
     /// parse_expression:
-    /// ```ignore
+    ///
     /// 1 + 2
-    /// ```
     pub fn parse_expression(
         &mut self,
         left_hand_side: Option<Expr>,
-        previous_primary: u64,
+        previous_primary: Option<u64>,
     ) -> Result<Expr> {
         let mut lhs = left_hand_side.unwrap_or(self.parse_primary()?);
         let mut lookahead = self.peek(0)?;
-        while precedence(lookahead.clone()) >= previous_primary {
+        while precedence(lookahead.clone()) >= previous_primary.unwrap_or(1) {
             let operator = lookahead.clone();
             self.consume()?;
             let mut rhs = self.parse_primary()?;
@@ -238,35 +193,33 @@ impl Parser {
                 || (is_right_associative(lookahead.clone())
                     && (precedence(lookahead.clone()) == precedence(operator.clone())))
             {
-                rhs = self.parse_expression(Some(lhs.clone()), precedence(lookahead.clone()))?;
+                rhs =
+                    self.parse_expression(Some(lhs.clone()), Some(precedence(lookahead.clone())))?;
                 lookahead = self.peek(0)?;
             }
-            lhs = Expr::Binary(Box::new(lhs), Box::new(rhs), Operator::from_token(operator));
+            lhs = Expr::binary(lhs, rhs, Operator::from_token(operator));
         }
         Ok(lhs)
     }
     /// parse_primary:
-    /// ```ignore
+    ///
     /// foo()
-    /// ```
     pub fn parse_primary(&mut self) -> Result<Expr> {
         let unary = self.parse_unary()?;
         match self.peek(0)?.tk_type() {
-            TkType::LParen => self.parse_argument(unary),
+            TkType::LParen => self.parse_function_call(unary),
             _ => Ok(unary),
         }
     }
     /// parse_unary:
-    /// ```ignore
+    ///
     /// <number>
     /// | <string_literal>
     /// | <identifier>
-    /// | <lambda>
-    /// ```
     pub fn parse_unary(&mut self) -> Result<Expr> {
         Ok(match self.peek(0)?.tk_type() {
             // FIXME: lexer should emit int & float token directly
-            TkType::Num => {
+            TkType::Integer => {
                 let num = self.take()?.value();
                 if num.parse::<i64>().is_ok() {
                     Expr::Int(num.parse::<i64>().unwrap())
@@ -279,13 +232,12 @@ impl Parser {
                     )
                 }
             }
-            TkType::Ident => Expr::Identifier(self.parse_access_chain()?),
+            TkType::Ident => Expr::identifier(self.parse_identifier()?),
             TkType::String => Expr::String(self.take()?.value()),
-            TkType::LParen => Expr::Lambda(self.parse_lambda()?),
             _ => panic!("unimplemented primary for {:?}", self.peek(0)?),
         })
     }
-    pub fn parse_argument(&mut self, func: Expr) -> Result<Expr> {
+    pub fn parse_function_call(&mut self, func: Expr) -> Result<Expr> {
         self.predict_and_consume(vec![TkType::LParen])?;
 
         let mut args = vec![];
@@ -297,11 +249,8 @@ impl Parser {
             } else {
                 "".to_string()
             };
-            let expr = self.parse_expression(None, 1)?;
-            args.push(Argument {
-                name: identifier,
-                expr,
-            });
+            let expr = self.parse_expression(None, None)?;
+            args.push(Argument::new(Some(identifier), expr));
             if self.predict(vec![TkType::Comma]).is_err() {
                 break;
             } else {
@@ -311,63 +260,6 @@ impl Parser {
         self.predict_and_consume(vec![TkType::RParen])?;
 
         Ok(Expr::FuncCall(Box::new(func), args))
-    }
-    /// parse_parameters:
-    /// ```ignore
-    /// ()
-    /// (x: int, y: int)
-    /// ```
-    pub fn parse_parameters(&mut self) -> Result<Vec<Parameter>> {
-        self.predict_and_consume(vec![TkType::LParen])?;
-        let mut params = vec![];
-        while self.peek(0)?.tk_type() != &TkType::RParen {
-            self.predict(vec![TkType::Ident, TkType::Colon])?;
-            let param_name = self.take()?.value();
-            self.consume()?;
-            let typ = self.parse_type()?;
-            params.push(Parameter(typ, param_name));
-            match self.peek(0)?.tk_type() {
-                TkType::Comma => self.consume()?,
-                TkType::RParen => (),
-                _ => {
-                    return Err(ParseError::new(format!(
-                        "expected `,` or `)` but got unexpected: {:?} while parsing parameters",
-                        self.peek(0)?,
-                    )));
-                }
-            }
-        }
-        self.predict_and_consume(vec![TkType::RParen])?;
-
-        Ok(params)
-    }
-    /// parse_type:
-    /// ```ignore
-    /// <identifier>
-    /// | ' <identifier>
-    /// | ()
-    /// ```
-    pub fn parse_type(&mut self) -> Result<Type> {
-        match self.peek(0)?.tk_type() {
-            TkType::Prime => self.parse_unsure_type(),
-            TkType::Ident => Ok(Type::Defined(self.parse_access_chain()?)),
-            TkType::LParen => {
-                self.predict_and_consume(vec![TkType::LParen, RParen])?;
-                Ok(Type::Unit)
-            }
-            _ => Err(ParseError::new(format!(
-                "expected `'` for unsure type(e.g. `'element`) or <identifier> for defined type but got {:?} while parsing type",
-                self.peek(0)?,
-            )))
-        }
-    }
-    /// parse_unsure_type:
-    /// ```ignore
-    /// 'a, 'b
-    /// ```
-    pub fn parse_unsure_type(&mut self) -> Result<Type> {
-        self.predict_and_consume(vec![TkType::Prime])?;
-        Ok(Type::Unsure(self.take()?.value()))
     }
 }
 
@@ -382,9 +274,9 @@ fn precedence(op: Token) -> u64 {
     }
 }
 
-/// This block puts helpers
+/// This block puts fundamental helpers
 impl Parser {
-    pub fn parse_program<T: Into<String>>(code: T) -> Result<Vec<Top>> {
+    pub fn parse_program<T: Into<String>>(code: T) -> Result<Vec<TopAst>> {
         let mut parser = Parser::new(code);
         parser.parse_all(TkType::EOF)
     }
@@ -409,7 +301,7 @@ impl Parser {
     }
     fn get_token(&self, n: usize) -> Result<Token> {
         if self.tokens.len() <= n {
-            Err(ParseError::new("eof".to_string()))
+            Err(ParseError::EOF)
         } else {
             Ok(self.tokens[n].clone())
         }
@@ -429,12 +321,7 @@ impl Parser {
         for (i, v) in wants.iter().enumerate() {
             let tk = self.peek(i)?;
             if !self.matched(tk.tk_type(), v) {
-                return Err(ParseError::new(format!(
-                    "expected: {:?} but got {:?} at {:?}",
-                    v,
-                    tk.tk_type(),
-                    tk.location(),
-                )));
+                return Err(ParseError::not_expected_token(wants, tk));
             }
         }
         Ok(())

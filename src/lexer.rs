@@ -3,34 +3,18 @@ pub enum TkType {
     EOF,
     /// e.g. a, ab, foo
     Ident,
-    /// namespace
-    Namespace,
-    /// let
-    Let,
     /// return
     Return,
-    /// type
-    Type,
-    /// contract
-    Contract,
-    /// impl
-    Impl,
-    /// for
-    For,
     /// e.g. 1, 10, 34
-    Num,
+    Integer,
     /// "string_literal"
     String,
     /// +
     Plus,
-    /// *
-    Star,
     /// ,
     Comma,
     /// =
     Assign,
-    /// =>
-    Arrow,
     /// (
     LParen,
     /// )
@@ -45,17 +29,39 @@ pub enum TkType {
     Accessor,
     /// ;
     Semicolon,
-    /// '
-    Prime,
-    /// |
-    VerticalLine,
 }
 
+impl std::fmt::Display for TkType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        use TkType::*;
+        let r = match self {
+            EOF => "<eof>",
+            Ident => "<identifier>",
+            Return => "return",
+            Integer => "<integer>",
+            String => "<string>",
+            Plus => "+",
+            Comma => ",",
+            Assign => "=",
+            LParen => "(",
+            RParen => ")",
+            LBrace => "{",
+            RBrace => "}",
+            Colon => ":",
+            Accessor => "::",
+            Semicolon => ";",
+        };
+        write!(f, "{}", r)
+    }
+}
+
+pub type Location = (u32, u32);
+
 #[derive(Clone, Debug, PartialEq)]
-pub struct Token((u32, u32), TkType, String);
+pub struct Token(Location, TkType, String);
 
 impl Token {
-    pub fn location(&self) -> (u32, u32) {
+    pub fn location(&self) -> Location {
         self.0
     }
     pub fn tk_type(&self) -> &TkType {
@@ -137,13 +143,7 @@ impl Lexer {
     fn emit(&mut self, token_type: TkType) {
         let s: String = self.code[self.start..self.offset].into_iter().collect();
         let tok = match s.as_str() {
-            "namespace" => self.new_token(TkType::Namespace, s),
-            "let" => self.new_token(TkType::Let, s),
             "return" => self.new_token(TkType::Return, s),
-            "type" => self.new_token(TkType::Type, s),
-            "contract" => self.new_token(TkType::Contract, s),
-            "impl" => self.new_token(TkType::Impl, s),
-            "for" => self.new_token(TkType::For, s),
             _ => self.new_token(token_type, s),
         };
         self.tokens.push(tok);
@@ -165,12 +165,7 @@ fn whitespace(lexer: &mut Lexer) -> State {
         Some(_c @ '0'..='9') => State::Fn(number),
         Some('=') => {
             lexer.next();
-            if lexer.peek() == Some('>') {
-                lexer.next();
-                lexer.emit(TkType::Arrow);
-            } else {
-                lexer.emit(TkType::Assign);
-            }
+            lexer.emit(TkType::Assign);
             State::Fn(whitespace)
         }
         Some(',') => {
@@ -181,11 +176,6 @@ fn whitespace(lexer: &mut Lexer) -> State {
         Some('+') => {
             lexer.next();
             lexer.emit(TkType::Plus);
-            State::Fn(whitespace)
-        }
-        Some('*') => {
-            lexer.next();
-            lexer.emit(TkType::Star);
             State::Fn(whitespace)
         }
         Some('(') => {
@@ -223,19 +213,9 @@ fn whitespace(lexer: &mut Lexer) -> State {
             lexer.emit(TkType::Semicolon);
             State::Fn(whitespace)
         }
-        Some('\'') => {
-            lexer.next();
-            lexer.emit(TkType::Prime);
-            State::Fn(whitespace)
-        }
-        Some('|') => {
-            lexer.next();
-            lexer.emit(TkType::VerticalLine);
-            State::Fn(whitespace)
-        }
         Some('"') => State::Fn(string),
         Some(c) => {
-            if identifier_set(c) {
+            if in_identifier_set(c) {
                 State::Fn(ident)
             } else {
                 panic!("Not implemented for {} yet", c);
@@ -245,13 +225,13 @@ fn whitespace(lexer: &mut Lexer) -> State {
     }
 }
 
-fn identifier_set(c: char) -> bool {
+fn in_identifier_set(c: char) -> bool {
     c.is_alphanumeric() || c == '_'
 }
 
 fn ident(lexer: &mut Lexer) -> State {
     while let Some(c) = lexer.next() {
-        if !identifier_set(c) {
+        if !in_identifier_set(c) {
             break;
         }
     }
@@ -277,7 +257,7 @@ fn number(lexer: &mut Lexer) -> State {
             break;
         }
     }
-    lexer.emit(TkType::Num);
+    lexer.emit(TkType::Integer);
     State::Fn(whitespace)
 }
 
@@ -306,7 +286,7 @@ mod tests {
                 Token((1, 2), Colon, ":".to_string()),
                 Token((1, 4), Ident, "int".to_string()),
                 Token((1, 8), Assign, "=".to_string()),
-                Token((1, 10), Num, "1".to_string()),
+                Token((1, 10), Integer, "1".to_string()),
                 Token((1, 11), EOF, "".to_string()),
             ]
         );
@@ -318,8 +298,8 @@ mod tests {
         assert_eq!(
             ts,
             vec![
-                Token((1, 0), Num, "10".to_string()),
-                Token((1, 3), Num, "30".to_string()),
+                Token((1, 0), Integer, "10".to_string()),
+                Token((1, 3), Integer, "30".to_string()),
                 Token((1, 5), EOF, "".to_string()),
             ]
         );
