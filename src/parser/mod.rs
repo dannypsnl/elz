@@ -255,7 +255,7 @@ impl Parser {
                 "".to_string()
             };
             let expr = self.parse_expression(None, None)?;
-            args.push(Argument::new(Some(identifier), expr));
+            args.push(Argument::new(expr.location, Some(identifier), expr));
             if self.predict(vec![TkType::Comma]).is_err() {
                 break;
             } else {

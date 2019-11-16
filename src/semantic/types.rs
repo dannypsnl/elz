@@ -1,5 +1,6 @@
 use super::error::Result;
 use super::error::SemanticError;
+use crate::ast::*;
 use crate::ast::{Function, ParsedType};
 use crate::lexer::Location;
 use std::collections::HashMap;
@@ -7,6 +8,55 @@ use std::collections::HashMap;
 pub struct TypeEnv {
     parent: Option<*const TypeEnv>,
     type_env: HashMap<String, TypeInfo>,
+}
+
+impl TypeEnv {
+    pub(crate) fn type_of_expr(&self, expr: Expr) -> Result<Type> {
+        use ExprVariant::*;
+        let location = expr.location;
+        match expr.value {
+            Binary(l, r, op) => {
+                let left_type = self.type_of_expr(*l)?;
+                let right_type = self.type_of_expr(*r)?;
+                match (left_type, right_type, op) {
+                    (Type::Int, Type::Int, Operator::Plus) => Ok(Type::Int),
+                    _ => panic!("unsupported operator"),
+                }
+            }
+            F64(_) => Ok(Type::F64),
+            Int(_) => Ok(Type::Int),
+            String(_) => Ok(Type::String),
+            FuncCall(f, args) => {
+                let location = f.location;
+                let f_type = self.type_of_expr(*f)?;
+                match f_type {
+                    Type::FunctionType(params, ret_typ) => {
+                        for (p, arg) in params.iter().zip(args.iter()) {
+                            self.unify(
+                                arg.location,
+                                p.clone(),
+                                self.type_of_expr(arg.expr.clone())?,
+                            )?;
+                        }
+                        Ok(*ret_typ)
+                    }
+                    _ => Err(SemanticError::call_on_non_function_type(location, f_type)),
+                }
+            }
+            Identifier(id) => {
+                let type_info = self.get_variable(location, id)?;
+                Ok(type_info.typ)
+            }
+        }
+    }
+
+    pub(crate) fn unify(&self, location: Location, expected: Type, actual: Type) -> Result<()> {
+        if expected == actual {
+            Ok(())
+        } else {
+            Err(SemanticError::type_mismatched(location, expected, actual))
+        }
+    }
 }
 
 impl TypeEnv {

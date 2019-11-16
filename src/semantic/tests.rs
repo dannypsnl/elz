@@ -31,6 +31,16 @@ fn test_type_mismatched() {
     assert_eq!(err.description(), "type mismatched");
 }
 
+#[test]
+fn test_check_function_call() {
+    let code = "\
+    x(a: int): int = a
+    y: int = x(2)
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code<T: ToString>(code: T) -> Result<()> {
     let program = Parser::parse_program(code.to_string()).unwrap();

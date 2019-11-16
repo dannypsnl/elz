@@ -207,13 +207,18 @@ impl Expr {
 /// `assert(n, equal_to: 1)`
 #[derive(Clone, Debug, PartialEq)]
 pub struct Argument {
+    pub location: Location,
     pub name: Option<String>,
     pub expr: Expr,
 }
 
 impl Argument {
-    pub fn new(name: Option<String>, expr: Expr) -> Argument {
-        Argument { name, expr }
+    pub fn new(location: Location, name: Option<String>, expr: Expr) -> Argument {
+        Argument {
+            location,
+            name,
+            expr,
+        }
     }
 }
 

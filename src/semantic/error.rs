@@ -14,6 +14,7 @@ pub enum SemanticErrorVariant {
     NameRedefined(String),
     TypeMismatched(Type, Type),
     NoVariableNamed(String),
+    CallOnNonFunctionType(Type),
 }
 
 impl SemanticError {
@@ -35,6 +36,12 @@ impl SemanticError {
             err: SemanticErrorVariant::NoVariableNamed(name),
         }
     }
+    pub fn call_on_non_function_type(location: Location, typ: Type) -> SemanticError {
+        SemanticError {
+            location,
+            err: SemanticErrorVariant::CallOnNonFunctionType(typ),
+        }
+    }
 }
 
 impl std::fmt::Display for SemanticError {
@@ -47,6 +54,7 @@ impl std::fmt::Display for SemanticError {
                 write!(f, "expected: {} but got: {}", expected, actual)
             }
             NoVariableNamed(name) => write!(f, "no variable named: {}", name),
+            CallOnNonFunctionType(typ) => write!(f, "call on non-function type: {}", typ),
         }
     }
 }
@@ -57,6 +65,7 @@ impl std::error::Error for SemanticError {
             NameRedefined(_) => "name redefined",
             TypeMismatched(_, _) => "type mismatched",
             NoVariableNamed(_) => "no variable named",
+            CallOnNonFunctionType(_) => "call on non-function type",
         }
     }
 }
