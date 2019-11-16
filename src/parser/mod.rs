@@ -51,6 +51,7 @@ impl Parser {
         // = 1;
         self.predict_and_consume(vec![TkType::Assign])?;
         let expr = self.parse_expression(None, None)?;
+        self.predict_and_consume(vec![TkType::Semicolon])?;
         Ok(Variable::new(loc, var_name, typ, expr))
     }
     /// parse_function:
@@ -110,7 +111,9 @@ impl Parser {
             TkType::LBrace => Ok(Body::Block(self.parse_block()?)),
             TkType::Assign => {
                 self.predict_and_consume(vec![TkType::Assign])?;
-                Ok(Body::Expr(self.parse_expression(None, None)?))
+                let e = self.parse_expression(None, None)?;
+                self.predict_and_consume(vec![TkType::Semicolon])?;
+                Ok(Body::Expr(e))
             }
             _ => Err(ParseError::not_expected_token(
                 vec![TkType::LBrace, TkType::Assign],
