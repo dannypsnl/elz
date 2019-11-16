@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 use elz::parser::Parser;
-use elz::semantic::check_program;
+use elz::semantic::SemanticChecker;
 use std::fs;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -25,7 +25,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let code = fs::read_to_string(files[0])?;
         let program = Parser::parse_program(code)?;
         // check program
-        check_program(program)?;
+        let mut semantic_checker = SemanticChecker::new();
+        semantic_checker.check_program(program)?;
     }
     Ok(())
 }

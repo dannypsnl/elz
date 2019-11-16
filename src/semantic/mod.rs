@@ -1,41 +1,69 @@
-use crate::ast::TopAst;
-use std::collections::HashMap;
-
+use crate::ast::*;
 mod error;
+mod types;
+use crate::lexer::Location;
+use crate::semantic::types::TypeEnv;
+use error::Result;
 use error::SemanticError;
+use types::Type;
 
-pub type Result<T> = std::result::Result<T, SemanticError>;
-
-pub fn check_program(program: Vec<TopAst>) -> Result<()> {
-    let _ = Program::from_ast(program)?;
-    Ok(())
+pub struct SemanticChecker {
+    type_env: TypeEnv,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct Program {
-    variables: HashMap<String, TopAst>,
+impl SemanticChecker {
+    pub fn new() -> SemanticChecker {
+        SemanticChecker {
+            type_env: TypeEnv::new(),
+        }
+    }
 }
 
-impl Program {
-    fn new() -> Program {
-        Program {
-            variables: HashMap::new(),
+impl SemanticChecker {
+    pub fn check_program(&mut self, ast: Vec<TopAst>) -> Result<()> {
+        for top in &ast {
+            self.type_env.add_variable(top.clone())?;
         }
-    }
-    fn from_ast(program: Vec<TopAst>) -> Result<Program> {
-        let mut p = Program::new();
-        for ast in program {
-            p.add_variable(ast)?
+        for top in ast {
+            use TopAst::*;
+            let location = top.location();
+            match top {
+                Variable(v) => self.unify(location, Type::from(v.typ), self.type_of(v.expr)?)?,
+                Function(f) => {}
+            }
         }
-        Ok(p)
+        Ok(())
     }
 
-    fn add_variable(&mut self, v: TopAst) -> Result<()> {
-        if self.variables.contains_key(&v.name()) {
-            Err(SemanticError::name_redefined(v.name(), v.location()))
-        } else {
-            self.variables.insert(v.name(), v);
+    fn type_of(&self, expr: Expr) -> Result<Type> {
+        use ExprVariant::*;
+        let location = expr.location();
+        let typ = match expr.value {
+            Binary(l, r, op) => {
+                let left_type = self.type_of(*l)?;
+                let right_type = self.type_of(*r)?;
+                match (left_type, right_type, op) {
+                    (Type::Int, Type::Int, Operator::Plus) => Type::Int,
+                    _ => panic!("unsupported operator"),
+                }
+            }
+            F64(_) => Type::F64,
+            Int(_) => Type::Int,
+            String(_) => Type::String,
+            FuncCall(f, args) => unimplemented!(),
+            Identifier(id) => {
+                let type_info = self.type_env.get_variable(location, id)?;
+                type_info.typ
+            }
+        };
+        Ok(typ)
+    }
+
+    pub fn unify(&self, location: Location, expected: Type, actual: Type) -> Result<()> {
+        if expected == actual {
             Ok(())
+        } else {
+            Err(SemanticError::type_mismatched(location, expected, actual))
         }
     }
 }

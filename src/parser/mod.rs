@@ -197,7 +197,7 @@ impl Parser {
                     self.parse_expression(Some(lhs.clone()), Some(precedence(lookahead.clone())))?;
                 lookahead = self.peek(0)?;
             }
-            lhs = Expr::binary(lhs, rhs, Operator::from_token(operator));
+            lhs = Expr::binary(lhs.location(), lhs, rhs, Operator::from_token(operator));
         }
         Ok(lhs)
     }
@@ -217,14 +217,15 @@ impl Parser {
     /// | <string_literal>
     /// | <identifier>
     pub fn parse_unary(&mut self) -> Result<Expr> {
-        Ok(match self.peek(0)?.tk_type() {
+        let tok = self.peek(0)?;
+        Ok(match tok.tk_type() {
             // FIXME: lexer should emit int & float token directly
             TkType::Integer => {
                 let num = self.take()?.value();
                 if num.parse::<i64>().is_ok() {
-                    Expr::Int(num.parse::<i64>().unwrap())
+                    Expr::int(tok.location(), num.parse::<i64>().unwrap())
                 } else if num.parse::<f64>().is_ok() {
-                    Expr::F64(num.parse::<f64>().unwrap())
+                    Expr::f64(tok.location(), num.parse::<f64>().unwrap())
                 } else {
                     panic!(
                         "lexing bug causes a number token can't be convert to number: {:?}",
@@ -232,8 +233,8 @@ impl Parser {
                     )
                 }
             }
-            TkType::Ident => Expr::identifier(self.parse_identifier()?),
-            TkType::String => Expr::String(self.take()?.value()),
+            TkType::Ident => Expr::identifier(tok.location(), self.parse_identifier()?),
+            TkType::String => Expr::string(tok.location(), self.take()?.value()),
             _ => panic!("unimplemented primary for {:?}", self.peek(0)?),
         })
     }
@@ -259,7 +260,7 @@ impl Parser {
         }
         self.predict_and_consume(vec![TkType::RParen])?;
 
-        Ok(Expr::FuncCall(Box::new(func), args))
+        Ok(Expr::func_call(func.location(), func, args))
     }
 }
 

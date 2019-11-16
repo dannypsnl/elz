@@ -1,29 +1,62 @@
+use super::types::Type;
 use crate::lexer::Location;
 
+pub type Result<T> = std::result::Result<T, SemanticError>;
+
 #[derive(Debug)]
-pub enum SemanticError {
-    NameRedefined(String, Location),
+pub struct SemanticError {
+    location: Location,
+    err: SemanticErrorVariant,
+}
+
+#[derive(Debug)]
+pub enum SemanticErrorVariant {
+    NameRedefined(String),
+    TypeMismatched(Type, Type),
+    NoVariableNamed(String),
 }
 
 impl SemanticError {
-    pub fn name_redefined<T: ToString>(name: T, location: Location) -> SemanticError {
-        SemanticError::NameRedefined(name.to_string(), location)
+    pub fn name_redefined<T: ToString>(location: Location, name: T) -> SemanticError {
+        SemanticError {
+            location,
+            err: SemanticErrorVariant::NameRedefined(name.to_string()),
+        }
+    }
+    pub fn type_mismatched(location: Location, expected: Type, actual: Type) -> SemanticError {
+        SemanticError {
+            location,
+            err: SemanticErrorVariant::TypeMismatched(expected, actual),
+        }
+    }
+    pub fn no_variable(location: Location, name: String) -> SemanticError {
+        SemanticError {
+            location,
+            err: SemanticErrorVariant::NoVariableNamed(name),
+        }
     }
 }
 
 impl std::fmt::Display for SemanticError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        use SemanticError::*;
-        match self {
-            NameRedefined(name, loc) => write!(f, "{:?} name: {} be redefined", loc, name),
+        write!(f, "{:?} ", self.location)?;
+        use SemanticErrorVariant::*;
+        match &self.err {
+            NameRedefined(name) => write!(f, "name: {} be redefined", name),
+            TypeMismatched(expected, actual) => {
+                write!(f, "expected: {} but got: {}", expected, actual)
+            }
+            NoVariableNamed(name) => write!(f, "no variable named: {}", name),
         }
     }
 }
 impl std::error::Error for SemanticError {
     fn description(&self) -> &str {
-        use SemanticError::*;
-        match self {
-            NameRedefined(_, _) => "name redefined",
+        use SemanticErrorVariant::*;
+        match self.err {
+            NameRedefined(_) => "name redefined",
+            TypeMismatched(_, _) => "type mismatched",
+            NoVariableNamed(_) => "no variable named",
         }
     }
 }

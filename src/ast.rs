@@ -25,14 +25,18 @@ impl TopAst {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum ParsedType {
-    /// Defined: `int`, `f64`, `string`
-    Defined(String),
+pub struct ParsedType {
+    name: String,
 }
 
 impl ParsedType {
     pub fn new<T: ToString>(name: T) -> ParsedType {
-        ParsedType::Defined(name.to_string())
+        ParsedType {
+            name: name.to_string(),
+        }
+    }
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 }
 
@@ -123,7 +127,13 @@ pub enum Statement {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum Expr {
+pub struct Expr {
+    location: Location,
+    pub value: ExprVariant,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ExprVariant {
     /// `x + y`
     Binary(Box<Expr>, Box<Expr>, Operator),
     /// `1.345`
@@ -139,11 +149,44 @@ pub enum Expr {
 }
 
 impl Expr {
-    pub fn binary(l: Expr, r: Expr, op: Operator) -> Expr {
-        Expr::Binary(l.into(), r.into(), op)
+    pub fn location(&self) -> Location {
+        self.location
     }
-    pub fn identifier<T: ToString>(id: T) -> Expr {
-        Expr::Identifier(id.to_string())
+    pub fn binary(location: Location, l: Expr, r: Expr, op: Operator) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::Binary(l.into(), r.into(), op),
+        }
+    }
+    pub fn f64(location: Location, f: f64) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::F64(f),
+        }
+    }
+    pub fn int(location: Location, i: i64) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::Int(i),
+        }
+    }
+    pub fn string(location: Location, s: String) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::String(s),
+        }
+    }
+    pub fn func_call(location: Location, expr: Expr, args: Vec<Argument>) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::FuncCall(expr.into(), args),
+        }
+    }
+    pub fn identifier<T: ToString>(location: Location, id: T) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::Identifier(id.to_string()),
+        }
     }
 }
 

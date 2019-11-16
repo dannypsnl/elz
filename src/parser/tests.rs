@@ -42,8 +42,9 @@ fn test_parse_function_with_expression_body() {
             ],
             ParsedType::new("int"),
             Body::Expr(Expr::binary(
-                Expr::identifier("x"),
-                Expr::identifier("y"),
+                (1, 27),
+                Expr::identifier((1, 27), "x"),
+                Expr::identifier((2, 0), "y"),
                 Operator::Plus
             ))
         )
@@ -61,6 +62,6 @@ fn test_parse_variable_define() {
     let var = parser.parse_variable().unwrap();
     assert_eq!(
         var,
-        Variable::new((1, 0), "x", ParsedType::new("int"), Expr::Int(1))
+        Variable::new((1, 0), "x", ParsedType::new("int"), Expr::int((2, 0), 1))
     )
 }
