@@ -7,6 +7,10 @@ pub enum TkType {
     Return,
     /// e.g. 1, 10, 34
     Integer,
+    /// true
+    True,
+    /// false
+    False,
     /// "string_literal"
     String,
     /// +
@@ -39,6 +43,8 @@ impl std::fmt::Display for TkType {
             Ident => "<identifier>",
             Return => "return",
             Integer => "<integer>",
+            True => "true",
+            False => "false",
             String => "<string>",
             Plus => "+",
             Comma => ",",
@@ -144,6 +150,8 @@ impl Lexer {
         let s: String = self.code[self.start..self.offset].into_iter().collect();
         let tok = match s.as_str() {
             "return" => self.new_token(TkType::Return, s),
+            "true" => self.new_token(TkType::True, s),
+            "false" => self.new_token(TkType::False, s),
             _ => self.new_token(token_type, s),
         };
         self.tokens.push(tok);

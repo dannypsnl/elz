@@ -155,6 +155,8 @@ pub enum ExprVariant {
     F64(f64),
     /// `1`
     Int(i64),
+    /// `true` or `false`
+    Bool(bool),
     /// `"str"`
     String(String),
     /// `a(b)`
@@ -180,6 +182,12 @@ impl Expr {
         Expr {
             location,
             value: ExprVariant::Int(i),
+        }
+    }
+    pub fn bool(location: Location, b: bool) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::Bool(b),
         }
     }
     pub fn string(location: Location, s: String) -> Expr {

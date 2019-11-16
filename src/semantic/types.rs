@@ -25,6 +25,7 @@ impl TypeEnv {
             }
             F64(_) => Ok(Type::F64),
             Int(_) => Ok(Type::Int),
+            Bool(_) => Ok(Type::Bool),
             String(_) => Ok(Type::String),
             FuncCall(f, args) => {
                 let location = f.location;
@@ -114,6 +115,7 @@ impl TypeInfo {
 pub enum Type {
     Void,
     Int,
+    Bool,
     F64,
     String,
     FunctionType(Vec<Type>, Box<Type>),
@@ -127,6 +129,7 @@ impl Type {
             "int" => Int,
             "void" => Void,
             "f64" => F64,
+            "bool" => Bool,
             "string" => String,
             _ => UnknownType(typ.name()),
         }
@@ -149,6 +152,7 @@ impl std::fmt::Display for Type {
             Void => "void",
             Int => "int",
             F64 => "f64",
+            Bool => "bool",
             String => "string",
             // FIXME: print format: `(int, int): int` not `<function>`
             FunctionType(_params, _ret) => "<function>",

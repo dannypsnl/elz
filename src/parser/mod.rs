@@ -241,6 +241,14 @@ impl Parser {
                 }
             }
             TkType::Ident => Expr::identifier(tok.location(), self.parse_identifier()?),
+            TkType::True => {
+                self.take()?;
+                Expr::bool(tok.location(), true)
+            }
+            TkType::False => {
+                self.take()?;
+                Expr::bool(tok.location(), false)
+            }
             TkType::String => Expr::string(tok.location(), self.take()?.value()),
             _ => panic!("unimplemented primary for {:?}", self.peek(0)?),
         })
