@@ -119,7 +119,22 @@ impl Parameter {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum Statement {
+pub struct Statement {
+    pub location: Location,
+    pub value: StatementVariant,
+}
+
+impl Statement {
+    pub fn return_stmt(location: Location, e: Expr) -> Statement {
+        Statement {
+            location,
+            value: StatementVariant::Return(e),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum StatementVariant {
     /// Return:
     ///
     /// `return 1;`
@@ -128,7 +143,7 @@ pub enum Statement {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Expr {
-    location: Location,
+    pub location: Location,
     pub value: ExprVariant,
 }
 
@@ -149,9 +164,6 @@ pub enum ExprVariant {
 }
 
 impl Expr {
-    pub fn location(&self) -> Location {
-        self.location
-    }
     pub fn binary(location: Location, l: Expr, r: Expr, op: Operator) -> Expr {
         Expr {
             location,

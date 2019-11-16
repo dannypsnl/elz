@@ -1,35 +1,38 @@
 use super::error::Result;
 use super::error::SemanticError;
-use crate::ast::ParsedType;
-use crate::ast::TopAst;
+use crate::ast::{Function, ParsedType};
 use crate::lexer::Location;
 use std::collections::HashMap;
 
 pub struct TypeEnv {
+    parent: Option<*const TypeEnv>,
     type_env: HashMap<String, TypeInfo>,
 }
 
 impl TypeEnv {
     pub fn new() -> TypeEnv {
         TypeEnv {
+            parent: None,
+            type_env: HashMap::new(),
+        }
+    }
+    pub fn with_parent(parent: &TypeEnv) -> TypeEnv {
+        TypeEnv {
+            parent: Some(parent),
             type_env: HashMap::new(),
         }
     }
 
-    pub(crate) fn add_variable(&mut self, top: TopAst) -> Result<()> {
-        if self.type_env.contains_key(&top.name()) {
-            Err(SemanticError::name_redefined(top.location(), top.name()))
+    pub(crate) fn add_variable(
+        &mut self,
+        location: Location,
+        key: String,
+        typ: Type,
+    ) -> Result<()> {
+        if self.type_env.contains_key(&key) {
+            Err(SemanticError::name_redefined(location, key))
         } else {
-            use TopAst::*;
-            let location = top.location();
-            let key = top.name();
-            match top {
-                Variable(v) => {
-                    self.type_env
-                        .insert(key, TypeInfo::new(location, Type::from(v.typ)));
-                }
-                Function(f) => {}
-            }
+            self.type_env.insert(key, TypeInfo::new(location, typ));
             Ok(())
         }
     }
@@ -37,7 +40,10 @@ impl TypeEnv {
         let result = self.type_env.get(&k);
         match result {
             Some(t) => Ok(t.clone()),
-            None => Err(SemanticError::no_variable(location, k)),
+            None => match self.parent {
+                Some(env) => unsafe { env.as_ref() }.unwrap().get_variable(location, k),
+                None => Err(SemanticError::no_variable(location, k)),
+            },
         }
     }
 }
@@ -60,6 +66,7 @@ pub enum Type {
     Int,
     F64,
     String,
+    FunctionType(Vec<Type>, Box<Type>),
     UnknownType(String),
 }
 
@@ -74,6 +81,15 @@ impl Type {
             _ => UnknownType(typ.name()),
         }
     }
+
+    pub fn new_function(f: Function) -> Type {
+        let param_types = f
+            .parameters
+            .into_iter()
+            .map(|param| Type::from(param.0))
+            .collect();
+        Type::FunctionType(param_types, Type::from(f.ret_typ).into())
+    }
 }
 
 impl std::fmt::Display for Type {
@@ -84,6 +100,8 @@ impl std::fmt::Display for Type {
             Int => "int",
             F64 => "f64",
             String => "string",
+            // FIXME: print format: `(int, int): int` not `<function>`
+            FunctionType(_params, _ret) => "<function>",
             UnknownType(s) => s.as_str(),
         };
         write!(f, "{}", r)

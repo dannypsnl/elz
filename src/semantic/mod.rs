@@ -22,26 +22,60 @@ impl SemanticChecker {
 impl SemanticChecker {
     pub fn check_program(&mut self, ast: Vec<TopAst>) -> Result<()> {
         for top in &ast {
-            self.type_env.add_variable(top.clone())?;
+            use TopAst::*;
+            match top {
+                Variable(v) => self.type_env.add_variable(
+                    top.location(),
+                    top.name(),
+                    Type::from(v.typ.clone()),
+                )?,
+                Function(f) => {
+                    let typ = Type::new_function(f.clone());
+                    self.type_env
+                        .add_variable(top.location(), top.name(), typ)?;
+                }
+            }
         }
         for top in ast {
             use TopAst::*;
             let location = top.location();
             match top {
-                Variable(v) => self.unify(location, Type::from(v.typ), self.type_of(v.expr)?)?,
-                Function(f) => {}
+                Variable(v) => {
+                    self.unify(location, Type::from(v.typ), self.type_of_expr(v.expr)?)?
+                }
+                Function(f) => self.check_function_body(location, f)?,
             }
         }
         Ok(())
     }
 
-    fn type_of(&self, expr: Expr) -> Result<Type> {
+    fn check_function_body(&self, location: Location, f: Function) -> Result<()> {
+        let return_type = Type::from(f.ret_typ);
+        match f.body {
+            Body::Expr(e) => self.unify(location, return_type.clone(), self.type_of_expr(e)?),
+            Body::Block(b) => {
+                let mut type_env = TypeEnv::with_parent(&self.type_env);
+                for param in f.parameters {
+                    type_env.add_variable(location, param.1, Type::from(param.0))?;
+                }
+                for stmt in b.statements {
+                    use StatementVariant::*;
+                    match stmt.value {
+                        Return(e) => self.unify(stmt.location, return_type.clone(), self.type_of_expr(e)?)?,
+                    }
+                }
+                Ok(())
+            }
+        }
+    }
+
+    fn type_of_expr(&self, expr: Expr) -> Result<Type> {
         use ExprVariant::*;
-        let location = expr.location();
+        let location = expr.location;
         let typ = match expr.value {
             Binary(l, r, op) => {
-                let left_type = self.type_of(*l)?;
-                let right_type = self.type_of(*r)?;
+                let left_type = self.type_of_expr(*l)?;
+                let right_type = self.type_of_expr(*r)?;
                 match (left_type, right_type, op) {
                     (Type::Int, Type::Int, Operator::Plus) => Type::Int,
                     _ => panic!("unsupported operator"),

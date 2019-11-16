@@ -159,11 +159,15 @@ impl Parser {
         Ok(block)
     }
     pub fn parse_statement(&mut self) -> Result<Statement> {
-        let stmt = match self.peek(0)?.tk_type() {
+        let tok = self.peek(0)?;
+        let stmt = match tok.tk_type() {
             // `return 1;`
             TkType::Return => {
                 self.consume()?;
-                Ok(Statement::Return(self.parse_expression(None, None)?))
+                Ok(Statement::return_stmt(
+                    tok.location(),
+                    self.parse_expression(None, None)?,
+                ))
             }
             _ => unimplemented!(),
         };
@@ -197,7 +201,7 @@ impl Parser {
                     self.parse_expression(Some(lhs.clone()), Some(precedence(lookahead.clone())))?;
                 lookahead = self.peek(0)?;
             }
-            lhs = Expr::binary(lhs.location(), lhs, rhs, Operator::from_token(operator));
+            lhs = Expr::binary(lhs.location, lhs, rhs, Operator::from_token(operator));
         }
         Ok(lhs)
     }
@@ -260,7 +264,7 @@ impl Parser {
         }
         self.predict_and_consume(vec![TkType::RParen])?;
 
-        Ok(Expr::func_call(func.location(), func, args))
+        Ok(Expr::func_call(func.location, func, args))
     }
 }
 
