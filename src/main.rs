@@ -3,7 +3,7 @@ use elz::parser::Parser;
 use elz::semantic::SemanticChecker;
 use std::fs;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
     let matches = App::new("elz")
         .author("Danny Lin <dannypsnl@gmail.com>")
         .subcommand(
@@ -22,11 +22,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let files: Vec<_> = compile.values_of("INPUT").unwrap().collect();
 
         // FIXME: for now to make code simple we only handle the first input file.
-        let code = fs::read_to_string(files[0])?;
-        let program = Parser::parse_program(code)?;
+        let code = match fs::read_to_string(files[0]) {
+            Ok(code) => code,
+            Err(e) => {
+                println!("{}", e);
+                return;
+            }
+        };
+        let program = match Parser::parse_program(code) {
+            Ok(p) => p,
+            Err(e) => {
+                println!("{}", e);
+                return;
+            }
+        };
         // check program
         let mut semantic_checker = SemanticChecker::new();
-        semantic_checker.check_program(program)?;
+        match semantic_checker.check_program(program) {
+            Err(e) => println!("{}", e),
+            _ => {
+                // TODO: generate binary(or do nothing for library)
+            }
+        }
     }
-    Ok(())
 }

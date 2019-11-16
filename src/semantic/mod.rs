@@ -61,7 +61,9 @@ impl SemanticChecker {
                 for stmt in b.statements {
                     use StatementVariant::*;
                     match stmt.value {
-                        Return(e) => self.unify(stmt.location, return_type.clone(), self.type_of_expr(e)?)?,
+                        Return(e) => {
+                            self.unify(stmt.location, return_type.clone(), self.type_of_expr(e)?)?
+                        }
                     }
                 }
                 Ok(())
