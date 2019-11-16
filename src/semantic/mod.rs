@@ -103,3 +103,7 @@ impl SemanticChecker {
         }
     }
 }
+
+// Must put code before tests module
+#[cfg(test)]
+mod tests;
