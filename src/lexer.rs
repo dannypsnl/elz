@@ -133,15 +133,7 @@ impl Lexer {
     }
     fn next(&mut self) -> Option<char> {
         self.offset += 1;
-        let c = self.peek();
-        match c {
-            Some('\n') => {
-                self.pos = 0;
-                self.line += 1;
-                c
-            }
-            _ => c,
-        }
+        self.peek()
     }
     fn new_token(&mut self, token_type: TkType, value: String) -> Token {
         Token((self.line, self.pos), token_type, value)
@@ -162,6 +154,10 @@ impl Lexer {
 fn whitespace(lexer: &mut Lexer) -> State {
     while let Some(c) = lexer.peek() {
         if c == ' ' || c == '\n' {
+            if c == '\n' {
+                lexer.pos = 0;
+                lexer.line += 1;
+            }
             lexer.next();
         } else {
             break;
