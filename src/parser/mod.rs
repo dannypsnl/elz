@@ -39,7 +39,7 @@ impl Parser {
     }
     /// parse_variable:
     ///
-    /// handle `x: int = 1`
+    /// handle `x: int = 1;`
     pub fn parse_variable(&mut self) -> Result<Variable> {
         let loc = self.peek(0)?.location();
         // x: int = 1;
@@ -56,7 +56,7 @@ impl Parser {
     }
     /// parse_function:
     ///
-    /// handle `main(): void {}` or `add(x: int, y: int): int = x + y`
+    /// handle `main(): void {}` or `add(x: int, y: int): int = x + y;`
     pub fn parse_function(&mut self) -> Result<Function> {
         let loc = self.peek(0)?.location();
         // main(): void {}
