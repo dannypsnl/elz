@@ -189,8 +189,12 @@ impl std::fmt::Display for Type {
             String => write!(f, "string"),
             GenericType(name, generics) => {
                 write!(f, "{}[", name)?;
-                for g in generics {
-                    write!(f, "{} ,", g)?;
+                for (i, g) in generics.iter().enumerate() {
+                    if i == generics.len() - 1 {
+                        write!(f, "{}", g)?;
+                    } else {
+                        write!(f, "{} ,", g)?;
+                    }
                 }
                 write!(f, "]")
             }
