@@ -50,6 +50,15 @@ fn test_unify_list_type() {
     assert_eq!(result.is_ok(), true);
 }
 
+#[test]
+fn test_unify_free_var() {
+    let code = "\
+    x: List[int] = [];
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code<T: ToString>(code: T) -> Result<()> {
     let program = Parser::parse_program(code.to_string()).unwrap();

@@ -39,11 +39,10 @@ impl SemanticChecker {
             use TopAst::*;
             let location = top.location();
             match top {
-                Variable(v) => self.type_env.unify(
-                    location,
-                    Type::from(v.typ),
-                    self.type_env.type_of_expr(v.expr)?,
-                )?,
+                Variable(v) => {
+                    let typ = self.type_env.type_of_expr(v.expr)?;
+                    self.type_env.unify(location, Type::from(v.typ), typ)?
+                }
                 Function(f) => self.check_function_body(location, f)?,
             }
         }
@@ -65,11 +64,10 @@ impl SemanticChecker {
                 for stmt in b.statements {
                     use StatementVariant::*;
                     match stmt.value {
-                        Return(e) => type_env.unify(
-                            stmt.location,
-                            return_type.clone(),
-                            type_env.type_of_expr(e)?,
-                        )?,
+                        Return(e) => {
+                            let typ = type_env.type_of_expr(e)?;
+                            type_env.unify(stmt.location, return_type.clone(), typ)?
+                        }
                     }
                 }
                 Ok(())

@@ -8,10 +8,11 @@ use std::collections::HashMap;
 pub struct TypeEnv {
     parent: Option<*const TypeEnv>,
     type_env: HashMap<String, TypeInfo>,
+    free_var_count: usize,
 }
 
 impl TypeEnv {
-    pub(crate) fn type_of_expr(&self, expr: Expr) -> Result<Type> {
+    pub(crate) fn type_of_expr(&mut self, expr: Expr) -> Result<Type> {
         use ExprVariant::*;
         let location = expr.location;
         match expr.value {
@@ -28,12 +29,11 @@ impl TypeEnv {
             Bool(_) => Ok(Type::Bool),
             String(_) => Ok(Type::String),
             List(es) => {
-                if es.len() < 1 {
-                    // FIXME: when there has no element in list, e.g. `[]`. We should provide FreeType for it.
-                    // so type should be: `List[T]`, and `T` is unknown that can be any type unify with it later.
-                    unreachable!()
-                }
-                let expr_type: Type = self.type_of_expr(es[0].clone())?;
+                let expr_type: Type = if es.len() < 1 {
+                    self.free_var()
+                } else {
+                    self.type_of_expr(es[0].clone())?
+                };
                 for e in es {
                     if expr_type != self.type_of_expr(e.clone())? {
                         return Err(SemanticError::type_mismatched(
@@ -51,11 +51,8 @@ impl TypeEnv {
                 match f_type {
                     Type::FunctionType(params, ret_typ) => {
                         for (p, arg) in params.iter().zip(args.iter()) {
-                            self.unify(
-                                arg.location,
-                                p.clone(),
-                                self.type_of_expr(arg.expr.clone())?,
-                            )?;
+                            let typ = self.type_of_expr(arg.expr.clone())?;
+                            self.unify(arg.location, p.clone(), typ)?;
                         }
                         Ok(*ret_typ)
                     }
@@ -70,11 +67,58 @@ impl TypeEnv {
     }
 
     pub(crate) fn unify(&self, location: Location, expected: Type, actual: Type) -> Result<()> {
-        if expected == actual {
-            Ok(())
-        } else {
-            Err(SemanticError::type_mismatched(location, expected, actual))
+        use Type::*;
+        match (expected.clone(), actual.clone()) {
+            (Void, Void) | (Int, Int) | (Bool, Bool) | (F64, F64) | (String, String) => {
+                if expected == actual {
+                    Ok(())
+                } else {
+                    Err(SemanticError::type_mismatched(location, expected, actual))
+                }
+            }
+            (GenericType(name, generics), GenericType(name2, generics2)) => {
+                if name != name2 {
+                    Err(SemanticError::type_mismatched(location, expected, actual))
+                } else {
+                    for (t1, t2) in generics.iter().zip(generics2.iter()) {
+                        self.unify(location, t1.clone(), t2.clone())?;
+                    }
+                    Ok(())
+                }
+            }
+            (FunctionType(ft, arg), FunctionType(ft_p, arg_p)) => {
+                for (ft, ft_p) in ft.iter().zip(ft_p.iter()) {
+                    self.unify(location, ft.clone(), ft_p.clone())?;
+                }
+                self.unify(location, *arg, *arg_p)
+            }
+            (FreeVar(_), t) => self.unify(location, t, expected),
+            (t, f @ FreeVar(_)) => {
+                if t == f || !f.occurs(t) {
+                    // FIXME: here we should update substitution map, but we haven't create it
+                    // pseudo code would like:
+                    // self.substitution_map.insert(f, t)
+                    // means f is t now
+                    Ok(())
+                } else {
+                    Ok(())
+                }
+            }
+            (UnknownType(name), UnknownType(name2)) => {
+                if name == name2 {
+                    Ok(())
+                } else {
+                    Err(SemanticError::type_mismatched(location, expected, actual))
+                }
+            }
+            (_, _) => Err(SemanticError::type_mismatched(location, expected, actual)),
         }
+    }
+
+    fn free_var(&mut self) -> Type {
+        let typ = Type::FreeVar(self.free_var_count);
+        self.free_var_count += 1;
+        typ
     }
 }
 
@@ -83,12 +127,14 @@ impl TypeEnv {
         TypeEnv {
             parent: None,
             type_env: HashMap::new(),
+            free_var_count: 0,
         }
     }
     pub fn with_parent(parent: &TypeEnv) -> TypeEnv {
         TypeEnv {
             parent: Some(parent),
             type_env: HashMap::new(),
+            free_var_count: 0,
         }
     }
 
@@ -139,6 +185,7 @@ pub enum Type {
     // name[generic_types]
     GenericType(String, Vec<Type>),
     FunctionType(Vec<Type>, Box<Type>),
+    FreeVar(usize),
     UnknownType(String),
 }
 
@@ -176,6 +223,30 @@ impl Type {
             .collect();
         Type::FunctionType(param_types, Type::from(f.ret_typ).into())
     }
+
+    fn occurs(&self, t: Type) -> bool {
+        use Type::*;
+        match t {
+            Void | Int | Bool | F64 | String | UnknownType(_) => false,
+            FunctionType(t1, t2) => {
+                for t in t1 {
+                    if self.occurs(t) {
+                        return true;
+                    }
+                }
+                self.occurs(*t2)
+            }
+            GenericType(_, ts) => {
+                for t in ts {
+                    if self.occurs(t) {
+                        return true;
+                    }
+                }
+                false
+            }
+            FreeVar(_) => self.clone() == t,
+        }
+    }
 }
 
 impl std::fmt::Display for Type {
@@ -200,6 +271,7 @@ impl std::fmt::Display for Type {
             }
             // FIXME: print format: `(int, int): int` not `<function>`
             FunctionType(_params, _ret) => write!(f, "<function>"),
+            FreeVar(n) => write!(f, "'{}", n),
             UnknownType(s) => write!(f, "{}", s.as_str()),
         }
     }
