@@ -137,7 +137,7 @@ pub struct Statement {
 }
 
 impl Statement {
-    pub fn return_stmt(location: Location, e: Expr) -> Statement {
+    pub fn return_stmt(location: Location, e: Option<Expr>) -> Statement {
         Statement {
             location,
             value: StatementVariant::Return(e),
@@ -150,7 +150,7 @@ pub enum StatementVariant {
     /// Return:
     ///
     /// `return 1;`
-    Return(Expr),
+    Return(Option<Expr>),
 }
 
 #[derive(Clone, Debug, PartialEq)]

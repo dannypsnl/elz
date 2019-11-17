@@ -65,7 +65,10 @@ impl SemanticChecker {
                     use StatementVariant::*;
                     match stmt.value {
                         Return(e) => {
-                            let typ = type_env.type_of_expr(e)?;
+                            let typ = match e {
+                                Some(e) => type_env.type_of_expr(e)?,
+                                None => Type::Void,
+                            };
                             type_env.unify(stmt.location, return_type.clone(), typ)?
                         }
                     }

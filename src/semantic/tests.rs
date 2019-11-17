@@ -59,6 +59,17 @@ fn test_unify_free_var() {
     assert_eq!(result.is_ok(), true);
 }
 
+#[test]
+fn test_check_return_nothing() {
+    let code = "\
+    x(): void {
+      return;
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code<T: ToString>(code: T) -> Result<()> {
     let program = Parser::parse_program(code.to_string()).unwrap();

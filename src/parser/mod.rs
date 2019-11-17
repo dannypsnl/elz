@@ -187,10 +187,12 @@ impl Parser {
             // `return 1;`
             TkType::Return => {
                 self.consume()?;
-                Ok(Statement::return_stmt(
-                    tok.location(),
-                    self.parse_expression(None, None)?,
-                ))
+                let expr = if self.peek(0)?.tk_type() == &TkType::Semicolon {
+                    None
+                } else {
+                    Some(self.parse_expression(None, None)?)
+                };
+                Ok(Statement::return_stmt(tok.location(), expr))
             }
             _ => unimplemented!(),
         };
