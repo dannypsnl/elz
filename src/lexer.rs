@@ -23,6 +23,10 @@ pub enum TkType {
     LParen,
     /// )
     RParen,
+    /// [
+    LBracket,
+    /// ]
+    RBracket,
     /// {
     LBrace,
     /// }
@@ -51,6 +55,8 @@ impl std::fmt::Display for TkType {
             Assign => "=",
             LParen => "(",
             RParen => ")",
+            LBracket => "[",
+            RBracket => "]",
             LBrace => "{",
             RBrace => "}",
             Colon => ":",
@@ -190,6 +196,16 @@ fn whitespace(lexer: &mut Lexer) -> State {
         Some(')') => {
             lexer.next();
             lexer.emit(TkType::RParen);
+            State::Fn(whitespace)
+        }
+        Some('[') => {
+            lexer.next();
+            lexer.emit(TkType::LBracket);
+            State::Fn(whitespace)
+        }
+        Some(']') => {
+            lexer.next();
+            lexer.emit(TkType::RBracket);
             State::Fn(whitespace)
         }
         Some('{') => {

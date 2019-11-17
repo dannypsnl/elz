@@ -138,9 +138,29 @@ impl Parser {
 
     /// parse_type:
     ///
-    /// <identifier>
+    /// `<identifier>`
+    /// | `<identifier> [ <generic_type_list> ]`
     pub fn parse_type(&mut self) -> Result<ParsedType> {
-        Ok(ParsedType::new(self.parse_identifier()?))
+        // ensure is <identifier>
+        self.predict(vec![TkType::Ident])?;
+        let type_name = self.parse_identifier()?;
+        if self.predict(vec![TkType::LBracket]).is_ok() {
+            let mut list = vec![];
+            self.predict_and_consume(vec![TkType::LBracket])?;
+            while self.peek(0)?.tk_type() != &TkType::RBracket {
+                let typ = self.parse_type()?;
+                list.push(typ);
+                if self.predict(vec![TkType::Comma]).is_err() {
+                    break;
+                } else {
+                    self.predict_and_consume(vec![TkType::Comma])?;
+                }
+            }
+            self.predict_and_consume(vec![TkType::RBracket])?;
+            Ok(ParsedType::generic_type(type_name, list))
+        } else {
+            Ok(ParsedType::type_name(type_name))
+        }
     }
 }
 
@@ -220,9 +240,12 @@ impl Parser {
     }
     /// parse_unary:
     ///
-    /// <number>
+    /// <integer>
+    /// | <float64>
     /// | <string_literal>
     /// | <identifier>
+    /// | <bool>
+    /// | <list>
     pub fn parse_unary(&mut self) -> Result<Expr> {
         let tok = self.peek(0)?;
         Ok(match tok.tk_type() {
@@ -250,6 +273,10 @@ impl Parser {
                 Expr::bool(tok.location(), false)
             }
             TkType::String => Expr::string(tok.location(), self.take()?.value()),
+            TkType::LBracket => {
+                let list = self.parse_list()?;
+                Expr::list(tok.location(), list)
+            }
             _ => panic!("unimplemented primary for {:?}", self.peek(0)?),
         })
     }
@@ -276,6 +303,21 @@ impl Parser {
         self.predict_and_consume(vec![TkType::RParen])?;
 
         Ok(Expr::func_call(func.location, func, args))
+    }
+    pub fn parse_list(&mut self) -> Result<Vec<Expr>> {
+        let mut list = vec![];
+        self.predict_and_consume(vec![TkType::LBracket])?;
+        while self.peek(0)?.tk_type() != &TkType::RBracket {
+            let expr = self.parse_expression(None, None)?;
+            list.push(expr);
+            if self.predict(vec![TkType::Comma]).is_err() {
+                break;
+            } else {
+                self.predict_and_consume(vec![TkType::Comma])?;
+            }
+        }
+        self.predict_and_consume(vec![TkType::RBracket])?;
+        Ok(list)
     }
 }
 

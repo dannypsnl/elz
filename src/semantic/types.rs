@@ -27,6 +27,24 @@ impl TypeEnv {
             Int(_) => Ok(Type::Int),
             Bool(_) => Ok(Type::Bool),
             String(_) => Ok(Type::String),
+            List(es) => {
+                if es.len() < 1 {
+                    // FIXME: when there has no element in list, e.g. `[]`. We should provide FreeType for it.
+                    // so type should be: `List[T]`, and `T` is unknown that can be any type unify with it later.
+                    unreachable!()
+                }
+                let expr_type: Type = self.type_of_expr(es[0].clone())?;
+                for e in es {
+                    if expr_type != self.type_of_expr(e.clone())? {
+                        return Err(SemanticError::type_mismatched(
+                            e.location,
+                            expr_type,
+                            self.type_of_expr(e)?,
+                        ));
+                    }
+                }
+                Ok(Type::generic_type("List", vec![expr_type]))
+            }
             FuncCall(f, args) => {
                 let location = f.location;
                 let f_type = self.type_of_expr(*f)?;
@@ -118,8 +136,16 @@ pub enum Type {
     Bool,
     F64,
     String,
+    // name[generic_types]
+    GenericType(String, Vec<Type>),
     FunctionType(Vec<Type>, Box<Type>),
     UnknownType(String),
+}
+
+impl Type {
+    fn generic_type<T: ToString>(name: T, generics: Vec<Type>) -> Type {
+        Type::GenericType(name.to_string(), generics)
+    }
 }
 
 impl Type {
@@ -131,6 +157,13 @@ impl Type {
             "f64" => F64,
             "bool" => Bool,
             "string" => String,
+            "List" => Type::generic_type(
+                "List",
+                typ.generics()
+                    .iter()
+                    .map(|parsed_type| Type::from(parsed_type.clone()))
+                    .collect(),
+            ),
             _ => UnknownType(typ.name()),
         }
     }
@@ -148,16 +181,22 @@ impl Type {
 impl std::fmt::Display for Type {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         use Type::*;
-        let r = match self {
-            Void => "void",
-            Int => "int",
-            F64 => "f64",
-            Bool => "bool",
-            String => "string",
+        match self {
+            Void => write!(f, "void"),
+            Int => write!(f, "int"),
+            F64 => write!(f, "f64"),
+            Bool => write!(f, "bool"),
+            String => write!(f, "string"),
+            GenericType(name, generics) => {
+                write!(f, "{}[", name)?;
+                for g in generics {
+                    write!(f, "{} ,", g)?;
+                }
+                write!(f, "]")
+            }
             // FIXME: print format: `(int, int): int` not `<function>`
-            FunctionType(_params, _ret) => "<function>",
-            UnknownType(s) => s.as_str(),
-        };
-        write!(f, "{}", r)
+            FunctionType(_params, _ret) => write!(f, "<function>"),
+            UnknownType(s) => write!(f, "{}", s.as_str()),
+        }
     }
 }

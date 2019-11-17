@@ -25,18 +25,30 @@ impl TopAst {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ParsedType {
-    name: String,
+pub enum ParsedType {
+    TypeName(String),
+    GenericType(String, Vec<ParsedType>),
 }
 
 impl ParsedType {
-    pub fn new<T: ToString>(name: T) -> ParsedType {
-        ParsedType {
-            name: name.to_string(),
+    pub fn type_name<T: ToString>(name: T) -> ParsedType {
+        ParsedType::TypeName(name.to_string())
+    }
+    pub fn generic_type<T: ToString>(name: T, generics: Vec<ParsedType>) -> ParsedType {
+        ParsedType::GenericType(name.to_string(), generics)
+    }
+
+    pub fn name(&self) -> String {
+        match self {
+            ParsedType::TypeName(name) => name.clone(),
+            ParsedType::GenericType(name, _) => name.clone(),
         }
     }
-    pub fn name(&self) -> String {
-        self.name.clone()
+    pub fn generics(&self) -> Vec<ParsedType> {
+        match self {
+            ParsedType::TypeName(_) => vec![],
+            ParsedType::GenericType(_, lst) => lst.clone(),
+        }
     }
 }
 
@@ -159,6 +171,8 @@ pub enum ExprVariant {
     Bool(bool),
     /// `"str"`
     String(String),
+    /// `[1, 2, 3]`
+    List(Vec<Expr>),
     /// `a(b)`
     FuncCall(Box<Expr>, Vec<Argument>),
     /// `n`
@@ -194,6 +208,12 @@ impl Expr {
         Expr {
             location,
             value: ExprVariant::String(s),
+        }
+    }
+    pub fn list(location: Location, lst: Vec<Expr>) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::List(lst),
         }
     }
     pub fn func_call(location: Location, expr: Expr, args: Vec<Argument>) -> Expr {
