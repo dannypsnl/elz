@@ -55,7 +55,7 @@ impl ParsedType {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Variable {
     loc: Location,
-    name: String,
+    pub name: String,
     pub typ: ParsedType,
     pub expr: Expr,
 }
@@ -143,6 +143,17 @@ impl Statement {
             value: StatementVariant::Return(e),
         }
     }
+    pub fn variable<T: ToString>(
+        location: Location,
+        name: T,
+        typ: ParsedType,
+        expr: Expr,
+    ) -> Statement {
+        Statement {
+            location,
+            value: StatementVariant::Variable(Variable::new(location, name, typ, expr)),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -151,6 +162,8 @@ pub enum StatementVariant {
     ///
     /// `return 1;`
     Return(Option<Expr>),
+    /// `x: int = 1;`
+    Variable(Variable),
 }
 
 #[derive(Clone, Debug, PartialEq)]

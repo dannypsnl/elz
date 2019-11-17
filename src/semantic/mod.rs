@@ -57,8 +57,8 @@ impl SemanticChecker {
         }
         match f.body {
             Body::Expr(e) => {
-                self.type_env
-                    .unify(location, return_type.clone(), type_env.type_of_expr(e)?)
+                let e_type = type_env.type_of_expr(e)?;
+                type_env.unify(location, return_type.clone(), e_type)
             }
             Body::Block(b) => {
                 for stmt in b.statements {
@@ -70,6 +70,12 @@ impl SemanticChecker {
                                 None => Type::Void,
                             };
                             type_env.unify(stmt.location, return_type.clone(), typ)?
+                        }
+                        Variable(v) => {
+                            let var_def_typ = Type::from(v.typ);
+                            let var_typ = type_env.type_of_expr(v.expr)?;
+                            type_env.unify(location, var_def_typ.clone(), var_typ)?;
+                            type_env.add_variable(stmt.location, v.name, var_def_typ)?
                         }
                     }
                 }

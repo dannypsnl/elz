@@ -184,6 +184,15 @@ impl Parser {
     pub fn parse_statement(&mut self) -> Result<Statement> {
         let tok = self.peek(0)?;
         let stmt = match tok.tk_type() {
+            // `x: int = 1;`
+            TkType::Ident => {
+                let name = self.parse_identifier()?;
+                self.predict_and_consume(vec![TkType::Colon])?;
+                let typ = self.parse_type()?;
+                self.predict_and_consume(vec![TkType::Assign])?;
+                let expr = self.parse_expression(None, None)?;
+                Ok(Statement::variable(tok.location(), name, typ, expr))
+            }
             // `return 1;`
             TkType::Return => {
                 self.consume()?;

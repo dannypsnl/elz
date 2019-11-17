@@ -70,6 +70,18 @@ fn test_check_return_nothing() {
     assert_eq!(result.is_ok(), true);
 }
 
+#[test]
+fn test_check_local_variable_define() {
+    let code = "\
+    x(): int {
+      y: int = 1;
+      return y;
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code<T: ToString>(code: T) -> Result<()> {
     let program = Parser::parse_program(code.to_string()).unwrap();
