@@ -193,7 +193,7 @@ impl std::fmt::Display for Type {
                     if i == generics.len() - 1 {
                         write!(f, "{}", g)?;
                     } else {
-                        write!(f, "{} ,", g)?;
+                        write!(f, "{}, ", g)?;
                     }
                 }
                 write!(f, "]")
