@@ -260,8 +260,10 @@ fn ident(lexer: &mut Lexer) -> State {
 }
 
 fn string(lexer: &mut Lexer) -> State {
-    lexer.next();
     while let Some(c) = lexer.next() {
+        if c == '\\' {
+            lexer.next();
+        }
         if c == '"' {
             break;
         }
@@ -333,6 +335,18 @@ mod tests {
             vec![
                 Token((1, 1), Ident, "abc6".to_string()),
                 Token((1, 5), EOF, "".to_string()),
+            ]
+        )
+    }
+
+    #[test]
+    fn get_escape_char_in_string() {
+        let ts = lex("\"\\\"\"");
+        assert_eq!(
+            ts,
+            vec![
+                Token((1, 0), String, "\"\\\"\"".to_string()),
+                Token((1, 4), EOF, "".to_string()),
             ]
         )
     }
