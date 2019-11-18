@@ -217,10 +217,10 @@ impl Expr {
             value: ExprVariant::Bool(b),
         }
     }
-    pub fn string(location: Location, s: String) -> Expr {
+    pub fn string<T: ToString>(location: Location, s: T) -> Expr {
         Expr {
             location,
-            value: ExprVariant::String(s),
+            value: ExprVariant::String(s.to_string()),
         }
     }
     pub fn list(location: Location, lst: Vec<Expr>) -> Expr {

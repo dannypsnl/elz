@@ -283,7 +283,7 @@ impl Parser {
                 self.take()?;
                 Expr::bool(tok.location(), false)
             }
-            TkType::String => Expr::string(tok.location(), self.take()?.value()),
+            TkType::String => self.parse_string()?,
             TkType::LBracket => {
                 let list = self.parse_list()?;
                 Expr::list(tok.location(), list)
@@ -329,6 +329,14 @@ impl Parser {
         }
         self.predict_and_consume(vec![TkType::RBracket])?;
         Ok(list)
+    }
+    pub fn parse_string(&mut self) -> Result<Expr> {
+        self.predict(vec![TkType::String])?;
+        let tok = self.take()?;
+        // lexer didn't trim "" of string, so here we have to remove it.
+        let s = tok.value();
+        let s = s.trim_start_matches('"').trim_end_matches('"');
+        Ok(Expr::string(tok.location(), s))
     }
 }
 

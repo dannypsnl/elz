@@ -1,5 +1,4 @@
 use super::*;
-use crate::ast::Function;
 
 #[test]
 fn test_parse_function_with_block_body() {
@@ -96,4 +95,16 @@ fn test_parse_variable_define_with_list_value() {
             )
         )
     )
+}
+
+#[test]
+fn test_parse_string() {
+    let code = "\
+    \"str value\"
+    ";
+
+    let mut parser = Parser::new(code);
+
+    let s = parser.parse_string().unwrap();
+    assert_eq!(s, Expr::string((1, 0), "str value"))
 }
