@@ -353,6 +353,28 @@ impl Parser {
                         break;
                     }
                 }
+                '{' => {
+                    let left_string = Expr::string(location, tmp_s.clone());
+                    // consume `{`
+                    index += 1;
+                    // reset it
+                    tmp_s = String::new();
+                    while index < s.len() && s[index] != '}' && s[index - 1] != '\\' {
+                        tmp_s.push(s[index]);
+                        index += 1;
+                    }
+                    let mut p = Parser::new(tmp_s);
+                    let mid_expr = p.parse_expression(None, None)?;
+                    index += 1;
+                    let rest_string = self.parse_string_template(location, s[index..].to_vec())?;
+                    let result = Expr::binary(
+                        location,
+                        Expr::binary(location, left_string, mid_expr, Operator::Plus),
+                        rest_string,
+                        Operator::Plus,
+                    );
+                    return Ok(result);
+                }
                 _ => {
                     tmp_s.push(c);
                     index += 1;
