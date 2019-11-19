@@ -336,7 +336,30 @@ impl Parser {
         // lexer didn't trim "" of string, so here we have to remove it.
         let s = tok.value();
         let s = s.trim_start_matches('"').trim_end_matches('"');
-        Ok(Expr::string(tok.location(), s))
+        self.parse_string_template(tok.location(), s.chars().collect())
+    }
+    fn parse_string_template(&mut self, location: lexer::Location, s: Vec<char>) -> Result<Expr> {
+        let mut tmp_s = String::new();
+        let mut index = 0;
+        while index < s.len() {
+            let c = s[index];
+            match c {
+                '\\' => {
+                    index += 1;
+                    if index < s.len() {
+                        tmp_s.push(s[index]);
+                        index += 1;
+                    } else {
+                        break;
+                    }
+                }
+                _ => {
+                    tmp_s.push(c);
+                    index += 1;
+                }
+            }
+        }
+        Ok(Expr::string(location, tmp_s))
     }
 }
 

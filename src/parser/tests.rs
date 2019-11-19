@@ -100,11 +100,11 @@ fn test_parse_variable_define_with_list_value() {
 #[test]
 fn test_parse_string() {
     let code = "\
-    \"str value\"
+    \"str \\\"\\\\ value\"
     ";
 
     let mut parser = Parser::new(code);
 
     let s = parser.parse_string().unwrap();
-    assert_eq!(s, Expr::string((1, 0), "str value"))
+    assert_eq!(s, Expr::string((1, 0), "str \"\\ value"))
 }
