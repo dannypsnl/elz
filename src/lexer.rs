@@ -18,19 +18,19 @@ pub enum TkType {
     /// ,
     Comma,
     /// =
-    Assign,
+    Equal,
     /// (
-    LParen,
+    OpenParen,
     /// )
-    RParen,
+    CloseParen,
     /// [
-    LBracket,
+    OpenBracket,
     /// ]
-    RBracket,
+    CloseBracket,
     /// {
-    LBrace,
+    OpenBrace,
     /// }
-    RBrace,
+    CloseBrace,
     /// :
     Colon,
     /// ::
@@ -52,13 +52,13 @@ impl std::fmt::Display for TkType {
             String => "<string>",
             Plus => "+",
             Comma => ",",
-            Assign => "=",
-            LParen => "(",
-            RParen => ")",
-            LBracket => "[",
-            RBracket => "]",
-            LBrace => "{",
-            RBrace => "}",
+            Equal => "=",
+            OpenParen => "(",
+            CloseParen => ")",
+            OpenBracket => "[",
+            CloseBracket => "]",
+            OpenBrace => "{",
+            CloseBrace => "}",
             Colon => ":",
             Accessor => "::",
             Semicolon => ";",
@@ -175,7 +175,7 @@ fn whitespace(lexer: &mut Lexer) -> State {
         Some(_c @ '0'..='9') => State::Fn(number),
         Some('=') => {
             lexer.next();
-            lexer.emit(TkType::Assign);
+            lexer.emit(TkType::Equal);
             State::Fn(whitespace)
         }
         Some(',') => {
@@ -190,32 +190,32 @@ fn whitespace(lexer: &mut Lexer) -> State {
         }
         Some('(') => {
             lexer.next();
-            lexer.emit(TkType::LParen);
+            lexer.emit(TkType::OpenParen);
             State::Fn(whitespace)
         }
         Some(')') => {
             lexer.next();
-            lexer.emit(TkType::RParen);
+            lexer.emit(TkType::CloseParen);
             State::Fn(whitespace)
         }
         Some('[') => {
             lexer.next();
-            lexer.emit(TkType::LBracket);
+            lexer.emit(TkType::OpenBracket);
             State::Fn(whitespace)
         }
         Some(']') => {
             lexer.next();
-            lexer.emit(TkType::RBracket);
+            lexer.emit(TkType::CloseBracket);
             State::Fn(whitespace)
         }
         Some('{') => {
             lexer.next();
-            lexer.emit(TkType::LBrace);
+            lexer.emit(TkType::OpenBrace);
             State::Fn(whitespace)
         }
         Some('}') => {
             lexer.next();
-            lexer.emit(TkType::RBrace);
+            lexer.emit(TkType::CloseBrace);
             State::Fn(whitespace)
         }
         Some(':') => {
@@ -307,7 +307,7 @@ mod tests {
                 Token((1, 0), Ident, "測試".to_string()),
                 Token((1, 2), Colon, ":".to_string()),
                 Token((1, 4), Ident, "int".to_string()),
-                Token((1, 8), Assign, "=".to_string()),
+                Token((1, 8), Equal, "=".to_string()),
                 Token((1, 10), Integer, "1".to_string()),
                 Token((1, 11), EOF, "".to_string()),
             ]
