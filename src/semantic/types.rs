@@ -21,7 +21,7 @@ impl TypeEnv {
                 let right_type = self.type_of_expr(*r)?;
                 match (left_type, right_type, op) {
                     (Type::Int, Type::Int, Operator::Plus) => Ok(Type::Int),
-                    _ => panic!("unsupported operator"),
+                    (l, r, op) => panic!("unsupported operator, {} {:?} {}", l, op, r),
                 }
             }
             F64(_) => Ok(Type::F64),
