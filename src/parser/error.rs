@@ -19,13 +19,17 @@ impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         use ParseError::*;
         match self {
-            NotExpectedToken(expected, actual) => write!(
-                f,
-                "{:?} expected one of {:?} but got {}",
-                actual.location(),
-                expected,
-                actual
-            ),
+            NotExpectedToken(expected, actual) => {
+                write!(f, "{} expected one of ", actual.location())?;
+                for (i, e) in expected.iter().enumerate() {
+                    if i == expected.len() - 1 {
+                        write!(f, "{}", e)?;
+                    } else {
+                        write!(f, "{}|", e)?;
+                    }
+                }
+                write!(f, " but got {}", actual.tk_type())
+            }
             EOF => write!(f, "meet eof when parsing"),
         }
     }
