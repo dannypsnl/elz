@@ -37,7 +37,7 @@ impl TypeEnv {
                 for e in es {
                     if expr_type != self.type_of_expr(e.clone())? {
                         return Err(SemanticError::type_mismatched(
-                            e.location,
+                            e.location.clone(),
                             expr_type,
                             self.type_of_expr(e)?,
                         ));
@@ -46,13 +46,13 @@ impl TypeEnv {
                 Ok(Type::generic_type("List", vec![expr_type]))
             }
             FuncCall(f, args) => {
-                let location = f.location;
+                let location = f.location.clone();
                 let f_type = self.type_of_expr(*f)?;
                 match f_type {
                     Type::FunctionType(params, ret_typ) => {
                         for (p, arg) in params.iter().zip(args.iter()) {
                             let typ = self.type_of_expr(arg.expr.clone())?;
-                            self.unify(arg.location, p.clone(), typ)?;
+                            self.unify(arg.location.clone(), p.clone(), typ)?;
                         }
                         Ok(*ret_typ)
                     }
@@ -81,14 +81,14 @@ impl TypeEnv {
                     Err(SemanticError::type_mismatched(location, expected, actual))
                 } else {
                     for (t1, t2) in generics.iter().zip(generics2.iter()) {
-                        self.unify(location, t1.clone(), t2.clone())?;
+                        self.unify(location.clone(), t1.clone(), t2.clone())?;
                     }
                     Ok(())
                 }
             }
             (FunctionType(ft, arg), FunctionType(ft_p, arg_p)) => {
                 for (ft, ft_p) in ft.iter().zip(ft_p.iter()) {
-                    self.unify(location, ft.clone(), ft_p.clone())?;
+                    self.unify(location.clone(), ft.clone(), ft_p.clone())?;
                 }
                 self.unify(location, *arg, *arg_p)
             }

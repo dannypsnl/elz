@@ -40,7 +40,11 @@ impl SemanticChecker {
             let location = top.location();
             match top {
                 Variable(v) => {
+                    let location = v.expr.location.clone();
                     let typ = self.type_env.type_of_expr(v.expr)?;
+                    // show where error happened
+                    // we are unifying <expr> and <type>, so <expr> location is better than
+                    // variable define statement location
                     self.type_env.unify(location, Type::from(v.typ), typ)?
                 }
                 Function(f) => self.check_function_body(location, f)?,
@@ -53,7 +57,7 @@ impl SemanticChecker {
         let return_type = Type::from(f.ret_typ);
         let mut type_env = TypeEnv::with_parent(&self.type_env);
         for Parameter(p_type, p_name) in f.parameters {
-            type_env.add_variable(location, p_name, Type::from(p_type))?;
+            type_env.add_variable(location.clone(), p_name, Type::from(p_type))?;
         }
         match f.body {
             Body::Expr(e) => {
@@ -74,7 +78,7 @@ impl SemanticChecker {
                         Variable(v) => {
                             let var_def_typ = Type::from(v.typ);
                             let var_typ = type_env.type_of_expr(v.expr)?;
-                            type_env.unify(location, var_def_typ.clone(), var_typ)?;
+                            type_env.unify(stmt.location.clone(), var_def_typ.clone(), var_typ)?;
                             type_env.add_variable(stmt.location, v.name, var_def_typ)?
                         }
                     }

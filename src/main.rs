@@ -29,7 +29,7 @@ fn main() {
                 return;
             }
         };
-        let program = match Parser::parse_program(code) {
+        let program = match Parser::parse_program(files[0], &code) {
             Ok(p) => p,
             Err(e) => {
                 println!("{}", e);

@@ -18,8 +18,8 @@ impl TopAst {
     pub fn location(&self) -> Location {
         use TopAst::*;
         match self {
-            Function(f) => f.loc,
-            Variable(v) => v.loc,
+            Function(f) => f.loc.clone(),
+            Variable(v) => v.loc.clone(),
         }
     }
 }
@@ -150,7 +150,7 @@ impl Statement {
         expr: Expr,
     ) -> Statement {
         Statement {
-            location,
+            location: location.clone(),
             value: StatementVariant::Variable(Variable::new(location, name, typ, expr)),
         }
     }

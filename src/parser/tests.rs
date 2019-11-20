@@ -7,13 +7,13 @@ fn test_parse_function_with_block_body() {
     main(): void {}
     ";
 
-    let mut parser = Parser::new(code);
+    let mut parser = Parser::new("", code);
 
     let func = parser.parse_function().unwrap();
     assert_eq!(
         func,
         Function::new(
-            (1, 0),
+            Location::from(1, 0),
             "main",
             vec![],
             ParsedType::type_name("void"),
@@ -28,13 +28,13 @@ fn test_parse_function_with_expression_body() {
     add(x: int, y: int): int = x + y;
     ";
 
-    let mut parser = Parser::new(code);
+    let mut parser = Parser::new("", code);
 
     let func = parser.parse_function().unwrap();
     assert_eq!(
         func,
         Function::new(
-            (1, 0),
+            Location::from(1, 0),
             "add",
             vec![
                 Parameter::new("x", ParsedType::type_name("int")),
@@ -42,9 +42,9 @@ fn test_parse_function_with_expression_body() {
             ],
             ParsedType::type_name("int"),
             Body::Expr(Expr::binary(
-                (1, 27),
-                Expr::identifier((1, 27), "x"),
-                Expr::identifier((1, 31), "y"),
+                Location::from(1, 27),
+                Expr::identifier(Location::from(1, 27), "x"),
+                Expr::identifier(Location::from(1, 31), "y"),
                 Operator::Plus
             ))
         )
@@ -57,16 +57,16 @@ fn test_parse_variable_define() {
     x: int = 1;
     ";
 
-    let mut parser = Parser::new(code);
+    let mut parser = Parser::new("", code);
 
     let var = parser.parse_variable().unwrap();
     assert_eq!(
         var,
         Variable::new(
-            (1, 0),
+            Location::from(1, 0),
             "x",
             ParsedType::type_name("int"),
-            Expr::int((1, 9), 1)
+            Expr::int(Location::from(1, 9), 1)
         )
     )
 }
@@ -77,21 +77,21 @@ fn test_parse_variable_define_with_list_value() {
     x: List[int] = [1, 2, 3];
     ";
 
-    let mut parser = Parser::new(code);
+    let mut parser = Parser::new("", code);
 
     let var = parser.parse_variable().unwrap();
     assert_eq!(
         var,
         Variable::new(
-            (1, 0),
+            Location::from(1, 0),
             "x",
             ParsedType::generic_type("List", vec![ParsedType::type_name("int")]),
             Expr::list(
-                (1, 15),
+                Location::from(1, 15),
                 vec![
-                    Expr::int((1, 16), 1),
-                    Expr::int((1, 19), 2),
-                    Expr::int((1, 22), 3),
+                    Expr::int(Location::from(1, 16), 1),
+                    Expr::int(Location::from(1, 19), 2),
+                    Expr::int(Location::from(1, 22), 3),
                 ]
             )
         )
@@ -104,16 +104,16 @@ fn test_parse_string() {
     \"str \\\"\\\\ value {a}\"
     ";
 
-    let mut parser = Parser::new(code);
+    let mut parser = Parser::new("", code);
 
     let s = parser.parse_string().unwrap();
-    let location: Location = (1, 0);
+    let location = Location::from(1, 0);
     let expected = Expr::binary(
-        location,
+        location.clone(),
         Expr::binary(
-            location,
-            Expr::string(location, "str \"\\ value "),
-            Expr::identifier(location, "a"),
+            location.clone(),
+            Expr::string(location.clone(), "str \"\\ value "),
+            Expr::identifier(location.clone(), "a"),
             Operator::Plus,
         ),
         Expr::string(location, ""),

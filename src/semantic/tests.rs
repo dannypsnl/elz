@@ -83,8 +83,8 @@ fn test_check_local_variable_define() {
 }
 
 // helpers, must put tests before this line
-fn check_code<T: ToString>(code: T) -> Result<()> {
-    let program = Parser::parse_program(code.to_string()).unwrap();
+fn check_code(code: &'static str) -> Result<()> {
+    let program = Parser::parse_program("", code).unwrap();
     let mut checker = SemanticChecker::new();
     checker.check_program(program)
 }

@@ -11,6 +11,7 @@ use error::Result;
 
 /// Parser is a parsing helper
 pub struct Parser {
+    file_name: String,
     tokens: Vec<Token>,
     offset: usize,
 }
@@ -235,7 +236,12 @@ impl Parser {
                     self.parse_expression(Some(lhs.clone()), Some(precedence(lookahead.clone())))?;
                 lookahead = self.peek(0)?;
             }
-            lhs = Expr::binary(lhs.location, lhs, rhs, Operator::from_token(operator));
+            lhs = Expr::binary(
+                lhs.location.clone(),
+                lhs,
+                rhs,
+                Operator::from_token(operator),
+            );
         }
         Ok(lhs)
     }
@@ -304,7 +310,7 @@ impl Parser {
                 "".to_string()
             };
             let expr = self.parse_expression(None, None)?;
-            args.push(Argument::new(expr.location, Some(identifier), expr));
+            args.push(Argument::new(expr.location.clone(), Some(identifier), expr));
             if self.predict(vec![TkType::Comma]).is_err() {
                 break;
             } else {
@@ -313,7 +319,7 @@ impl Parser {
         }
         self.predict_and_consume(vec![TkType::CloseParen])?;
 
-        Ok(Expr::func_call(func.location, func, args))
+        Ok(Expr::func_call(func.location.clone(), func, args))
     }
     pub fn parse_list(&mut self) -> Result<Vec<Expr>> {
         let mut list = vec![];
@@ -354,7 +360,7 @@ impl Parser {
                     }
                 }
                 '{' => {
-                    let left_string = Expr::string(location, tmp_s.clone());
+                    let left_string = Expr::string(location.clone(), tmp_s.clone());
                     // consume `{`
                     index += 1;
                     // reset it
@@ -363,12 +369,13 @@ impl Parser {
                         tmp_s.push(s[index]);
                         index += 1;
                     }
-                    let mut p = Parser::new(tmp_s);
+                    let mut p = Parser::new(self.file_name.clone(), tmp_s);
                     let mid_expr = p.parse_expression(None, None)?;
                     index += 1;
-                    let rest_string = self.parse_string_template(location, s[index..].to_vec())?;
+                    let rest_string =
+                        self.parse_string_template(location.clone(), s[index..].to_vec())?;
                     let result = Expr::binary(
-                        location,
+                        location.clone(),
                         Expr::binary(location, left_string, mid_expr, Operator::Plus),
                         rest_string,
                         Operator::Plus,
@@ -398,14 +405,19 @@ fn precedence(op: Token) -> u64 {
 
 /// This block puts fundamental helpers
 impl Parser {
-    pub fn parse_program<T: Into<String>>(code: T) -> Result<Vec<TopAst>> {
-        let mut parser = Parser::new(code);
+    pub fn parse_program<T: Into<String> + Clone>(file_name: T, code: T) -> Result<Vec<TopAst>> {
+        let mut parser = Parser::new(file_name, code);
         parser.parse_all(TkType::EOF)
     }
     /// new create Parser from code
-    pub fn new<T: Into<String>>(code: T) -> Parser {
-        let tokens = lexer::lex(code);
-        Parser { tokens, offset: 0 }
+    pub fn new<T: Into<String> + Clone>(f_name: T, code: T) -> Parser {
+        let file_name = f_name.clone().into();
+        let tokens = lexer::lex(f_name, code);
+        Parser {
+            file_name,
+            tokens,
+            offset: 0,
+        }
     }
     /// peek get the token by (current position + n)
     pub fn peek(&self, n: usize) -> Result<Token> {

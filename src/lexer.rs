@@ -67,14 +67,38 @@ impl std::fmt::Display for TkType {
     }
 }
 
-pub type Location = (u32, u32);
+#[derive(Clone, Debug, PartialEq)]
+pub struct Location {
+    file_name: String,
+    line: u32,
+    column: u32,
+}
+
+impl Location {
+    pub fn from(line: u32, column: u32) -> Location {
+        Location::new("", line, column)
+    }
+    pub fn new<T: ToString>(file_name: T, line: u32, column: u32) -> Location {
+        Location {
+            file_name: file_name.to_string(),
+            line,
+            column,
+        }
+    }
+}
+
+impl std::fmt::Display for Location {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}:{}:{}", self.file_name, self.line, self.column)
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Token(Location, TkType, String);
 
 impl Token {
     pub fn location(&self) -> Location {
-        self.0
+        self.0.clone()
     }
     pub fn tk_type(&self) -> &TkType {
         &self.1
@@ -86,12 +110,10 @@ impl Token {
 
 impl std::fmt::Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let (line, pos) = self.location();
         write!(
             f,
-            "loc: ({}, {}), type: {:?}, `{}`",
-            line,
-            pos,
+            "loc: {}, type: {}, `{}`",
+            self.location(),
             self.tk_type(),
             self.value()
         )
@@ -104,6 +126,7 @@ enum State {
 }
 
 struct Lexer {
+    file_name: String,
     code: Vec<char>,
     tokens: Vec<Token>,
     state_fn: State,
@@ -115,8 +138,9 @@ struct Lexer {
 }
 
 impl Lexer {
-    fn new<T: Into<String>>(code: T) -> Lexer {
+    fn new<T: Into<String>>(file_name: T, code: T) -> Lexer {
         Lexer {
+            file_name: file_name.into(),
             code: code.into().chars().collect(),
             tokens: vec![],
             state_fn: State::Fn(whitespace),
@@ -142,7 +166,11 @@ impl Lexer {
         self.peek()
     }
     fn new_token(&mut self, token_type: TkType, value: String) -> Token {
-        Token((self.line, self.pos), token_type, value)
+        Token(
+            Location::new(self.file_name.clone(), self.line, self.pos),
+            token_type,
+            value,
+        )
     }
     fn emit(&mut self, token_type: TkType) {
         let s: String = self.code[self.start..self.offset].into_iter().collect();
@@ -283,8 +311,8 @@ fn number(lexer: &mut Lexer) -> State {
     State::Fn(whitespace)
 }
 
-pub fn lex<T: Into<String>>(source: T) -> Vec<Token> {
-    let mut lexer = Lexer::new(source);
+pub fn lex<T: Into<String>>(file_name: T, source: T) -> Vec<Token> {
+    let mut lexer = Lexer::new(file_name, source);
     while let State::Fn(f) = lexer.state_fn {
         lexer.state_fn = f(&mut lexer);
     }
@@ -302,51 +330,51 @@ mod tests {
         let code = "測試: int = 1";
 
         assert_eq!(
-            lex(code),
+            lex("", code),
             vec![
-                Token((1, 0), Ident, "測試".to_string()),
-                Token((1, 2), Colon, ":".to_string()),
-                Token((1, 4), Ident, "int".to_string()),
-                Token((1, 8), Equal, "=".to_string()),
-                Token((1, 10), Integer, "1".to_string()),
-                Token((1, 11), EOF, "".to_string()),
+                Token(Location::from(1, 0), Ident, "測試".to_string()),
+                Token(Location::from(1, 2), Colon, ":".to_string()),
+                Token(Location::from(1, 4), Ident, "int".to_string()),
+                Token(Location::from(1, 8), Equal, "=".to_string()),
+                Token(Location::from(1, 10), Integer, "1".to_string()),
+                Token(Location::from(1, 11), EOF, "".to_string()),
             ]
         );
     }
 
     #[test]
     fn get_number_tokens() {
-        let ts = lex("10 30");
+        let ts = lex("", "10 30");
         assert_eq!(
             ts,
             vec![
-                Token((1, 0), Integer, "10".to_string()),
-                Token((1, 3), Integer, "30".to_string()),
-                Token((1, 5), EOF, "".to_string()),
+                Token(Location::from(1, 0), Integer, "10".to_string()),
+                Token(Location::from(1, 3), Integer, "30".to_string()),
+                Token(Location::from(1, 5), EOF, "".to_string()),
             ]
         );
     }
 
     #[test]
     fn get_ident_tokens() {
-        let ts = lex(" abc6");
+        let ts = lex("", " abc6");
         assert_eq!(
             ts,
             vec![
-                Token((1, 1), Ident, "abc6".to_string()),
-                Token((1, 5), EOF, "".to_string()),
+                Token(Location::from(1, 1), Ident, "abc6".to_string()),
+                Token(Location::from(1, 5), EOF, "".to_string()),
             ]
         )
     }
 
     #[test]
     fn get_escape_char_in_string() {
-        let ts = lex("\"\\\"\"");
+        let ts = lex("", "\"\\\"\"");
         assert_eq!(
             ts,
             vec![
-                Token((1, 0), String, "\"\\\"\"".to_string()),
-                Token((1, 4), EOF, "".to_string()),
+                Token(Location::from(1, 0), String, "\"\\\"\"".to_string()),
+                Token(Location::from(1, 4), EOF, "".to_string()),
             ]
         )
     }

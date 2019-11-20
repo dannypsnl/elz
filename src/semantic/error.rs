@@ -46,7 +46,7 @@ impl SemanticError {
 
 impl std::fmt::Display for SemanticError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?} ", self.location)?;
+        write!(f, "{} ", self.location)?;
         use SemanticErrorVariant::*;
         match &self.err {
             NameRedefined(name) => write!(f, "name: {} be redefined", name),
