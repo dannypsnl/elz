@@ -185,14 +185,26 @@ impl Parser {
     pub fn parse_statement(&mut self) -> Result<Statement> {
         let tok = self.peek(0)?;
         let stmt = match tok.tk_type() {
-            // `x: int = 1;`
             TkType::Ident => {
                 let name = self.parse_identifier()?;
-                self.predict_and_consume(vec![TkType::Colon])?;
-                let typ = self.parse_type()?;
-                self.predict_and_consume(vec![TkType::Equal])?;
-                let expr = self.parse_expression(None, None)?;
-                Ok(Statement::variable(tok.location(), name, typ, expr))
+                if self.predict(vec![TkType::Colon]).is_ok() {
+                    // `x: int = 1;`
+                    self.predict_and_consume(vec![TkType::Colon])?;
+                    let typ = self.parse_type()?;
+                    self.predict_and_consume(vec![TkType::Equal])?;
+                    let expr = self.parse_expression(None, None)?;
+                    Ok(Statement::variable(tok.location(), name, typ, expr))
+                } else if self.predict(vec![TkType::OpenParen]).is_ok() {
+                    // `println("hello");`
+                    let func_expr = Expr::identifier(tok.location().clone(), name);
+                    let func_call_expr = self.parse_function_call(func_expr)?;
+                    Ok(Statement::function_call(tok.location(), func_call_expr))
+                } else {
+                    Err(ParseError::not_expected_token(
+                        vec![TkType::Colon, TkType::OpenParen],
+                        tok,
+                    ))
+                }
             }
             // `return 1;`
             TkType::Return => {
@@ -265,14 +277,14 @@ impl Parser {
     /// | <list>
     pub fn parse_unary(&mut self) -> Result<Expr> {
         let tok = self.peek(0)?;
-        Ok(match tok.tk_type() {
+        match tok.tk_type() {
             // FIXME: lexer should emit int & float token directly
             TkType::Integer => {
                 let num = self.take()?.value();
                 if num.parse::<i64>().is_ok() {
-                    Expr::int(tok.location(), num.parse::<i64>().unwrap())
+                    Ok(Expr::int(tok.location(), num.parse::<i64>().unwrap()))
                 } else if num.parse::<f64>().is_ok() {
-                    Expr::f64(tok.location(), num.parse::<f64>().unwrap())
+                    Ok(Expr::f64(tok.location(), num.parse::<f64>().unwrap()))
                 } else {
                     panic!(
                         "lexing bug causes a number token can't be convert to number: {:?}",
@@ -280,22 +292,28 @@ impl Parser {
                     )
                 }
             }
-            TkType::Ident => Expr::identifier(tok.location(), self.parse_identifier()?),
+            TkType::Ident => Ok(Expr::identifier(tok.location(), self.parse_identifier()?)),
             TkType::True => {
                 self.take()?;
-                Expr::bool(tok.location(), true)
+                Ok(Expr::bool(tok.location(), true))
             }
             TkType::False => {
                 self.take()?;
-                Expr::bool(tok.location(), false)
+                Ok(Expr::bool(tok.location(), false))
             }
-            TkType::String => self.parse_string()?,
+            TkType::String => self.parse_string(),
             TkType::OpenBracket => {
                 let list = self.parse_list()?;
-                Expr::list(tok.location(), list)
+                Ok(Expr::list(tok.location(), list))
             }
-            _ => panic!("unimplemented primary for {:?}", self.peek(0)?),
-        })
+            _ => {
+                use TkType::*;
+                Err(ParseError::not_expected_token(
+                    vec![Integer, Ident, True, False, String, OpenBracket],
+                    tok,
+                ))
+            }
+        }
     }
     pub fn parse_function_call(&mut self, func: Expr) -> Result<Expr> {
         self.predict_and_consume(vec![TkType::OpenParen])?;

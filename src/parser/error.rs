@@ -21,14 +21,10 @@ impl std::fmt::Display for ParseError {
         match self {
             NotExpectedToken(expected, actual) => {
                 write!(f, "{} expected one of ", actual.location())?;
-                for (i, e) in expected.iter().enumerate() {
-                    if i == expected.len() - 1 {
-                        write!(f, "{}", e)?;
-                    } else {
-                        write!(f, "{}|", e)?;
-                    }
+                for e in expected {
+                    write!(f, "`{}` ", e)?;
                 }
-                write!(f, " but got {}", actual.tk_type())
+                write!(f, "but got `{}`", actual.tk_type())
             }
             EOF => write!(f, "meet eof when parsing"),
         }

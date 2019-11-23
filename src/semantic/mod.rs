@@ -81,6 +81,7 @@ impl SemanticChecker {
                             type_env.unify(stmt.location.clone(), var_def_typ.clone(), var_typ)?;
                             type_env.add_variable(stmt.location, v.name, var_def_typ)?
                         }
+                        _ => unimplemented!(),
                     }
                 }
                 Ok(())

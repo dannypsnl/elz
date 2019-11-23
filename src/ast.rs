@@ -154,6 +154,12 @@ impl Statement {
             value: StatementVariant::Variable(Variable::new(location, name, typ, expr)),
         }
     }
+    pub fn function_call(location: Location, func_call_expr: Expr) -> Statement {
+        Statement {
+            location,
+            value: StatementVariant::FunctionCall(func_call_expr),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -164,6 +170,8 @@ pub enum StatementVariant {
     Return(Option<Expr>),
     /// `x: int = 1;`
     Variable(Variable),
+    /// `println("hello");`
+    FunctionCall(Expr),
 }
 
 #[derive(Clone, Debug, PartialEq)]
