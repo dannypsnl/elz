@@ -49,12 +49,12 @@ impl std::fmt::Display for SemanticError {
         write!(f, "{} ", self.location)?;
         use SemanticErrorVariant::*;
         match &self.err {
-            NameRedefined(name) => write!(f, "name: {} be redefined", name),
+            NameRedefined(name) => write!(f, "name: `{}` be redefined", name),
             TypeMismatched(expected, actual) => {
-                write!(f, "expected: {} but got: {}", expected, actual)
+                write!(f, "expected: `{}` but got: `{}`", expected, actual)
             }
-            NoVariableNamed(name) => write!(f, "no variable named: {}", name),
-            CallOnNonFunctionType(typ) => write!(f, "call on non-function type: {}", typ),
+            NoVariableNamed(name) => write!(f, "no variable named: `{}`", name),
+            CallOnNonFunctionType(typ) => write!(f, "call on non-function type: `{}`", typ),
         }
     }
 }

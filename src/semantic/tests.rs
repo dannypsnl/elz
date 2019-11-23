@@ -32,6 +32,30 @@ fn test_type_mismatched() {
 }
 
 #[test]
+fn call_non_void_function_as_statement() {
+    let code = "\
+    main(): void {
+      foo();
+    }
+    foo(): int = 1;
+    ";
+    let err = check_code(code).unwrap_err();
+    assert_eq!(err.description(), "type mismatched");
+}
+
+#[test]
+fn call_void_function_as_statement() {
+    let code = "\
+    main(): void {
+      foo();
+    }
+    foo(): void {}
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
+
+#[test]
 fn test_check_function_call() {
     let code = "\
     x(a: int): int = a;
