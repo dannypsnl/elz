@@ -19,8 +19,8 @@ impl SemanticChecker {
 }
 
 impl SemanticChecker {
-    pub fn check_program(&mut self, ast: Vec<TopAst>) -> Result<()> {
-        for top in &ast {
+    pub fn check_program(&mut self, ast: &Vec<TopAst>) -> Result<()> {
+        for top in ast {
             use TopAst::*;
             match top {
                 Variable(v) => self.type_env.add_variable(
@@ -41,13 +41,14 @@ impl SemanticChecker {
             match top {
                 Variable(v) => {
                     let location = v.expr.location.clone();
-                    let typ = self.type_env.type_of_expr(v.expr)?;
+                    let typ = self.type_env.type_of_expr(v.expr.clone())?;
                     // show where error happened
                     // we are unifying <expr> and <type>, so <expr> location is better than
                     // variable define statement location
-                    self.type_env.unify(location, Type::from(v.typ), typ)?
+                    self.type_env
+                        .unify(location, Type::from(v.typ.clone()), typ)?
                 }
-                Function(f) => self.check_function_body(location, f)?,
+                Function(f) => self.check_function_body(location, f.clone())?,
             }
         }
         Ok(())

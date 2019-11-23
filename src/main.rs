@@ -1,7 +1,7 @@
 use clap::{App, Arg, SubCommand};
+use elz::ast::TopAst;
 use elz::parser::Parser;
 use elz::semantic::SemanticChecker;
-use std::fs;
 
 fn main() {
     let matches = App::new("elz")
@@ -18,31 +18,24 @@ fn main() {
         )
         .get_matches();
 
-    if let Some(compile) = matches.subcommand_matches("compile") {
-        let files: Vec<_> = compile.values_of("INPUT").unwrap().collect();
+    if let Some(compile_args) = matches.subcommand_matches("compile") {
+        let files: Vec<_> = compile_args.values_of("INPUT").unwrap().collect();
 
-        // FIXME: for now to make code simple we only handle the first input file.
-        let code = match fs::read_to_string(files[0]) {
-            Ok(code) => code,
-            Err(e) => {
-                println!("{}", e);
-                return;
-            }
-        };
-        let program = match Parser::parse_program(files[0], &code) {
-            Ok(p) => p,
-            Err(e) => {
-                println!("{}", e);
-                return;
-            }
-        };
-        // check program
-        let mut semantic_checker = SemanticChecker::new();
-        match semantic_checker.check_program(program) {
+        match check(files) {
             Err(e) => println!("{}", e),
             _ => {
-                // TODO: generate binary(or do nothing for library)
+                return;
             }
         }
     }
+}
+
+fn check(files: Vec<&str>) -> Result<Vec<TopAst>, Box<dyn std::error::Error>> {
+    // FIXME: for now to make code simple we only handle the first input file.
+    let code = std::fs::read_to_string(files[0])?;
+    let program = Parser::parse_program(files[0], &code)?;
+    // check program
+    let mut semantic_checker = SemanticChecker::new();
+    semantic_checker.check_program(&program)?;
+    Ok(program)
 }

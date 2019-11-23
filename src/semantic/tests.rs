@@ -110,5 +110,5 @@ fn test_check_local_variable_define() {
 fn check_code(code: &'static str) -> Result<()> {
     let program = Parser::parse_program("", code).unwrap();
     let mut checker = SemanticChecker::new();
-    checker.check_program(program)
+    checker.check_program(&program)
 }
