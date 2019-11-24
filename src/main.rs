@@ -1,5 +1,6 @@
 use clap::{App, Arg, SubCommand};
 use elz::ast::TopAst;
+use elz::codegen::{Backend, CodeGenerator};
 use elz::parser::Parser;
 use elz::semantic::SemanticChecker;
 
@@ -23,8 +24,9 @@ fn main() {
 
         match check(files) {
             Err(e) => println!("{}", e),
-            _ => {
-                return;
+            Ok(program) => {
+                let code_generator = CodeGenerator::with_backend(Backend::LLVM);
+                code_generator.generate_module(&program);
             }
         }
     }
