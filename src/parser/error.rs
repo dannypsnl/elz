@@ -1,10 +1,13 @@
 use crate::lexer::{TkType, Token};
+use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, ParseError>;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ParseError {
+    #[error("{} expected one of {} but got {}", .1.location(), ShowTkTypeList(.0.to_vec()), .1.tk_type())]
     NotExpectedToken(Vec<TkType>, Token),
+    #[error("meet eof when parsing")]
     EOF,
 }
 
@@ -15,27 +18,12 @@ impl ParseError {
     }
 }
 
-impl std::fmt::Display for ParseError {
+struct ShowTkTypeList(Vec<TkType>);
+impl std::fmt::Display for ShowTkTypeList {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        use ParseError::*;
-        match self {
-            NotExpectedToken(expected, actual) => {
-                write!(f, "{} expected one of ", actual.location())?;
-                for e in expected {
-                    write!(f, "`{}` ", e)?;
-                }
-                write!(f, "but got `{}`", actual.tk_type())
-            }
-            EOF => write!(f, "meet eof when parsing"),
+        for e in &self.0 {
+            write!(f, "`{}` ", e)?;
         }
-    }
-}
-impl std::error::Error for ParseError {
-    fn description(&self) -> &str {
-        use ParseError::*;
-        match self {
-            NotExpectedToken(_, _) => "not expected token",
-            EOF => "eof",
-        }
+        write!(f, "")
     }
 }
