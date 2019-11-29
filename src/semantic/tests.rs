@@ -1,6 +1,5 @@
 use super::*;
 use crate::parser::Parser;
-use std::error::Error;
 
 #[test]
 fn test_redefine_variable_would_get_error() {
@@ -8,8 +7,8 @@ fn test_redefine_variable_would_get_error() {
     x: int = 1;
     x: int = 2;
     ";
-    let err = check_code(code).unwrap_err();
-    assert_eq!(err.description(), "name redefined");
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
 }
 
 #[test]
@@ -18,8 +17,8 @@ fn test_function_and_variable_use_the_same_space() {
     x: int = 1;
     x(): void {}
     ";
-    let err = check_code(code).unwrap_err();
-    assert_eq!(err.description(), "name redefined");
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
 }
 
 #[test]
@@ -27,8 +26,8 @@ fn test_type_mismatched() {
     let code = "\
     x: int = \"str\";
     ";
-    let err = check_code(code).unwrap_err();
-    assert_eq!(err.description(), "type mismatched");
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
 }
 
 #[test]
@@ -39,8 +38,8 @@ fn call_non_void_function_as_statement() {
     }
     foo(): int = 1;
     ";
-    let err = check_code(code).unwrap_err();
-    assert_eq!(err.description(), "type mismatched");
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
 }
 
 #[test]
