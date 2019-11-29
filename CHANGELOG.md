@@ -11,7 +11,14 @@
 * global function definition
     ```elz
     main(): void {}
+    // block body
     foo(): void {}
+    // expression body
+    bar(): int = 1;
+    // or we can use block
+    bar(): int {
+      return 1;
+    }
     ```
 * local variable
     ```elz
@@ -25,7 +32,7 @@
       println("hello, world");
     }
     ```
-* string template
+* string literal and template
     ```elz
     main(): void {
       x: int = 1;
