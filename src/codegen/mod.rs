@@ -30,12 +30,15 @@ impl Backend {
         for top in asts {
             match top {
                 TopAst::Function(f) => {
-                    let func = Function::new(top.name(), Type::from_ast(&f.ret_typ));
+                    let func = Function::new(
+                        top.name(),
+                        Type::from_ast(&f.ret_typ),
+                        Some(Body::from_ast(&f.body)),
+                    );
                     module.push_function(func);
                 }
                 TopAst::Variable(v) => {
-                    let var =
-                        Variable::new(top.name(), Type::from_ast(&v.typ), Expr::from_ast(&v.expr));
+                    let var = Variable::new(top.name(), Expr::from_ast(&v.expr));
                     module.push_variable(var);
                 }
             }
@@ -83,47 +86,127 @@ impl LLVMValue for Module {
     }
 }
 
+enum Statement {
+    Return(Option<Expr>),
+}
+
+impl Statement {
+    fn from_ast(s: &ast::Statement) -> Statement {
+        use ast::StatementVariant::*;
+        match &s.value {
+            Return(e) => match e {
+                None => Statement::Return(None),
+                Some(ex) => Statement::Return(Some(Expr::from_ast(ex))),
+            },
+            _ => unimplemented!(),
+        }
+    }
+}
+
+impl LLVMValue for Statement {
+    fn llvm_represent(&self) -> String {
+        use Statement::*;
+        match self {
+            Return(e) => {
+                let es = match e {
+                    None => "void".to_string(),
+                    Some(ex) => ex.llvm_represent(),
+                };
+                format!("ret {}", es)
+            }
+        }
+    }
+}
+
+struct Body {
+    statements: Vec<Statement>,
+}
+
+impl Body {
+    fn from_ast(b: &ast::Body) -> Body {
+        match b {
+            ast::Body::Expr(e) => Body {
+                statements: vec![Statement::Return(Some(Expr::from_ast(e)))],
+            },
+            ast::Body::Block(b) => Body {
+                statements: b
+                    .statements
+                    .iter()
+                    .map(|ob| Statement::from_ast(ob))
+                    .collect(),
+            },
+        }
+    }
+}
+
+impl LLVMValue for Body {
+    fn llvm_represent(&self) -> String {
+        let mut s = String::new();
+        for stmt in &self.statements {
+            s.push_str(format!("  {}\n", stmt.llvm_represent()).as_str());
+        }
+        s
+    }
+}
+
 struct Function {
     name: String,
     ret_typ: Type,
+    body: Option<Body>,
 }
 
 impl Function {
-    fn new(name: String, ret_typ: Type) -> Function {
-        Function { name, ret_typ }
+    fn new(name: String, ret_typ: Type, body: Option<Body>) -> Function {
+        Function {
+            name,
+            ret_typ,
+            body,
+        }
     }
 }
 
 impl LLVMValue for Function {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
-        s.push_str("define ");
-        if self.name == "main".to_string() {
-            s.push_str("i32 ");
+        if self.body.is_none() {
+            s.push_str("declare ");
         } else {
-            s.push_str(self.ret_typ.llvm_represent().as_str());
-            s.push_str(" ");
+            s.push_str("define ");
         }
+        s.push_str(self.ret_typ.llvm_represent().as_str());
+        s.push_str(" ");
         // function name need @, e.g. @main
         s.push_str("@");
         s.push_str(self.name.as_str());
         // TODO: parameters
         s.push_str("()");
-        // TODO: body
-        s.push_str(" {}");
+        match &self.body {
+            Some(b) => {
+                s.push_str(" {\n");
+                s.push_str(b.llvm_represent().as_str());
+                match self.ret_typ {
+                    Type::Void => {
+                        s.push_str("  ret void\n");
+                    }
+                    _ => {}
+                }
+                s.push_str("}");
+            }
+            None => s.push_str(";"),
+        };
+
         s
     }
 }
 
 struct Variable {
     name: String,
-    typ: Type,
     expr: Expr,
 }
 
 impl Variable {
-    fn new(name: String, typ: Type, expr: Expr) -> Variable {
-        Variable { name, typ, expr }
+    fn new(name: String, expr: Expr) -> Variable {
+        Variable { name, expr }
     }
 }
 
@@ -134,14 +217,13 @@ impl LLVMValue for Variable {
         s.push_str(self.name.as_str());
         s.push_str(" = ");
         s.push_str("global ");
-        s.push_str(self.typ.llvm_represent().as_str());
-        s.push_str(" ");
         s.push_str(self.expr.llvm_represent().as_str());
         s
     }
 }
 
 enum Type {
+    Void,
     Int(usize),
     Float(usize),
 }
@@ -150,8 +232,8 @@ impl Type {
     fn from_ast(t: &ast::ParsedType) -> Type {
         use Type::*;
         match t.name().as_str() {
+            "void" => Void,
             "int" => Int(64),
-            "void" => Int(32),
             "f64" => Float(64),
             "bool" => Int(1),
             _ => unimplemented!(),
@@ -163,6 +245,7 @@ impl LLVMValue for Type {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
         match self {
+            Type::Void => s.push_str("void"),
             Type::Float(n) => s.push_str(format!("f{}", n).as_str()),
             Type::Int(n) => s.push_str(format!("i{}", n).as_str()),
         }
@@ -195,10 +278,10 @@ impl LLVMValue for Expr {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
         match self {
-            Expr::F64(f) => s.push_str(format!("{}", f).as_str()),
-            Expr::I64(i) => s.push_str(format!("{}", i).as_str()),
-            Expr::Bool(b) => s.push_str(format!("{}", b).as_str()),
-            Expr::String(s_l) => s.push_str(s_l.as_str()),
+            Expr::F64(f) => s.push_str(format!("f64 {}", f).as_str()),
+            Expr::I64(i) => s.push_str(format!("i64 {}", i).as_str()),
+            Expr::Bool(b) => s.push_str(format!("i1 {}", b).as_str()),
+            Expr::String(s_l) => s.push_str(format!("String* {}", s_l).as_str()),
             _ => s.push_str("<unknown>"),
         }
         s
@@ -210,7 +293,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_() {
+    fn test_codegen_main() {
         let code = "\
         main(): void {}
         x: int = 1;";
@@ -219,7 +302,20 @@ mod tests {
             module.llvm_represent(),
             "\
              @x = global i64 1\n\
-             define i32 @main() {}\n"
+             define void @main() {\n  ret void\n\
+             }\n"
+        );
+    }
+
+    #[test]
+    fn test_return_value() {
+        let code = "foo(): int = 1;";
+        let module = gen_code(code);
+        assert_eq!(
+            module.llvm_represent(),
+            "\
+             define i64 @foo() {\n  ret i64 1\n\
+             }\n"
         );
     }
 
