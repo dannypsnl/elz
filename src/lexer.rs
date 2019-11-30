@@ -1,82 +1,53 @@
-#[derive(Clone, Debug, PartialEq)]
-pub enum TkType {
-    EOF,
-    /// e.g. a, ab, foo
-    Ident,
-    /// return
-    Return,
-    /// e.g. 1, 10, 34
-    Integer,
-    /// true
-    True,
-    /// false
-    False,
-    /// "string_literal"
-    String,
-    /// +
-    Plus,
-    /// -
-    Minus,
-    /// *
-    Multiple,
-    /// /
-    Divide,
-    /// ,
-    Comma,
-    /// =
-    Equal,
-    /// (
-    OpenParen,
-    /// )
-    CloseParen,
-    /// [
-    OpenBracket,
-    /// ]
-    CloseBracket,
-    /// {
-    OpenBrace,
-    /// }
-    CloseBrace,
-    /// :
-    Colon,
-    /// ::
-    Accessor,
-    /// ;
-    Semicolon,
-    /// `// comment`
-    Comment,
-}
+use strum_macros::Display;
 
-impl std::fmt::Display for TkType {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        use TkType::*;
-        let r = match self {
-            EOF => "<eof>",
-            Ident => "<identifier>",
-            Return => "return",
-            Integer => "<integer>",
-            True => "true",
-            False => "false",
-            String => "<string>",
-            Plus => "+",
-            Minus => "-",
-            Multiple => "*",
-            Divide => "/",
-            Comma => ",",
-            Equal => "=",
-            OpenParen => "(",
-            CloseParen => ")",
-            OpenBracket => "[",
-            CloseBracket => "]",
-            OpenBrace => "{",
-            CloseBrace => "}",
-            Colon => ":",
-            Accessor => "::",
-            Semicolon => ";",
-            Comment => "<comment>",
-        };
-        write!(f, "{}", r)
-    }
+#[derive(Display, Clone, Debug, PartialEq)]
+pub enum TkType {
+    #[strum(serialize = "<eof>")]
+    EOF,
+    #[strum(serialize = "<identifier>")]
+    Ident,
+    #[strum(serialize = "return")]
+    Return,
+    #[strum(serialize = "<integer>")]
+    Integer,
+    #[strum(serialize = "true")]
+    True,
+    #[strum(serialize = "false")]
+    False,
+    #[strum(serialize = "<string>")]
+    String,
+    #[strum(serialize = "+")]
+    Plus,
+    #[strum(serialize = "-")]
+    Minus,
+    #[strum(serialize = "*")]
+    Multiple,
+    #[strum(serialize = "/")]
+    Divide,
+    #[strum(serialize = ",")]
+    Comma,
+    #[strum(serialize = "=")]
+    Equal,
+    #[strum(serialize = "(")]
+    OpenParen,
+    #[strum(serialize = ")")]
+    CloseParen,
+    #[strum(serialize = "[")]
+    OpenBracket,
+    #[strum(serialize = "]")]
+    CloseBracket,
+    #[strum(serialize = "{")]
+    OpenBrace,
+    #[strum(serialize = "}")]
+    CloseBrace,
+    #[strum(serialize = ":")]
+    Colon,
+    #[strum(serialize = "::")]
+    Accessor,
+    #[strum(serialize = ";")]
+    Semicolon,
+    #[strum(serialize = "<comment>")]
+    Comment,
 }
 
 #[derive(Clone, Debug, PartialEq)]
