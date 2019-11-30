@@ -15,6 +15,12 @@ pub enum TkType {
     String,
     /// +
     Plus,
+    /// -
+    Minus,
+    /// *
+    Multiple,
+    /// /
+    Divide,
     /// ,
     Comma,
     /// =
@@ -37,6 +43,8 @@ pub enum TkType {
     Accessor,
     /// ;
     Semicolon,
+    /// `// comment`
+    Comment,
 }
 
 impl std::fmt::Display for TkType {
@@ -51,6 +59,9 @@ impl std::fmt::Display for TkType {
             False => "false",
             String => "<string>",
             Plus => "+",
+            Minus => "-",
+            Multiple => "*",
+            Divide => "/",
             Comma => ",",
             Equal => "=",
             OpenParen => "(",
@@ -62,6 +73,7 @@ impl std::fmt::Display for TkType {
             Colon => ":",
             Accessor => "::",
             Semicolon => ";",
+            Comment => "<comment>",
         };
         write!(f, "{}", r)
     }
@@ -178,9 +190,12 @@ impl Lexer {
             "return" => self.new_token(TkType::Return, s),
             "true" => self.new_token(TkType::True, s),
             "false" => self.new_token(TkType::False, s),
-            _ => self.new_token(token_type, s),
+            _ => self.new_token(token_type.clone(), s),
         };
-        self.tokens.push(tok);
+        match token_type {
+            TkType::Comment => {}
+            _ => self.tokens.push(tok),
+        }
         self.ignore();
     }
 }
@@ -189,10 +204,13 @@ fn whitespace(lexer: &mut Lexer) -> State {
     while let Some(c) = lexer.peek() {
         if c == ' ' || c == '\n' {
             if c == '\n' {
+                lexer.next();
+                lexer.start = lexer.offset;
                 lexer.pos = 0;
                 lexer.line += 1;
+            } else {
+                lexer.next();
             }
-            lexer.next();
         } else {
             break;
         }
@@ -214,6 +232,34 @@ fn whitespace(lexer: &mut Lexer) -> State {
         Some('+') => {
             lexer.next();
             lexer.emit(TkType::Plus);
+            State::Fn(whitespace)
+        }
+        Some('-') => {
+            lexer.next();
+            lexer.emit(TkType::Minus);
+            State::Fn(whitespace)
+        }
+        Some('*') => {
+            lexer.next();
+            lexer.emit(TkType::Multiple);
+            State::Fn(whitespace)
+        }
+        Some('/') => {
+            lexer.next();
+            if lexer.peek() == Some('/') {
+                // found `//`
+                lexer.next();
+                while let Some(c) = lexer.peek() {
+                    if c == '\n' {
+                        break;
+                    } else {
+                        lexer.next();
+                    }
+                }
+                lexer.emit(TkType::Comment);
+            } else {
+                lexer.emit(TkType::Divide);
+            }
             State::Fn(whitespace)
         }
         Some('(') => {
@@ -375,6 +421,18 @@ mod tests {
             vec![
                 Token(Location::from(1, 0), String, "\"\\\"\"".to_string()),
                 Token(Location::from(1, 4), EOF, "".to_string()),
+            ]
+        )
+    }
+
+    #[test]
+    fn comment_would_be_discard() {
+        let ts = lex("", "//\n1");
+        assert_eq!(
+            ts,
+            vec![
+                Token(Location::from(2, 0), Integer, "1".to_string()),
+                Token(Location::from(2, 1), EOF, "".to_string()),
             ]
         )
     }
