@@ -79,10 +79,18 @@ impl Parser {
                 // ;
                 self.consume()?;
                 Ok(Function::new_declaration(loc, fn_name, params, ret_typ))
-            } else {
+            } else if self
+                .predict_one_of(vec![TkType::OpenBrace, TkType::Equal])
+                .is_ok()
+            {
                 // {}
                 let body = self.parse_body()?;
                 Ok(Function::new(loc, fn_name, params, ret_typ, body))
+            } else {
+                Err(ParseError::not_expected_token(
+                    vec![TkType::OpenBrace, TkType::Semicolon, TkType::Equal],
+                    self.peek(0)?,
+                ))
             }
         } else {
             Err(ParseError::not_expected_token(vec![TkType::OpenParen], tok))
@@ -487,5 +495,14 @@ impl Parser {
             }
         }
         Ok(())
+    }
+    pub fn predict_one_of(&self, wants: Vec<TkType>) -> Result<()> {
+        let tok = self.peek(0)?;
+        for want in &wants {
+            if self.matched(tok.tk_type(), want) {
+                return Ok(());
+            }
+        }
+        Err(ParseError::not_expected_token(wants, tok))
     }
 }
