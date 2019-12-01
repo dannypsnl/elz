@@ -20,6 +20,11 @@
       return 1;
     }
     ```
+* global function declaration
+    ```elz
+    foo(): void;
+    println(content: string): void;
+    ```
 * local variable
     ```elz
     main(): void {
