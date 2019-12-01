@@ -61,11 +61,11 @@ impl SemanticChecker {
             type_env.add_variable(location.clone(), p_name, Type::from(p_type))?;
         }
         match f.body {
-            Body::Expr(e) => {
+            Some(Body::Expr(e)) => {
                 let e_type = type_env.type_of_expr(e)?;
                 type_env.unify(location, return_type.clone(), e_type)
             }
-            Body::Block(b) => {
+            Some(Body::Block(b)) => {
                 for stmt in b.statements {
                     use StatementVariant::*;
                     match stmt.value {
@@ -88,6 +88,14 @@ impl SemanticChecker {
                         }
                     }
                 }
+                Ok(())
+            }
+            None => {
+                // function declaration has no body need to check
+                // e.g.
+                // ```
+                // foo(): void;
+                // ```
                 Ok(())
             }
         }

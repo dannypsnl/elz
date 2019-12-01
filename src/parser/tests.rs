@@ -121,3 +121,23 @@ fn test_parse_string() {
     );
     assert_eq!(s, expected)
 }
+
+#[test]
+fn test_parse_function_declaration() {
+    let code = "\
+    foo(): void;
+    ";
+
+    let mut parser = Parser::new("", code);
+
+    let func = parser.parse_function().unwrap();
+    assert_eq!(
+        func,
+        Function::new_declaration(
+            Location::from(1, 0),
+            "foo",
+            vec![],
+            ParsedType::type_name("void"),
+        )
+    )
+}

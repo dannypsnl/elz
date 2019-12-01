@@ -30,11 +30,11 @@ impl Backend {
         for top in asts {
             match top {
                 TopAst::Function(f) => {
-                    let func = Function::new(
-                        top.name(),
-                        Type::from_ast(&f.ret_typ),
-                        Some(Body::from_ast(&f.body)),
-                    );
+                    let body = match &f.body {
+                        Some(b) => Some(Body::from_ast(b)),
+                        None => None,
+                    };
+                    let func = Function::new(top.name(), Type::from_ast(&f.ret_typ), body);
                     module.push_function(func);
                 }
                 TopAst::Variable(v) => {

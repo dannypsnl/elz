@@ -77,7 +77,7 @@ pub struct Function {
     name: String,
     pub parameters: Vec<Parameter>,
     pub ret_typ: ParsedType,
-    pub body: Body,
+    pub body: Option<Body>,
 }
 
 impl Function {
@@ -93,7 +93,21 @@ impl Function {
             name: name.to_string(),
             parameters,
             ret_typ,
-            body,
+            body: Some(body),
+        }
+    }
+    pub fn new_declaration<T: ToString>(
+        loc: Location,
+        name: T,
+        parameters: Vec<Parameter>,
+        ret_typ: ParsedType,
+    ) -> Function {
+        Function {
+            loc,
+            name: name.to_string(),
+            parameters,
+            ret_typ,
+            body: None,
         }
     }
 }

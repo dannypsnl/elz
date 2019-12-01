@@ -57,23 +57,33 @@ impl Parser {
     }
     /// parse_function:
     ///
-    /// handle `main(): void {}` or `add(x: int, y: int): int = x + y;`
+    /// handle
+    ///
+    /// `main(): void {}`
+    /// `add(x: int, y: int): int = x + y;`
+    /// or declaration
+    /// `foo(): void;`
     pub fn parse_function(&mut self) -> Result<Function> {
         let loc = self.peek(0)?.location();
-        // main(): void {}
+        // main(): void
         let fn_name = self.parse_identifier()?;
-        // (): void {}
+        // (): void
         let tok = self.peek(0)?;
         if tok.tk_type() == &TkType::OpenParen {
             let params = self.parse_parameters()?;
-            // : void {}
+            // : void
             self.predict_and_consume(vec![TkType::Colon])?;
-            // void {}
+            // void
             let ret_typ = self.parse_type()?;
-            // {}
-            let body = self.parse_body()?;
-            // now parsing done
-            Ok(Function::new(loc, fn_name, params, ret_typ, body))
+            if self.predict(vec![TkType::Semicolon]).is_ok() {
+                // ;
+                self.consume()?;
+                Ok(Function::new_declaration(loc, fn_name, params, ret_typ))
+            } else {
+                // {}
+                let body = self.parse_body()?;
+                Ok(Function::new(loc, fn_name, params, ret_typ, body))
+            }
         } else {
             Err(ParseError::not_expected_token(vec![TkType::OpenParen], tok))
         }
