@@ -33,10 +33,73 @@ impl Parser {
                         program.push(TopAst::Function(f));
                     }
                 }
-                _ => unimplemented!(),
+                TkType::Class => {
+                    let c = self.parse_class()?;
+                    program.push(TopAst::Class(c));
+                }
+                _ => self.predict_one_of(vec![TkType::Ident, TkType::Class])?,
             }
         }
         Ok(program)
+    }
+    /// parse_class:
+    ///
+    /// handle:
+    /// `class Car { name: string; ::new(name: string): Car; }`
+    pub fn parse_class(&mut self) -> Result<Class> {
+        let kw_class = self.peek(0)?;
+        self.consume()?;
+        let name = self.parse_identifier()?;
+        self.predict_and_consume(vec![TkType::OpenBrace])?;
+        let mut fields = vec![];
+        let mut methods = vec![];
+        let mut static_methods = vec![];
+        while self.peek(0)?.tk_type() != &TkType::CloseBrace {
+            if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
+                let v = self.parse_class_field()?;
+                fields.push(v);
+            } else {
+                if self.predict_and_consume(vec![TkType::Accessor]).is_ok() {
+                    static_methods.push(self.parse_function()?);
+                } else {
+                    methods.push(self.parse_function()?);
+                }
+            }
+        }
+        self.predict_and_consume(vec![TkType::CloseBrace])?;
+        Ok(Class::new(
+            kw_class.location().clone(),
+            name,
+            fields,
+            methods,
+            static_methods,
+        ))
+    }
+    /// parse_class_field:
+    ///
+    /// handle
+    ///
+    /// normal field must initialize
+    /// `x: int;`
+    /// or field with default value
+    /// `x: int = 1;`
+    pub fn parse_class_field(&mut self) -> Result<Field> {
+        let loc = self.peek(0)?.location();
+        // x: int = 1;
+        let var_name = self.parse_identifier()?;
+        // : int = 1;
+        self.predict_and_consume(vec![TkType::Colon])?;
+        // int = 1;
+        let typ = self.parse_type()?;
+        // = 1;
+        if self.predict_and_consume(vec![TkType::Equal]).is_ok() {
+            let expr = self.parse_expression(None, None)?;
+            self.predict_and_consume(vec![TkType::Semicolon])?;
+            Ok(Field::new(loc, var_name, typ, Some(expr)))
+        } else {
+            self.predict_and_consume(vec![TkType::Semicolon])?;
+            Ok(Field::new(loc, var_name, typ, None))
+        }
     }
     /// parse_variable:
     ///

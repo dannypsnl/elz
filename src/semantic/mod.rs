@@ -33,6 +33,7 @@ impl SemanticChecker {
                     self.type_env
                         .add_variable(top.location(), top.name(), typ)?;
                 }
+                Class(_) => unimplemented!(),
             }
         }
         for top in ast {
@@ -49,6 +50,7 @@ impl SemanticChecker {
                         .unify(location, Type::from(v.typ.clone()), typ)?
                 }
                 Function(f) => self.check_function_body(location, f.clone())?,
+                Class(_) => unimplemented!(),
             }
         }
         Ok(())

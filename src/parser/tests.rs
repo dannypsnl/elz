@@ -141,3 +141,35 @@ fn test_parse_function_declaration() {
         )
     )
 }
+
+#[test]
+fn test_parse_class() {
+    let code = "\
+                class Car {\n\
+                name: string;\n\
+                ::new(name: string): Car;\n\
+                }";
+
+    let mut parser = Parser::new("", code);
+    let class = parser.parse_class().unwrap();
+    assert_eq!(
+        class,
+        Class::new(
+            Location::from(1, 0),
+            "Car",
+            vec![Field::new(
+                Location::from(2, 0),
+                "name",
+                ParsedType::type_name("string"),
+                None
+            )],
+            vec![],
+            vec![Function::new_declaration(
+                Location::from(3, 2),
+                "new",
+                vec![Parameter::new("name", ParsedType::type_name("string"))],
+                ParsedType::type_name("Car"),
+            )]
+        )
+    )
+}
