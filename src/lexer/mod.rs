@@ -6,7 +6,7 @@ pub enum TkType {
     EOF,
     // literal
     #[strum(serialize = "<identifier>")]
-    Ident,
+    Identifier,
     #[strum(serialize = "<integer>")]
     Integer,
     #[strum(serialize = "<string>")]
@@ -307,7 +307,7 @@ fn ident(lexer: &mut Lexer) -> State {
             break;
         }
     }
-    lexer.emit(TkType::Ident);
+    lexer.emit(TkType::Identifier);
     State::Fn(whitespace)
 }
 

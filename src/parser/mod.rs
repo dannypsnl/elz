@@ -22,9 +22,12 @@ impl Parser {
         while self.peek(0)?.tk_type() != &end_token_type {
             let tok = self.peek(0)?;
             match tok.tk_type() {
-                TkType::Ident => {
+                TkType::Identifier => {
                     // found `<identifier> :`
-                    if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
+                    if self
+                        .predict(vec![TkType::Identifier, TkType::Colon])
+                        .is_ok()
+                    {
                         let v = self.parse_variable()?;
                         program.push(TopAst::Variable(v));
                     } else {
@@ -37,7 +40,7 @@ impl Parser {
                     let c = self.parse_class()?;
                     program.push(TopAst::Class(c));
                 }
-                _ => self.predict_one_of(vec![TkType::Ident, TkType::Class])?,
+                _ => self.predict_one_of(vec![TkType::Identifier, TkType::Class])?,
             }
         }
         Ok(program)
@@ -55,7 +58,10 @@ impl Parser {
         let mut methods = vec![];
         let mut static_methods = vec![];
         while self.peek(0)?.tk_type() != &TkType::CloseBrace {
-            if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
+            if self
+                .predict(vec![TkType::Identifier, TkType::Colon])
+                .is_ok()
+            {
                 let v = self.parse_class_field()?;
                 fields.push(v);
             } else {
@@ -167,7 +173,7 @@ impl Parser {
         self.predict_and_consume(vec![TkType::OpenParen])?;
         let mut params = vec![];
         while self.peek(0)?.tk_type() != &TkType::CloseParen {
-            self.predict(vec![TkType::Ident, TkType::Colon])?;
+            self.predict(vec![TkType::Identifier, TkType::Colon])?;
             let param_name = self.take()?.value();
             self.consume()?;
             let typ = self.parse_type()?;
@@ -208,11 +214,11 @@ impl Parser {
     /// foo::bar
     pub fn parse_identifier(&mut self) -> Result<String> {
         let mut chain = vec![];
-        self.predict(vec![TkType::Ident])?;
+        self.predict(vec![TkType::Identifier])?;
         chain.push(self.take()?.value());
         while self.peek(0)?.tk_type() == &TkType::Accessor {
             self.predict_and_consume(vec![TkType::Accessor])?;
-            self.predict(vec![TkType::Ident])?;
+            self.predict(vec![TkType::Identifier])?;
             chain.push(self.take()?.value());
         }
         Ok(chain.join("::"))
@@ -224,7 +230,7 @@ impl Parser {
     /// | `<identifier> [ <generic_type_list> ]`
     pub fn parse_type(&mut self) -> Result<ParsedType> {
         // ensure is <identifier>
-        self.predict(vec![TkType::Ident])?;
+        self.predict(vec![TkType::Identifier])?;
         let type_name = self.parse_identifier()?;
         if self.predict(vec![TkType::OpenBracket]).is_ok() {
             let mut list = vec![];
@@ -266,7 +272,7 @@ impl Parser {
     pub fn parse_statement(&mut self) -> Result<Statement> {
         let tok = self.peek(0)?;
         let stmt = match tok.tk_type() {
-            TkType::Ident => {
+            TkType::Identifier => {
                 let name = self.parse_identifier()?;
                 if self.predict(vec![TkType::Colon]).is_ok() {
                     // `x: int = 1;`
@@ -373,7 +379,7 @@ impl Parser {
                     )
                 }
             }
-            TkType::Ident => Ok(Expr::identifier(tok.location(), self.parse_identifier()?)),
+            TkType::Identifier => Ok(Expr::identifier(tok.location(), self.parse_identifier()?)),
             TkType::True => {
                 self.take()?;
                 Ok(Expr::bool(tok.location(), true))
@@ -390,7 +396,7 @@ impl Parser {
             _ => {
                 use TkType::*;
                 Err(ParseError::not_expected_token(
-                    vec![Integer, Ident, True, False, String, OpenBracket],
+                    vec![Integer, Identifier, True, False, String, OpenBracket],
                     tok,
                 ))
             }
@@ -401,7 +407,10 @@ impl Parser {
 
         let mut args = vec![];
         while self.peek(0)?.tk_type() != &TkType::CloseParen {
-            let identifier = if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
+            let identifier = if self
+                .predict(vec![TkType::Identifier, TkType::Colon])
+                .is_ok()
+            {
                 let identifier = self.take()?.value();
                 self.predict_and_consume(vec![TkType::Colon])?;
                 identifier

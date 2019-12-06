@@ -8,9 +8,9 @@ fn test_unicode_identifier_a() {
     assert_eq!(
         lex("", code),
         vec![
-            Token(Location::from(1, 0), Ident, "測試".to_string()),
+            Token(Location::from(1, 0), Identifier, "測試".to_string()),
             Token(Location::from(1, 2), Colon, ":".to_string()),
-            Token(Location::from(1, 4), Ident, "int".to_string()),
+            Token(Location::from(1, 4), Identifier, "int".to_string()),
             Token(Location::from(1, 8), Equal, "=".to_string()),
             Token(Location::from(1, 10), Integer, "1".to_string()),
             Token(Location::from(1, 11), EOF, "".to_string()),
@@ -37,7 +37,7 @@ fn get_ident_tokens() {
     assert_eq!(
         ts,
         vec![
-            Token(Location::from(1, 1), Ident, "abc6".to_string()),
+            Token(Location::from(1, 1), Identifier, "abc6".to_string()),
             Token(Location::from(1, 5), EOF, "".to_string()),
         ]
     )
