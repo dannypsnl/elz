@@ -5,6 +5,7 @@ use crate::lexer::Location;
 pub enum TopAst {
     Function(Function),
     Variable(Variable),
+    Class(Class),
 }
 
 impl TopAst {
@@ -13,6 +14,7 @@ impl TopAst {
         match self {
             Function(f) => f.name.clone(),
             Variable(v) => v.name.clone(),
+            Class(c) => c.name.clone(),
         }
     }
     pub fn location(&self) -> Location {
@@ -20,6 +22,53 @@ impl TopAst {
         match self {
             Function(f) => f.loc.clone(),
             Variable(v) => v.loc.clone(),
+            Class(c) => c.loc.clone(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Class {
+    loc: Location,
+    name: String,
+    fields: Vec<Field>,
+    methods: Vec<Function>,
+    static_methods: Vec<Function>,
+}
+
+impl Class {
+    pub fn new<T: ToString>(
+        loc: Location,
+        name: T,
+        fields: Vec<Field>,
+        methods: Vec<Function>,
+        static_methods: Vec<Function>,
+    ) -> Class {
+        Class {
+            loc,
+            name: name.to_string(),
+            fields,
+            methods,
+            static_methods,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Field {
+    loc: Location,
+    pub name: String,
+    pub typ: ParsedType,
+    pub expr: Option<Expr>,
+}
+
+impl Field {
+    pub fn new<T: ToString>(loc: Location, name: T, typ: ParsedType, expr: Option<Expr>) -> Field {
+        Field {
+            loc,
+            name: name.to_string(),
+            typ,
+            expr,
         }
     }
 }
@@ -212,6 +261,11 @@ pub enum ExprVariant {
     FuncCall(Box<Expr>, Vec<Argument>),
     /// `n`
     Identifier(String),
+    /// assume there has a class definition:
+    /// `class Foo { bar: int; }`
+    /// We can have a class construction expression
+    /// `Foo { bar: 0 }`
+    ClassConstruction(String, Vec<Argument>),
 }
 
 impl Expr {
@@ -261,6 +315,16 @@ impl Expr {
         Expr {
             location,
             value: ExprVariant::Identifier(id.to_string()),
+        }
+    }
+    pub fn class_construction<T: ToString>(
+        location: Location,
+        class_name: T,
+        field_inits: Vec<Argument>,
+    ) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::ClassConstruction(class_name.to_string(), field_inits),
         }
     }
 }

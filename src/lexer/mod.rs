@@ -4,18 +4,23 @@ use strum_macros::Display;
 pub enum TkType {
     #[strum(serialize = "<eof>")]
     EOF,
+    // literal
     #[strum(serialize = "<identifier>")]
-    Ident,
-    #[strum(serialize = "return")]
-    Return,
+    Identifier,
     #[strum(serialize = "<integer>")]
     Integer,
+    #[strum(serialize = "<string>")]
+    String,
+    // keyword
+    #[strum(serialize = "return")]
+    Return,
+    #[strum(serialize = "class")]
+    Class,
     #[strum(serialize = "true")]
     True,
     #[strum(serialize = "false")]
     False,
-    #[strum(serialize = "<string>")]
-    String,
+    // symbol
     #[strum(serialize = "+")]
     Plus,
     #[strum(serialize = "-")]
@@ -46,6 +51,7 @@ pub enum TkType {
     Accessor,
     #[strum(serialize = ";")]
     Semicolon,
+    // ignored
     #[strum(serialize = "<comment>")]
     Comment,
 }
@@ -161,6 +167,7 @@ impl Lexer {
             "return" => self.new_token(TkType::Return, s),
             "true" => self.new_token(TkType::True, s),
             "false" => self.new_token(TkType::False, s),
+            "class" => self.new_token(TkType::Class, s),
             _ => self.new_token(token_type.clone(), s),
         };
         match token_type {
@@ -300,7 +307,7 @@ fn ident(lexer: &mut Lexer) -> State {
             break;
         }
     }
-    lexer.emit(TkType::Ident);
+    lexer.emit(TkType::Identifier);
     State::Fn(whitespace)
 }
 

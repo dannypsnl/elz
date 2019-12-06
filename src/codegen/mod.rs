@@ -41,6 +41,7 @@ impl Backend {
                     let var = Variable::new(top.name(), Expr::from_ast(&v.expr));
                     module.push_variable(var);
                 }
+                TopAst::Class(_) => unimplemented!(),
             }
         }
         module

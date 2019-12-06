@@ -4,6 +4,13 @@
 
 #### Syntax
 
+* class
+    ```elz
+    class Car {
+      name: string;
+      ::new(name: string): Car = Car {name: "wow"};
+    }
+    ```
 * global variable
     ```elz
     x: int = 1;

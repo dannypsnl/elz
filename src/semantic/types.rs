@@ -63,6 +63,7 @@ impl TypeEnv {
                 let type_info = self.get_variable(location, id)?;
                 Ok(type_info.typ)
             }
+            ClassConstruction(_, _) => unimplemented!(),
         }
     }
 

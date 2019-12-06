@@ -141,3 +141,62 @@ fn test_parse_function_declaration() {
         )
     )
 }
+
+#[test]
+fn test_parse_class() {
+    let code = "\
+                class Car {\n\
+                name: string;\n\
+                ::new(name: string): Car;\n\
+                }";
+
+    let mut parser = Parser::new("", code);
+    let class = parser.parse_class().unwrap();
+    assert_eq!(
+        class,
+        Class::new(
+            Location::from(1, 0),
+            "Car",
+            vec![Field::new(
+                Location::from(2, 0),
+                "name",
+                ParsedType::type_name("string"),
+                None
+            )],
+            vec![],
+            vec![Function::new_declaration(
+                Location::from(3, 2),
+                "new",
+                vec![Parameter::new("name", ParsedType::type_name("string"))],
+                ParsedType::type_name("Car"),
+            )]
+        )
+    )
+}
+
+#[test]
+fn test_class_construction() {
+    let code = "Car { name: \"\", price: 10000 }";
+
+    let mut parser = Parser::new("", code);
+    let class_construction = parser.parse_expression(None, None).unwrap();
+    assert_eq!(
+        class_construction,
+        Expr::class_construction(
+            Location::from(1, 0),
+            "Car",
+            vec![
+                Argument::new(
+                    Location::from(1, 12),
+                    Some("name".to_string()),
+                    Expr::string(Location::from(1, 12), "")
+                ),
+                Argument::new(
+                    Location::from(1, 23),
+                    Some("price".to_string()),
+                    Expr::int(Location::from(1, 23), 10000)
+                ),
+            ]
+        )
+    )
+}

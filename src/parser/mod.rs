@@ -22,9 +22,12 @@ impl Parser {
         while self.peek(0)?.tk_type() != &end_token_type {
             let tok = self.peek(0)?;
             match tok.tk_type() {
-                TkType::Ident => {
+                TkType::Identifier => {
                     // found `<identifier> :`
-                    if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
+                    if self
+                        .predict(vec![TkType::Identifier, TkType::Colon])
+                        .is_ok()
+                    {
                         let v = self.parse_variable()?;
                         program.push(TopAst::Variable(v));
                     } else {
@@ -33,10 +36,76 @@ impl Parser {
                         program.push(TopAst::Function(f));
                     }
                 }
-                _ => unimplemented!(),
+                TkType::Class => {
+                    let c = self.parse_class()?;
+                    program.push(TopAst::Class(c));
+                }
+                _ => self.predict_one_of(vec![TkType::Identifier, TkType::Class])?,
             }
         }
         Ok(program)
+    }
+    /// parse_class:
+    ///
+    /// handle:
+    /// `class Car { name: string; ::new(name: string): Car; }`
+    pub fn parse_class(&mut self) -> Result<Class> {
+        let kw_class = self.peek(0)?;
+        self.consume()?;
+        let name = self.parse_identifier()?;
+        self.predict_and_consume(vec![TkType::OpenBrace])?;
+        let mut fields = vec![];
+        let mut methods = vec![];
+        let mut static_methods = vec![];
+        while self.peek(0)?.tk_type() != &TkType::CloseBrace {
+            if self
+                .predict(vec![TkType::Identifier, TkType::Colon])
+                .is_ok()
+            {
+                let v = self.parse_class_field()?;
+                fields.push(v);
+            } else {
+                if self.predict_and_consume(vec![TkType::Accessor]).is_ok() {
+                    static_methods.push(self.parse_function()?);
+                } else {
+                    methods.push(self.parse_function()?);
+                }
+            }
+        }
+        self.predict_and_consume(vec![TkType::CloseBrace])?;
+        Ok(Class::new(
+            kw_class.location().clone(),
+            name,
+            fields,
+            methods,
+            static_methods,
+        ))
+    }
+    /// parse_class_field:
+    ///
+    /// handle
+    ///
+    /// normal field must initialize
+    /// `x: int;`
+    /// or field with default value
+    /// `x: int = 1;`
+    pub fn parse_class_field(&mut self) -> Result<Field> {
+        let loc = self.peek(0)?.location();
+        // x: int = 1;
+        let var_name = self.parse_identifier()?;
+        // : int = 1;
+        self.predict_and_consume(vec![TkType::Colon])?;
+        // int = 1;
+        let typ = self.parse_type()?;
+        // = 1;
+        if self.predict_and_consume(vec![TkType::Equal]).is_ok() {
+            let expr = self.parse_expression(None, None)?;
+            self.predict_and_consume(vec![TkType::Semicolon])?;
+            Ok(Field::new(loc, var_name, typ, Some(expr)))
+        } else {
+            self.predict_and_consume(vec![TkType::Semicolon])?;
+            Ok(Field::new(loc, var_name, typ, None))
+        }
     }
     /// parse_variable:
     ///
@@ -104,7 +173,7 @@ impl Parser {
         self.predict_and_consume(vec![TkType::OpenParen])?;
         let mut params = vec![];
         while self.peek(0)?.tk_type() != &TkType::CloseParen {
-            self.predict(vec![TkType::Ident, TkType::Colon])?;
+            self.predict(vec![TkType::Identifier, TkType::Colon])?;
             let param_name = self.take()?.value();
             self.consume()?;
             let typ = self.parse_type()?;
@@ -145,11 +214,11 @@ impl Parser {
     /// foo::bar
     pub fn parse_identifier(&mut self) -> Result<String> {
         let mut chain = vec![];
-        self.predict(vec![TkType::Ident])?;
+        self.predict(vec![TkType::Identifier])?;
         chain.push(self.take()?.value());
         while self.peek(0)?.tk_type() == &TkType::Accessor {
             self.predict_and_consume(vec![TkType::Accessor])?;
-            self.predict(vec![TkType::Ident])?;
+            self.predict(vec![TkType::Identifier])?;
             chain.push(self.take()?.value());
         }
         Ok(chain.join("::"))
@@ -161,21 +230,15 @@ impl Parser {
     /// | `<identifier> [ <generic_type_list> ]`
     pub fn parse_type(&mut self) -> Result<ParsedType> {
         // ensure is <identifier>
-        self.predict(vec![TkType::Ident])?;
+        self.predict(vec![TkType::Identifier])?;
         let type_name = self.parse_identifier()?;
         if self.predict(vec![TkType::OpenBracket]).is_ok() {
-            let mut list = vec![];
-            self.predict_and_consume(vec![TkType::OpenBracket])?;
-            while self.peek(0)?.tk_type() != &TkType::CloseBracket {
-                let typ = self.parse_type()?;
-                list.push(typ);
-                if self.predict(vec![TkType::Comma]).is_err() {
-                    break;
-                } else {
-                    self.predict_and_consume(vec![TkType::Comma])?;
-                }
-            }
-            self.predict_and_consume(vec![TkType::CloseBracket])?;
+            let list = self.parse_many(
+                TkType::OpenBracket,
+                TkType::CloseBracket,
+                TkType::Comma,
+                |parser| parser.parse_type(),
+            )?;
             Ok(ParsedType::generic_type(type_name, list))
         } else {
             Ok(ParsedType::type_name(type_name))
@@ -203,7 +266,7 @@ impl Parser {
     pub fn parse_statement(&mut self) -> Result<Statement> {
         let tok = self.peek(0)?;
         let stmt = match tok.tk_type() {
-            TkType::Ident => {
+            TkType::Identifier => {
                 let name = self.parse_identifier()?;
                 if self.predict(vec![TkType::Colon]).is_ok() {
                     // `x: int = 1;`
@@ -310,7 +373,35 @@ impl Parser {
                     )
                 }
             }
-            TkType::Ident => Ok(Expr::identifier(tok.location(), self.parse_identifier()?)),
+            TkType::Identifier => {
+                let name = self.parse_identifier()?;
+                match self.peek(0)?.tk_type() {
+                    TkType::OpenBrace => {
+                        let field_inits = self.parse_many(
+                            TkType::OpenBrace,
+                            TkType::CloseBrace,
+                            TkType::Comma,
+                            |parser| {
+                                // x: 1
+                                let identifier = if parser
+                                    .predict(vec![TkType::Identifier, TkType::Colon])
+                                    .is_ok()
+                                {
+                                    let identifier = parser.take()?.value();
+                                    parser.predict_and_consume(vec![TkType::Colon])?;
+                                    identifier
+                                } else {
+                                    "".to_string()
+                                };
+                                let expr = parser.parse_expression(None, None)?;
+                                Ok(Argument::new(expr.location.clone(), Some(identifier), expr))
+                            },
+                        )?;
+                        Ok(Expr::class_construction(tok.location(), name, field_inits))
+                    }
+                    _ => Ok(Expr::identifier(tok.location(), name)),
+                }
+            }
             TkType::True => {
                 self.take()?;
                 Ok(Expr::bool(tok.location(), true))
@@ -327,7 +418,7 @@ impl Parser {
             _ => {
                 use TkType::*;
                 Err(ParseError::not_expected_token(
-                    vec![Integer, Ident, True, False, String, OpenBracket],
+                    vec![Integer, Identifier, True, False, String, OpenBracket],
                     tok,
                 ))
             }
@@ -338,7 +429,10 @@ impl Parser {
 
         let mut args = vec![];
         while self.peek(0)?.tk_type() != &TkType::CloseParen {
-            let identifier = if self.predict(vec![TkType::Ident, TkType::Colon]).is_ok() {
+            let identifier = if self
+                .predict(vec![TkType::Identifier, TkType::Colon])
+                .is_ok()
+            {
                 let identifier = self.take()?.value();
                 self.predict_and_consume(vec![TkType::Colon])?;
                 identifier
@@ -358,18 +452,12 @@ impl Parser {
         Ok(Expr::func_call(func.location.clone(), func, args))
     }
     pub fn parse_list(&mut self) -> Result<Vec<Expr>> {
-        let mut list = vec![];
-        self.predict_and_consume(vec![TkType::OpenBracket])?;
-        while self.peek(0)?.tk_type() != &TkType::CloseBracket {
-            let expr = self.parse_expression(None, None)?;
-            list.push(expr);
-            if self.predict(vec![TkType::Comma]).is_err() {
-                break;
-            } else {
-                self.predict_and_consume(vec![TkType::Comma])?;
-            }
-        }
-        self.predict_and_consume(vec![TkType::CloseBracket])?;
+        let list = self.parse_many(
+            TkType::OpenBracket,
+            TkType::CloseBracket,
+            TkType::Comma,
+            |parser| parser.parse_expression(None, None),
+        )?;
         Ok(list)
     }
     pub fn parse_string(&mut self) -> Result<Expr> {
@@ -504,5 +592,31 @@ impl Parser {
             }
         }
         Err(ParseError::not_expected_token(wants, tok))
+    }
+
+    fn parse_many<F, T>(
+        &mut self,
+        open_token: TkType,
+        close_token: TkType,
+        separator: TkType,
+        step_fn: F,
+    ) -> Result<Vec<T>>
+    where
+        F: Fn(&mut Parser) -> Result<T>,
+    {
+        let mut result = vec![];
+        self.predict_and_consume(vec![open_token])?;
+        while self.peek(0)?.tk_type() != &close_token {
+            //
+            result.push(step_fn(self)?);
+            //
+            if self.predict(vec![separator.clone()]).is_err() {
+                break;
+            } else {
+                self.predict_and_consume(vec![separator.clone()])?;
+            }
+        }
+        self.predict_and_consume(vec![close_token])?;
+        Ok(result)
     }
 }
