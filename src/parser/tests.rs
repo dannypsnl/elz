@@ -173,3 +173,30 @@ fn test_parse_class() {
         )
     )
 }
+
+#[test]
+fn test_class_construction() {
+    let code = "Car { name: \"\", price: 10000 }";
+
+    let mut parser = Parser::new("", code);
+    let class_construction = parser.parse_expression(None, None).unwrap();
+    assert_eq!(
+        class_construction,
+        Expr::class_construction(
+            Location::from(1, 0),
+            "Car",
+            vec![
+                Argument::new(
+                    Location::from(1, 12),
+                    Some("name".to_string()),
+                    Expr::string(Location::from(1, 12), "")
+                ),
+                Argument::new(
+                    Location::from(1, 23),
+                    Some("price".to_string()),
+                    Expr::int(Location::from(1, 23), 10000)
+                ),
+            ]
+        )
+    )
+}

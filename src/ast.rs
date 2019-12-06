@@ -261,6 +261,11 @@ pub enum ExprVariant {
     FuncCall(Box<Expr>, Vec<Argument>),
     /// `n`
     Identifier(String),
+    /// assume there has a class definition:
+    /// `class Foo { bar: int; }`
+    /// We can have a class construction expression
+    /// `Foo { bar: 0 }`
+    ClassConstruction(String, Vec<Argument>),
 }
 
 impl Expr {
@@ -310,6 +315,16 @@ impl Expr {
         Expr {
             location,
             value: ExprVariant::Identifier(id.to_string()),
+        }
+    }
+    pub fn class_construction<T: ToString>(
+        location: Location,
+        class_name: T,
+        field_inits: Vec<Argument>,
+    ) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::ClassConstruction(class_name.to_string(), field_inits),
         }
     }
 }
