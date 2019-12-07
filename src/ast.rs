@@ -9,14 +9,6 @@ pub enum TopAst {
 }
 
 impl TopAst {
-    pub fn name(&self) -> String {
-        use TopAst::*;
-        match self {
-            Function(f) => f.name.clone(),
-            Variable(v) => v.name.clone(),
-            Class(c) => c.name.clone(),
-        }
-    }
     pub fn location(&self) -> Location {
         use TopAst::*;
         match self {
@@ -30,10 +22,10 @@ impl TopAst {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
     loc: Location,
-    name: String,
-    fields: Vec<Field>,
-    methods: Vec<Function>,
-    static_methods: Vec<Function>,
+    pub name: String,
+    pub fields: Vec<Field>,
+    pub methods: Vec<Function>,
+    pub static_methods: Vec<Function>,
 }
 
 impl Class {
@@ -56,16 +48,21 @@ impl Class {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
-    loc: Location,
+    pub location: Location,
     pub name: String,
     pub typ: ParsedType,
     pub expr: Option<Expr>,
 }
 
 impl Field {
-    pub fn new<T: ToString>(loc: Location, name: T, typ: ParsedType, expr: Option<Expr>) -> Field {
+    pub fn new<T: ToString>(
+        location: Location,
+        name: T,
+        typ: ParsedType,
+        expr: Option<Expr>,
+    ) -> Field {
         Field {
-            loc,
+            location,
             name: name.to_string(),
             typ,
             expr,
@@ -123,7 +120,7 @@ impl Variable {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Function {
     loc: Location,
-    name: String,
+    pub name: String,
     pub parameters: Vec<Parameter>,
     pub ret_typ: ParsedType,
     pub body: Option<Body>,

@@ -63,7 +63,10 @@ impl TypeEnv {
                 let type_info = self.get_variable(location, id)?;
                 Ok(type_info.typ)
             }
-            ClassConstruction(_, _) => unimplemented!(),
+            ClassConstruction(name, _) => {
+                let type_info = self.get_variable(location, name)?;
+                Ok(type_info.typ)
+            }
         }
     }
 
@@ -142,13 +145,14 @@ impl TypeEnv {
     pub(crate) fn add_variable(
         &mut self,
         location: Location,
-        key: String,
+        key: &String,
         typ: Type,
     ) -> Result<()> {
-        if self.type_env.contains_key(&key) {
+        if self.type_env.contains_key(key) {
             Err(SemanticError::name_redefined(location, key))
         } else {
-            self.type_env.insert(key, TypeInfo::new(location, typ));
+            self.type_env
+                .insert(key.clone(), TypeInfo::new(location, typ));
             Ok(())
         }
     }
@@ -197,7 +201,7 @@ impl Type {
 }
 
 impl Type {
-    pub fn from(typ: ParsedType) -> Type {
+    pub fn from(typ: &ParsedType) -> Type {
         use Type::*;
         match typ.name().as_str() {
             "int" => Int,
@@ -209,7 +213,7 @@ impl Type {
                 "List",
                 typ.generics()
                     .iter()
-                    .map(|parsed_type| Type::from(parsed_type.clone()))
+                    .map(|parsed_type| Type::from(parsed_type))
                     .collect(),
             ),
             _ => UnknownType(typ.name()),
@@ -220,9 +224,13 @@ impl Type {
         let param_types = f
             .parameters
             .into_iter()
-            .map(|param| Type::from(param.0))
+            .map(|param| Type::from(&param.0))
             .collect();
-        Type::FunctionType(param_types, Type::from(f.ret_typ).into())
+        Type::FunctionType(param_types, Type::from(&f.ret_typ).into())
+    }
+
+    pub fn new_class(c: &Class) -> Type {
+        Type::GenericType(c.name.clone(), vec![])
     }
 
     fn occurs(&self, t: Type) -> bool {

@@ -34,11 +34,11 @@ impl Backend {
                         Some(b) => Some(Body::from_ast(b)),
                         None => None,
                     };
-                    let func = Function::new(top.name(), Type::from_ast(&f.ret_typ), body);
+                    let func = Function::new(f.name.clone(), Type::from_ast(&f.ret_typ), body);
                     module.push_function(func);
                 }
                 TopAst::Variable(v) => {
-                    let var = Variable::new(top.name(), Expr::from_ast(&v.expr));
+                    let var = Variable::new(v.name.clone(), Expr::from_ast(&v.expr));
                     module.push_variable(var);
                 }
                 TopAst::Class(_) => unimplemented!(),

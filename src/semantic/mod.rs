@@ -23,17 +23,18 @@ impl SemanticChecker {
         for top in ast {
             use TopAst::*;
             match top {
-                Variable(v) => self.type_env.add_variable(
-                    top.location(),
-                    top.name(),
-                    Type::from(v.typ.clone()),
-                )?,
+                Variable(v) => {
+                    self.type_env
+                        .add_variable(top.location(), &v.name, Type::from(&v.typ))?
+                }
                 Function(f) => {
                     let typ = Type::new_function(f.clone());
-                    self.type_env
-                        .add_variable(top.location(), top.name(), typ)?;
+                    self.type_env.add_variable(top.location(), &f.name, typ)?;
                 }
-                Class(_) => unimplemented!(),
+                Class(c) => {
+                    let typ = Type::new_class(c);
+                    self.type_env.add_variable(top.location(), &c.name, typ)?;
+                }
             }
         }
         for top in ast {
@@ -46,20 +47,26 @@ impl SemanticChecker {
                     // show where error happened
                     // we are unifying <expr> and <type>, so <expr> location is better than
                     // variable define statement location
-                    self.type_env
-                        .unify(location, Type::from(v.typ.clone()), typ)?
+                    self.type_env.unify(location, Type::from(&v.typ), typ)?
                 }
                 Function(f) => self.check_function_body(location, f.clone())?,
-                Class(_) => unimplemented!(),
+                Class(c) => {
+                    let mut class_type_env = TypeEnv::with_parent(&self.type_env);
+                    for f in &c.fields {
+                        let typ = Type::from(&f.typ);
+                        class_type_env.add_variable(f.location.clone(), &f.name, typ)?;
+                    }
+                    // TODO: check methods, static methods by class_type_env
+                }
             }
         }
         Ok(())
     }
 
     fn check_function_body(&self, location: Location, f: Function) -> Result<()> {
-        let return_type = Type::from(f.ret_typ);
+        let return_type = Type::from(&f.ret_typ);
         let mut type_env = TypeEnv::with_parent(&self.type_env);
-        for Parameter(p_type, p_name) in f.parameters {
+        for Parameter(p_type, p_name) in &f.parameters {
             type_env.add_variable(location.clone(), p_name, Type::from(p_type))?;
         }
         match f.body {
@@ -79,10 +86,10 @@ impl SemanticChecker {
                             type_env.unify(stmt.location, return_type.clone(), typ)?
                         }
                         Variable(v) => {
-                            let var_def_typ = Type::from(v.typ);
+                            let var_def_typ = Type::from(&v.typ);
                             let var_typ = type_env.type_of_expr(v.expr)?;
                             type_env.unify(stmt.location.clone(), var_def_typ.clone(), var_typ)?;
-                            type_env.add_variable(stmt.location, v.name, var_def_typ)?
+                            type_env.add_variable(stmt.location, &v.name, var_def_typ)?
                         }
                         FunctionCall(func_call) => {
                             let func_call_ret_typ = type_env.type_of_expr(func_call)?;
