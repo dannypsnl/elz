@@ -52,7 +52,7 @@ impl TypeEnv {
                     Type::FunctionType(params, ret_typ) => {
                         for (p, arg) in params.iter().zip(args.iter()) {
                             let typ = self.type_of_expr(arg.expr.clone())?;
-                            self.unify(arg.location.clone(), p.clone(), typ)?;
+                            self.unify(&arg.location, p.clone(), typ)?;
                         }
                         Ok(*ret_typ)
                     }
@@ -70,30 +70,34 @@ impl TypeEnv {
         }
     }
 
-    pub(crate) fn unify(&self, location: Location, expected: Type, actual: Type) -> Result<()> {
+    pub(crate) fn unify(&self, location: &Location, expected: Type, actual: Type) -> Result<()> {
         use Type::*;
         match (expected.clone(), actual.clone()) {
             (Void, Void) | (Int, Int) | (Bool, Bool) | (F64, F64) | (String, String) => {
                 if expected == actual {
                     Ok(())
                 } else {
-                    Err(SemanticError::type_mismatched(location, expected, actual))
+                    Err(SemanticError::type_mismatched(
+                        location.clone(),
+                        expected,
+                        actual,
+                    ))
                 }
             }
             (GenericType(name, generics), GenericType(name2, generics2)) => {
                 if name != name2 {
-                    Err(SemanticError::type_mismatched(location, expected, actual))
+                    Err(SemanticError::type_mismatched(
+                        location.clone(),
+                        expected,
+                        actual,
+                    ))
                 } else {
-                    for (t1, t2) in generics.iter().zip(generics2.iter()) {
-                        self.unify(location.clone(), t1.clone(), t2.clone())?;
-                    }
+                    self.unify_type_list(location, generics, generics2)?;
                     Ok(())
                 }
             }
             (FunctionType(ft, arg), FunctionType(ft_p, arg_p)) => {
-                for (ft, ft_p) in ft.iter().zip(ft_p.iter()) {
-                    self.unify(location.clone(), ft.clone(), ft_p.clone())?;
-                }
+                self.unify_type_list(location, ft, ft_p)?;
                 self.unify(location, *arg, *arg_p)
             }
             (FreeVar(_), t) => self.unify(location, t, expected),
@@ -112,11 +116,31 @@ impl TypeEnv {
                 if name == name2 {
                     Ok(())
                 } else {
-                    Err(SemanticError::type_mismatched(location, expected, actual))
+                    Err(SemanticError::type_mismatched(
+                        location.clone(),
+                        expected,
+                        actual,
+                    ))
                 }
             }
-            (_, _) => Err(SemanticError::type_mismatched(location, expected, actual)),
+            (_, _) => Err(SemanticError::type_mismatched(
+                location.clone(),
+                expected,
+                actual,
+            )),
         }
+    }
+
+    fn unify_type_list(
+        &self,
+        location: &Location,
+        expected: Vec<Type>,
+        actual: Vec<Type>,
+    ) -> Result<()> {
+        for (t1, t2) in expected.iter().zip(actual.iter()) {
+            self.unify(location, t1.clone(), t2.clone())?;
+        }
+        Ok(())
     }
 
     fn free_var(&mut self) -> Type {

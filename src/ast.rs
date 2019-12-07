@@ -8,20 +8,9 @@ pub enum TopAst {
     Class(Class),
 }
 
-impl TopAst {
-    pub fn location(&self) -> Location {
-        use TopAst::*;
-        match self {
-            Function(f) => f.loc.clone(),
-            Variable(v) => v.loc.clone(),
-            Class(c) => c.loc.clone(),
-        }
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
-    loc: Location,
+    pub location: Location,
     pub name: String,
     pub fields: Vec<Field>,
     pub methods: Vec<Function>,
@@ -30,14 +19,14 @@ pub struct Class {
 
 impl Class {
     pub fn new<T: ToString>(
-        loc: Location,
+        location: Location,
         name: T,
         fields: Vec<Field>,
         methods: Vec<Function>,
         static_methods: Vec<Function>,
     ) -> Class {
         Class {
-            loc,
+            location,
             name: name.to_string(),
             fields,
             methods,
@@ -100,16 +89,16 @@ impl ParsedType {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Variable {
-    loc: Location,
+    pub location: Location,
     pub name: String,
     pub typ: ParsedType,
     pub expr: Expr,
 }
 
 impl Variable {
-    pub fn new<T: ToString>(loc: Location, name: T, typ: ParsedType, expr: Expr) -> Variable {
+    pub fn new<T: ToString>(location: Location, name: T, typ: ParsedType, expr: Expr) -> Variable {
         Variable {
-            loc,
+            location,
             name: name.to_string(),
             typ,
             expr,
@@ -119,7 +108,7 @@ impl Variable {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Function {
-    loc: Location,
+    pub location: Location,
     pub name: String,
     pub parameters: Vec<Parameter>,
     pub ret_typ: ParsedType,
@@ -128,14 +117,14 @@ pub struct Function {
 
 impl Function {
     pub fn new<T: ToString>(
-        loc: Location,
+        location: Location,
         name: T,
         parameters: Vec<Parameter>,
         ret_typ: ParsedType,
         body: Body,
     ) -> Function {
         Function {
-            loc,
+            location,
             name: name.to_string(),
             parameters,
             ret_typ,
@@ -143,13 +132,13 @@ impl Function {
         }
     }
     pub fn new_declaration<T: ToString>(
-        loc: Location,
+        location: Location,
         name: T,
         parameters: Vec<Parameter>,
         ret_typ: ParsedType,
     ) -> Function {
         Function {
-            loc,
+            location,
             name: name.to_string(),
             parameters,
             ret_typ,
