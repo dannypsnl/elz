@@ -12,13 +12,13 @@ pub struct TypeEnv {
 }
 
 impl TypeEnv {
-    pub(crate) fn type_of_expr(&mut self, expr: Expr) -> Result<Type> {
+    pub(crate) fn type_of_expr(&mut self, expr: &Expr) -> Result<Type> {
         use ExprVariant::*;
-        let location = expr.location;
-        match expr.value {
+        let location = &expr.location;
+        match &expr.value {
             Binary(l, r, op) => {
-                let left_type = self.type_of_expr(*l)?;
-                let right_type = self.type_of_expr(*r)?;
+                let left_type = self.type_of_expr(l)?;
+                let right_type = self.type_of_expr(r)?;
                 match (left_type, right_type, op) {
                     (Type::Int, Type::Int, Operator::Plus) => Ok(Type::Int),
                     (l, r, op) => panic!("unsupported operator, {} {:?} {}", l, op, r),
@@ -32,12 +32,12 @@ impl TypeEnv {
                 let expr_type: Type = if es.len() < 1 {
                     self.free_var()
                 } else {
-                    self.type_of_expr(es[0].clone())?
+                    self.type_of_expr(&es[0])?
                 };
                 for e in es {
-                    if expr_type != self.type_of_expr(e.clone())? {
+                    if expr_type != self.type_of_expr(e)? {
                         return Err(SemanticError::type_mismatched(
-                            e.location.clone(),
+                            &e.location,
                             expr_type,
                             self.type_of_expr(e)?,
                         ));
@@ -46,25 +46,27 @@ impl TypeEnv {
                 Ok(Type::generic_type("List", vec![expr_type]))
             }
             FuncCall(f, args) => {
-                let location = f.location.clone();
-                let f_type = self.type_of_expr(*f)?;
+                let f_type = self.type_of_expr(f)?;
                 match f_type {
                     Type::FunctionType(params, ret_typ) => {
                         for (p, arg) in params.iter().zip(args.iter()) {
-                            let typ = self.type_of_expr(arg.expr.clone())?;
+                            let typ = self.type_of_expr(&arg.expr)?;
                             self.unify(&arg.location, p.clone(), typ)?;
                         }
                         Ok(*ret_typ)
                     }
-                    _ => Err(SemanticError::call_on_non_function_type(location, f_type)),
+                    _ => Err(SemanticError::call_on_non_function_type(
+                        &f.location,
+                        f_type,
+                    )),
                 }
             }
             Identifier(id) => {
-                let type_info = self.get_variable(location, id)?;
+                let type_info = self.get_variable(location, id.clone())?;
                 Ok(type_info.typ)
             }
             ClassConstruction(name, _) => {
-                let type_info = self.get_variable(location, name)?;
+                let type_info = self.get_variable(location, name.clone())?;
                 Ok(type_info.typ)
             }
         }
@@ -77,20 +79,12 @@ impl TypeEnv {
                 if expected == actual {
                     Ok(())
                 } else {
-                    Err(SemanticError::type_mismatched(
-                        location.clone(),
-                        expected,
-                        actual,
-                    ))
+                    Err(SemanticError::type_mismatched(location, expected, actual))
                 }
             }
             (GenericType(name, generics), GenericType(name2, generics2)) => {
                 if name != name2 {
-                    Err(SemanticError::type_mismatched(
-                        location.clone(),
-                        expected,
-                        actual,
-                    ))
+                    Err(SemanticError::type_mismatched(location, expected, actual))
                 } else {
                     self.unify_type_list(location, generics, generics2)?;
                     Ok(())
@@ -116,18 +110,10 @@ impl TypeEnv {
                 if name == name2 {
                     Ok(())
                 } else {
-                    Err(SemanticError::type_mismatched(
-                        location.clone(),
-                        expected,
-                        actual,
-                    ))
+                    Err(SemanticError::type_mismatched(location, expected, actual))
                 }
             }
-            (_, _) => Err(SemanticError::type_mismatched(
-                location.clone(),
-                expected,
-                actual,
-            )),
+            (_, _) => Err(SemanticError::type_mismatched(location, expected, actual)),
         }
     }
 
@@ -168,7 +154,7 @@ impl TypeEnv {
 
     pub(crate) fn add_variable(
         &mut self,
-        location: Location,
+        location: &Location,
         key: &String,
         typ: Type,
     ) -> Result<()> {
@@ -180,7 +166,7 @@ impl TypeEnv {
             Ok(())
         }
     }
-    pub(crate) fn get_variable(&self, location: Location, k: String) -> Result<TypeInfo> {
+    pub(crate) fn get_variable(&self, location: &Location, k: String) -> Result<TypeInfo> {
         let result = self.type_env.get(&k);
         match result {
             Some(t) => Ok(t.clone()),
@@ -199,8 +185,11 @@ pub struct TypeInfo {
 }
 
 impl TypeInfo {
-    fn new(location: Location, typ: Type) -> TypeInfo {
-        TypeInfo { location, typ }
+    fn new(location: &Location, typ: Type) -> TypeInfo {
+        TypeInfo {
+            location: location.clone(),
+            typ,
+        }
     }
 }
 
