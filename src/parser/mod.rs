@@ -607,9 +607,9 @@ impl Parser {
         let mut result = vec![];
         self.predict_and_consume(vec![open_token])?;
         while self.peek(0)?.tk_type() != &close_token {
-            //
+            // the step like parse parameter or argument we want to repeat
             result.push(step_fn(self)?);
-            //
+            // parse separator or leave loop and consume the close terminate symbol
             if self.predict(vec![separator.clone()]).is_err() {
                 break;
             } else {
