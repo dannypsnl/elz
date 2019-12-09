@@ -383,18 +383,10 @@ impl Parser {
                             TkType::Comma,
                             |parser| {
                                 // x: 1
-                                let identifier = if parser
-                                    .predict(vec![TkType::Identifier, TkType::Colon])
-                                    .is_ok()
-                                {
-                                    let identifier = parser.take()?.value();
-                                    parser.predict_and_consume(vec![TkType::Colon])?;
-                                    identifier
-                                } else {
-                                    "".to_string()
-                                };
+                                let identifier = parser.take()?.value();
+                                parser.predict_and_consume(vec![TkType::Colon])?;
                                 let expr = parser.parse_expression(None, None)?;
-                                Ok(Argument::new(expr.location.clone(), Some(identifier), expr))
+                                Ok(FieldInit::new(expr.location.clone(), identifier, expr))
                             },
                         )?;
                         Ok(Expr::class_construction(tok.location(), name, field_inits))
@@ -435,12 +427,12 @@ impl Parser {
             {
                 let identifier = self.take()?.value();
                 self.predict_and_consume(vec![TkType::Colon])?;
-                identifier
+                Some(identifier)
             } else {
-                "".to_string()
+                None
             };
             let expr = self.parse_expression(None, None)?;
-            args.push(Argument::new(expr.location.clone(), Some(identifier), expr));
+            args.push(Argument::new(expr.location.clone(), identifier, expr));
             if self.predict(vec![TkType::Comma]).is_err() {
                 break;
             } else {

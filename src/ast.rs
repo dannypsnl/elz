@@ -251,7 +251,7 @@ pub enum ExprVariant {
     /// `class Foo { bar: int; }`
     /// We can have a class construction expression
     /// `Foo { bar: 0 }`
-    ClassConstruction(String, Vec<Argument>),
+    ClassConstruction(String, Vec<FieldInit>),
 }
 
 impl Expr {
@@ -306,7 +306,7 @@ impl Expr {
     pub fn class_construction<T: ToString>(
         location: Location,
         class_name: T,
-        field_inits: Vec<Argument>,
+        field_inits: Vec<FieldInit>,
     ) -> Expr {
         Expr {
             location,
@@ -330,6 +330,26 @@ impl Argument {
         Argument {
             location,
             name,
+            expr,
+        }
+    }
+}
+
+/// FieldInit
+///
+/// `Foo { bar: 1, wow: 2 }`
+#[derive(Clone, Debug, PartialEq)]
+pub struct FieldInit {
+    pub location: Location,
+    pub name: String,
+    pub expr: Expr,
+}
+
+impl FieldInit {
+    pub fn new<T: Into<String>>(location: Location, name: T, expr: Expr) -> FieldInit {
+        FieldInit {
+            location,
+            name: name.into(),
             expr,
         }
     }

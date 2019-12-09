@@ -186,14 +186,14 @@ fn test_class_construction() {
             Location::from(1, 0),
             "Car",
             vec![
-                Argument::new(
+                FieldInit::new(
                     Location::from(1, 12),
-                    Some("name".to_string()),
+                    "name",
                     Expr::string(Location::from(1, 12), "")
                 ),
-                Argument::new(
+                FieldInit::new(
                     Location::from(1, 23),
-                    Some("price".to_string()),
+                    "price",
                     Expr::int(Location::from(1, 23), 10000)
                 ),
             ]
