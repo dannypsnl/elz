@@ -105,6 +105,17 @@ fn test_check_local_variable_define() {
     assert_eq!(result.is_ok(), true);
 }
 
+#[test]
+fn test_static_method_check() {
+    let code = "\
+    class Foo {
+      ::new(): Foo = Foo {};
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let program = Parser::parse_program("", code).unwrap();

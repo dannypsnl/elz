@@ -106,14 +106,10 @@ impl TypeEnv {
                     Ok(())
                 }
             }
-            (UnknownType(name), UnknownType(name2)) => {
-                if name == name2 {
-                    Ok(())
-                } else {
-                    Err(SemanticError::type_mismatched(location, expected, actual))
-                }
+            (_, _) => {
+                println!("{:#?} {:#?}", expected, actual);
+                Err(SemanticError::type_mismatched(location, expected, actual))
             }
-            (_, _) => Err(SemanticError::type_mismatched(location, expected, actual)),
         }
     }
 
@@ -176,6 +172,13 @@ impl TypeEnv {
             },
         }
     }
+
+    pub fn from(&self, typ: &ParsedType) -> Result<Type> {
+        match typ.name().as_str() {
+            "int" | "void" | "f64" | "bool" | "string" | "List" => Ok(Type::from(typ)),
+            _ => Ok(self.get_variable(&Location::from(0, 0), typ.name())?.typ),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -204,7 +207,6 @@ pub enum Type {
     GenericType(String, Vec<Type>),
     FunctionType(Vec<Type>, Box<Type>),
     FreeVar(usize),
-    UnknownType(String),
 }
 
 impl Type {
@@ -229,7 +231,7 @@ impl Type {
                     .map(|parsed_type| Type::from(parsed_type))
                     .collect(),
             ),
-            _ => UnknownType(typ.name()),
+            _ => unreachable!(),
         }
     }
 
@@ -249,7 +251,7 @@ impl Type {
     fn occurs(&self, t: Type) -> bool {
         use Type::*;
         match t {
-            Void | Int | Bool | F64 | String | UnknownType(_) => false,
+            Void | Int | Bool | F64 | String => false,
             FunctionType(t1, t2) => {
                 for t in t1 {
                     if self.occurs(t) {
@@ -298,7 +300,6 @@ impl std::fmt::Display for Type {
             // FIXME: print format: `(int, int): int` not `<function>`
             FunctionType(_params, _ret) => write!(f, "<function>"),
             FreeVar(n) => write!(f, "'{}", n),
-            UnknownType(s) => write!(f, "{}", s.as_str()),
         }
     }
 }

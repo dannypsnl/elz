@@ -46,14 +46,17 @@ impl SemanticChecker {
                     // we are unifying <expr> and <type>, so <expr> location is better than
                     // variable define statement location
                     self.type_env
-                        .unify(&v.expr.location, Type::from(&v.typ), typ)?
+                        .unify(&v.expr.location, self.type_env.from(&v.typ)?, typ)?
                 }
-                Function(f) => self.check_function_body(&f.location, f.clone())?,
+                Function(f) => self.check_function_body(&f.location, &f)?,
                 Class(c) => {
                     let mut class_type_env = TypeEnv::with_parent(&self.type_env);
                     for f in &c.fields {
                         let typ = Type::from(&f.typ);
                         class_type_env.add_variable(&f.location, &f.name, typ)?;
+                    }
+                    for static_method in &c.static_methods {
+                        self.check_function_body(&static_method.location, &static_method)?;
                     }
                     // TODO: check methods, static methods by class_type_env
                 }
@@ -62,11 +65,11 @@ impl SemanticChecker {
         Ok(())
     }
 
-    fn check_function_body(&self, location: &Location, f: Function) -> Result<()> {
-        let return_type = Type::from(&f.ret_typ);
+    fn check_function_body(&self, location: &Location, f: &Function) -> Result<()> {
+        let return_type = self.type_env.from(&f.ret_typ)?;
         let mut type_env = TypeEnv::with_parent(&self.type_env);
         for Parameter(p_type, p_name) in &f.parameters {
-            type_env.add_variable(location, p_name, Type::from(p_type))?;
+            type_env.add_variable(location, p_name, type_env.from(p_type)?)?;
         }
         match &f.body {
             Some(Body::Expr(e)) => {
@@ -85,7 +88,7 @@ impl SemanticChecker {
                             type_env.unify(&stmt.location, return_type.clone(), typ)?
                         }
                         Variable(v) => {
-                            let var_def_typ = Type::from(&v.typ);
+                            let var_def_typ = type_env.from(&v.typ)?;
                             let var_typ = type_env.type_of_expr(&v.expr)?;
                             type_env.unify(&stmt.location, var_def_typ.clone(), var_typ)?;
                             type_env.add_variable(&stmt.location, &v.name, var_def_typ)?
