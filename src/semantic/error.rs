@@ -8,7 +8,7 @@ pub type Result<T> = std::result::Result<T, SemanticError>;
 pub enum SemanticError {
     #[error("{} name: `{}` be redefined", .0, .1)]
     NameRedefined(Location, String),
-    #[error("{} expected: `{}` but got: `{}`", .0, .1, .2)]
+    #[error("{} type mismatched, expected: `{}` but got: `{}`", .0, .1, .2)]
     TypeMismatched(Location, Type, Type),
     #[error("{} no variable named: `{}`", .0, .1)]
     NoVariableNamed(Location, String),
