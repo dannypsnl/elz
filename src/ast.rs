@@ -8,44 +8,25 @@ pub enum TopAst {
     Class(Class),
 }
 
-impl TopAst {
-    pub fn name(&self) -> String {
-        use TopAst::*;
-        match self {
-            Function(f) => f.name.clone(),
-            Variable(v) => v.name.clone(),
-            Class(c) => c.name.clone(),
-        }
-    }
-    pub fn location(&self) -> Location {
-        use TopAst::*;
-        match self {
-            Function(f) => f.loc.clone(),
-            Variable(v) => v.loc.clone(),
-            Class(c) => c.loc.clone(),
-        }
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
-    loc: Location,
-    name: String,
-    fields: Vec<Field>,
-    methods: Vec<Function>,
-    static_methods: Vec<Function>,
+    pub location: Location,
+    pub name: String,
+    pub fields: Vec<Field>,
+    pub methods: Vec<Function>,
+    pub static_methods: Vec<Function>,
 }
 
 impl Class {
     pub fn new<T: ToString>(
-        loc: Location,
+        location: Location,
         name: T,
         fields: Vec<Field>,
         methods: Vec<Function>,
         static_methods: Vec<Function>,
     ) -> Class {
         Class {
-            loc,
+            location,
             name: name.to_string(),
             fields,
             methods,
@@ -56,16 +37,21 @@ impl Class {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Field {
-    loc: Location,
+    pub location: Location,
     pub name: String,
     pub typ: ParsedType,
     pub expr: Option<Expr>,
 }
 
 impl Field {
-    pub fn new<T: ToString>(loc: Location, name: T, typ: ParsedType, expr: Option<Expr>) -> Field {
+    pub fn new<T: ToString>(
+        location: Location,
+        name: T,
+        typ: ParsedType,
+        expr: Option<Expr>,
+    ) -> Field {
         Field {
-            loc,
+            location,
             name: name.to_string(),
             typ,
             expr,
@@ -103,16 +89,16 @@ impl ParsedType {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Variable {
-    loc: Location,
+    pub location: Location,
     pub name: String,
     pub typ: ParsedType,
     pub expr: Expr,
 }
 
 impl Variable {
-    pub fn new<T: ToString>(loc: Location, name: T, typ: ParsedType, expr: Expr) -> Variable {
+    pub fn new<T: ToString>(location: Location, name: T, typ: ParsedType, expr: Expr) -> Variable {
         Variable {
-            loc,
+            location,
             name: name.to_string(),
             typ,
             expr,
@@ -122,8 +108,8 @@ impl Variable {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Function {
-    loc: Location,
-    name: String,
+    pub location: Location,
+    pub name: String,
     pub parameters: Vec<Parameter>,
     pub ret_typ: ParsedType,
     pub body: Option<Body>,
@@ -131,14 +117,14 @@ pub struct Function {
 
 impl Function {
     pub fn new<T: ToString>(
-        loc: Location,
+        location: Location,
         name: T,
         parameters: Vec<Parameter>,
         ret_typ: ParsedType,
         body: Body,
     ) -> Function {
         Function {
-            loc,
+            location,
             name: name.to_string(),
             parameters,
             ret_typ,
@@ -146,13 +132,13 @@ impl Function {
         }
     }
     pub fn new_declaration<T: ToString>(
-        loc: Location,
+        location: Location,
         name: T,
         parameters: Vec<Parameter>,
         ret_typ: ParsedType,
     ) -> Function {
         Function {
-            loc,
+            location,
             name: name.to_string(),
             parameters,
             ret_typ,
@@ -265,7 +251,7 @@ pub enum ExprVariant {
     /// `class Foo { bar: int; }`
     /// We can have a class construction expression
     /// `Foo { bar: 0 }`
-    ClassConstruction(String, Vec<Argument>),
+    ClassConstruction(String, Vec<FieldInit>),
 }
 
 impl Expr {
@@ -320,7 +306,7 @@ impl Expr {
     pub fn class_construction<T: ToString>(
         location: Location,
         class_name: T,
-        field_inits: Vec<Argument>,
+        field_inits: Vec<FieldInit>,
     ) -> Expr {
         Expr {
             location,
@@ -344,6 +330,26 @@ impl Argument {
         Argument {
             location,
             name,
+            expr,
+        }
+    }
+}
+
+/// FieldInit
+///
+/// `Foo { bar: 1, wow: 2 }`
+#[derive(Clone, Debug, PartialEq)]
+pub struct FieldInit {
+    pub location: Location,
+    pub name: String,
+    pub expr: Expr,
+}
+
+impl FieldInit {
+    pub fn new<T: Into<String>>(location: Location, name: T, expr: Expr) -> FieldInit {
+        FieldInit {
+            location,
+            name: name.into(),
             expr,
         }
     }

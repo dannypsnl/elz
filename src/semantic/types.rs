@@ -12,13 +12,13 @@ pub struct TypeEnv {
 }
 
 impl TypeEnv {
-    pub(crate) fn type_of_expr(&mut self, expr: Expr) -> Result<Type> {
+    pub(crate) fn type_of_expr(&mut self, expr: &Expr) -> Result<Type> {
         use ExprVariant::*;
-        let location = expr.location;
-        match expr.value {
+        let location = &expr.location;
+        match &expr.value {
             Binary(l, r, op) => {
-                let left_type = self.type_of_expr(*l)?;
-                let right_type = self.type_of_expr(*r)?;
+                let left_type = self.type_of_expr(l)?;
+                let right_type = self.type_of_expr(r)?;
                 match (left_type, right_type, op) {
                     (Type::Int, Type::Int, Operator::Plus) => Ok(Type::Int),
                     (l, r, op) => panic!("unsupported operator, {} {:?} {}", l, op, r),
@@ -32,12 +32,12 @@ impl TypeEnv {
                 let expr_type: Type = if es.len() < 1 {
                     self.free_var()
                 } else {
-                    self.type_of_expr(es[0].clone())?
+                    self.type_of_expr(&es[0])?
                 };
                 for e in es {
-                    if expr_type != self.type_of_expr(e.clone())? {
+                    if expr_type != self.type_of_expr(e)? {
                         return Err(SemanticError::type_mismatched(
-                            e.location.clone(),
+                            &e.location,
                             expr_type,
                             self.type_of_expr(e)?,
                         ));
@@ -46,28 +46,33 @@ impl TypeEnv {
                 Ok(Type::generic_type("List", vec![expr_type]))
             }
             FuncCall(f, args) => {
-                let location = f.location.clone();
-                let f_type = self.type_of_expr(*f)?;
+                let f_type = self.type_of_expr(f)?;
                 match f_type {
                     Type::FunctionType(params, ret_typ) => {
                         for (p, arg) in params.iter().zip(args.iter()) {
-                            let typ = self.type_of_expr(arg.expr.clone())?;
-                            self.unify(arg.location.clone(), p.clone(), typ)?;
+                            let typ = self.type_of_expr(&arg.expr)?;
+                            self.unify(&arg.location, p.clone(), typ)?;
                         }
                         Ok(*ret_typ)
                     }
-                    _ => Err(SemanticError::call_on_non_function_type(location, f_type)),
+                    _ => Err(SemanticError::call_on_non_function_type(
+                        &f.location,
+                        f_type,
+                    )),
                 }
             }
             Identifier(id) => {
-                let type_info = self.get_variable(location, id)?;
+                let type_info = self.get_variable(location, id.clone())?;
                 Ok(type_info.typ)
             }
-            ClassConstruction(_, _) => unimplemented!(),
+            ClassConstruction(name, _) => {
+                let type_info = self.get_variable(location, name.clone())?;
+                Ok(type_info.typ)
+            }
         }
     }
 
-    pub(crate) fn unify(&self, location: Location, expected: Type, actual: Type) -> Result<()> {
+    pub(crate) fn unify(&self, location: &Location, expected: Type, actual: Type) -> Result<()> {
         use Type::*;
         match (expected.clone(), actual.clone()) {
             (Void, Void) | (Int, Int) | (Bool, Bool) | (F64, F64) | (String, String) => {
@@ -81,16 +86,12 @@ impl TypeEnv {
                 if name != name2 {
                     Err(SemanticError::type_mismatched(location, expected, actual))
                 } else {
-                    for (t1, t2) in generics.iter().zip(generics2.iter()) {
-                        self.unify(location.clone(), t1.clone(), t2.clone())?;
-                    }
+                    self.unify_type_list(location, generics, generics2)?;
                     Ok(())
                 }
             }
             (FunctionType(ft, arg), FunctionType(ft_p, arg_p)) => {
-                for (ft, ft_p) in ft.iter().zip(ft_p.iter()) {
-                    self.unify(location.clone(), ft.clone(), ft_p.clone())?;
-                }
+                self.unify_type_list(location, ft, ft_p)?;
                 self.unify(location, *arg, *arg_p)
             }
             (FreeVar(_), t) => self.unify(location, t, expected),
@@ -105,15 +106,23 @@ impl TypeEnv {
                     Ok(())
                 }
             }
-            (UnknownType(name), UnknownType(name2)) => {
-                if name == name2 {
-                    Ok(())
-                } else {
-                    Err(SemanticError::type_mismatched(location, expected, actual))
-                }
+            (_, _) => {
+                println!("{:#?} {:#?}", expected, actual);
+                Err(SemanticError::type_mismatched(location, expected, actual))
             }
-            (_, _) => Err(SemanticError::type_mismatched(location, expected, actual)),
         }
+    }
+
+    fn unify_type_list(
+        &self,
+        location: &Location,
+        expected: Vec<Type>,
+        actual: Vec<Type>,
+    ) -> Result<()> {
+        for (t1, t2) in expected.iter().zip(actual.iter()) {
+            self.unify(location, t1.clone(), t2.clone())?;
+        }
+        Ok(())
     }
 
     fn free_var(&mut self) -> Type {
@@ -141,18 +150,19 @@ impl TypeEnv {
 
     pub(crate) fn add_variable(
         &mut self,
-        location: Location,
-        key: String,
+        location: &Location,
+        key: &String,
         typ: Type,
     ) -> Result<()> {
-        if self.type_env.contains_key(&key) {
+        if self.type_env.contains_key(key) {
             Err(SemanticError::name_redefined(location, key))
         } else {
-            self.type_env.insert(key, TypeInfo::new(location, typ));
+            self.type_env
+                .insert(key.clone(), TypeInfo::new(location, typ));
             Ok(())
         }
     }
-    pub(crate) fn get_variable(&self, location: Location, k: String) -> Result<TypeInfo> {
+    pub(crate) fn get_variable(&self, location: &Location, k: String) -> Result<TypeInfo> {
         let result = self.type_env.get(&k);
         match result {
             Some(t) => Ok(t.clone()),
@@ -160,6 +170,13 @@ impl TypeEnv {
                 Some(env) => unsafe { env.as_ref() }.unwrap().get_variable(location, k),
                 None => Err(SemanticError::no_variable(location, k)),
             },
+        }
+    }
+
+    pub fn from(&self, typ: &ParsedType) -> Result<Type> {
+        match typ.name().as_str() {
+            "int" | "void" | "f64" | "bool" | "string" | "List" => Ok(Type::from(typ)),
+            _ => Ok(self.get_variable(&Location::from(0, 0), typ.name())?.typ),
         }
     }
 }
@@ -171,8 +188,11 @@ pub struct TypeInfo {
 }
 
 impl TypeInfo {
-    fn new(location: Location, typ: Type) -> TypeInfo {
-        TypeInfo { location, typ }
+    fn new(location: &Location, typ: Type) -> TypeInfo {
+        TypeInfo {
+            location: location.clone(),
+            typ,
+        }
     }
 }
 
@@ -187,7 +207,6 @@ pub enum Type {
     GenericType(String, Vec<Type>),
     FunctionType(Vec<Type>, Box<Type>),
     FreeVar(usize),
-    UnknownType(String),
 }
 
 impl Type {
@@ -197,7 +216,7 @@ impl Type {
 }
 
 impl Type {
-    pub fn from(typ: ParsedType) -> Type {
+    pub fn from(typ: &ParsedType) -> Type {
         use Type::*;
         match typ.name().as_str() {
             "int" => Int,
@@ -209,10 +228,10 @@ impl Type {
                 "List",
                 typ.generics()
                     .iter()
-                    .map(|parsed_type| Type::from(parsed_type.clone()))
+                    .map(|parsed_type| Type::from(parsed_type))
                     .collect(),
             ),
-            _ => UnknownType(typ.name()),
+            _ => unreachable!(),
         }
     }
 
@@ -220,15 +239,19 @@ impl Type {
         let param_types = f
             .parameters
             .into_iter()
-            .map(|param| Type::from(param.0))
+            .map(|param| Type::from(&param.0))
             .collect();
-        Type::FunctionType(param_types, Type::from(f.ret_typ).into())
+        Type::FunctionType(param_types, Type::from(&f.ret_typ).into())
+    }
+
+    pub fn new_class(c: &Class) -> Type {
+        Type::GenericType(c.name.clone(), vec![])
     }
 
     fn occurs(&self, t: Type) -> bool {
         use Type::*;
         match t {
-            Void | Int | Bool | F64 | String | UnknownType(_) => false,
+            Void | Int | Bool | F64 | String => false,
             FunctionType(t1, t2) => {
                 for t in t1 {
                     if self.occurs(t) {
@@ -260,20 +283,23 @@ impl std::fmt::Display for Type {
             Bool => write!(f, "bool"),
             String => write!(f, "string"),
             GenericType(name, generics) => {
-                write!(f, "{}[", name)?;
-                for (i, g) in generics.iter().enumerate() {
-                    if i == generics.len() - 1 {
-                        write!(f, "{}", g)?;
-                    } else {
-                        write!(f, "{}, ", g)?;
+                write!(f, "{}", name)?;
+                if generics.len() > 0 {
+                    write!(f, "[")?;
+                    for (i, g) in generics.iter().enumerate() {
+                        if i == generics.len() - 1 {
+                            write!(f, "{}", g)?;
+                        } else {
+                            write!(f, "{}, ", g)?;
+                        }
                     }
+                    write!(f, "]")?;
                 }
-                write!(f, "]")
+                write!(f, "")
             }
             // FIXME: print format: `(int, int): int` not `<function>`
             FunctionType(_params, _ret) => write!(f, "<function>"),
             FreeVar(n) => write!(f, "'{}", n),
-            UnknownType(s) => write!(f, "{}", s.as_str()),
         }
     }
 }

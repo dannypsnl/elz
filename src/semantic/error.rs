@@ -8,7 +8,7 @@ pub type Result<T> = std::result::Result<T, SemanticError>;
 pub enum SemanticError {
     #[error("{} name: `{}` be redefined", .0, .1)]
     NameRedefined(Location, String),
-    #[error("{} expected: `{}` but got: `{}`", .0, .1, .2)]
+    #[error("{} type mismatched, expected: `{}` but got: `{}`", .0, .1, .2)]
     TypeMismatched(Location, Type, Type),
     #[error("{} no variable named: `{}`", .0, .1)]
     NoVariableNamed(Location, String),
@@ -17,16 +17,16 @@ pub enum SemanticError {
 }
 
 impl SemanticError {
-    pub fn name_redefined<T: ToString>(location: Location, name: T) -> SemanticError {
-        SemanticError::NameRedefined(location, name.to_string())
+    pub fn name_redefined<T: ToString>(location: &Location, name: T) -> SemanticError {
+        SemanticError::NameRedefined(location.clone(), name.to_string())
     }
-    pub fn type_mismatched(location: Location, expected: Type, actual: Type) -> SemanticError {
-        SemanticError::TypeMismatched(location, expected, actual)
+    pub fn type_mismatched(location: &Location, expected: Type, actual: Type) -> SemanticError {
+        SemanticError::TypeMismatched(location.clone(), expected, actual)
     }
-    pub fn no_variable(location: Location, name: String) -> SemanticError {
-        SemanticError::NoVariableNamed(location, name)
+    pub fn no_variable(location: &Location, name: String) -> SemanticError {
+        SemanticError::NoVariableNamed(location.clone(), name)
     }
-    pub fn call_on_non_function_type(location: Location, typ: Type) -> SemanticError {
-        SemanticError::CallOnNonFunctionType(location, typ)
+    pub fn call_on_non_function_type(location: &Location, typ: Type) -> SemanticError {
+        SemanticError::CallOnNonFunctionType(location.clone(), typ)
     }
 }
