@@ -281,15 +281,19 @@ impl std::fmt::Display for Type {
             Bool => write!(f, "bool"),
             String => write!(f, "string"),
             GenericType(name, generics) => {
-                write!(f, "{}[", name)?;
-                for (i, g) in generics.iter().enumerate() {
-                    if i == generics.len() - 1 {
-                        write!(f, "{}", g)?;
-                    } else {
-                        write!(f, "{}, ", g)?;
+                write!(f, "{}", name)?;
+                if generics.len() > 0 {
+                    write!(f, "[")?;
+                    for (i, g) in generics.iter().enumerate() {
+                        if i == generics.len() - 1 {
+                            write!(f, "{}", g)?;
+                        } else {
+                            write!(f, "{}, ", g)?;
+                        }
                     }
+                    write!(f, "]")?;
                 }
-                write!(f, "]")
+                write!(f, "")
             }
             // FIXME: print format: `(int, int): int` not `<function>`
             FunctionType(_params, _ret) => write!(f, "<function>"),
