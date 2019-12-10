@@ -7,7 +7,10 @@
 * class
     ```elz
     class Car {
+      // field
       name: string;
+      // static method, and Elz didn't have constructor out of class
+      // instead of that, please use static method
       ::new(name: string): Car = Car {name: "wow"};
     }
     ```
