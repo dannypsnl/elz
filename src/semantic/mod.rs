@@ -48,7 +48,7 @@ impl SemanticChecker {
                     self.type_env
                         .unify(&v.expr.location, self.type_env.from(&v.typ)?, typ)?
                 }
-                Function(f) => self.check_function_body(&f.location, &f)?,
+                Function(f) => self.check_function_body(&f.location, &f, &self.type_env)?,
                 Class(c) => {
                     let mut class_type_env = TypeEnv::with_parent(&self.type_env);
                     for f in &c.fields {
@@ -56,7 +56,11 @@ impl SemanticChecker {
                         class_type_env.add_variable(&f.location, &f.name, typ)?;
                     }
                     for static_method in &c.static_methods {
-                        self.check_function_body(&static_method.location, &static_method)?;
+                        self.check_function_body(
+                            &static_method.location,
+                            &static_method,
+                            &class_type_env,
+                        )?;
                     }
                     // TODO: check methods, static methods by class_type_env
                 }
@@ -65,9 +69,9 @@ impl SemanticChecker {
         Ok(())
     }
 
-    fn check_function_body(&self, location: &Location, f: &Function) -> Result<()> {
+    fn check_function_body(&self, location: &Location, f: &Function, env: &TypeEnv) -> Result<()> {
         let return_type = self.type_env.from(&f.ret_typ)?;
-        let mut type_env = TypeEnv::with_parent(&self.type_env);
+        let mut type_env = TypeEnv::with_parent(env);
         for Parameter(p_type, p_name) in &f.parameters {
             type_env.add_variable(location, p_name, type_env.from(p_type)?)?;
         }
