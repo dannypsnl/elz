@@ -1,5 +1,6 @@
 use super::*;
 use crate::lexer::Location;
+use std::collections::{HashMap, HashSet};
 
 #[test]
 fn test_parse_function_with_block_body() {
@@ -178,25 +179,14 @@ fn test_parse_class() {
 fn test_class_construction() {
     let code = "Car { name: \"\", price: 10000 }";
 
+    let mut fields_inits = HashMap::<String, Expr>::new();
+    fields_inits.insert("name".to_string(), Expr::string(Location::from(1, 12), ""));
+    fields_inits.insert("price".to_string(), Expr::int(Location::from(1, 23), 10000));
+
     let mut parser = Parser::new("", code);
     let class_construction = parser.parse_expression(None, None).unwrap();
     assert_eq!(
         class_construction,
-        Expr::class_construction(
-            Location::from(1, 0),
-            "Car",
-            vec![
-                FieldInit::new(
-                    Location::from(1, 12),
-                    "name",
-                    Expr::string(Location::from(1, 12), "")
-                ),
-                FieldInit::new(
-                    Location::from(1, 23),
-                    "price",
-                    Expr::int(Location::from(1, 23), 10000)
-                ),
-            ]
-        )
+        Expr::class_construction(Location::from(1, 0), "Car", fields_inits)
     )
 }
