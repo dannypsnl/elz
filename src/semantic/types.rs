@@ -10,6 +10,8 @@ pub struct TypeEnv {
     variables: HashMap<String, TypeInfo>,
     types: HashMap<String, TypeInfo>,
     free_var_count: usize,
+    // flag
+    pub in_class_scope: bool,
 }
 
 impl TypeEnv {
@@ -67,6 +69,11 @@ impl TypeEnv {
                 Ok(type_info.typ)
             }
             ClassConstruction(name, field_inits) => {
+                if !self.in_class_scope {
+                    return Err(SemanticError::cannot_use_class_construction_out_of_class(
+                        location,
+                    ));
+                }
                 let type_info = self.get_type(location, name.clone())?;
                 match &type_info.typ {
                     Type::ClassType(_, _, should_inits) => {
@@ -137,10 +144,7 @@ impl TypeEnv {
                     Ok(())
                 }
             }
-            (_, _) => {
-                println!("{:#?} {:#?}", expected, actual);
-                Err(SemanticError::type_mismatched(location, expected, actual))
-            }
+            (_, _) => Err(SemanticError::type_mismatched(location, expected, actual)),
         }
     }
 
@@ -199,14 +203,26 @@ impl TypeEnv {
             variables: HashMap::new(),
             types,
             free_var_count: 0,
+            in_class_scope: false,
         }
     }
     pub fn with_parent(parent: &TypeEnv) -> TypeEnv {
         let mut type_env = TypeEnv::new();
         type_env.parent = Some(parent);
+        // inherit the attribute from parent
+        // if parent is in class scope, this of course is in class scope
+        type_env.in_class_scope = parent.in_class_scope;
         type_env
     }
+    pub fn from(&self, typ: &ParsedType) -> Result<Type> {
+        match typ.name().as_str() {
+            "int" | "void" | "f64" | "bool" | "string" | "List" => Ok(Type::from(typ)),
+            _ => Ok(self.get_type(&Location::none(), typ.name())?.typ),
+        }
+    }
+}
 
+impl TypeEnv {
     pub(crate) fn add_variable(
         &mut self,
         location: &Location,
@@ -248,13 +264,6 @@ impl TypeEnv {
                 Some(env) => unsafe { env.as_ref() }.unwrap().get_type(location, k),
                 None => Err(SemanticError::no_type(location, k)),
             },
-        }
-    }
-
-    pub fn from(&self, typ: &ParsedType) -> Result<Type> {
-        match typ.name().as_str() {
-            "int" | "void" | "f64" | "bool" | "string" | "List" => Ok(Type::from(typ)),
-            _ => Ok(self.get_type(&Location::none(), typ.name())?.typ),
         }
     }
 }

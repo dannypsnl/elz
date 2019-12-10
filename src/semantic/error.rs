@@ -18,8 +18,10 @@ pub enum SemanticError {
     CallOnNonFunctionType(Location, Type),
     #[error("{} following fields must be inited but haven't: {}", .0, ShowFieldsList(.1.to_vec()))]
     FieldsMissingInit(Location, Vec<String>),
-    #[error("{} cannot use class construct on a non-class type: {}", .0, .1)]
+    #[error("{} cannot use class construction on a non-class type: {}", .0, .1)]
     CannotConstructNonClassType(Location, Type),
+    #[error("{} cannot use class construction out of class scope", .0)]
+    CannotUseClassConstructionOutOfClass(Location),
 }
 
 impl SemanticError {
@@ -43,6 +45,9 @@ impl SemanticError {
     }
     pub fn cannot_construct_non_class_type(location: &Location, typ: Type) -> SemanticError {
         SemanticError::CannotConstructNonClassType(location.clone(), typ)
+    }
+    pub fn cannot_use_class_construction_out_of_class(location: &Location) -> SemanticError {
+        SemanticError::CannotUseClassConstructionOutOfClass(location.clone())
     }
 }
 

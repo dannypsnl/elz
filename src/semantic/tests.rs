@@ -129,11 +129,21 @@ fn test_all_class_field_must_init() {
 }
 
 #[test]
-fn test_cannot_use_class_construct_on_non_class_type() {
+fn test_cannot_use_class_construction_on_non_class_type() {
     let code = "\
     class Foo {
       ::new(): Foo = int {};
     }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
+#[test]
+fn test_cannot_use_class_construction_out_of_class() {
+    let code = "\
+    class Foo {}
+    x: Foo = Foo {};
     ";
     let result = check_code(code);
     assert_eq!(result.is_err(), true);
