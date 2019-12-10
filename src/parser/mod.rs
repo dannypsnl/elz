@@ -8,6 +8,7 @@ mod tests;
 
 use error::ParseError;
 use error::Result;
+use std::collections::HashMap;
 
 /// Parser is a parsing helper
 pub struct Parser {
@@ -377,7 +378,8 @@ impl Parser {
                 let name = self.parse_identifier()?;
                 match self.peek(0)?.tk_type() {
                     TkType::OpenBrace => {
-                        let field_inits = self.parse_many(
+                        let mut field_inits = HashMap::new();
+                        let exprs = self.parse_many(
                             TkType::OpenBrace,
                             TkType::CloseBrace,
                             TkType::Comma,
@@ -386,9 +388,12 @@ impl Parser {
                                 let identifier = parser.take()?.value();
                                 parser.predict_and_consume(vec![TkType::Colon])?;
                                 let expr = parser.parse_expression(None, None)?;
-                                Ok(FieldInit::new(expr.location.clone(), identifier, expr))
+                                Ok((identifier, expr))
                             },
                         )?;
+                        for (name, expr) in exprs {
+                            field_inits.insert(name, expr);
+                        }
                         Ok(Expr::class_construction(tok.location(), name, field_inits))
                     }
                     _ => Ok(Expr::identifier(tok.location(), name)),

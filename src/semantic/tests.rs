@@ -116,6 +116,29 @@ fn test_static_method_check() {
     assert_eq!(result.is_ok(), true);
 }
 
+#[test]
+fn test_all_class_field_must_init() {
+    let code = "\
+    class Foo {
+      bar: int;
+      ::new(): Foo = Foo {};
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
+#[test]
+fn test_cannot_use_class_construct_on_non_class_type() {
+    let code = "\
+    class Foo {
+      ::new(): Foo = int {};
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let program = Parser::parse_program("", code).unwrap();

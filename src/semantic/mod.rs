@@ -33,7 +33,7 @@ impl SemanticChecker {
                 }
                 Class(c) => {
                     let typ = Type::new_class(c);
-                    self.type_env.add_variable(&c.location, &c.name, typ)?;
+                    self.type_env.add_type(&c.location, &c.name, typ)?;
                 }
             }
         }
