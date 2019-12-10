@@ -7,7 +7,8 @@ use std::collections::HashMap;
 
 pub struct TypeEnv {
     parent: Option<*const TypeEnv>,
-    type_env: HashMap<String, TypeInfo>,
+    variables: HashMap<String, TypeInfo>,
+    types: HashMap<String, TypeInfo>,
     free_var_count: usize,
 }
 
@@ -66,7 +67,7 @@ impl TypeEnv {
                 Ok(type_info.typ)
             }
             ClassConstruction(name, field_inits) => {
-                let type_info = self.get_variable(location, name.clone())?;
+                let type_info = self.get_type(location, name.clone())?;
                 match &type_info.typ {
                     Type::ClassType(_, _, should_inits) => {
                         let mut missing_init_fields = vec![];
@@ -76,14 +77,17 @@ impl TypeEnv {
                             }
                         }
                         if !missing_init_fields.is_empty() {
-                            return Err(SemanticError::FieldsMissingInit(
-                                location.clone(),
+                            return Err(SemanticError::fields_missing_init(
+                                location,
                                 missing_init_fields,
                             ));
                         }
                     }
                     rest => {
-                        // TODO: Error, construct a non-class type
+                        return Err(SemanticError::cannot_construct_non_class_type(
+                            location,
+                            rest.clone(),
+                        ));
                     }
                 }
                 Ok(type_info.typ)
@@ -161,18 +165,46 @@ impl TypeEnv {
 
 impl TypeEnv {
     pub fn new() -> TypeEnv {
+        let mut types = HashMap::new();
+        types.insert(
+            "int".to_string(),
+            TypeInfo::new(&Location::none(), Type::Int),
+        );
+        types.insert(
+            "string".to_string(),
+            TypeInfo::new(&Location::none(), Type::String),
+        );
+        types.insert(
+            "int".to_string(),
+            TypeInfo::new(&Location::none(), Type::Int),
+        );
+        types.insert(
+            "void".to_string(),
+            TypeInfo::new(&Location::none(), Type::Void),
+        );
+        types.insert(
+            "f64".to_string(),
+            TypeInfo::new(&Location::none(), Type::F64),
+        );
+        types.insert(
+            "bool".to_string(),
+            TypeInfo::new(&Location::none(), Type::Bool),
+        );
+        types.insert(
+            "string".to_string(),
+            TypeInfo::new(&Location::none(), Type::String),
+        );
         TypeEnv {
             parent: None,
-            type_env: HashMap::new(),
+            variables: HashMap::new(),
+            types,
             free_var_count: 0,
         }
     }
     pub fn with_parent(parent: &TypeEnv) -> TypeEnv {
-        TypeEnv {
-            parent: Some(parent),
-            type_env: HashMap::new(),
-            free_var_count: 0,
-        }
+        let mut type_env = TypeEnv::new();
+        type_env.parent = Some(parent);
+        type_env
     }
 
     pub(crate) fn add_variable(
@@ -181,16 +213,16 @@ impl TypeEnv {
         key: &String,
         typ: Type,
     ) -> Result<()> {
-        if self.type_env.contains_key(key) {
+        if self.variables.contains_key(key) {
             Err(SemanticError::name_redefined(location, key))
         } else {
-            self.type_env
+            self.variables
                 .insert(key.clone(), TypeInfo::new(location, typ));
             Ok(())
         }
     }
     pub(crate) fn get_variable(&self, location: &Location, k: String) -> Result<TypeInfo> {
-        let result = self.type_env.get(&k);
+        let result = self.variables.get(&k);
         match result {
             Some(t) => Ok(t.clone()),
             None => match self.parent {
@@ -200,10 +232,29 @@ impl TypeEnv {
         }
     }
 
+    pub(crate) fn add_type(&mut self, location: &Location, key: &String, typ: Type) -> Result<()> {
+        if self.types.contains_key(key) {
+            Err(SemanticError::name_redefined(location, key))
+        } else {
+            self.types.insert(key.clone(), TypeInfo::new(location, typ));
+            Ok(())
+        }
+    }
+    pub(crate) fn get_type(&self, location: &Location, k: String) -> Result<TypeInfo> {
+        let result = self.types.get(&k);
+        match result {
+            Some(t) => Ok(t.clone()),
+            None => match self.parent {
+                Some(env) => unsafe { env.as_ref() }.unwrap().get_type(location, k),
+                None => Err(SemanticError::no_type(location, k)),
+            },
+        }
+    }
+
     pub fn from(&self, typ: &ParsedType) -> Result<Type> {
         match typ.name().as_str() {
             "int" | "void" | "f64" | "bool" | "string" | "List" => Ok(Type::from(typ)),
-            _ => Ok(self.get_variable(&Location::from(0, 0), typ.name())?.typ),
+            _ => Ok(self.get_type(&Location::none(), typ.name())?.typ),
         }
     }
 }

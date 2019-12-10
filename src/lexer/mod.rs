@@ -64,6 +64,9 @@ pub struct Location {
 }
 
 impl Location {
+    pub fn none() -> Location {
+        Location::from(0, 0)
+    }
     pub fn from(line: u32, column: u32) -> Location {
         Location::new("", line, column)
     }

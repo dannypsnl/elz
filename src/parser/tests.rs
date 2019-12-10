@@ -1,6 +1,6 @@
 use super::*;
 use crate::lexer::Location;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 #[test]
 fn test_parse_function_with_block_body() {
