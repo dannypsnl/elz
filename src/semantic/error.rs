@@ -14,6 +14,8 @@ pub enum SemanticError {
     NoVariableNamed(Location, String),
     #[error("{} call on non-function type: `{}`", .0, .1)]
     CallOnNonFunctionType(Location, Type),
+    #[error("{} following fields must be inited but haven't: {}", .0, ShowFieldsList(.1.to_vec()))]
+    FieldsMissingInit(Location, Vec<String>),
 }
 
 impl SemanticError {
@@ -28,5 +30,18 @@ impl SemanticError {
     }
     pub fn call_on_non_function_type(location: &Location, typ: Type) -> SemanticError {
         SemanticError::CallOnNonFunctionType(location.clone(), typ)
+    }
+    pub fn fields_missing_init(location: &Location, fields: Vec<String>) -> SemanticError {
+        SemanticError::FieldsMissingInit(location.clone(), fields)
+    }
+}
+
+struct ShowFieldsList(Vec<String>);
+impl std::fmt::Display for ShowFieldsList {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        for e in &self.0 {
+            write!(f, "`{}` ", e)?;
+        }
+        write!(f, "")
     }
 }

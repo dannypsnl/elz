@@ -65,8 +65,27 @@ impl TypeEnv {
                 let type_info = self.get_variable(location, id.clone())?;
                 Ok(type_info.typ)
             }
-            ClassConstruction(name, _) => {
+            ClassConstruction(name, field_inits) => {
                 let type_info = self.get_variable(location, name.clone())?;
+                match &type_info.typ {
+                    Type::ClassType(_, _, should_inits) => {
+                        let mut missing_init_fields = vec![];
+                        for should_init in should_inits {
+                            if !field_inits.contains_key(should_init) {
+                                missing_init_fields.push(should_init.clone())
+                            }
+                        }
+                        if !missing_init_fields.is_empty() {
+                            return Err(SemanticError::FieldsMissingInit(
+                                location.clone(),
+                                missing_init_fields,
+                            ));
+                        }
+                    }
+                    rest => {
+                        // TODO: Error, construct a non-class type
+                    }
+                }
                 Ok(type_info.typ)
             }
         }
@@ -87,6 +106,14 @@ impl TypeEnv {
                     Err(SemanticError::type_mismatched(location, expected, actual))
                 } else {
                     self.unify_type_list(location, generics, generics2)?;
+                    Ok(())
+                }
+            }
+            (ClassType(name, type_parameters, _), ClassType(name2, type_parameters2, _)) => {
+                if name != name2 {
+                    Err(SemanticError::type_mismatched(location, expected, actual))
+                } else {
+                    self.unify_type_list(location, type_parameters, type_parameters2)?;
                     Ok(())
                 }
             }
@@ -203,6 +230,7 @@ pub enum Type {
     Bool,
     F64,
     String,
+    ClassType(String, Vec<Type>, Vec<String>),
     // name[generic_types]
     GenericType(String, Vec<Type>),
     FunctionType(Vec<Type>, Box<Type>),
@@ -245,7 +273,16 @@ impl Type {
     }
 
     pub fn new_class(c: &Class) -> Type {
-        Type::GenericType(c.name.clone(), vec![])
+        let mut should_inits = vec![];
+        for field in &c.fields {
+            match &field.expr {
+                None => {
+                    should_inits.push(field.name.clone());
+                }
+                _ => (),
+            }
+        }
+        Type::ClassType(c.name.clone(), vec![], should_inits)
     }
 
     fn occurs(&self, t: Type) -> bool {
@@ -262,6 +299,14 @@ impl Type {
             }
             GenericType(_, ts) => {
                 for t in ts {
+                    if self.occurs(t) {
+                        return true;
+                    }
+                }
+                false
+            }
+            ClassType(_, type_parameters, _) => {
+                for t in type_parameters {
                     if self.occurs(t) {
                         return true;
                     }
@@ -288,6 +333,21 @@ impl std::fmt::Display for Type {
                     write!(f, "[")?;
                     for (i, g) in generics.iter().enumerate() {
                         if i == generics.len() - 1 {
+                            write!(f, "{}", g)?;
+                        } else {
+                            write!(f, "{}, ", g)?;
+                        }
+                    }
+                    write!(f, "]")?;
+                }
+                write!(f, "")
+            }
+            ClassType(name, type_parameters, _) => {
+                write!(f, "{}", name)?;
+                if type_parameters.len() > 0 {
+                    write!(f, "[")?;
+                    for (i, g) in type_parameters.iter().enumerate() {
+                        if i == type_parameters.len() - 1 {
                             write!(f, "{}", g)?;
                         } else {
                             write!(f, "{}, ", g)?;
