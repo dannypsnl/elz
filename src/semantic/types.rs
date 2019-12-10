@@ -144,10 +144,7 @@ impl TypeEnv {
                     Ok(())
                 }
             }
-            (_, _) => {
-                println!("{:#?} {:#?}", expected, actual);
-                Err(SemanticError::type_mismatched(location, expected, actual))
-            }
+            (_, _) => Err(SemanticError::type_mismatched(location, expected, actual)),
         }
     }
 
@@ -322,10 +319,7 @@ impl Type {
                     .map(|parsed_type| Type::from(parsed_type))
                     .collect(),
             ),
-            _ => {
-                println!("here, {:#?}", typ);
-                unreachable!()
-            }
+            _ => unreachable!(),
         }
     }
 
