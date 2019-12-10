@@ -25,7 +25,7 @@ impl SemanticChecker {
             match top {
                 Variable(v) => {
                     self.type_env
-                        .add_variable(&v.location, &v.name, Type::from(&v.typ))?
+                        .add_variable(&v.location, &v.name, self.type_env.from(&v.typ)?)?
                 }
                 Function(f) => {
                     let typ = Type::new_function(f.clone());
@@ -52,9 +52,10 @@ impl SemanticChecker {
                 Class(c) => {
                     let mut class_type_env = TypeEnv::with_parent(&self.type_env);
                     for f in &c.fields {
-                        let typ = Type::from(&f.typ);
+                        let typ = class_type_env.from(&f.typ)?;
                         class_type_env.add_variable(&f.location, &f.name, typ)?;
                     }
+                    class_type_env.in_class_scope = true;
                     for static_method in &c.static_methods {
                         self.check_function_body(
                             &static_method.location,
