@@ -117,6 +117,17 @@ fn test_static_method_check() {
 }
 
 #[test]
+fn test_method_check() {
+    let code = "\
+    class Foo {
+      bar(): int = 1;
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
+
+#[test]
 fn test_all_class_field_must_init() {
     let code = "\
     class Foo {
