@@ -5,7 +5,7 @@
 Ensure all tests was pass, I use git hook for this, if you want to use it, run:
 
 ```bash
-ln -s ./hooks/pre-push .git/hooks/pre-push
+cp ./hooks/pre-push .git/hooks/pre-push
 ```
 
 ### Code style
