@@ -63,7 +63,9 @@ impl SemanticChecker {
                             &class_type_env,
                         )?;
                     }
-                    // TODO: check methods, static methods by class_type_env
+                    for method in &c.methods {
+                        self.check_function_body(&method.location, &method, &class_type_env)?;
+                    }
                 }
             }
         }
