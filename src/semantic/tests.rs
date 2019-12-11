@@ -160,6 +160,21 @@ fn test_cannot_use_class_construction_out_of_class() {
     assert_eq!(result.is_err(), true);
 }
 
+#[test]
+fn test_global_should_be_able_to_use_class_static_method() {
+    let code = "\
+    main(): void {
+      foo: Foo = Foo::new();
+    }
+
+    class Foo {
+      ::new(): Foo = Foo {};
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let program = Parser::parse_program("", code).unwrap();

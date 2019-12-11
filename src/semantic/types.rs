@@ -216,9 +216,19 @@ impl TypeEnv {
     }
     pub fn from(&self, typ: &ParsedType) -> Result<Type> {
         match typ.name().as_str() {
-            "int" | "void" | "f64" | "bool" | "string" | "List" => Ok(Type::from(typ)),
+            "List" => Ok(Type::from(typ)),
             _ => Ok(self.get_type(&Location::none(), typ.name())?.typ),
         }
+    }
+    pub fn new_function_type(&self, f: &Function) -> Result<Type> {
+        let mut param_types = vec![];
+        for param in &f.parameters {
+            param_types.push(self.from(&param.0)?);
+        }
+        Ok(Type::FunctionType(
+            param_types,
+            self.from(&f.ret_typ)?.into(),
+        ))
     }
 }
 
@@ -307,11 +317,6 @@ impl Type {
     pub fn from(typ: &ParsedType) -> Type {
         use Type::*;
         match typ.name().as_str() {
-            "int" => Int,
-            "void" => Void,
-            "f64" => F64,
-            "bool" => Bool,
-            "string" => String,
             "List" => Type::generic_type(
                 "List",
                 typ.generics()
@@ -321,15 +326,6 @@ impl Type {
             ),
             _ => unreachable!(),
         }
-    }
-
-    pub fn new_function(f: Function) -> Type {
-        let param_types = f
-            .parameters
-            .into_iter()
-            .map(|param| Type::from(&param.0))
-            .collect();
-        Type::FunctionType(param_types, Type::from(&f.ret_typ).into())
     }
 
     pub fn new_class(c: &Class) -> Type {

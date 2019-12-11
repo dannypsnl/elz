@@ -23,18 +23,35 @@ impl SemanticChecker {
         for top in ast {
             use TopAst::*;
             match top {
+                Class(c) => {
+                    let typ = Type::new_class(c);
+                    self.type_env.add_type(&c.location, &c.name, typ)?;
+                    for static_method in &c.static_methods {
+                        self.type_env.add_variable(
+                            &static_method.location,
+                            &format!("{}::{}", c.name, static_method.name).to_string(),
+                            self.type_env.new_function_type(static_method)?,
+                        )?;
+                    }
+                }
+                _ => (),
+            }
+        }
+        for top in ast {
+            use TopAst::*;
+            match top {
                 Variable(v) => {
                     self.type_env
                         .add_variable(&v.location, &v.name, self.type_env.from(&v.typ)?)?
                 }
                 Function(f) => {
-                    let typ = Type::new_function(f.clone());
-                    self.type_env.add_variable(&f.location, &f.name, typ)?;
+                    self.type_env.add_variable(
+                        &f.location,
+                        &f.name,
+                        self.type_env.new_function_type(f)?,
+                    )?;
                 }
-                Class(c) => {
-                    let typ = Type::new_class(c);
-                    self.type_env.add_type(&c.location, &c.name, typ)?;
-                }
+                _ => (),
             }
         }
         for top in ast {
