@@ -198,11 +198,19 @@ impl TypeEnv {
             "string".to_string(),
             TypeInfo::new(&Location::none(), Type::String),
         );
+        // FIXME: Get list type should with free variable type?
+        types.insert(
+            "List".to_string(),
+            TypeInfo::new(
+                &Location::none(),
+                Type::generic_type("List", vec![Type::FreeVar(0)]),
+            ),
+        );
         TypeEnv {
             parent: None,
             variables: HashMap::new(),
             types,
-            free_var_count: 0,
+            free_var_count: 1,
             in_class_scope: false,
         }
     }
@@ -216,7 +224,13 @@ impl TypeEnv {
     }
     pub fn from(&self, typ: &ParsedType) -> Result<Type> {
         match typ.name().as_str() {
-            "List" => Ok(Type::from(typ)),
+            "List" => {
+                let mut type_parameters = vec![];
+                for parsed_type in &typ.generics() {
+                    type_parameters.push(self.from(parsed_type)?);
+                }
+                Ok(Type::generic_type("List", type_parameters))
+            }
             _ => Ok(self.get_type(&Location::none(), typ.name())?.typ),
         }
     }
@@ -314,20 +328,6 @@ impl Type {
 }
 
 impl Type {
-    pub fn from(typ: &ParsedType) -> Type {
-        use Type::*;
-        match typ.name().as_str() {
-            "List" => Type::generic_type(
-                "List",
-                typ.generics()
-                    .iter()
-                    .map(|parsed_type| Type::from(parsed_type))
-                    .collect(),
-            ),
-            _ => unreachable!(),
-        }
-    }
-
     pub fn new_class(c: &Class) -> Type {
         let mut should_inits = vec![];
         for field in &c.fields {
