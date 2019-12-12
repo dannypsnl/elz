@@ -175,6 +175,18 @@ fn test_global_should_be_able_to_use_class_static_method() {
     assert_eq!(result.is_ok(), true);
 }
 
+#[test]
+fn test_static_method_should_avaliable_in_class_scope() {
+    let code = "\
+    class Foo {
+      ::new2(): void {new1();}
+      ::new1(): void {}
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let program = Parser::parse_program("", code).unwrap();
