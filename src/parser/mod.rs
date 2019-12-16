@@ -275,19 +275,18 @@ impl Parser {
         let tok = self.peek(0)?;
         let stmt = match tok.tk_type() {
             TkType::Identifier => {
-                let name = self.parse_identifier()?;
-                if self.predict(vec![TkType::Colon]).is_ok() {
+                if self.peek(1)?.tk_type() == &TkType::Colon {
+                    let name = self.parse_identifier()?;
                     // `x: int = 1;`
                     self.predict_and_consume(vec![TkType::Colon])?;
                     let typ = self.parse_type()?;
                     self.predict_and_consume(vec![TkType::Equal])?;
                     let expr = self.parse_expression(None, None)?;
                     Ok(Statement::variable(tok.location(), name, typ, expr))
-                } else if self.predict(vec![TkType::OpenParen]).is_ok() {
-                    // `println("hello");`
-                    let func_expr = Expr::identifier(tok.location().clone(), name);
-                    let func_call_expr = self.parse_function_call(func_expr)?;
-                    Ok(Statement::function_call(tok.location(), func_call_expr))
+                } else if vec![TkType::OpenParen, TkType::Dot].contains(self.peek(1)?.tk_type()) {
+                    let unary = self.parse_unary()?;
+                    let expr = self.parse_primary(unary)?;
+                    Ok(Statement::expression(tok.location(), expr))
                 } else {
                     Err(ParseError::not_expected_token(
                         vec![TkType::Colon, TkType::OpenParen],
@@ -322,12 +321,14 @@ impl Parser {
         left_hand_side: Option<Expr>,
         previous_primary: Option<u64>,
     ) -> Result<Expr> {
-        let mut lhs = left_hand_side.unwrap_or(self.parse_primary()?);
+        let unary = self.parse_unary()?;
+        let mut lhs = left_hand_side.unwrap_or(self.parse_primary(unary)?);
         let mut lookahead = self.peek(0)?;
         while precedence(lookahead.clone()) >= previous_primary.unwrap_or(1) {
             let operator = lookahead.clone();
             self.consume()?;
-            let mut rhs = self.parse_primary()?;
+            let unary = self.parse_unary()?;
+            let mut rhs = self.parse_primary(unary)?;
             lookahead = self.peek(0)?;
             while precedence(lookahead.clone()) > precedence(operator.clone())
                 || (is_right_associative(lookahead.clone())
@@ -349,10 +350,15 @@ impl Parser {
     /// parse_primary:
     ///
     /// foo()
-    pub fn parse_primary(&mut self) -> Result<Expr> {
-        let unary = self.parse_unary()?;
-        match self.peek(0)?.tk_type() {
+    pub fn parse_primary(&mut self, unary: Expr) -> Result<Expr> {
+        let tok = self.peek(0)?;
+        match tok.tk_type() {
             TkType::OpenParen => self.parse_function_call(unary),
+            TkType::Dot => {
+                self.predict_and_consume(vec![TkType::Dot])?;
+                let field_name = self.parse_identifier()?;
+                self.parse_primary(Expr::dot_access(tok.location(), unary, field_name))
+            }
             _ => Ok(unary),
         }
     }

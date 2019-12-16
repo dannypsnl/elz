@@ -204,10 +204,10 @@ impl Statement {
             value: StatementVariant::Variable(Variable::new(location, name, typ, expr)),
         }
     }
-    pub fn function_call(location: Location, func_call_expr: Expr) -> Statement {
+    pub fn expression(location: Location, expr: Expr) -> Statement {
         Statement {
             location,
-            value: StatementVariant::FunctionCall(func_call_expr),
+            value: StatementVariant::Expression(expr),
         }
     }
 }
@@ -221,38 +221,14 @@ pub enum StatementVariant {
     /// `x: int = 1;`
     Variable(Variable),
     /// `println("hello");`
-    FunctionCall(Expr),
+    /// `foo.bar();`
+    Expression(Expr),
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Expr {
     pub location: Location,
     pub value: ExprVariant,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum ExprVariant {
-    /// `x + y`
-    Binary(Box<Expr>, Box<Expr>, Operator),
-    /// `1.345`
-    F64(f64),
-    /// `1`
-    Int(i64),
-    /// `true` or `false`
-    Bool(bool),
-    /// `"str"`
-    String(String),
-    /// `[1, 2, 3]`
-    List(Vec<Expr>),
-    /// `a(b)`
-    FuncCall(Box<Expr>, Vec<Argument>),
-    /// `n`
-    Identifier(String),
-    /// assume there has a class definition:
-    /// `class Foo { bar: int; }`
-    /// We can have a class construction expression
-    /// `Foo { bar: 0 }`
-    ClassConstruction(String, HashMap<String, Expr>),
 }
 
 impl Expr {
@@ -298,6 +274,12 @@ impl Expr {
             value: ExprVariant::FuncCall(expr.into(), args),
         }
     }
+    pub fn dot_access<T: ToString>(location: Location, from: Expr, access: T) -> Expr {
+        Expr {
+            location,
+            value: ExprVariant::DotAccess(from.into(), access.to_string()),
+        }
+    }
     pub fn identifier<T: ToString>(location: Location, id: T) -> Expr {
         Expr {
             location,
@@ -314,6 +296,33 @@ impl Expr {
             value: ExprVariant::ClassConstruction(class_name.to_string(), field_inits),
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ExprVariant {
+    /// `x + y`
+    Binary(Box<Expr>, Box<Expr>, Operator),
+    /// `1.345`
+    F64(f64),
+    /// `1`
+    Int(i64),
+    /// `true` or `false`
+    Bool(bool),
+    /// `"str"`
+    String(String),
+    /// `[1, 2, 3]`
+    List(Vec<Expr>),
+    /// `a(b)`
+    FuncCall(Box<Expr>, Vec<Argument>),
+    /// `foo.bar`, `foo.bar()`, `foo().bar`
+    DotAccess(Box<Expr>, String),
+    /// `n`
+    Identifier(String),
+    /// assume there has a class definition:
+    /// `class Foo { bar: int; }`
+    /// We can have a class construction expression
+    /// `Foo { bar: 0 }`
+    ClassConstruction(String, HashMap<String, Expr>),
 }
 
 /// Argument:

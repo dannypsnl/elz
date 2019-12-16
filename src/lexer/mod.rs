@@ -51,6 +51,8 @@ pub enum TkType {
     Accessor,
     #[strum(serialize = ";")]
     Semicolon,
+    #[strum(serialize = ".")]
+    Dot,
     // ignored
     #[strum(serialize = "<comment>")]
     Comment,
@@ -286,6 +288,11 @@ fn whitespace(lexer: &mut Lexer) -> State {
         Some(';') => {
             lexer.next();
             lexer.emit(TkType::Semicolon);
+            State::Fn(whitespace)
+        }
+        Some('.') => {
+            lexer.next();
+            lexer.emit(TkType::Dot);
             State::Fn(whitespace)
         }
         Some('"') => State::Fn(string),
