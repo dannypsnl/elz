@@ -52,7 +52,7 @@ impl Parser {
     /// `class Car { name: string; ::new(name: string): Car; }`
     pub fn parse_class(&mut self) -> Result<Class> {
         let kw_class = self.peek(0)?;
-        self.consume()?;
+        self.predict_and_consume(vec![TkType::Class])?;
         let name = self.parse_identifier()?;
         self.predict_and_consume(vec![TkType::OpenBrace])?;
         let mut fields = vec![];
@@ -69,7 +69,14 @@ impl Parser {
                 if self.predict_and_consume(vec![TkType::Accessor]).is_ok() {
                     static_methods.push(self.parse_function()?);
                 } else {
-                    methods.push(self.parse_function()?);
+                    let mut method = self.parse_function()?;
+                    let method_name = format!("{}::{}", name.clone(), method.name.clone());
+                    method.name = method_name;
+                    method.parameters.insert(
+                        0,
+                        Parameter::new("self", ParsedType::TypeName(name.clone())),
+                    );
+                    methods.push(method);
                 }
             }
         }
