@@ -192,7 +192,7 @@ fn test_parse_class_method() {
             vec![],
             vec![Function::new_declaration(
                 Location::from(2, 0),
-                "Foo::bar",
+                "bar",
                 vec![
                     Parameter::new("self", ParsedType::type_name("Foo")),
                     Parameter::new("i", ParsedType::type_name("int"))

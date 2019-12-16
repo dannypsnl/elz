@@ -193,3 +193,20 @@ fn check_code(code: &'static str) -> Result<()> {
     let mut checker = SemanticChecker::new();
     checker.check_program(&program)
 }
+
+#[test]
+fn test_method_should_get_transform() {
+    let code = "\
+    main(): void {
+      foo: Foo = Foo::new();
+      foo.bar();
+    }
+
+    class Foo {
+      ::new(): Foo = Foo {};
+      bar(): void;
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}

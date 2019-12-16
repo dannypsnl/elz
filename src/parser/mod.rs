@@ -70,8 +70,6 @@ impl Parser {
                     static_methods.push(self.parse_function()?);
                 } else {
                     let mut method = self.parse_function()?;
-                    let method_name = format!("{}::{}", name.clone(), method.name.clone());
-                    method.name = method_name;
                     method.parameters.insert(
                         0,
                         Parameter::new("self", ParsedType::TypeName(name.clone())),
