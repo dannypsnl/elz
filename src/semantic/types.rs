@@ -64,6 +64,16 @@ impl TypeEnv {
                     )),
                 }
             }
+            DotAccess(from, access) => {
+                let typ = self.type_of_expr(from)?;
+                match typ {
+                    Type::ClassType(name, _, _) => {
+                        let transform_name = format!("{}::{}", name, access);
+                        self.type_of_expr(&Expr::identifier(location.clone(), transform_name))
+                    }
+                    _ => unreachable!(),
+                }
+            }
             Identifier(id) => {
                 let type_info = self.get_variable(location, id.clone())?;
                 Ok(type_info.typ)
