@@ -176,6 +176,35 @@ fn test_parse_class() {
 }
 
 #[test]
+fn test_parse_class_method() {
+    let code = "\
+                class Foo {\n\
+                bar(i: int): void;\n\
+                }";
+
+    let mut parser = Parser::new("", code);
+    let class = parser.parse_class().unwrap();
+    assert_eq!(
+        class,
+        Class::new(
+            Location::from(1, 0),
+            "Foo",
+            vec![],
+            vec![Function::new_declaration(
+                Location::from(2, 0),
+                "bar",
+                vec![
+                    Parameter::new("self", ParsedType::type_name("Foo")),
+                    Parameter::new("i", ParsedType::type_name("int"))
+                ],
+                ParsedType::type_name("void"),
+            )],
+            vec![],
+        )
+    )
+}
+
+#[test]
 fn test_class_construction() {
     let code = "Car { name: \"\", price: 10000 }";
 

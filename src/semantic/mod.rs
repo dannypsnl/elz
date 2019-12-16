@@ -33,6 +33,13 @@ impl SemanticChecker {
                             self.type_env.new_function_type(static_method)?,
                         )?;
                     }
+                    for methods in &c.methods {
+                        self.type_env.add_variable(
+                            &methods.location,
+                            &format!("{}::{}", c.name, methods.name).to_string(),
+                            self.type_env.new_function_type(methods)?,
+                        )?;
+                    }
                 }
                 _ => (),
             }
