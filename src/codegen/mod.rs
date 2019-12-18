@@ -34,7 +34,12 @@ impl Backend {
                         Some(b) => Some(Body::from_ast(b)),
                         None => None,
                     };
-                    let func = Function::new(f.name.clone(), Type::from_ast(&f.ret_typ), body);
+                    let func = Function::new(
+                        f.name.clone(),
+                        &f.parameters,
+                        Type::from_ast(&f.ret_typ),
+                        body,
+                    );
                     module.push_function(func);
                 }
                 TopAst::Variable(v) => {
@@ -152,14 +157,29 @@ impl LLVMValue for Body {
 
 struct Function {
     name: String,
+    parameters: Vec<(String, Type)>,
     ret_typ: Type,
     body: Option<Body>,
 }
 
 impl Function {
-    fn new(name: String, ret_typ: Type, body: Option<Body>) -> Function {
+    fn new(
+        name: String,
+        parsed_params: &Vec<Parameter>,
+        ret_typ: Type,
+        body: Option<Body>,
+    ) -> Function {
+        let parameters: Vec<(String, Type)> = parsed_params
+            .iter()
+            .map(|p| {
+                let name = p.1.clone();
+                let typ = Type::from_ast(&p.0);
+                (name, typ)
+            })
+            .collect();
         Function {
             name,
+            parameters,
             ret_typ,
             body,
         }
@@ -169,7 +189,8 @@ impl Function {
 impl LLVMValue for Function {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
-        if self.body.is_none() {
+        let is_declaration = self.body.is_none();
+        if is_declaration {
             s.push_str("declare ");
         } else {
             s.push_str("define ");
@@ -179,8 +200,16 @@ impl LLVMValue for Function {
         // function name need @, e.g. @main
         s.push_str("@");
         s.push_str(self.name.as_str());
-        // TODO: parameters
-        s.push_str("()");
+        s.push_str("(");
+        for (index, (name, typ)) in self.parameters.iter().enumerate() {
+            s.push_str(typ.llvm_represent().as_str());
+            s.push_str(" %");
+            s.push_str(name.as_str());
+            if index < self.parameters.len() - 1 {
+                s.push_str(", ");
+            }
+        }
+        s.push_str(")");
         match &self.body {
             Some(b) => {
                 s.push_str(" {\n");
@@ -193,9 +222,8 @@ impl LLVMValue for Function {
                 }
                 s.push_str("}");
             }
-            None => s.push_str(";"),
+            None => (),
         };
-
         s
     }
 }
@@ -237,7 +265,7 @@ impl Type {
             "int" => Int(64),
             "f64" => Float(64),
             "bool" => Int(1),
-            _ => unimplemented!(),
+            _ => unimplemented!("type `{}`", t.name()),
         }
     }
 }
@@ -290,40 +318,4 @@ impl LLVMValue for Expr {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_codegen_main() {
-        let code = "\
-        main(): void {}
-        x: int = 1;";
-        let module = gen_code(code);
-        assert_eq!(
-            module.llvm_represent(),
-            "\
-             @x = global i64 1\n\
-             define void @main() {\n  ret void\n\
-             }\n"
-        );
-    }
-
-    #[test]
-    fn test_return_value() {
-        let code = "foo(): int = 1;";
-        let module = gen_code(code);
-        assert_eq!(
-            module.llvm_represent(),
-            "\
-             define i64 @foo() {\n  ret i64 1\n\
-             }\n"
-        );
-    }
-
-    // helpers, must put tests before this line
-    fn gen_code(code: &'static str) -> Module {
-        let program = crate::parser::Parser::parse_program("", code).unwrap();
-        let backend = Backend::LLVM;
-        backend.generate_module(&program)
-    }
-}
+mod tests;
