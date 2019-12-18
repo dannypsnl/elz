@@ -300,7 +300,7 @@ fn whitespace(lexer: &mut Lexer) -> State {
             if in_identifier_set(c) {
                 State::Fn(ident)
             } else {
-                panic!("Not implemented for {} yet", c);
+                unimplemented!("char: `{}`", c);
             }
         }
         None => State::EOF,
