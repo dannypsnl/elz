@@ -297,7 +297,6 @@ enum Expr {
     F64(f64),
     Bool(bool),
     String(String),
-    Unknown,
 }
 
 impl Expr {
@@ -308,7 +307,7 @@ impl Expr {
             Int(i) => Expr::I64(*i),
             Bool(b) => Expr::Bool(*b),
             String(s) => Expr::String(s.clone()),
-            _ => Expr::Unknown,
+            expr => unimplemented!("codegen: expr {:#?}", expr),
         }
     }
 }
@@ -321,7 +320,6 @@ impl LLVMValue for Expr {
             Expr::I64(i) => s.push_str(format!("i64 {}", i).as_str()),
             Expr::Bool(b) => s.push_str(format!("i1 {}", b).as_str()),
             Expr::String(s_l) => s.push_str(format!("String* {}", s_l).as_str()),
-            _ => s.push_str("<unknown>"),
         }
         s
     }
