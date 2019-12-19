@@ -50,9 +50,30 @@ fn test_function_define_with_parameter() {
     )
 }
 
+#[test]
+fn test_function_call() {
+    let code = "
+    main(): void {
+      foo(1);
+    }
+    foo(x: int): void {}";
+    let module = gen_code(code);
+    assert_eq!(
+        module.llvm_represent(),
+        "define void @main() {
+  call void @foo(i64 1)
+  ret void
+}
+define void @foo(i64 %x) {
+  ret void
+}
+"
+    )
+}
+
 // helpers, must put tests before this line
 fn gen_code(code: &'static str) -> Module {
     let program = crate::parser::Parser::parse_program("", code).unwrap();
-    let backend = Backend::LLVM;
-    backend.generate_module(&program)
+    let code_generator = CodeGenerator::new();
+    code_generator.generate_module(&program)
 }
