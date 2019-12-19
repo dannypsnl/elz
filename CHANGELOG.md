@@ -12,6 +12,8 @@
     // static method, and Elz didn't have constructor out of class
     // instead of that, please use static method
     ::new(name: string): Car = Car {name: "wow"};
+    // method
+    run(): void {}
   }
   ```
 - global variable
@@ -59,7 +61,7 @@
   x: List[int] = [];
   ```
 
-#### Type
+#### Semantic Type
 
 - `void`
 - `int`
