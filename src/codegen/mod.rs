@@ -1,5 +1,6 @@
 use crate::ast;
 use crate::ast::*;
+use crate::codegen::Instruction::TempVariable;
 
 pub struct CodeGenerator {
     backend: Backend,
@@ -92,26 +93,14 @@ impl LLVMValue for Module {
     }
 }
 
-enum Statement {
+enum Instruction {
     Return(Option<Expr>),
+    TempVariable(u64, Expr),
 }
 
-impl Statement {
-    fn from_ast(s: &ast::Statement) -> Statement {
-        use ast::StatementVariant::*;
-        match &s.value {
-            Return(e) => match e {
-                None => Statement::Return(None),
-                Some(ex) => Statement::Return(Some(Expr::from_ast(ex))),
-            },
-            _ => unimplemented!(),
-        }
-    }
-}
-
-impl LLVMValue for Statement {
+impl LLVMValue for Instruction {
     fn llvm_represent(&self) -> String {
-        use Statement::*;
+        use Instruction::*;
         match self {
             Return(e) => {
                 let es = match e {
@@ -120,28 +109,49 @@ impl LLVMValue for Statement {
                 };
                 format!("ret {}", es)
             }
+            TempVariable(counter, e) => format!("%{} = {}", counter, e.llvm_represent().as_str()),
         }
     }
 }
 
 struct Body {
-    statements: Vec<Statement>,
+    counter: u64,
+    statements: Vec<Instruction>,
 }
 
 impl Body {
     fn from_ast(b: &ast::Body) -> Body {
+        let mut body = Body {
+            counter: 0,
+            statements: vec![],
+        };
         match b {
-            ast::Body::Expr(e) => Body {
-                statements: vec![Statement::Return(Some(Expr::from_ast(e)))],
-            },
-            ast::Body::Block(b) => Body {
-                statements: b
-                    .statements
-                    .iter()
-                    .map(|ob| Statement::from_ast(ob))
-                    .collect(),
-            },
-        }
+            ast::Body::Expr(e) => {
+                body.statements = vec![Instruction::Return(Some(Expr::from_ast(e)))];
+            }
+            ast::Body::Block(b) => body.generate_instructions(&b.statements),
+        };
+        body
+    }
+    fn generate_instructions(&mut self, stmts: &Vec<Statement>) {
+        self.statements = stmts
+            .iter()
+            .map(|stmt| {
+                use ast::StatementVariant::*;
+                match &stmt.value {
+                    Return(e) => match e {
+                        None => Instruction::Return(None),
+                        Some(ex) => Instruction::Return(Some(Expr::from_ast(ex))),
+                    },
+                    Expression(expr) => {
+                        let instruction = TempVariable(self.counter, Expr::from_ast(expr));
+                        self.counter += 1;
+                        instruction
+                    }
+                    st => unimplemented!("for statement: {:#?}", st),
+                }
+            })
+            .collect();
     }
 }
 
