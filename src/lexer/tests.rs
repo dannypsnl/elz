@@ -2,6 +2,38 @@ use self::TkType::*;
 use super::*;
 
 #[test]
+fn test_symbols() {
+    let code = "+ - * / , = ( ) [ ] { } : :: ; . <:";
+
+    let tokens = lex("", code);
+    let tk_types: Vec<_> = tokens.iter().map(|tok| tok.tk_type()).collect();
+    use TkType::*;
+    assert_eq!(
+        tk_types,
+        vec![
+            &Plus,
+            &Minus,
+            &Multiple,
+            &Divide,
+            &Comma,
+            &Equal,
+            &OpenParen,
+            &CloseParen,
+            &OpenBracket,
+            &CloseBracket,
+            &OpenBrace,
+            &CloseBrace,
+            &Colon,
+            &Accessor,
+            &Semicolon,
+            &Dot,
+            &IsSubTypeOf,
+            &EOF,
+        ]
+    )
+}
+
+#[test]
 fn test_unicode_identifier_a() {
     let code = "測試: int = 1";
 

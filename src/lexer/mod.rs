@@ -53,6 +53,8 @@ pub enum TkType {
     Semicolon,
     #[strum(serialize = ".")]
     Dot,
+    #[strum(serialize = "<:")]
+    IsSubTypeOf,
     // ignored
     #[strum(serialize = "<comment>")]
     Comment,
@@ -273,6 +275,16 @@ fn whitespace(lexer: &mut Lexer) -> State {
         Some('}') => {
             lexer.next();
             lexer.emit(TkType::CloseBrace);
+            State::Fn(whitespace)
+        }
+        Some('<') => {
+            lexer.next();
+            if lexer.peek() == Some(':') {
+                lexer.next();
+                lexer.emit(TkType::IsSubTypeOf);
+            } else {
+                unimplemented!("less than operator");
+            }
             State::Fn(whitespace)
         }
         Some(':') => {
