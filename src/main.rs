@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 use elz::ast::TopAst;
-use elz::codegen::{CodeGenerator, LLVMValue};
+use elz::codegen::{llvm::LLVMValue, CodeGenerator};
 use elz::parser::Parser;
 use elz::semantic::SemanticChecker;
 

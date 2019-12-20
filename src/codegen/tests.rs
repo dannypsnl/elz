@@ -1,4 +1,5 @@
 use super::*;
+use llvm::LLVMValue;
 
 #[test]
 fn test_codegen_main() {
@@ -72,7 +73,7 @@ define void @foo(i64 %x) {
 }
 
 // helpers, must put tests before this line
-fn gen_code(code: &'static str) -> Module {
+fn gen_code(code: &'static str) -> ir::Module {
     let program = crate::parser::Parser::parse_program("", code).unwrap();
     let code_generator = CodeGenerator::new();
     code_generator.generate_module(&program)
