@@ -149,6 +149,7 @@ fn test_parse_class() {
                 class Car {\n\
                 name: string;\n\
                 ::new(name: string): Car;\n\
+                bar(i: int): void;\n\
                 }";
 
     let mut parser = Parser::new("", code);
@@ -157,6 +158,7 @@ fn test_parse_class() {
         class,
         Class::new(
             Location::from(1, 0),
+            None,
             "Car",
             vec![Field::new(
                 Location::from(2, 0),
@@ -164,7 +166,15 @@ fn test_parse_class() {
                 ParsedType::type_name("string"),
                 None
             )],
-            vec![],
+            vec![Function::new_declaration(
+                Location::from(4, 0),
+                "bar",
+                vec![
+                    Parameter::new("self", ParsedType::type_name("Car")),
+                    Parameter::new("i", ParsedType::type_name("int"))
+                ],
+                ParsedType::type_name("void"),
+            )],
             vec![Function::new_declaration(
                 Location::from(3, 2),
                 "new",
@@ -176,11 +186,8 @@ fn test_parse_class() {
 }
 
 #[test]
-fn test_parse_class_method() {
-    let code = "\
-                class Foo {\n\
-                bar(i: int): void;\n\
-                }";
+fn test_parse_class_inherit() {
+    let code = "class Foo <: Bar {}";
 
     let mut parser = Parser::new("", code);
     let class = parser.parse_class().unwrap();
@@ -188,18 +195,11 @@ fn test_parse_class_method() {
         class,
         Class::new(
             Location::from(1, 0),
+            Some("Bar".to_string()),
             "Foo",
             vec![],
-            vec![Function::new_declaration(
-                Location::from(2, 0),
-                "bar",
-                vec![
-                    Parameter::new("self", ParsedType::type_name("Foo")),
-                    Parameter::new("i", ParsedType::type_name("int"))
-                ],
-                ParsedType::type_name("void"),
-            )],
             vec![],
+            vec![]
         )
     )
 }

@@ -49,12 +49,34 @@ impl Parser {
     /// parse_class:
     ///
     /// handle:
-    /// `class Car { name: string; ::new(name: string): Car; }`
+    /// basic: `class Car { name: string; ::new(name: string): Car; }`
+    /// inherit: `class Rectangle <: Shape {}`
     pub fn parse_class(&mut self) -> Result<Class> {
         let kw_class = self.peek(0)?;
         self.predict_and_consume(vec![TkType::Class])?;
-        let name = self.parse_identifier()?;
+        self.predict(vec![TkType::Identifier])?;
+        let class_name = self.take()?.value();
+        let parent_class_name = if self.predict_and_consume(vec![TkType::IsSubTypeOf]).is_ok() {
+            Some(self.parse_identifier()?)
+        } else {
+            None
+        };
         self.predict_and_consume(vec![TkType::OpenBrace])?;
+        let (fields, methods, static_methods) = self.parse_class_members(&class_name)?;
+        self.predict_and_consume(vec![TkType::CloseBrace])?;
+        Ok(Class::new(
+            kw_class.location().clone(),
+            parent_class_name,
+            class_name,
+            fields,
+            methods,
+            static_methods,
+        ))
+    }
+    fn parse_class_members(
+        &mut self,
+        class_name: &String,
+    ) -> Result<(Vec<Field>, Vec<Function>, Vec<Function>)> {
         let mut fields = vec![];
         let mut methods = vec![];
         let mut static_methods = vec![];
@@ -72,20 +94,13 @@ impl Parser {
                     let mut method = self.parse_function()?;
                     method.parameters.insert(
                         0,
-                        Parameter::new("self", ParsedType::TypeName(name.clone())),
+                        Parameter::new("self", ParsedType::TypeName(class_name.clone())),
                     );
                     methods.push(method);
                 }
             }
         }
-        self.predict_and_consume(vec![TkType::CloseBrace])?;
-        Ok(Class::new(
-            kw_class.location().clone(),
-            name,
-            fields,
-            methods,
-            static_methods,
-        ))
+        Ok((fields, methods, static_methods))
     }
     /// parse_class_field:
     ///

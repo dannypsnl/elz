@@ -12,6 +12,7 @@ pub enum TopAst {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
     pub location: Location,
+    pub parent_class_name: Option<String>,
     pub name: String,
     pub fields: Vec<Field>,
     pub methods: Vec<Function>,
@@ -21,6 +22,7 @@ pub struct Class {
 impl Class {
     pub fn new<T: ToString>(
         location: Location,
+        parent_class_name: Option<String>,
         name: T,
         fields: Vec<Field>,
         methods: Vec<Function>,
@@ -28,6 +30,7 @@ impl Class {
     ) -> Class {
         Class {
             location,
+            parent_class_name,
             name: name.to_string(),
             fields,
             methods,
