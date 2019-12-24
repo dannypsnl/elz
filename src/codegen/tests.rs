@@ -78,12 +78,16 @@ fn test_class_define() {
     class Foo {
       x: int;
       ::new(): Foo;
+      bar(): void {}
     }";
     let module = gen_code(code);
     assert_eq!(
         module.llvm_represent(),
         "%Foo = type {i64}
-declare %Foo @\"Foo::new\"()
+declare %Foo* @\"Foo::new\"()
+define void @\"Foo::bar\"(%Foo* %self) {
+  ret void
+}
 "
     )
 }

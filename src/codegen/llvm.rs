@@ -130,7 +130,7 @@ impl LLVMValue for ir::Type {
             Type::Void => s.push_str("void"),
             Type::Float(n) => s.push_str(format!("f{}", n).as_str()),
             Type::Int(n) => s.push_str(format!("i{}", n).as_str()),
-            Type::UserDefined(name) => s.push_str(format!("%{}", name).as_str()),
+            Type::UserDefined(name) => s.push_str(format!("%{}*", name).as_str()),
         }
         s
     }

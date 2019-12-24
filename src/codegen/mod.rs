@@ -45,6 +45,7 @@ impl CodeGenerator {
                 }
                 TopAst::Class(c) => {
                     module.push_type(&c.name, &c.fields);
+
                     for static_method in &c.static_methods {
                         let body = match &static_method.body {
                             Some(b) => Some(ir::Body::from_ast(b, &module)),
@@ -58,7 +59,20 @@ impl CodeGenerator {
                         );
                         module.push_function(func);
                     }
-                    // TODO: methods
+
+                    for method in &c.methods {
+                        let body = match &method.body {
+                            Some(b) => Some(ir::Body::from_ast(b, &module)),
+                            None => None,
+                        };
+                        let func = ir::Function::new(
+                            format!("\"{}::{}\"", c.name, method.name),
+                            &method.parameters,
+                            ir::Type::from_ast(&method.ret_typ),
+                            body,
+                        );
+                        module.push_function(func);
+                    }
                 }
             }
         }
