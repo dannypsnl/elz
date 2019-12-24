@@ -29,14 +29,14 @@ impl SemanticChecker {
                     for static_method in &c.static_methods {
                         self.type_env.add_variable(
                             &static_method.location,
-                            &format!("{}::{}", c.name, static_method.name).to_string(),
+                            &format!("{}::{}", c.name, static_method.name),
                             self.type_env.new_function_type(static_method)?,
                         )?;
                     }
                     for methods in &c.methods {
                         self.type_env.add_variable(
                             &methods.location,
-                            &format!("{}::{}", c.name, methods.name).to_string(),
+                            &format!("{}::{}", c.name, methods.name),
                             self.type_env.new_function_type(methods)?,
                         )?;
                     }
