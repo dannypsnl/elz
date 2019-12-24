@@ -155,6 +155,7 @@ pub(crate) enum Type {
     Void,
     Int(usize),
     Float(usize),
+    UserDefined(String),
 }
 
 impl Type {
@@ -165,7 +166,7 @@ impl Type {
             "int" => Int(64),
             "f64" => Float(64),
             "bool" => Int(1),
-            _ => unimplemented!("type `{}`", t.name()),
+            name => UserDefined(name.to_string()),
         }
     }
 }
