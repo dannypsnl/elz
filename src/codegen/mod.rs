@@ -5,8 +5,11 @@ pub mod llvm;
 
 pub struct CodeGenerator {}
 
-// Functionality
 impl CodeGenerator {
+    pub fn new() -> CodeGenerator {
+        CodeGenerator {}
+    }
+
     pub fn generate_module(&self, asts: &Vec<TopAst>) -> ir::Module {
         let mut module = ir::Module::new();
         for top in asts {
@@ -17,7 +20,7 @@ impl CodeGenerator {
                 TopAst::Variable(v) => {
                     module.remember_variable(v);
                 }
-                TopAst::Class(_) => unimplemented!(),
+                TopAst::Class(_) => {}
             }
         }
         for top in asts {
@@ -40,17 +43,14 @@ impl CodeGenerator {
                         ir::Variable::new(v.name.clone(), ir::Expr::from_ast(&v.expr, &module));
                     module.push_variable(var);
                 }
-                TopAst::Class(_) => unimplemented!(),
+                TopAst::Class(c) => {
+                    module.push_type(&c.name, &c.fields);
+                    // TODO: static methods
+                    // TODO: methods
+                }
             }
         }
         module
-    }
-}
-
-// Constructor
-impl CodeGenerator {
-    pub fn new() -> CodeGenerator {
-        CodeGenerator {}
     }
 }
 
