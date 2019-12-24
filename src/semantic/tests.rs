@@ -176,7 +176,7 @@ fn test_global_should_be_able_to_use_class_static_method() {
 }
 
 #[test]
-fn test_static_method_should_avaliable_in_class_scope() {
+fn test_static_method_should_not_available_in_class_scope() {
     let code = "\
     class Foo {
       ::new2(): void {new1();}
@@ -184,7 +184,7 @@ fn test_static_method_should_avaliable_in_class_scope() {
     }
     ";
     let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    assert_eq!(result.is_err(), true);
 }
 
 // helpers, must put tests before this line

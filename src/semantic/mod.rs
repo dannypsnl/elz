@@ -81,13 +81,6 @@ impl SemanticChecker {
                     }
                     class_type_env.in_class_scope = true;
                     for static_method in &c.static_methods {
-                        class_type_env.add_variable(
-                            &static_method.location,
-                            &static_method.name,
-                            self.type_env.new_function_type(static_method)?,
-                        )?;
-                    }
-                    for static_method in &c.static_methods {
                         self.check_function_body(
                             &static_method.location,
                             &static_method,
