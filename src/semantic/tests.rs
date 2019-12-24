@@ -210,3 +210,19 @@ fn test_method_should_get_transform() {
     let result = check_code(code);
     assert_eq!(result.is_ok(), true);
 }
+
+#[test]
+fn test_method_should_be_able_to_call_with_instance() {
+    let code = "\
+    class Foo {
+      ::new(): Foo {
+        f: Foo = Foo {};
+        f.bar();
+        return f;
+      }
+      bar(): void;
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
