@@ -5,8 +5,11 @@ pub mod llvm;
 
 pub struct CodeGenerator {}
 
-// Functionality
 impl CodeGenerator {
+    pub fn new() -> CodeGenerator {
+        CodeGenerator {}
+    }
+
     pub fn generate_module(&self, asts: &Vec<TopAst>) -> ir::Module {
         let mut module = ir::Module::new();
         for top in asts {
@@ -17,7 +20,7 @@ impl CodeGenerator {
                 TopAst::Variable(v) => {
                     module.remember_variable(v);
                 }
-                TopAst::Class(_) => unimplemented!(),
+                TopAst::Class(_) => {}
             }
         }
         for top in asts {
@@ -40,17 +43,40 @@ impl CodeGenerator {
                         ir::Variable::new(v.name.clone(), ir::Expr::from_ast(&v.expr, &module));
                     module.push_variable(var);
                 }
-                TopAst::Class(_) => unimplemented!(),
+                TopAst::Class(c) => {
+                    module.push_type(&c.name, &c.fields);
+
+                    for static_method in &c.static_methods {
+                        let body = match &static_method.body {
+                            Some(b) => Some(ir::Body::from_ast(b, &module)),
+                            None => None,
+                        };
+                        let func = ir::Function::new(
+                            format!("\"{}::{}\"", c.name, static_method.name),
+                            &static_method.parameters,
+                            ir::Type::from_ast(&static_method.ret_typ),
+                            body,
+                        );
+                        module.push_function(func);
+                    }
+
+                    for method in &c.methods {
+                        let body = match &method.body {
+                            Some(b) => Some(ir::Body::from_ast(b, &module)),
+                            None => None,
+                        };
+                        let func = ir::Function::new(
+                            format!("\"{}::{}\"", c.name, method.name),
+                            &method.parameters,
+                            ir::Type::from_ast(&method.ret_typ),
+                            body,
+                        );
+                        module.push_function(func);
+                    }
+                }
             }
         }
         module
-    }
-}
-
-// Constructor
-impl CodeGenerator {
-    pub fn new() -> CodeGenerator {
-        CodeGenerator {}
     }
 }
 

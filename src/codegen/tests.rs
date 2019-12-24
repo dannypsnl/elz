@@ -72,6 +72,26 @@ define void @foo(i64 %x) {
     )
 }
 
+#[test]
+fn test_class_define() {
+    let code = "
+    class Foo {
+      x: int;
+      ::new(): Foo;
+      bar(): void {}
+    }";
+    let module = gen_code(code);
+    assert_eq!(
+        module.llvm_represent(),
+        "%Foo = type {i64}
+declare %Foo* @\"Foo::new\"()
+define void @\"Foo::bar\"(%Foo* %self) {
+  ret void
+}
+"
+    )
+}
+
 // helpers, must put tests before this line
 fn gen_code(code: &'static str) -> ir::Module {
     let program = crate::parser::Parser::parse_program("", code).unwrap();

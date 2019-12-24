@@ -7,6 +7,7 @@ pub struct Module {
     pub(crate) known_variables: HashMap<String, Type>,
     pub(crate) functions: Vec<Function>,
     pub(crate) variables: Vec<Variable>,
+    pub(crate) types: Vec<TypeDefinition>,
 }
 
 impl Module {
@@ -16,6 +17,7 @@ impl Module {
             known_variables: HashMap::new(),
             functions: vec![],
             variables: vec![],
+            types: vec![],
         }
     }
     pub(crate) fn remember_function(&mut self, f: &ast::Function) {
@@ -32,6 +34,21 @@ impl Module {
     pub(crate) fn push_variable(&mut self, v: Variable) {
         self.variables.push(v);
     }
+    pub(crate) fn push_type(&mut self, type_name: &String, fields: &Vec<Field>) {
+        self.types.push(TypeDefinition {
+            name: type_name.clone(),
+            fields: fields
+                .iter()
+                .map(|field| Type::from_ast(&field.typ))
+                .collect(),
+        });
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct TypeDefinition {
+    pub(crate) name: String,
+    pub(crate) fields: Vec<Type>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -138,6 +155,7 @@ pub(crate) enum Type {
     Void,
     Int(usize),
     Float(usize),
+    UserDefined(String),
 }
 
 impl Type {
@@ -148,7 +166,7 @@ impl Type {
             "int" => Int(64),
             "f64" => Float(64),
             "bool" => Int(1),
-            _ => unimplemented!("type `{}`", t.name()),
+            name => UserDefined(name.to_string()),
         }
     }
 }

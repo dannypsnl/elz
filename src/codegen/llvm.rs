@@ -7,14 +7,34 @@ pub trait LLVMValue {
 impl LLVMValue for ir::Module {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
+        for t in &self.types {
+            s.push_str(t.llvm_represent().as_str());
+            s.push_str("\n");
+        }
         for v in &self.variables {
-            s.push_str(v.llvm_represent().as_ref());
+            s.push_str(v.llvm_represent().as_str());
             s.push_str("\n");
         }
         for f in &self.functions {
-            s.push_str(f.llvm_represent().as_ref());
+            s.push_str(f.llvm_represent().as_str());
             s.push_str("\n");
         }
+        s
+    }
+}
+
+impl LLVMValue for ir::TypeDefinition {
+    fn llvm_represent(&self) -> String {
+        let mut s = String::new();
+        s.push_str(format!("%{}", self.name).as_str());
+        s.push_str(" = type {");
+        for (index, field) in self.fields.iter().enumerate() {
+            s.push_str(field.llvm_represent().as_str());
+            if index < self.fields.len() - 1 {
+                s.push_str(" ");
+            }
+        }
+        s.push_str("}");
         s
     }
 }
@@ -110,6 +130,7 @@ impl LLVMValue for ir::Type {
             Type::Void => s.push_str("void"),
             Type::Float(n) => s.push_str(format!("f{}", n).as_str()),
             Type::Int(n) => s.push_str(format!("i{}", n).as_str()),
+            Type::UserDefined(name) => s.push_str(format!("%{}*", name).as_str()),
         }
         s
     }
