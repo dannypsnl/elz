@@ -214,15 +214,10 @@ impl Statement {
             value: StatementVariant::Return(e),
         }
     }
-    pub fn variable<T: ToString>(
-        location: Location,
-        name: T,
-        typ: ParsedType,
-        expr: Expr,
-    ) -> Statement {
+    pub fn variable(location: Location, variable: Variable) -> Statement {
         Statement {
             location: location.clone(),
-            value: StatementVariant::Variable(Variable::new(location, name, typ, expr)),
+            value: StatementVariant::Variable(variable),
         }
     }
     pub fn expression(location: Location, expr: Expr) -> Statement {

@@ -30,6 +30,7 @@ impl Parser {
                         .is_ok()
                     {
                         let v = self.parse_variable()?;
+                        self.predict_and_consume(vec![TkType::Semicolon])?;
                         program.push(TopAst::Variable(v));
                     } else {
                         // else we just seems it as a function to parse
@@ -166,7 +167,6 @@ impl Parser {
         // = 1;
         self.predict_and_consume(vec![TkType::Equal])?;
         let expr = self.parse_expression(None, None)?;
-        self.predict_and_consume(vec![TkType::Semicolon])?;
         Ok(Variable::new(loc, var_name, typ, expr))
     }
     /// parse_function:
@@ -317,13 +317,7 @@ impl Parser {
         let stmt = match tok.tk_type() {
             TkType::Identifier => {
                 if self.peek(1)?.tk_type() == &TkType::Colon {
-                    let name = self.parse_identifier()?;
-                    // `x: int = 1;`
-                    self.predict_and_consume(vec![TkType::Colon])?;
-                    let typ = self.parse_type()?;
-                    self.predict_and_consume(vec![TkType::Equal])?;
-                    let expr = self.parse_expression(None, None)?;
-                    Ok(Statement::variable(tok.location(), name, typ, expr))
+                    Ok(Statement::variable(tok.location(), self.parse_variable()?))
                 } else if vec![TkType::OpenParen, TkType::Dot].contains(self.peek(1)?.tk_type()) {
                     let unary = self.parse_unary()?;
                     let expr = self.parse_primary(unary)?;
