@@ -54,10 +54,9 @@ impl Parser {
     pub fn parse_class(&mut self) -> Result<Class> {
         let kw_class = self.peek(0)?;
         self.predict_and_consume(vec![TkType::Class])?;
-        self.predict(vec![TkType::Identifier])?;
-        let class_name = self.take()?.value();
+        let class_name = self.parse_identifier()?;
         let parent_class_name = if self.predict_and_consume(vec![TkType::IsSubTypeOf]).is_ok() {
-            Some(self.parse_identifier()?)
+            Some(self.parse_access_identifier()?)
         } else {
             None
         };
@@ -138,7 +137,7 @@ impl Parser {
     pub fn parse_class_field(&mut self) -> Result<Field> {
         let loc = self.peek(0)?.location();
         // x: int = 1;
-        let var_name = self.parse_identifier()?;
+        let var_name = self.parse_access_identifier()?;
         // : int = 1;
         self.predict_and_consume(vec![TkType::Colon])?;
         // int = 1;
@@ -255,10 +254,14 @@ impl Parser {
             )),
         }
     }
-    /// parse_identifier:
+    fn parse_identifier(&mut self) -> Result<String> {
+        self.predict(vec![TkType::Identifier])?;
+        Ok(self.take()?.value())
+    }
+    /// parse_access_identifier:
     ///
     /// foo::bar
-    pub fn parse_identifier(&mut self) -> Result<String> {
+    pub fn parse_access_identifier(&mut self) -> Result<String> {
         let mut chain = vec![];
         self.predict(vec![TkType::Identifier])?;
         chain.push(self.take()?.value());
@@ -277,7 +280,7 @@ impl Parser {
     pub fn parse_type(&mut self) -> Result<ParsedType> {
         // ensure is <identifier>
         self.predict(vec![TkType::Identifier])?;
-        let type_name = self.parse_identifier()?;
+        let type_name = self.parse_access_identifier()?;
         if self.predict(vec![TkType::OpenBracket]).is_ok() {
             let list = self.parse_many(
                 TkType::OpenBracket,
@@ -394,7 +397,7 @@ impl Parser {
             TkType::OpenParen => self.parse_function_call(unary),
             TkType::Dot => {
                 self.predict_and_consume(vec![TkType::Dot])?;
-                let field_name = self.parse_identifier()?;
+                let field_name = self.parse_access_identifier()?;
                 self.parse_primary(Expr::dot_access(tok.location(), unary, field_name))
             }
             _ => Ok(unary),
@@ -405,7 +408,7 @@ impl Parser {
     /// <integer>
     /// | <float64>
     /// | <string_literal>
-    /// | <identifier>
+    /// | <access_identifier>
     /// | <bool>
     /// | <list>
     pub fn parse_unary(&mut self) -> Result<Expr> {
@@ -426,7 +429,7 @@ impl Parser {
                 }
             }
             TkType::Identifier => {
-                let name = self.parse_identifier()?;
+                let name = self.parse_access_identifier()?;
                 match self.peek(0)?.tk_type() {
                     TkType::OpenBrace => {
                         let mut field_inits = HashMap::new();
