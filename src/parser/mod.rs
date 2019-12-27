@@ -61,6 +61,11 @@ impl Parser {
         } else {
             None
         };
+        let type_parameters = if self.predict(vec![TkType::OpenBracket]).is_ok() {
+            self.parse_type_parameters()?
+        } else {
+            vec![]
+        };
         self.predict_and_consume(vec![TkType::OpenBrace])?;
         let (fields, methods, static_methods) = self.parse_class_members(&class_name)?;
         self.predict_and_consume(vec![TkType::CloseBrace])?;
@@ -68,10 +73,30 @@ impl Parser {
             kw_class.location().clone(),
             parent_class_name,
             class_name,
+            type_parameters,
             fields,
             methods,
             static_methods,
         ))
+    }
+    fn parse_type_parameters(&mut self) -> Result<Vec<TypeParameter>> {
+        self.parse_many(
+            TkType::OpenBracket,
+            TkType::CloseBracket,
+            TkType::Comma,
+            |parser| {
+                let identifier = parser.parse_identifier()?;
+                let parent_types = if parser
+                    .predict_and_consume(vec![TkType::IsSubTypeOf])
+                    .is_ok()
+                {
+                    vec![parser.parse_type()?]
+                } else {
+                    vec![]
+                };
+                Ok(TypeParameter::new(identifier, parent_types))
+            },
+        )
     }
     fn parse_class_members(
         &mut self,

@@ -160,6 +160,7 @@ fn test_parse_class() {
             Location::from(1, 0),
             None,
             "Car",
+            vec![],
             vec![Field::new(
                 Location::from(2, 0),
                 "name",
@@ -197,6 +198,27 @@ fn test_parse_class_inherit() {
             Location::from(1, 0),
             Some("Bar".to_string()),
             "Foo",
+            vec![],
+            vec![],
+            vec![],
+            vec![]
+        )
+    )
+}
+
+#[test]
+fn test_parse_class_with_type_parameters() {
+    let code = "class Foo[T] {}";
+
+    let mut parser = Parser::new("", code);
+    let class = parser.parse_class().unwrap();
+    assert_eq!(
+        class,
+        Class::new(
+            Location::from(1, 0),
+            None,
+            "Foo",
+            vec![TypeParameter::new("T", vec![])],
             vec![],
             vec![],
             vec![]

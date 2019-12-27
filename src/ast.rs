@@ -10,10 +10,26 @@ pub enum TopAst {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct TypeParameter {
+    pub name: String,
+    pub parent_types: Vec<ParsedType>,
+}
+
+impl TypeParameter {
+    pub fn new<T: ToString>(name: T, parent_types: Vec<ParsedType>) -> TypeParameter {
+        TypeParameter {
+            name: name.to_string(),
+            parent_types,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct Class {
     pub location: Location,
     pub parent_class_name: Option<String>,
     pub name: String,
+    pub type_parameters: Vec<TypeParameter>,
     pub fields: Vec<Field>,
     pub methods: Vec<Function>,
     pub static_methods: Vec<Function>,
@@ -24,6 +40,7 @@ impl Class {
         location: Location,
         parent_class_name: Option<String>,
         name: T,
+        type_parameters: Vec<TypeParameter>,
         fields: Vec<Field>,
         methods: Vec<Function>,
         static_methods: Vec<Function>,
@@ -32,6 +49,7 @@ impl Class {
             location,
             parent_class_name,
             name: name.to_string(),
+            type_parameters,
             fields,
             methods,
             static_methods,
