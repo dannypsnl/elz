@@ -24,7 +24,7 @@ impl SemanticChecker {
             use TopAst::*;
             match top {
                 Class(c) => {
-                    let typ = Type::new_class(c);
+                    let typ = self.type_env.new_class(c)?;
                     self.type_env.add_type(&c.location, &c.name, typ)?;
                     for static_method in &c.static_methods {
                         self.type_env.add_variable(
@@ -70,7 +70,7 @@ impl SemanticChecker {
                     // we are unifying <expr> and <type>, so <expr> location is better than
                     // variable define statement location
                     self.type_env
-                        .unify(&v.expr.location, self.type_env.from(&v.typ)?, typ)?
+                        .unify(&v.expr.location, &self.type_env.from(&v.typ)?, &typ)?
                 }
                 Function(f) => self.check_function_body(&f.location, &f, &self.type_env)?,
                 Class(c) => {
@@ -105,7 +105,7 @@ impl SemanticChecker {
         match &f.body {
             Some(Body::Expr(e)) => {
                 let e_type = type_env.type_of_expr(e)?;
-                type_env.unify(location, return_type.clone(), e_type)
+                type_env.unify(location, &return_type, &e_type)
             }
             Some(Body::Block(b)) => {
                 for stmt in &b.statements {
@@ -116,17 +116,17 @@ impl SemanticChecker {
                                 Some(e) => type_env.type_of_expr(e)?,
                                 None => Type::Void,
                             };
-                            type_env.unify(&stmt.location, return_type.clone(), typ)?
+                            type_env.unify(&stmt.location, &return_type, &typ)?
                         }
                         Variable(v) => {
                             let var_def_typ = type_env.from(&v.typ)?;
                             let var_typ = type_env.type_of_expr(&v.expr)?;
-                            type_env.unify(&stmt.location, var_def_typ.clone(), var_typ)?;
+                            type_env.unify(&stmt.location, &var_def_typ, &var_typ)?;
                             type_env.add_variable(&stmt.location, &v.name, var_def_typ)?
                         }
                         Expression(func_call) => {
                             let func_call_ret_typ = type_env.type_of_expr(func_call)?;
-                            type_env.unify(&stmt.location, Type::Void, func_call_ret_typ)?;
+                            type_env.unify(&stmt.location, &Type::Void, &func_call_ret_typ)?;
                         }
                     }
                 }

@@ -41,8 +41,8 @@ impl TypeEnv {
                     if expr_type != self.type_of_expr(e)? {
                         return Err(SemanticError::type_mismatched(
                             &e.location,
-                            expr_type,
-                            self.type_of_expr(e)?,
+                            &expr_type,
+                            &self.type_of_expr(e)?,
                         ));
                     }
                 }
@@ -54,7 +54,7 @@ impl TypeEnv {
                     Type::FunctionType(params, ret_typ) => {
                         for (p, arg) in params.iter().zip(args.iter()) {
                             let typ = self.type_of_expr(&arg.expr)?;
-                            self.unify(&arg.location, p.clone(), typ)?;
+                            self.unify(&arg.location, p, &typ)?;
                         }
                         Ok(*ret_typ)
                     }
@@ -67,7 +67,7 @@ impl TypeEnv {
             DotAccess(from, access) => {
                 let typ = self.type_of_expr(from)?;
                 match typ {
-                    Type::ClassType(name, _, _) => {
+                    Type::ClassType(name, ..) => {
                         let transform_name = format!("{}::{}", name, access);
                         self.type_of_expr(&Expr::identifier(location.clone(), transform_name))
                     }
@@ -86,7 +86,7 @@ impl TypeEnv {
                 }
                 let type_info = self.get_type(location, name.clone())?;
                 match &type_info.typ {
-                    Type::ClassType(_, _, should_inits) => {
+                    Type::ClassType(.., should_inits) => {
                         let mut missing_init_fields = vec![];
                         for should_init in should_inits {
                             if !field_inits.contains_key(should_init) {
@@ -112,9 +112,9 @@ impl TypeEnv {
         }
     }
 
-    pub(crate) fn unify(&self, location: &Location, expected: Type, actual: Type) -> Result<()> {
+    pub(crate) fn unify(&self, location: &Location, expected: &Type, actual: &Type) -> Result<()> {
         use Type::*;
-        match (expected.clone(), actual.clone()) {
+        match (expected, actual) {
             (Void, Void) | (Int, Int) | (Bool, Bool) | (F64, F64) | (String, String) => {
                 if expected == actual {
                     Ok(())
@@ -130,8 +130,16 @@ impl TypeEnv {
                     Ok(())
                 }
             }
-            (ClassType(name, type_parameters, _), ClassType(name2, type_parameters2, _)) => {
+            (
+                ClassType(name, _, type_parameters, _),
+                ClassType(name2, parents, type_parameters2, _),
+            ) => {
                 if name != name2 {
+                    for parent in parents {
+                        if self.unify(location, expected, parent).is_ok() {
+                            return Ok(());
+                        }
+                    }
                     Err(SemanticError::type_mismatched(location, expected, actual))
                 } else {
                     self.unify_type_list(location, type_parameters, type_parameters2)?;
@@ -140,11 +148,11 @@ impl TypeEnv {
             }
             (FunctionType(ft, arg), FunctionType(ft_p, arg_p)) => {
                 self.unify_type_list(location, ft, ft_p)?;
-                self.unify(location, *arg, *arg_p)
+                self.unify(location, arg, arg_p)
             }
             (FreeVar(_), t) => self.unify(location, t, expected),
             (t, f @ FreeVar(_)) => {
-                if t == f || !f.occurs(t) {
+                if t == f || !f.occurs(t.clone()) {
                     // FIXME: here we should update substitution map, but we haven't create it
                     // pseudo code would like:
                     // self.substitution_map.insert(f, t)
@@ -161,11 +169,11 @@ impl TypeEnv {
     fn unify_type_list(
         &self,
         location: &Location,
-        expected: Vec<Type>,
-        actual: Vec<Type>,
+        expected: &Vec<Type>,
+        actual: &Vec<Type>,
     ) -> Result<()> {
         for (t1, t2) in expected.iter().zip(actual.iter()) {
-            self.unify(location, t1.clone(), t2.clone())?;
+            self.unify(location, t1, t2)?;
         }
         Ok(())
     }
@@ -254,6 +262,31 @@ impl TypeEnv {
             self.from(&f.ret_typ)?.into(),
         ))
     }
+    pub fn new_class(&self, c: &Class) -> Result<Type> {
+        let mut should_inits = vec![];
+        for field in &c.fields {
+            match &field.expr {
+                None => {
+                    should_inits.push(field.name.clone());
+                }
+                _ => (),
+            }
+        }
+        let mut parents = vec![];
+        match &c.parent_class_name {
+            Some(p_name) => {
+                let parent_typ = self.get_type(&c.location, p_name.clone())?;
+                parents.push(parent_typ.typ);
+            }
+            None => (),
+        }
+        Ok(Type::ClassType(
+            c.name.clone(),
+            parents,
+            vec![],
+            should_inits,
+        ))
+    }
 }
 
 impl TypeEnv {
@@ -324,8 +357,9 @@ pub enum Type {
     Bool,
     F64,
     String,
-    ClassType(String, Vec<Type>, Vec<String>),
-    // name[generic_types]
+    // name, parents, type parameters, uninitialized fields
+    ClassType(String, Vec<Type>, Vec<Type>, Vec<String>),
+    // name, type parameters
     GenericType(String, Vec<Type>),
     FunctionType(Vec<Type>, Box<Type>),
     FreeVar(usize),
@@ -338,19 +372,6 @@ impl Type {
 }
 
 impl Type {
-    pub fn new_class(c: &Class) -> Type {
-        let mut should_inits = vec![];
-        for field in &c.fields {
-            match &field.expr {
-                None => {
-                    should_inits.push(field.name.clone());
-                }
-                _ => (),
-            }
-        }
-        Type::ClassType(c.name.clone(), vec![], should_inits)
-    }
-
     fn occurs(&self, t: Type) -> bool {
         use Type::*;
         match t {
@@ -371,7 +392,7 @@ impl Type {
                 }
                 false
             }
-            ClassType(_, type_parameters, _) => {
+            ClassType(_, _, type_parameters, _) => {
                 for t in type_parameters {
                     if self.occurs(t) {
                         return true;
@@ -408,7 +429,7 @@ impl std::fmt::Display for Type {
                 }
                 write!(f, "")
             }
-            ClassType(name, type_parameters, _) => {
+            ClassType(name, _, type_parameters, _) => {
                 write!(f, "{}", name)?;
                 if type_parameters.len() > 0 {
                     write!(f, "[")?;
