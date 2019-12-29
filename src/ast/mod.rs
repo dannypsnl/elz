@@ -2,6 +2,8 @@ use super::lexer::{TkType, Token};
 use crate::lexer::Location;
 use std::collections::HashMap;
 
+pub(crate) mod format;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum TopAst {
     Function(Function),
@@ -374,3 +376,6 @@ impl Operator {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;
