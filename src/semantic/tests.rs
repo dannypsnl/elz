@@ -226,3 +226,19 @@ fn test_method_should_be_able_to_call_with_instance() {
     let result = check_code(code);
     assert_eq!(result.is_ok(), true);
 }
+
+#[test]
+fn test_subtype_upcasting() {
+    let code = "\
+    class Foo {}
+    class Bar <: Foo {
+      ::new(): Bar = Bar {};
+    }
+
+    main(): void {
+      foo: Foo = Bar::new();
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}

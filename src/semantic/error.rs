@@ -44,10 +44,10 @@ impl SemanticError {
             SemanticErrorVariant::NameRedefined(name.to_string()),
         )
     }
-    pub fn type_mismatched(location: &Location, expected: Type, actual: Type) -> SemanticError {
+    pub fn type_mismatched(location: &Location, expected: &Type, actual: &Type) -> SemanticError {
         SemanticError::new(
             location,
-            SemanticErrorVariant::TypeMismatched(expected, actual),
+            SemanticErrorVariant::TypeMismatched(expected.clone(), actual.clone()),
         )
     }
     pub fn no_variable(location: &Location, name: String) -> SemanticError {
