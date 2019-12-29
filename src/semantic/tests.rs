@@ -242,3 +242,18 @@ fn test_subtype_upcasting() {
     let result = check_code(code);
     assert_eq!(result.is_ok(), true);
 }
+
+#[test]
+fn test_type_parameter_upcasting() {
+    let code = "\
+    class Foo {}
+    class Bar <: Foo {}
+
+    main(): void {
+      bl: List[Bar] = [];
+      fl: List[Foo] = bl;
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_ok(), true);
+}
