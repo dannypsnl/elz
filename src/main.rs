@@ -1,14 +1,11 @@
 use clap::{App, Arg, SubCommand};
-use elz::ast::TopAst;
-use elz::codegen::{llvm::LLVMValue, CodeGenerator};
-use elz::parser::Parser;
-use elz::semantic::SemanticChecker;
+use elz::cmd;
 
 fn main() {
     let matches = App::new("elz")
         .author("Danny Lin <dannypsnl@gmail.com>")
         .subcommand(
-            SubCommand::with_name("compile")
+            SubCommand::with_name(cmd::compile::CMD_NAME)
                 .about("compile input file")
                 .arg(
                     Arg::with_name("INPUT")
@@ -17,28 +14,29 @@ fn main() {
                         .min_values(1),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name(cmd::fmt::CMD_NAME)
+                .about("format all files matched *.elz under the directory")
+                .arg(
+                    Arg::with_name("INPUT")
+                        .help("input directory to format")
+                        .required(true)
+                        .max_values(1),
+                ),
+        )
         .get_matches();
 
-    if let Some(compile_args) = matches.subcommand_matches("compile") {
+    let result = if let Some(compile_args) = matches.subcommand_matches(cmd::compile::CMD_NAME) {
         let files: Vec<_> = compile_args.values_of("INPUT").unwrap().collect();
-
-        match check(files) {
-            Err(e) => println!("{}", e),
-            Ok(program) => {
-                let code_generator = CodeGenerator::new();
-                let module = code_generator.generate_module(&program);
-                println!("{}", module.llvm_represent());
-            }
-        }
+        cmd::compile::compile(files)
+    } else if let Some(compile_args) = matches.subcommand_matches(cmd::fmt::CMD_NAME) {
+        let files: Vec<_> = compile_args.values_of("INPUT").unwrap().collect();
+        cmd::fmt::format(files)
+    } else {
+        Ok(())
+    };
+    match result {
+        Ok(()) => (),
+        Err(err) => println!("{}", err),
     }
-}
-
-fn check(files: Vec<&str>) -> Result<Vec<TopAst>, Box<dyn std::error::Error>> {
-    // FIXME: for now to make code simple we only handle the first input file.
-    let code = std::fs::read_to_string(files[0])?;
-    let program = Parser::parse_program(files[0], &code)?;
-    // check program
-    let mut semantic_checker = SemanticChecker::new();
-    semantic_checker.check_program(&program)?;
-    Ok(program)
 }
