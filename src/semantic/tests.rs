@@ -187,13 +187,6 @@ fn test_static_method_should_not_available_in_class_scope() {
     assert_eq!(result.is_err(), true);
 }
 
-// helpers, must put tests before this line
-fn check_code(code: &'static str) -> Result<()> {
-    let program = Parser::parse_program("", code).unwrap();
-    let mut checker = SemanticChecker::new();
-    checker.check_program(&program)
-}
-
 #[test]
 fn test_method_should_get_transform() {
     let code = "\
@@ -256,4 +249,11 @@ fn test_type_parameter_upcasting() {
     ";
     let result = check_code(code);
     assert_eq!(result.is_ok(), true);
+}
+
+// helpers, must put tests before this line
+fn check_code(code: &'static str) -> Result<()> {
+    let program = Parser::parse_program("", code).unwrap();
+    let mut checker = SemanticChecker::new();
+    checker.check_program(&program)
 }
