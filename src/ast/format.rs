@@ -1,5 +1,7 @@
 use super::*;
 
+pub(crate) const DEFAULT_LEVEL: usize = 0;
+
 pub(crate) trait FormattedElz {
     fn formatted_elz(&self, level: usize) -> String;
 }

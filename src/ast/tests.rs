@@ -1,7 +1,5 @@
-use crate::ast::format::{FormatTopAstList, FormattedElz};
+use crate::ast::format::{FormatTopAstList, FormattedElz, DEFAULT_LEVEL};
 use crate::parser::Parser;
-
-const DEFAULT_LEVEL: usize = 0;
 
 #[test]
 fn simple_variable() {
