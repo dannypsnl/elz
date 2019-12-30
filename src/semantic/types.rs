@@ -264,11 +264,14 @@ impl TypeEnv {
     }
     pub fn new_class(&self, c: &Class) -> Result<Type> {
         let mut should_inits = vec![];
-        for field in &c.fields {
-            match &field.expr {
-                None => {
-                    should_inits.push(field.name.clone());
-                }
+        for member in &c.members {
+            match member {
+                ClassMember::Field(field) => match &field.expr {
+                    None => {
+                        should_inits.push(field.name.clone());
+                    }
+                    _ => (),
+                },
                 _ => (),
             }
         }

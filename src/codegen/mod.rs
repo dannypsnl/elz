@@ -44,34 +44,38 @@ impl CodeGenerator {
                     module.push_variable(var);
                 }
                 TopAst::Class(c) => {
-                    module.push_type(&c.name, &c.fields);
+                    module.push_type(&c.name, &c.members);
 
-                    for static_method in &c.static_methods {
-                        let body = match &static_method.body {
-                            Some(b) => Some(ir::Body::from_ast(b, &module)),
-                            None => None,
-                        };
-                        let func = ir::Function::new(
-                            format!("\"{}::{}\"", c.name, static_method.name),
-                            &static_method.parameters,
-                            ir::Type::from_ast(&static_method.ret_typ),
-                            body,
-                        );
-                        module.push_function(func);
-                    }
-
-                    for method in &c.methods {
-                        let body = match &method.body {
-                            Some(b) => Some(ir::Body::from_ast(b, &module)),
-                            None => None,
-                        };
-                        let func = ir::Function::new(
-                            format!("\"{}::{}\"", c.name, method.name),
-                            &method.parameters,
-                            ir::Type::from_ast(&method.ret_typ),
-                            body,
-                        );
-                        module.push_function(func);
+                    for member in &c.members {
+                        match member {
+                            ClassMember::StaticMethod(static_method) => {
+                                let body = match &static_method.body {
+                                    Some(b) => Some(ir::Body::from_ast(b, &module)),
+                                    None => None,
+                                };
+                                let func = ir::Function::new(
+                                    format!("\"{}::{}\"", c.name, static_method.name),
+                                    &static_method.parameters,
+                                    ir::Type::from_ast(&static_method.ret_typ),
+                                    body,
+                                );
+                                module.push_function(func);
+                            }
+                            ClassMember::Method(method) => {
+                                let body = match &method.body {
+                                    Some(b) => Some(ir::Body::from_ast(b, &module)),
+                                    None => None,
+                                };
+                                let func = ir::Function::new(
+                                    format!("\"{}::{}\"", c.name, method.name),
+                                    &method.parameters,
+                                    ir::Type::from_ast(&method.ret_typ),
+                                    body,
+                                );
+                                module.push_function(func);
+                            }
+                            _ => (),
+                        }
                     }
                 }
             }

@@ -2,6 +2,8 @@ use super::lexer::{TkType, Token};
 use crate::lexer::Location;
 use std::collections::HashMap;
 
+pub(crate) mod format;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum TopAst {
     Function(Function),
@@ -30,9 +32,14 @@ pub struct Class {
     pub parent_class_name: Option<String>,
     pub name: String,
     pub type_parameters: Vec<TypeParameter>,
-    pub fields: Vec<Field>,
-    pub methods: Vec<Function>,
-    pub static_methods: Vec<Function>,
+    pub members: Vec<ClassMember>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ClassMember {
+    Field(Field),
+    Method(Function),
+    StaticMethod(Function),
 }
 
 impl Class {
@@ -41,18 +48,14 @@ impl Class {
         parent_class_name: Option<String>,
         name: T,
         type_parameters: Vec<TypeParameter>,
-        fields: Vec<Field>,
-        methods: Vec<Function>,
-        static_methods: Vec<Function>,
+        members: Vec<ClassMember>,
     ) -> Class {
         Class {
             location,
             parent_class_name,
             name: name.to_string(),
             type_parameters,
-            fields,
-            methods,
-            static_methods,
+            members,
         }
     }
 }
@@ -374,3 +377,6 @@ impl Operator {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

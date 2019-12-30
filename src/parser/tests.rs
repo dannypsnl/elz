@@ -161,27 +161,29 @@ fn test_parse_class() {
             None,
             "Car",
             vec![],
-            vec![Field::new(
-                Location::from(2, 0),
-                "name",
-                ParsedType::type_name("string"),
-                None
-            )],
-            vec![Function::new_declaration(
-                Location::from(4, 0),
-                "bar",
-                vec![
-                    Parameter::new("self", ParsedType::type_name("Car")),
-                    Parameter::new("i", ParsedType::type_name("int"))
-                ],
-                ParsedType::type_name("void"),
-            )],
-            vec![Function::new_declaration(
-                Location::from(3, 2),
-                "new",
-                vec![Parameter::new("name", ParsedType::type_name("string"))],
-                ParsedType::type_name("Car"),
-            )]
+            vec![
+                ClassMember::Field(Field::new(
+                    Location::from(2, 0),
+                    "name",
+                    ParsedType::type_name("string"),
+                    None
+                )),
+                ClassMember::StaticMethod(Function::new_declaration(
+                    Location::from(3, 2),
+                    "new",
+                    vec![Parameter::new("name", ParsedType::type_name("string"))],
+                    ParsedType::type_name("Car"),
+                )),
+                ClassMember::Method(Function::new_declaration(
+                    Location::from(4, 0),
+                    "bar",
+                    vec![
+                        Parameter::new("self", ParsedType::type_name("Car")),
+                        Parameter::new("i", ParsedType::type_name("int"))
+                    ],
+                    ParsedType::type_name("void"),
+                )),
+            ]
         )
     )
 }
@@ -200,8 +202,6 @@ fn test_parse_class_inherit() {
             "Foo",
             vec![],
             vec![],
-            vec![],
-            vec![]
         )
     )
 }
@@ -220,8 +220,6 @@ fn test_parse_class_with_type_parameters() {
             "Foo",
             vec![TypeParameter::new("T", vec![])],
             vec![],
-            vec![],
-            vec![]
         )
     )
 }
