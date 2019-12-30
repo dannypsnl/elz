@@ -26,19 +26,24 @@ impl SemanticChecker {
                 Class(c) => {
                     let typ = self.type_env.new_class(c)?;
                     self.type_env.add_type(&c.location, &c.name, typ)?;
-                    for static_method in &c.static_methods {
-                        self.type_env.add_variable(
-                            &static_method.location,
-                            &format!("{}::{}", c.name, static_method.name),
-                            self.type_env.new_function_type(static_method)?,
-                        )?;
-                    }
-                    for methods in &c.methods {
-                        self.type_env.add_variable(
-                            &methods.location,
-                            &format!("{}::{}", c.name, methods.name),
-                            self.type_env.new_function_type(methods)?,
-                        )?;
+                    for member in &c.members {
+                        match member {
+                            ClassMember::StaticMethod(static_method) => {
+                                self.type_env.add_variable(
+                                    &static_method.location,
+                                    &format!("{}::{}", c.name, static_method.name),
+                                    self.type_env.new_function_type(static_method)?,
+                                )?;
+                            }
+                            ClassMember::Method(method) => {
+                                self.type_env.add_variable(
+                                    &method.location,
+                                    &format!("{}::{}", c.name, method.name),
+                                    self.type_env.new_function_type(method)?,
+                                )?;
+                            }
+                            _ => (),
+                        }
                     }
                 }
                 _ => (),
@@ -75,20 +80,34 @@ impl SemanticChecker {
                 Function(f) => self.check_function_body(&f.location, &f, &self.type_env)?,
                 Class(c) => {
                     let mut class_type_env = TypeEnv::with_parent(&self.type_env);
-                    for f in &c.fields {
-                        let typ = class_type_env.from(&f.typ)?;
-                        class_type_env.add_variable(&f.location, &f.name, typ)?;
+                    for member in &c.members {
+                        match member {
+                            ClassMember::Field(f) => {
+                                let typ = class_type_env.from(&f.typ)?;
+                                class_type_env.add_variable(&f.location, &f.name, typ)?;
+                            }
+                            _ => (),
+                        }
                     }
                     class_type_env.in_class_scope = true;
-                    for static_method in &c.static_methods {
-                        self.check_function_body(
-                            &static_method.location,
-                            &static_method,
-                            &class_type_env,
-                        )?;
-                    }
-                    for method in &c.methods {
-                        self.check_function_body(&method.location, &method, &class_type_env)?;
+                    for member in &c.members {
+                        match member {
+                            ClassMember::StaticMethod(static_method) => {
+                                self.check_function_body(
+                                    &static_method.location,
+                                    &static_method,
+                                    &class_type_env,
+                                )?;
+                            }
+                            ClassMember::Method(method) => {
+                                self.check_function_body(
+                                    &method.location,
+                                    &method,
+                                    &class_type_env,
+                                )?;
+                            }
+                            _ => (),
+                        }
                     }
                 }
             }

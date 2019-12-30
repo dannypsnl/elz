@@ -34,12 +34,19 @@ impl Module {
     pub(crate) fn push_variable(&mut self, v: Variable) {
         self.variables.push(v);
     }
-    pub(crate) fn push_type(&mut self, type_name: &String, fields: &Vec<Field>) {
+    pub(crate) fn push_type(&mut self, type_name: &String, fields: &Vec<ClassMember>) {
         self.types.push(TypeDefinition {
             name: type_name.clone(),
             fields: fields
                 .iter()
-                .map(|field| Type::from_ast(&field.typ))
+                .filter(|&member| match member {
+                    ClassMember::Field(_) => true,
+                    _ => false,
+                })
+                .map(|member| match member {
+                    ClassMember::Field(field) => Type::from_ast(&field.typ),
+                    _ => unreachable!(),
+                })
                 .collect(),
         });
     }
