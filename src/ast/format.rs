@@ -40,14 +40,7 @@ impl FormattedElz for Function {
         let mut s = String::new();
         s.push_str(self.name.as_str());
         s.push_str("(");
-        for (index, param) in self.parameters.iter().enumerate() {
-            s.push_str(param.1.as_str());
-            s.push_str(": ");
-            s.push_str(param.0.formatted_elz(level).as_str());
-            if index < self.parameters.len() - 1 {
-                s.push_str(", ");
-            }
-        }
+        concat_with_separator(&mut s, &self.parameters, ", ", level);
         s.push_str("): ");
         s.push_str(self.ret_typ.formatted_elz(level).as_str());
         s.push_str(" ");
@@ -58,6 +51,21 @@ impl FormattedElz for Function {
             }
         }
         s
+    }
+}
+
+impl FormattedElz for Parameter {
+    fn formatted_elz(&self, level: usize) -> String {
+        match self.1.as_str() {
+            "self" => "".to_string(),
+            name => {
+                let mut s = "".to_string();
+                s.push_str(name);
+                s.push_str(": ");
+                s.push_str(self.0.formatted_elz(level).as_str());
+                s
+            }
+        }
     }
 }
 
@@ -140,8 +148,8 @@ impl FormattedElz for Block {
                 s.push_str(stmt.formatted_elz(level + 1).as_str());
                 s.push_str("\n");
             }
+            s.push_str("  ".repeat(level).as_str());
         }
-        s.push_str("  ".repeat(level).as_str());
         s.push_str("}");
         s
     }
@@ -275,9 +283,12 @@ fn concat_with_separator<T: FormattedElz>(
     level: usize,
 ) {
     for (index, elem) in vector.iter().enumerate() {
-        s.push_str(elem.formatted_elz(level).as_str());
+        let elem_str = elem.formatted_elz(level);
+        s.push_str(elem_str.as_str());
         if index < vector.len() - 1 {
-            s.push_str(separator);
+            if elem_str != "".to_string() {
+                s.push_str(separator);
+            }
         }
     }
 }
