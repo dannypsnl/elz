@@ -255,7 +255,7 @@ impl TypeEnv {
     pub fn new_function_type(&self, f: &Function) -> Result<Type> {
         let mut param_types = vec![];
         for param in &f.parameters {
-            param_types.push(self.from(&param.0)?);
+            param_types.push(self.from(&param.typ)?);
         }
         Ok(Type::FunctionType(
             param_types,

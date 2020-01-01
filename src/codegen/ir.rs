@@ -126,11 +126,7 @@ impl Function {
     ) -> Function {
         let parameters: Vec<(String, Type)> = parsed_params
             .iter()
-            .map(|p| {
-                let name = p.1.clone();
-                let typ = Type::from_ast(&p.0);
-                (name, typ)
-            })
+            .map(|p| (p.name.clone(), Type::from_ast(&p.typ)))
             .collect();
         Function {
             // function name need @, e.g. @main

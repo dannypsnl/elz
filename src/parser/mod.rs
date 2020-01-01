@@ -215,7 +215,7 @@ impl Parser {
             let param_name = self.take()?.value();
             self.consume()?;
             let typ = self.parse_type()?;
-            params.push(Parameter(typ, param_name));
+            params.push(Parameter::new(param_name, typ));
             let tok = self.peek(0)?;
             match tok.tk_type() {
                 TkType::Comma => self.consume()?,

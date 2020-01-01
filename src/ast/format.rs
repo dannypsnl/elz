@@ -56,13 +56,13 @@ impl FormattedElz for Function {
 
 impl FormattedElz for Parameter {
     fn formatted_elz(&self, level: usize) -> String {
-        match self.1.as_str() {
+        match self.name.as_str() {
             "self" => "".to_string(),
             name => {
                 let mut s = "".to_string();
                 s.push_str(name);
                 s.push_str(": ");
-                s.push_str(self.0.formatted_elz(level).as_str());
+                s.push_str(self.typ.formatted_elz(level).as_str());
                 s
             }
         }

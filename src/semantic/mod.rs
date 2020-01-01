@@ -118,8 +118,8 @@ impl SemanticChecker {
     fn check_function_body(&self, location: &Location, f: &Function, env: &TypeEnv) -> Result<()> {
         let return_type = self.type_env.from(&f.ret_typ)?;
         let mut type_env = TypeEnv::with_parent(env);
-        for Parameter(p_type, p_name) in &f.parameters {
-            type_env.add_variable(location, p_name, type_env.from(p_type)?)?;
+        for Parameter { name, typ } in &f.parameters {
+            type_env.add_variable(location, name, type_env.from(typ)?)?;
         }
         match &f.body {
             Some(Body::Expr(e)) => {

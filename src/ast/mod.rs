@@ -196,11 +196,17 @@ impl Block {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Parameter(pub ParsedType, pub String);
+pub struct Parameter {
+    pub name: String,
+    pub typ: ParsedType,
+}
 
 impl Parameter {
     pub fn new<T: ToString>(name: T, typ: ParsedType) -> Parameter {
-        Parameter(typ, name.to_string())
+        Parameter {
+            name: name.to_string(),
+            typ,
+        }
     }
 }
 
@@ -337,10 +343,7 @@ pub enum ExprVariant {
     DotAccess(Box<Expr>, String),
     /// `n`
     Identifier(String),
-    /// assume there has a class definition:
-    /// `class Foo { bar: int; }`
-    /// We can have a class construction expression
-    /// `Foo { bar: 0 }`
+    /// We can have a class construction expression: `Foo { bar: 0 }` for definition `class Foo { bar: int; }`
     ClassConstruction(String, HashMap<String, Expr>),
 }
 
@@ -373,7 +376,7 @@ impl Operator {
     pub fn from_token(token: Token) -> Operator {
         match token.tk_type() {
             TkType::Plus => Operator::Plus,
-            tok => panic!("{:?} is not a operator", tok),
+            tok => todo!("{:?} is not a operator", tok),
         }
     }
 }
