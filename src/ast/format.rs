@@ -43,10 +43,12 @@ impl FormattedElz for Function {
         concat_with_separator(&mut s, &self.parameters, ", ", level);
         s.push_str("): ");
         s.push_str(self.ret_typ.formatted_elz(level).as_str());
-        s.push_str(" ");
         match &self.body {
-            None => (),
+            None => {
+                s.push_str(";");
+            }
             Some(b) => {
+                s.push_str(" ");
                 s.push_str(b.formatted_elz(level).as_str());
             }
         }
