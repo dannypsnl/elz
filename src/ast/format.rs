@@ -44,9 +44,7 @@ impl FormattedElz for Function {
         s.push_str("): ");
         s.push_str(self.ret_typ.formatted_elz(level).as_str());
         match &self.body {
-            None => {
-                s.push_str(";");
-            }
+            None => s.push_str(";"),
             Some(b) => {
                 s.push_str(" ");
                 s.push_str(b.formatted_elz(level).as_str());
@@ -126,9 +124,7 @@ impl FormattedElz for Body {
         use Body::*;
         let mut s = String::new();
         match self {
-            Block(block) => {
-                s.push_str(block.formatted_elz(level).as_str());
-            }
+            Block(block) => s.push_str(block.formatted_elz(level).as_str()),
             Expr(expr) => {
                 s.push_str("= ");
                 s.push_str(expr.formatted_elz(level).as_str());
@@ -242,10 +238,12 @@ impl FormattedElz for FormatFieldInit {
 impl FormattedElz for Argument {
     fn formatted_elz(&self, level: usize) -> String {
         let mut s = "".to_string();
-        match &self.name {
-            Some(name) => s.push_str(format!("{}: ", name).as_str()),
-            None => (),
-        }
+        s.push_str(
+            self.name
+                .as_ref()
+                .map_or_else(|| "".to_string(), |name| format!("{}: ", name))
+                .as_str(),
+        );
         s.push_str(self.expr.formatted_elz(level).as_str());
         s
     }

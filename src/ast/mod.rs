@@ -376,7 +376,7 @@ impl Operator {
     pub fn from_token(token: Token) -> Operator {
         match token.tk_type() {
             TkType::Plus => Operator::Plus,
-            tok => todo!("{:?} is not a operator", tok),
+            tok => unimplemented!("{:?} is not a operator", tok),
         }
     }
 }
