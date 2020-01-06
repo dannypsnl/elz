@@ -50,11 +50,17 @@ impl SemanticError {
             SemanticErrorVariant::TypeMismatched(expected.clone(), actual.clone()),
         )
     }
-    pub fn no_variable(location: &Location, name: String) -> SemanticError {
-        SemanticError::new(location, SemanticErrorVariant::NoVariableNamed(name))
+    pub fn no_variable(location: &Location, name: &str) -> SemanticError {
+        SemanticError::new(
+            location,
+            SemanticErrorVariant::NoVariableNamed(name.to_string()),
+        )
     }
-    pub fn no_type(location: &Location, name: String) -> SemanticError {
-        SemanticError::new(location, SemanticErrorVariant::NoTypeNamed(name))
+    pub fn no_type(location: &Location, name: &str) -> SemanticError {
+        SemanticError::new(
+            location,
+            SemanticErrorVariant::NoTypeNamed(name.to_string()),
+        )
     }
     pub fn call_on_non_function_type(location: &Location, typ: Type) -> SemanticError {
         SemanticError::new(location, SemanticErrorVariant::CallOnNonFunctionType(typ))

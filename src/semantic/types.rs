@@ -75,7 +75,7 @@ impl TypeEnv {
                 }
             }
             Identifier(id) => {
-                let type_info = self.get_variable(location, id.clone())?;
+                let type_info = self.get_variable(location, id.as_str())?;
                 Ok(type_info.typ)
             }
             ClassConstruction(name, field_inits) => {
@@ -84,7 +84,7 @@ impl TypeEnv {
                         location,
                     ));
                 }
-                let type_info = self.get_type(location, name.clone())?;
+                let type_info = self.get_type(location, name)?;
                 match &type_info.typ {
                     Type::ClassType(.., should_inits) => {
                         let mut missing_init_fields = vec![];
@@ -249,7 +249,7 @@ impl TypeEnv {
                 }
                 Ok(Type::generic_type("List", type_parameters))
             }
-            _ => Ok(self.get_type(&Location::none(), typ.name())?.typ),
+            typ_name => Ok(self.get_type(&Location::none(), typ_name)?.typ),
         }
     }
     pub fn new_function_type(&self, f: &Function) -> Result<Type> {
@@ -278,7 +278,7 @@ impl TypeEnv {
         let mut parents = vec![];
         match &c.parent_class_name {
             Some(p_name) => {
-                let parent_typ = self.get_type(&c.location, p_name.clone())?;
+                let parent_typ = self.get_type(&c.location, p_name)?;
                 parents.push(parent_typ.typ);
             }
             None => (),
@@ -293,22 +293,17 @@ impl TypeEnv {
 }
 
 impl TypeEnv {
-    pub(crate) fn add_variable(
-        &mut self,
-        location: &Location,
-        key: &String,
-        typ: Type,
-    ) -> Result<()> {
+    pub(crate) fn add_variable(&mut self, location: &Location, key: &str, typ: Type) -> Result<()> {
         if self.variables.contains_key(key) {
             Err(SemanticError::name_redefined(location, key))
         } else {
             self.variables
-                .insert(key.clone(), TypeInfo::new(location, typ));
+                .insert(key.to_string(), TypeInfo::new(location, typ));
             Ok(())
         }
     }
-    pub(crate) fn get_variable(&self, location: &Location, k: String) -> Result<TypeInfo> {
-        let result = self.variables.get(&k);
+    pub(crate) fn get_variable(&self, location: &Location, k: &str) -> Result<TypeInfo> {
+        let result = self.variables.get(k);
         match result {
             Some(t) => Ok(t.clone()),
             None => match self.parent {
@@ -318,16 +313,17 @@ impl TypeEnv {
         }
     }
 
-    pub(crate) fn add_type(&mut self, location: &Location, key: &String, typ: Type) -> Result<()> {
+    pub(crate) fn add_type(&mut self, location: &Location, key: &str, typ: Type) -> Result<()> {
         if self.types.contains_key(key) {
             Err(SemanticError::name_redefined(location, key))
         } else {
-            self.types.insert(key.clone(), TypeInfo::new(location, typ));
+            self.types
+                .insert(key.to_string(), TypeInfo::new(location, typ));
             Ok(())
         }
     }
-    pub(crate) fn get_type(&self, location: &Location, k: String) -> Result<TypeInfo> {
-        let result = self.types.get(&k);
+    pub(crate) fn get_type(&self, location: &Location, k: &str) -> Result<TypeInfo> {
+        let result = self.types.get(k);
         match result {
             Some(t) => Ok(t.clone()),
             None => match self.parent {
