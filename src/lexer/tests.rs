@@ -34,6 +34,19 @@ fn test_symbols() {
 }
 
 #[test]
+fn test_keywords() {
+    let code = "return class trait true false";
+
+    let tokens = lex("", code);
+    let tk_types: Vec<_> = tokens.iter().map(|tok| tok.tk_type()).collect();
+    use TkType::*;
+    assert_eq!(
+        tk_types,
+        vec![&Return, &Class, &Trait, &True, &False, &EOF,]
+    )
+}
+
+#[test]
 fn test_unicode_identifier_a() {
     let code = "測試: int = 1";
 
