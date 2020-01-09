@@ -4,6 +4,12 @@
 
 #### Syntax
 
+- trait
+  ```elz
+  trait Iterable {
+    next(): Self
+  }
+  ```
 - class
   ```elz
   class Car {
