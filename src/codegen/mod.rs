@@ -22,6 +22,7 @@ impl CodeGenerator {
                     module.remember_variable(v);
                 }
                 TopAst::Class(_) => {}
+                TopAst::Trait(_) => unimplemented!(),
             }
         }
         for top in asts {
@@ -79,6 +80,7 @@ impl CodeGenerator {
                         }
                     }
                 }
+                TopAst::Trait(_) => unimplemented!(),
             }
         }
         module

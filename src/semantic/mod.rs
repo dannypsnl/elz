@@ -110,6 +110,7 @@ impl SemanticChecker {
                         }
                     }
                 }
+                Trait(_) => unimplemented!(),
             }
         }
         Ok(())

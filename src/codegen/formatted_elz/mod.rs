@@ -15,6 +15,7 @@ impl FormattedElz for FormatTopAstList {
                 TopAst::Variable(v) => s.push_str(v.formatted_elz(level).as_str()),
                 TopAst::Function(f) => s.push_str(f.formatted_elz(level).as_str()),
                 TopAst::Class(c) => s.push_str(c.formatted_elz(level).as_str()),
+                TopAst::Trait(_) => unimplemented!(),
             }
             s.push_str("\n");
         }
