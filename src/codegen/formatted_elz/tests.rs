@@ -122,5 +122,9 @@ fn simple_trait() {
 
 // helpers, must put tests before this line
 fn parse_code(code: &'static str) -> FormatTopAstList {
-    FormatTopAstList(Parser::parse_program("", code).unwrap())
+    let program = match Parser::parse_program("", code) {
+        Ok(program) => program,
+        Err(err) => panic!("{}", err),
+    };
+    FormatTopAstList(program)
 }
