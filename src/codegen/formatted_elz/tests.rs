@@ -1,4 +1,4 @@
-use crate::ast::format::{FormatTopAstList, FormattedElz, DEFAULT_LEVEL};
+use super::{FormatTopAstList, FormattedElz, DEFAULT_LEVEL};
 use crate::parser::Parser;
 
 #[test]
