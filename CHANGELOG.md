@@ -6,8 +6,8 @@
 
 - trait
   ```elz
-  trait Iterable {
-    next(): Self
+  trait Foo {
+    foo();
   }
   ```
 - class
