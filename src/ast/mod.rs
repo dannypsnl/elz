@@ -7,6 +7,7 @@ pub enum TopAst {
     Function(Function),
     Variable(Variable),
     Class(Class),
+    Trait(Trait),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -20,6 +21,39 @@ impl TypeParameter {
         TypeParameter {
             name: name.to_string(),
             parent_types,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Trait {
+    pub location: Location,
+    pub with_traits: Vec<String>,
+    pub name: String,
+    pub type_parameters: Vec<TypeParameter>,
+    pub members: Vec<TraitMember>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum TraitMember {
+    Field(Field),
+    Method(Function),
+}
+
+impl Trait {
+    pub fn new<T: ToString>(
+        location: Location,
+        with_traits: Vec<String>,
+        name: T,
+        type_parameters: Vec<TypeParameter>,
+        members: Vec<TraitMember>,
+    ) -> Trait {
+        Trait {
+            location,
+            with_traits,
+            name: name.to_string(),
+            type_parameters,
+            members,
         }
     }
 }

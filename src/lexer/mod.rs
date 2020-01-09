@@ -16,6 +16,8 @@ pub enum TkType {
     Return,
     #[strum(serialize = "class")]
     Class,
+    #[strum(serialize = "trait")]
+    Trait,
     #[strum(serialize = "true")]
     True,
     #[strum(serialize = "false")]
@@ -175,6 +177,7 @@ impl Lexer {
             "true" => self.new_token(TkType::True, s),
             "false" => self.new_token(TkType::False, s),
             "class" => self.new_token(TkType::Class, s),
+            "trait" => self.new_token(TkType::Trait, s),
             _ => self.new_token(token_type.clone(), s),
         };
         match token_type {

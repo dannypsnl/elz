@@ -42,7 +42,11 @@ impl Parser {
                     let c = self.parse_class()?;
                     program.push(TopAst::Class(c));
                 }
-                _ => self.predict_one_of(vec![TkType::Identifier, TkType::Class])?,
+                TkType::Trait => {
+                    let t = self.parse_trait()?;
+                    program.push(TopAst::Trait(t));
+                }
+                _ => self.predict_one_of(vec![TkType::Identifier, TkType::Class, TkType::Trait])?,
             }
         }
         Ok(program)
@@ -51,7 +55,7 @@ impl Parser {
     ///
     /// handle:
     /// basic: `class Car { name: string; ::new(name: string): Car; }`
-    /// inherit: `class Rectangle <: Shape {}`
+    /// implements trait: `class Rectangle <: Shape {}`
     pub fn parse_class(&mut self) -> Result<Class> {
         let kw_class = self.peek(0)?;
         self.predict_and_consume(vec![TkType::Class])?;
@@ -145,6 +149,52 @@ impl Parser {
             self.predict_and_consume(vec![TkType::Semicolon])?;
             Ok(Field::new(loc, var_name, typ, None))
         }
+    }
+    /// parse_trait:
+    ///
+    /// handle:
+    /// basic: `trait Foo { name: string; get_name(): string; }`
+    /// with others trait: `trait A <: B {}`
+    pub fn parse_trait(&mut self) -> Result<Trait> {
+        let location = self.peek(0)?.location();
+        self.predict_and_consume(vec![TkType::Trait])?;
+        let trait_name = self.parse_identifier()?;
+        // FIXME: parse with traits part
+        let type_parameters = if self.predict(vec![TkType::OpenBracket]).is_ok() {
+            self.parse_type_parameters()?
+        } else {
+            vec![]
+        };
+        self.predict_and_consume(vec![TkType::OpenBrace])?;
+        let members = self.parse_trait_members(&trait_name)?;
+        self.predict_and_consume(vec![TkType::CloseBrace])?;
+        Ok(Trait::new(
+            location,
+            vec![],
+            trait_name,
+            type_parameters,
+            members,
+        ))
+    }
+    fn parse_trait_members(&mut self, class_name: &String) -> Result<Vec<TraitMember>> {
+        let mut members = vec![];
+        while self.peek(0)?.tk_type() != &TkType::CloseBrace {
+            if self
+                .predict(vec![TkType::Identifier, TkType::Colon])
+                .is_ok()
+            {
+                let v = self.parse_class_field()?;
+                members.push(TraitMember::Field(v));
+            } else {
+                let mut method = self.parse_function()?;
+                method.parameters.insert(
+                    0,
+                    Parameter::new("self", ParsedType::TypeName(class_name.clone())),
+                );
+                members.push(TraitMember::Method(method));
+            }
+        }
+        Ok(members)
     }
     /// parse_variable:
     ///
@@ -269,7 +319,7 @@ impl Parser {
     /// parse_type:
     ///
     /// `<identifier>`
-    /// | `<identifier> [ <generic_type_list> ]`
+    /// | `<identifier> [ <applied-type-parameters> ]`
     pub fn parse_type(&mut self) -> Result<ParsedType> {
         // ensure is <identifier>
         self.predict(vec![TkType::Identifier])?;

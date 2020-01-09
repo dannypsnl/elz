@@ -4,6 +4,12 @@
 
 #### Syntax
 
+- trait
+  ```elz
+  trait Foo {
+    foo();
+  }
+  ```
 - class
   ```elz
   class Car {
