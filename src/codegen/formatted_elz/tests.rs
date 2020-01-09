@@ -110,6 +110,16 @@ fn nested_block() {
     );
 }
 
+#[test]
+fn simple_trait() {
+    let program = parse_code("trait Foo{}");
+    assert_eq!(
+        program.formatted_elz(DEFAULT_LEVEL),
+        "trait Foo {}
+"
+    );
+}
+
 // helpers, must put tests before this line
 fn parse_code(code: &'static str) -> FormatTopAstList {
     FormatTopAstList(Parser::parse_program("", code).unwrap())

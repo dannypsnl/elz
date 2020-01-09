@@ -15,11 +15,58 @@ impl FormattedElz for FormatTopAstList {
                 TopAst::Variable(v) => s.push_str(v.formatted_elz(level).as_str()),
                 TopAst::Function(f) => s.push_str(f.formatted_elz(level).as_str()),
                 TopAst::Class(c) => s.push_str(c.formatted_elz(level).as_str()),
-                TopAst::Trait(_) => unimplemented!(),
+                TopAst::Trait(t) => s.push_str(t.formatted_elz(level).as_str()),
             }
             s.push_str("\n");
         }
         s
+    }
+}
+
+impl FormattedElz for Trait {
+    fn formatted_elz(&self, level: usize) -> String {
+        let mut s = String::new();
+        s.push_str("trait ");
+        s.push_str(self.name.as_str());
+        s.push_str(" ");
+        for with_trait in &self.with_traits {
+            s.push_str(format!("{} ", with_trait).as_str());
+        }
+        s.push_str("{");
+        if self.members.len() > 0 {
+            s.push_str("\n");
+        }
+        for member in &self.members {
+            s.push_str("  ".repeat(level + 1).as_str());
+            s.push_str(member.formatted_elz(level + 1).as_str());
+            s.push_str("\n");
+        }
+        s.push_str("}");
+
+        s
+    }
+}
+
+impl FormattedElz for TraitMember {
+    fn formatted_elz(&self, level: usize) -> String {
+        use TraitMember::*;
+        match self {
+            Field(f) => {
+                let mut s = "".to_string();
+                s.push_str(f.name.as_str());
+                s.push_str(": ");
+                s.push_str(f.typ.formatted_elz(level).as_str());
+                s.push_str(
+                    f.expr
+                        .as_ref()
+                        .map_or_else(|| "".to_string(), |e| format!("{}", e.formatted_elz(level)))
+                        .as_str(),
+                );
+                s.push_str(";");
+                s
+            }
+            Method(m) => m.formatted_elz(level),
+        }
     }
 }
 
