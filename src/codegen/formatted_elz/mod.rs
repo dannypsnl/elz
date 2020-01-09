@@ -1,4 +1,4 @@
-use super::*;
+use crate::ast::*;
 
 pub(crate) const DEFAULT_LEVEL: usize = 0;
 
@@ -292,3 +292,6 @@ fn concat_with_separator<T: FormattedElz>(
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

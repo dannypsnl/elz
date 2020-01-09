@@ -1,5 +1,6 @@
 use crate::ast::*;
 
+pub mod formatted_elz;
 pub mod ir;
 pub mod llvm;
 

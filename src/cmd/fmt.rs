@@ -1,4 +1,4 @@
-use crate::ast::format::{FormatTopAstList, FormattedElz, DEFAULT_LEVEL};
+use crate::codegen::formatted_elz::{FormatTopAstList, FormattedElz, DEFAULT_LEVEL};
 use crate::parser::Parser;
 use std::io::Write;
 use walkdir::{DirEntry, WalkDir};
