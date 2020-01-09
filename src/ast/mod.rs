@@ -267,6 +267,19 @@ impl Statement {
             value: StatementVariant::Expression(expr),
         }
     }
+    pub fn if_block(
+        location: Location,
+        clauses: Vec<(Expr, Block)>,
+        else_block: Block,
+    ) -> Statement {
+        Statement {
+            location,
+            value: StatementVariant::IfBlock {
+                clauses,
+                else_block,
+            },
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -280,6 +293,11 @@ pub enum StatementVariant {
     /// `println("hello");`
     /// `foo.bar();`
     Expression(Expr),
+    /// `if <condition> {} else if <condition> else {}`
+    IfBlock {
+        clauses: Vec<(Expr, Block)>,
+        else_block: Block,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq)]
