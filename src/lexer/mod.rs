@@ -18,6 +18,10 @@ pub enum TkType {
     Class,
     #[strum(serialize = "trait")]
     Trait,
+    #[strum(serialize = "if")]
+    If,
+    #[strum(serialize = "else")]
+    Else,
     #[strum(serialize = "true")]
     True,
     #[strum(serialize = "false")]
@@ -178,6 +182,8 @@ impl Lexer {
             "false" => self.new_token(TkType::False, s),
             "class" => self.new_token(TkType::Class, s),
             "trait" => self.new_token(TkType::Trait, s),
+            "if" => self.new_token(TkType::If, s),
+            "else" => self.new_token(TkType::Else, s),
             _ => self.new_token(token_type.clone(), s),
         };
         match token_type {
