@@ -40,6 +40,24 @@ pub enum TraitMember {
     Method(Function),
 }
 
+impl Trait {
+    pub fn new<T: ToString>(
+        location: Location,
+        with_traits: Vec<String>,
+        name: T,
+        type_parameters: Vec<TypeParameter>,
+        members: Vec<TraitMember>,
+    ) -> Trait {
+        Trait {
+            location,
+            with_traits,
+            name: name.to_string(),
+            type_parameters,
+            members,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
     pub location: Location,
