@@ -269,7 +269,7 @@ impl Parser {
     /// parse_type:
     ///
     /// `<identifier>`
-    /// | `<identifier> [ <generic_type_list> ]`
+    /// | `<identifier> [ <applied-type-parameters> ]`
     pub fn parse_type(&mut self) -> Result<ParsedType> {
         // ensure is <identifier>
         self.predict(vec![TkType::Identifier])?;
