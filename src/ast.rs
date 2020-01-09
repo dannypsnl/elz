@@ -284,8 +284,6 @@ impl Statement {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum StatementVariant {
-    /// Return:
-    ///
     /// `return 1;`
     Return(Option<Expr>),
     /// `x: int = 1;`
