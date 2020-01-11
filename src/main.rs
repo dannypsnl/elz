@@ -19,9 +19,9 @@ fn main() {
                 .about("format all files matched *.elz under the directory")
                 .arg(
                     Arg::with_name("INPUT")
-                        .help("input directory to format")
+                        .help("input directories or files to format")
                         .required(true)
-                        .max_values(1),
+                        .min_values(1),
                 ),
         )
         .get_matches();
