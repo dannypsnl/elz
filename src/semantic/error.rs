@@ -29,8 +29,8 @@ enum SemanticErrorVariant {
     CannotConstructNonClassType(Type),
     #[error("cannot use class construction out of class scope")]
     CannotUseClassConstructionOutOfClass(),
-    #[error("can only as subtype of a trait type, but got: {}", .got_type)]
-    CanOnlyAsSubtypeOfATrait { got_type: Type },
+    #[error("only trait can be super type, but got: {}", .got_type)]
+    OnlyTraitCanBeSuperType { got_type: Type },
 }
 
 impl SemanticError {
@@ -82,10 +82,10 @@ impl SemanticError {
             SemanticErrorVariant::CannotUseClassConstructionOutOfClass(),
         )
     }
-    pub fn can_only_as_subtype_of_a_trait(location: &Location, got_type: &Type) -> SemanticError {
+    pub fn only_trait_can_be_super_type(location: &Location, got_type: &Type) -> SemanticError {
         SemanticError::new(
             location,
-            SemanticErrorVariant::CanOnlyAsSubtypeOfATrait {
+            SemanticErrorVariant::OnlyTraitCanBeSuperType {
                 got_type: got_type.clone(),
             },
         )

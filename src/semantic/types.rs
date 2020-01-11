@@ -281,12 +281,7 @@ impl TypeEnv {
                 let parent_typ = self.get_type(&c.location, p_name)?;
                 match &parent_typ.typ {
                     Type::TraitType => (),
-                    t => {
-                        return Err(SemanticError::can_only_as_subtype_of_a_trait(
-                            &c.location,
-                            t,
-                        ))
-                    }
+                    t => return Err(SemanticError::only_trait_can_be_super_type(&c.location, t)),
                 };
                 parents.push(parent_typ.typ);
             }
