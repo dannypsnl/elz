@@ -279,6 +279,15 @@ impl TypeEnv {
         match &c.parent_class_name {
             Some(p_name) => {
                 let parent_typ = self.get_type(&c.location, p_name)?;
+                match &parent_typ.typ {
+                    Type::TraitType => (),
+                    t => {
+                        return Err(SemanticError::can_only_as_subtype_of_a_trait(
+                            &c.location,
+                            t,
+                        ))
+                    }
+                };
                 parents.push(parent_typ.typ);
             }
             None => (),
@@ -356,6 +365,8 @@ pub enum Type {
     Bool,
     F64,
     String,
+    // TODO: complete definition
+    TraitType,
     // name, parents, type parameters, uninitialized fields
     ClassType(String, Vec<Type>, Vec<Type>, Vec<String>),
     // name, type parameters
@@ -399,6 +410,7 @@ impl Type {
                 }
                 false
             }
+            TraitType => unimplemented!("trait type"),
             FreeVar(_) => self.clone() == t,
         }
     }
@@ -443,6 +455,7 @@ impl std::fmt::Display for Type {
                 }
                 write!(f, "")
             }
+            TraitType => unimplemented!("trait type"),
             // FIXME: print format: `(int, int): int` not `<function>`
             FunctionType(_params, _ret) => write!(f, "<function>"),
             FreeVar(n) => write!(f, "'{}", n),

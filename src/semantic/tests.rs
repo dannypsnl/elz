@@ -220,6 +220,16 @@ fn test_method_should_be_able_to_call_with_instance() {
     assert_eq!(result.is_ok(), true);
 }
 
+#[test]
+fn can_only_as_subtype_of_a_trait() {
+    let code = "
+    class Bar {}
+    class Foo <: Bar {}
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let program = Parser::parse_program("", code).unwrap();
