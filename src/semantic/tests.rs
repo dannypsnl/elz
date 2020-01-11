@@ -221,34 +221,13 @@ fn test_method_should_be_able_to_call_with_instance() {
 }
 
 #[test]
-fn test_subtype_upcasting() {
-    let code = "\
-    class Foo {}
-    class Bar <: Foo {
-      ::new(): Bar = Bar {};
-    }
-
-    main(): void {
-      foo: Foo = Bar::new();
-    }
+fn only_trait_can_be_super_type() {
+    let code = "
+    class Bar {}
+    class Foo <: Bar {}
     ";
     let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
-}
-
-#[test]
-fn test_type_parameter_upcasting() {
-    let code = "\
-    class Foo {}
-    class Bar <: Foo {}
-
-    main(): void {
-      bl: List[Bar] = [];
-      fl: List[Foo] = bl;
-    }
-    ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    assert_eq!(result.is_err(), true);
 }
 
 // helpers, must put tests before this line
