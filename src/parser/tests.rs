@@ -3,7 +3,7 @@ use crate::lexer::Location;
 use std::collections::HashMap;
 
 #[test]
-fn test_parse_function_with_block_body() {
+fn parse_function_with_block_body() {
     let code = "\
     main(): void {}
     ";
@@ -24,7 +24,7 @@ fn test_parse_function_with_block_body() {
 }
 
 #[test]
-fn test_parse_function_with_expression_body() {
+fn parse_function_with_expression_body() {
     let code = "\
     add(x: int, y: int): int = x + y;
     ";
@@ -53,7 +53,27 @@ fn test_parse_function_with_expression_body() {
 }
 
 #[test]
-fn test_parse_variable_define() {
+fn parse_function_declaration() {
+    let code = "\
+    foo(): void;
+    ";
+
+    let mut parser = Parser::new("", code);
+
+    let func = parser.parse_function().unwrap();
+    assert_eq!(
+        func,
+        Function::new_declaration(
+            Location::from(1, 0),
+            "foo",
+            vec![],
+            ParsedType::type_name("void"),
+        )
+    )
+}
+
+#[test]
+fn parse_variable_define() {
     let code = "\
     x: int = 1;
     ";
@@ -73,7 +93,7 @@ fn test_parse_variable_define() {
 }
 
 #[test]
-fn test_parse_variable_define_with_list_value() {
+fn parse_variable_define_with_list_value() {
     let code = "\
     x: List[int] = [1, 2, 3];
     ";
@@ -119,7 +139,7 @@ fn parse_statement_if_block() {
 }
 
 #[test]
-fn test_parse_string() {
+fn parse_expr_string() {
     let code = "\
     \"str \\\"\\\\ value {a}\"
     ";
@@ -143,27 +163,23 @@ fn test_parse_string() {
 }
 
 #[test]
-fn test_parse_function_declaration() {
-    let code = "\
-    foo(): void;
-    ";
+fn parse_expr_class_construction() {
+    let code = "Car { name: \"\", price: 10000 }";
+
+    let mut fields_inits = HashMap::<String, Expr>::new();
+    fields_inits.insert("name".to_string(), Expr::string(Location::from(1, 12), ""));
+    fields_inits.insert("price".to_string(), Expr::int(Location::from(1, 23), 10000));
 
     let mut parser = Parser::new("", code);
-
-    let func = parser.parse_function().unwrap();
+    let class_construction = parser.parse_expression(None, None).unwrap();
     assert_eq!(
-        func,
-        Function::new_declaration(
-            Location::from(1, 0),
-            "foo",
-            vec![],
-            ParsedType::type_name("void"),
-        )
+        class_construction,
+        Expr::class_construction(Location::from(1, 0), "Car", fields_inits)
     )
 }
 
 #[test]
-fn test_parse_class() {
+fn parse_class() {
     let code = "\
                 class Car {\n\
                 name: string;\n\
@@ -208,7 +224,7 @@ fn test_parse_class() {
 }
 
 #[test]
-fn test_parse_class_inherit() {
+fn parse_class_inherit() {
     let code = "class Foo <: Bar {}";
 
     let mut parser = Parser::new("", code);
@@ -226,7 +242,7 @@ fn test_parse_class_inherit() {
 }
 
 #[test]
-fn test_parse_class_with_type_parameters() {
+fn parse_class_with_type_parameters() {
     let code = "class Foo[T] {}";
 
     let mut parser = Parser::new("", code);
@@ -240,21 +256,5 @@ fn test_parse_class_with_type_parameters() {
             vec![TypeParameter::new("T", vec![])],
             vec![],
         )
-    )
-}
-
-#[test]
-fn test_class_construction() {
-    let code = "Car { name: \"\", price: 10000 }";
-
-    let mut fields_inits = HashMap::<String, Expr>::new();
-    fields_inits.insert("name".to_string(), Expr::string(Location::from(1, 12), ""));
-    fields_inits.insert("price".to_string(), Expr::int(Location::from(1, 23), 10000));
-
-    let mut parser = Parser::new("", code);
-    let class_construction = parser.parse_expression(None, None).unwrap();
-    assert_eq!(
-        class_construction,
-        Expr::class_construction(Location::from(1, 0), "Car", fields_inits)
     )
 }
