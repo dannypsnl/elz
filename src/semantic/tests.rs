@@ -221,7 +221,7 @@ fn test_method_should_be_able_to_call_with_instance() {
 }
 
 #[test]
-fn can_only_as_subtype_of_a_trait() {
+fn only_trait_can_be_super_type() {
     let code = "
     class Bar {}
     class Foo <: Bar {}
