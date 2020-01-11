@@ -148,6 +148,7 @@ impl SemanticChecker {
                             let func_call_ret_typ = type_env.type_of_expr(func_call)?;
                             type_env.unify(&stmt.location, &Type::Void, &func_call_ret_typ)?;
                         }
+                        IfBlock { .. } => unimplemented!(),
                     }
                 }
                 Ok(())

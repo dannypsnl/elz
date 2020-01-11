@@ -221,6 +221,7 @@ impl FormattedElz for Statement {
             }
             Variable(v) => v.formatted_elz(level),
             Expression(e) => format!("{};", e.formatted_elz(level)),
+            IfBlock { .. } => unimplemented!(),
         }
     }
 }

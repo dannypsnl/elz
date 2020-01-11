@@ -382,7 +382,30 @@ impl Parser {
                 };
                 Ok(Statement::return_stmt(tok.location(), expr))
             }
-            _ => unimplemented!(),
+            TkType::If => {
+                self.consume()?;
+                let mut clauses = vec![];
+                let condition = self.parse_expression(None, None)?;
+                let first_if_block = self.parse_block()?;
+                clauses.push((condition, first_if_block));
+                while self.predict_and_consume(vec![TkType::Else]).is_ok() {
+                    // and remember that else block was optional, so failed at this condition was fine
+                    if self.predict_and_consume(vec![TkType::If]).is_ok() {
+                        // else if
+                        clauses.push((self.parse_expression(None, None)?, self.parse_block()?));
+                        continue;
+                    } else {
+                        // else
+                        return Ok(Statement::if_block(
+                            tok.location(),
+                            clauses,
+                            Some(self.parse_block()?),
+                        ));
+                    }
+                }
+                Ok(Statement::if_block(tok.location(), clauses, None))
+            }
+            _ => unimplemented!("{}", tok),
         };
         self.predict_and_consume(vec![TkType::Semicolon])?;
         stmt
