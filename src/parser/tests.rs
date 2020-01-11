@@ -100,6 +100,25 @@ fn test_parse_variable_define_with_list_value() {
 }
 
 #[test]
+fn parse_statement_if_block() {
+    let code = "if true {} else if false {} else {}";
+
+    let mut parser = Parser::new("", code);
+
+    assert_eq!(
+        parser.parse_statement().unwrap(),
+        Statement::if_block(
+            Location::from(1, 0),
+            vec![
+                (Expr::bool(Location::from(1, 3), true), Block::new()),
+                (Expr::bool(Location::from(1, 19), false), Block::new())
+            ],
+            Some(Block::new())
+        )
+    )
+}
+
+#[test]
 fn test_parse_string() {
     let code = "\
     \"str \\\"\\\\ value {a}\"

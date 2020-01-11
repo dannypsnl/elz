@@ -270,7 +270,7 @@ impl Statement {
     pub fn if_block(
         location: Location,
         clauses: Vec<(Expr, Block)>,
-        else_block: Block,
+        else_block: Option<Block>,
     ) -> Statement {
         Statement {
             location,
@@ -294,7 +294,7 @@ pub enum StatementVariant {
     /// `if <condition> {} else if <condition> else {}`
     IfBlock {
         clauses: Vec<(Expr, Block)>,
-        else_block: Block,
+        else_block: Option<Block>,
     },
 }
 
