@@ -1,5 +1,5 @@
 use super::*;
-use crate::parser::Parser;
+use crate::parser::{parse_prelude, Parser};
 
 #[test]
 fn test_redefine_variable_would_get_error() {
@@ -232,7 +232,13 @@ fn only_trait_can_be_super_type() {
 
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
-    let program = Parser::parse_program("", code).unwrap();
+    let mut program = Parser::parse_program("", code).unwrap();
+    let mut prelude = parse_prelude();
+    prelude.append(&mut program);
     let mut checker = SemanticChecker::new();
-    checker.check_program(&program)
+    checker.check_program(&prelude).map_err(|err| {
+        // map origin error and report at here
+        println!("{}", err);
+        err
+    })
 }
