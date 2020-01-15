@@ -210,6 +210,11 @@ impl TypeEnv {
     }
     pub fn new_class(&self, c: &Class) -> Result<Type> {
         match c.name.as_str() {
+            // FIXME: provide a tag, e.g.
+            // ```
+            // @Codegen(Omit)
+            // class int {}
+            // ```
             "void" => Ok(Type::Void),
             "int" => Ok(Type::Int),
             "f64" => Ok(Type::F64),
