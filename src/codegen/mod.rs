@@ -28,6 +28,14 @@ impl CodeGenerator {
         for top in asts {
             match top {
                 TopAst::Function(f) => {
+                    // FIXME: provide a tag, e.g.
+                    // ```
+                    // @Codegen(Omit)
+                    // println(content: string): void;
+                    // ```
+                    if f.name.as_str() == "println" {
+                        continue;
+                    }
                     let body = match &f.body {
                         Some(b) => Some(ir::Body::from_ast(b, &module)),
                         None => None,
@@ -46,6 +54,20 @@ impl CodeGenerator {
                     module.push_variable(var);
                 }
                 TopAst::Class(c) => {
+                    match c.name.as_str() {
+                        // FIXME: provide a tag, e.g.
+                        // ```
+                        // @Codegen(Omit)
+                        // class int {}
+                        // ```
+                        "void" => continue,
+                        "int" => continue,
+                        "f64" => continue,
+                        "bool" => continue,
+                        "string" => continue,
+                        "List" => continue,
+                        _ => {}
+                    }
                     module.push_type(&c.name, &c.members);
 
                     for member in &c.members {

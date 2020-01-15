@@ -1,2 +1,10 @@
+// builtin types
+class void {}
+class int {}
+class f64 {}
+class bool {}
+class string {}
+class List[T] {}
+
 println(content: string): void;
 

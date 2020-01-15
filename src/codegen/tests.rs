@@ -94,7 +94,9 @@ define void @\"Foo::bar\"(%Foo* %self) {
 
 // helpers, must put tests before this line
 fn gen_code(code: &'static str) -> ir::Module {
-    let program = crate::parser::Parser::parse_program("", code).unwrap();
+    let mut program = crate::parser::Parser::parse_program("", code).unwrap();
+    let mut prelude = crate::parser::parse_prelude();
+    prelude.append(&mut program);
     let code_generator = CodeGenerator::new();
-    code_generator.generate_module(&program)
+    code_generator.generate_module(&prelude)
 }

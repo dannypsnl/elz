@@ -46,7 +46,7 @@ impl TypeEnv {
                         ));
                     }
                 }
-                Ok(Type::generic_type("List", vec![expr_type]))
+                Ok(self.get_type(location, "List")?.typ)
             }
             FuncCall(f, args) => {
                 let f_type = self.type_of_expr(f)?;
@@ -122,14 +122,6 @@ impl TypeEnv {
                     Err(SemanticError::type_mismatched(location, expected, actual))
                 }
             }
-            (GenericType(name, generics), GenericType(name2, generics2)) => {
-                if name != name2 {
-                    Err(SemanticError::type_mismatched(location, expected, actual))
-                } else {
-                    self.unify_type_list(location, generics, generics2)?;
-                    Ok(())
-                }
-            }
             (
                 ClassType(name, _, type_parameters, _),
                 ClassType(name2, parents, type_parameters2, _),
@@ -187,47 +179,10 @@ impl TypeEnv {
 
 impl TypeEnv {
     pub fn new() -> TypeEnv {
-        let mut types = HashMap::new();
-        types.insert(
-            "int".to_string(),
-            TypeInfo::new(&Location::none(), Type::Int),
-        );
-        types.insert(
-            "string".to_string(),
-            TypeInfo::new(&Location::none(), Type::String),
-        );
-        types.insert(
-            "int".to_string(),
-            TypeInfo::new(&Location::none(), Type::Int),
-        );
-        types.insert(
-            "void".to_string(),
-            TypeInfo::new(&Location::none(), Type::Void),
-        );
-        types.insert(
-            "f64".to_string(),
-            TypeInfo::new(&Location::none(), Type::F64),
-        );
-        types.insert(
-            "bool".to_string(),
-            TypeInfo::new(&Location::none(), Type::Bool),
-        );
-        types.insert(
-            "string".to_string(),
-            TypeInfo::new(&Location::none(), Type::String),
-        );
-        // FIXME: Get list type should with free variable type?
-        types.insert(
-            "List".to_string(),
-            TypeInfo::new(
-                &Location::none(),
-                Type::generic_type("List", vec![Type::FreeVar(0)]),
-            ),
-        );
         TypeEnv {
             parent: None,
             variables: HashMap::new(),
-            types,
+            types: HashMap::new(),
             free_var_count: 1,
             in_class_scope: false,
         }
@@ -241,16 +196,7 @@ impl TypeEnv {
         type_env
     }
     pub fn from(&self, typ: &ParsedType) -> Result<Type> {
-        match typ.name().as_str() {
-            "List" => {
-                let mut type_parameters = vec![];
-                for parsed_type in &typ.generics() {
-                    type_parameters.push(self.from(parsed_type)?);
-                }
-                Ok(Type::generic_type("List", type_parameters))
-            }
-            typ_name => Ok(self.get_type(&Location::none(), typ_name)?.typ),
-        }
+        Ok(self.get_type(&Location::none(), typ.name().as_str())?.typ)
     }
     pub fn new_function_type(&self, f: &Function) -> Result<Type> {
         let mut param_types = vec![];
@@ -263,36 +209,55 @@ impl TypeEnv {
         ))
     }
     pub fn new_class(&self, c: &Class) -> Result<Type> {
-        let mut should_inits = vec![];
-        for member in &c.members {
-            match member {
-                ClassMember::Field(field) => match &field.expr {
-                    None => {
-                        should_inits.push(field.name.clone());
+        match c.name.as_str() {
+            // FIXME: provide a tag, e.g.
+            // ```
+            // @Codegen(Omit)
+            // class int {}
+            // ```
+            "void" => Ok(Type::Void),
+            "int" => Ok(Type::Int),
+            "f64" => Ok(Type::F64),
+            "bool" => Ok(Type::Bool),
+            "string" => Ok(Type::String),
+            _ => {
+                let mut should_inits = vec![];
+                for member in &c.members {
+                    match member {
+                        ClassMember::Field(field) => match &field.expr {
+                            None => {
+                                should_inits.push(field.name.clone());
+                            }
+                            _ => (),
+                        },
+                        _ => (),
                     }
-                    _ => (),
-                },
-                _ => (),
+                }
+                let mut parents = vec![];
+                match &c.parent_class_name {
+                    Some(p_name) => {
+                        let parent_typ = self.get_type(&c.location, p_name)?;
+                        match &parent_typ.typ {
+                            Type::TraitType => (),
+                            t => {
+                                return Err(SemanticError::only_trait_can_be_super_type(
+                                    &c.location,
+                                    t,
+                                ))
+                            }
+                        };
+                        parents.push(parent_typ.typ);
+                    }
+                    None => (),
+                }
+                Ok(Type::ClassType(
+                    c.name.clone(),
+                    parents,
+                    vec![],
+                    should_inits,
+                ))
             }
         }
-        let mut parents = vec![];
-        match &c.parent_class_name {
-            Some(p_name) => {
-                let parent_typ = self.get_type(&c.location, p_name)?;
-                match &parent_typ.typ {
-                    Type::TraitType => (),
-                    t => return Err(SemanticError::only_trait_can_be_super_type(&c.location, t)),
-                };
-                parents.push(parent_typ.typ);
-            }
-            None => (),
-        }
-        Ok(Type::ClassType(
-            c.name.clone(),
-            parents,
-            vec![],
-            should_inits,
-        ))
     }
 }
 
@@ -364,16 +329,8 @@ pub enum Type {
     TraitType,
     // name, parents, type parameters, uninitialized fields
     ClassType(String, Vec<Type>, Vec<Type>, Vec<String>),
-    // name, type parameters
-    GenericType(String, Vec<Type>),
     FunctionType(Vec<Type>, Box<Type>),
     FreeVar(usize),
-}
-
-impl Type {
-    fn generic_type<T: ToString>(name: T, generics: Vec<Type>) -> Type {
-        Type::GenericType(name.to_string(), generics)
-    }
 }
 
 impl Type {
@@ -388,14 +345,6 @@ impl Type {
                     }
                 }
                 self.occurs(*t2)
-            }
-            GenericType(_, ts) => {
-                for t in ts {
-                    if self.occurs(t) {
-                        return true;
-                    }
-                }
-                false
             }
             ClassType(_, _, type_parameters, _) => {
                 for t in type_parameters {
@@ -420,21 +369,6 @@ impl std::fmt::Display for Type {
             F64 => write!(f, "f64"),
             Bool => write!(f, "bool"),
             String => write!(f, "string"),
-            GenericType(name, generics) => {
-                write!(f, "{}", name)?;
-                if generics.len() > 0 {
-                    write!(f, "[")?;
-                    for (i, g) in generics.iter().enumerate() {
-                        if i == generics.len() - 1 {
-                            write!(f, "{}", g)?;
-                        } else {
-                            write!(f, "{}, ", g)?;
-                        }
-                    }
-                    write!(f, "]")?;
-                }
-                write!(f, "")
-            }
             ClassType(name, _, type_parameters, _) => {
                 write!(f, "{}", name)?;
                 if type_parameters.len() > 0 {
