@@ -188,34 +188,6 @@ impl TypeEnv {
 impl TypeEnv {
     pub fn new() -> TypeEnv {
         let mut types = HashMap::new();
-        types.insert(
-            "int".to_string(),
-            TypeInfo::new(&Location::none(), Type::Int),
-        );
-        types.insert(
-            "string".to_string(),
-            TypeInfo::new(&Location::none(), Type::String),
-        );
-        types.insert(
-            "int".to_string(),
-            TypeInfo::new(&Location::none(), Type::Int),
-        );
-        types.insert(
-            "void".to_string(),
-            TypeInfo::new(&Location::none(), Type::Void),
-        );
-        types.insert(
-            "f64".to_string(),
-            TypeInfo::new(&Location::none(), Type::F64),
-        );
-        types.insert(
-            "bool".to_string(),
-            TypeInfo::new(&Location::none(), Type::Bool),
-        );
-        types.insert(
-            "string".to_string(),
-            TypeInfo::new(&Location::none(), Type::String),
-        );
         // FIXME: Get list type should with free variable type?
         types.insert(
             "List".to_string(),
@@ -263,36 +235,50 @@ impl TypeEnv {
         ))
     }
     pub fn new_class(&self, c: &Class) -> Result<Type> {
-        let mut should_inits = vec![];
-        for member in &c.members {
-            match member {
-                ClassMember::Field(field) => match &field.expr {
-                    None => {
-                        should_inits.push(field.name.clone());
+        match c.name.as_str() {
+            "void" => Ok(Type::Void),
+            "int" => Ok(Type::Int),
+            "f64" => Ok(Type::F64),
+            "bool" => Ok(Type::Bool),
+            "string" => Ok(Type::String),
+            _ => {
+                let mut should_inits = vec![];
+                for member in &c.members {
+                    match member {
+                        ClassMember::Field(field) => match &field.expr {
+                            None => {
+                                should_inits.push(field.name.clone());
+                            }
+                            _ => (),
+                        },
+                        _ => (),
                     }
-                    _ => (),
-                },
-                _ => (),
+                }
+                let mut parents = vec![];
+                match &c.parent_class_name {
+                    Some(p_name) => {
+                        let parent_typ = self.get_type(&c.location, p_name)?;
+                        match &parent_typ.typ {
+                            Type::TraitType => (),
+                            t => {
+                                return Err(SemanticError::only_trait_can_be_super_type(
+                                    &c.location,
+                                    t,
+                                ))
+                            }
+                        };
+                        parents.push(parent_typ.typ);
+                    }
+                    None => (),
+                }
+                Ok(Type::ClassType(
+                    c.name.clone(),
+                    parents,
+                    vec![],
+                    should_inits,
+                ))
             }
         }
-        let mut parents = vec![];
-        match &c.parent_class_name {
-            Some(p_name) => {
-                let parent_typ = self.get_type(&c.location, p_name)?;
-                match &parent_typ.typ {
-                    Type::TraitType => (),
-                    t => return Err(SemanticError::only_trait_can_be_super_type(&c.location, t)),
-                };
-                parents.push(parent_typ.typ);
-            }
-            None => (),
-        }
-        Ok(Type::ClassType(
-            c.name.clone(),
-            parents,
-            vec![],
-            should_inits,
-        ))
     }
 }
 

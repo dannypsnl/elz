@@ -1,2 +1,9 @@
+// builtin types
+class void {}
+class int {}
+class f64 {}
+class bool {}
+class string {}
+
 println(content: string): void;
 
