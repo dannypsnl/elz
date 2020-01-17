@@ -63,11 +63,21 @@ fn simple_class() {
 }
 
 #[test]
-fn class_inherit() {
+fn class_super_type() {
     let program = parse_code("class Foo<:Bar{}");
     assert_eq!(
         program.formatted_elz(DEFAULT_LEVEL),
         "class Foo <: Bar {}
+"
+    );
+}
+
+#[test]
+fn class_multiple_super_types() {
+    let program = parse_code("class Foo<:Bar,Tool{}");
+    assert_eq!(
+        program.formatted_elz(DEFAULT_LEVEL),
+        "class Foo <: Bar, Tool {}
 "
     );
 }

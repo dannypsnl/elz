@@ -61,7 +61,7 @@ impl Trait {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
     pub location: Location,
-    pub parent_class_name: Option<String>,
+    pub parents: Vec<String>,
     pub name: String,
     pub type_parameters: Vec<TypeParameter>,
     pub members: Vec<ClassMember>,
@@ -77,14 +77,14 @@ pub enum ClassMember {
 impl Class {
     pub fn new<T: ToString>(
         location: Location,
-        parent_class_name: Option<String>,
+        parents: Vec<String>,
         name: T,
         type_parameters: Vec<TypeParameter>,
         members: Vec<ClassMember>,
     ) -> Class {
         Class {
             location,
-            parent_class_name,
+            parents,
             name: name.to_string(),
             type_parameters,
             members,

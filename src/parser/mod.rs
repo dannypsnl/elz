@@ -68,11 +68,16 @@ impl Parser {
         let kw_class = self.peek(0)?;
         self.predict_and_consume(vec![TkType::Class])?;
         let class_name = self.parse_identifier()?;
-        let parent_class_name = if self.predict_and_consume(vec![TkType::IsSubTypeOf]).is_ok() {
-            Some(self.parse_access_identifier()?)
-        } else {
-            None
-        };
+        let mut parents = vec![];
+        if self.predict_and_consume(vec![TkType::IsSubTypeOf]).is_ok() {
+            while self.peek(0)?.tk_type() != &TkType::OpenBracket {
+                parents.push(self.parse_identifier()?);
+                if self.predict_and_consume(vec![TkType::Comma]).is_err() {
+                    break;
+                } else {
+                }
+            }
+        }
         let type_parameters = if self.predict(vec![TkType::OpenBracket]).is_ok() {
             self.parse_type_parameters()?
         } else {
@@ -83,7 +88,7 @@ impl Parser {
         self.predict_and_consume(vec![TkType::CloseBrace])?;
         Ok(Class::new(
             kw_class.location().clone(),
-            parent_class_name,
+            parents,
             class_name,
             type_parameters,
             members,

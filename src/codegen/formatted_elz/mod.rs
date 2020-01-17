@@ -117,18 +117,23 @@ impl FormattedElz for Parameter {
     }
 }
 
+impl FormattedElz for String {
+    fn formatted_elz(&self, _level: usize) -> String {
+        self.clone()
+    }
+}
+
 impl FormattedElz for Class {
     fn formatted_elz(&self, level: usize) -> String {
         let mut s = "".to_string();
         s.push_str("class ");
         s.push_str(self.name.as_str());
         s.push_str(" ");
-        s.push_str(
-            self.parent_class_name
-                .as_ref()
-                .map_or_else(|| "".to_string(), |v| format!("<: {} ", v))
-                .as_str(),
-        );
+        if self.parents.len() > 0 {
+            s.push_str("<: ");
+            concat_with_separator(&mut s, &self.parents, ", ", level);
+            s.push_str(" ");
+        }
         s.push_str("{");
         if self.members.len() > 0 {
             s.push_str("\n");

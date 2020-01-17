@@ -234,21 +234,14 @@ impl TypeEnv {
                     }
                 }
                 let mut parents = vec![];
-                match &c.parent_class_name {
-                    Some(p_name) => {
-                        let parent_typ = self.get_type(&c.location, p_name)?;
-                        match &parent_typ.typ {
-                            Type::TraitType => (),
-                            t => {
-                                return Err(SemanticError::only_trait_can_be_super_type(
-                                    &c.location,
-                                    t,
-                                ))
-                            }
-                        };
-                        parents.push(parent_typ.typ);
+                for p_name in &c.parents {
+                    let parent_typ = self.get_type(&c.location, p_name.as_str())?;
+                    match &parent_typ.typ {
+                        Type::TraitType => parents.push(parent_typ.typ),
+                        t => {
+                            return Err(SemanticError::only_trait_can_be_super_type(&c.location, t))
+                        }
                     }
-                    None => (),
                 }
                 Ok(Type::ClassType(
                     c.name.clone(),

@@ -193,7 +193,7 @@ fn parse_class() {
         class,
         Class::new(
             Location::from(1, 0),
-            None,
+            vec![],
             "Car",
             vec![],
             vec![
@@ -233,7 +233,7 @@ fn parse_class_inherit() {
         class,
         Class::new(
             Location::from(1, 0),
-            Some("Bar".to_string()),
+            vec!["Bar".to_string()],
             "Foo",
             vec![],
             vec![],
@@ -251,7 +251,7 @@ fn parse_class_with_type_parameters() {
         class,
         Class::new(
             Location::from(1, 0),
-            None,
+            vec![],
             "Foo",
             vec![TypeParameter::new("T", vec![])],
             vec![],
