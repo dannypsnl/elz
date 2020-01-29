@@ -21,8 +21,8 @@ impl SemanticChecker {
 impl SemanticChecker {
     pub fn check_program(&mut self, ast: &Vec<TopAst>) -> Result<()> {
         for top in ast {
-            use TopAst::*;
-            match top {
+            use TopAstVariant::*;
+            match &top.ast {
                 Class(c) => {
                     let typ = self.type_env.new_class(c)?;
                     self.type_env.add_type(&c.location, &c.name, typ)?;
@@ -50,8 +50,8 @@ impl SemanticChecker {
             }
         }
         for top in ast {
-            use TopAst::*;
-            match top {
+            use TopAstVariant::*;
+            match &top.ast {
                 Variable(v) => {
                     self.type_env
                         .add_variable(&v.location, &v.name, self.type_env.from(&v.typ)?)?
@@ -67,8 +67,8 @@ impl SemanticChecker {
             }
         }
         for top in ast {
-            use TopAst::*;
-            match top {
+            use TopAstVariant::*;
+            match &top.ast {
                 Variable(v) => {
                     let typ = self.type_env.type_of_expr(&v.expr)?;
                     // show where error happened
