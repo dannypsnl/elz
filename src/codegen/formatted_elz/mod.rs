@@ -11,11 +11,12 @@ impl FormattedElz for FormatTopAstList {
     fn formatted_elz(&self, level: usize) -> String {
         let mut s = String::new();
         for ast in &self.0 {
-            match ast {
-                TopAst::Variable(v) => s.push_str(v.formatted_elz(level).as_str()),
-                TopAst::Function(f) => s.push_str(f.formatted_elz(level).as_str()),
-                TopAst::Class(c) => s.push_str(c.formatted_elz(level).as_str()),
-                TopAst::Trait(t) => s.push_str(t.formatted_elz(level).as_str()),
+            use TopAstVariant::*;
+            match &ast.ast {
+                Variable(v) => s.push_str(v.formatted_elz(level).as_str()),
+                Function(f) => s.push_str(f.formatted_elz(level).as_str()),
+                Class(c) => s.push_str(c.formatted_elz(level).as_str()),
+                Trait(t) => s.push_str(t.formatted_elz(level).as_str()),
             }
             s.push_str("\n");
         }

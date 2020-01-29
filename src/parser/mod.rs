@@ -29,35 +29,52 @@ impl Parser {
     pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<TopAst>> {
         let mut program = vec![];
         while self.peek(0)?.tk_type() != &end_token_type {
-            let tok = self.peek(0)?;
-            match tok.tk_type() {
-                TkType::Identifier => {
-                    // found `<identifier> :`
-                    if self
-                        .predict(vec![TkType::Identifier, TkType::Colon])
-                        .is_ok()
-                    {
-                        let v = self.parse_variable()?;
-                        self.predict_and_consume(vec![TkType::Semicolon])?;
-                        program.push(TopAst::Variable(v));
-                    } else {
-                        // else we just seems it as a function to parse
-                        let f = self.parse_function()?;
-                        program.push(TopAst::Function(f));
-                    }
-                }
-                TkType::Class => {
-                    let c = self.parse_class()?;
-                    program.push(TopAst::Class(c));
-                }
-                TkType::Trait => {
-                    let t = self.parse_trait()?;
-                    program.push(TopAst::Trait(t));
-                }
-                _ => self.predict_one_of(vec![TkType::Identifier, TkType::Class, TkType::Trait])?,
-            }
+            let tag = self.parse_tag()?;
+            let ast = self.parse_top_ast()?;
+            program.push(TopAst::new(tag, ast));
         }
         Ok(program)
+    }
+    pub fn parse_tag(&mut self) -> Result<Option<Tag>> {
+        if self.predict_and_consume(vec![TkType::AtSign]).is_ok() {
+            let tag_name = self.parse_identifier()?;
+            Ok(Some(Tag::new(tag_name)))
+        } else {
+            Ok(None)
+        }
+    }
+    pub fn parse_top_ast(&mut self) -> Result<TopAstVariant> {
+        let tok = self.peek(0)?;
+        use TopAstVariant::*;
+        match tok.tk_type() {
+            TkType::Identifier => {
+                // found `<identifier> :`
+                if self
+                    .predict(vec![TkType::Identifier, TkType::Colon])
+                    .is_ok()
+                {
+                    let v = self.parse_variable()?;
+                    self.predict_and_consume(vec![TkType::Semicolon])?;
+                    Ok(Variable(v))
+                } else {
+                    // else we just seems it as a function to parse
+                    let f = self.parse_function()?;
+                    Ok(Function(f))
+                }
+            }
+            TkType::Class => {
+                let c = self.parse_class()?;
+                Ok(Class(c))
+            }
+            TkType::Trait => {
+                let t = self.parse_trait()?;
+                Ok(Trait(t))
+            }
+            _ => {
+                self.predict_one_of(vec![TkType::Identifier, TkType::Class, TkType::Trait])?;
+                unreachable!();
+            }
+        }
     }
     /// parse_class:
     ///

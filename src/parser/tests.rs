@@ -258,3 +258,12 @@ fn parse_class_with_type_parameters() {
         )
     )
 }
+
+#[test]
+fn parse_tag() {
+    let code = "@builtin";
+
+    let mut parser = Parser::new("", code);
+    let tag = parser.parse_tag().unwrap().unwrap();
+    assert_eq!(tag, Tag::new("builtin"))
+}

@@ -3,7 +3,32 @@ use crate::lexer::Location;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum TopAst {
+pub struct Tag {
+    pub name: String,
+}
+
+impl Tag {
+    pub fn new<T: ToString>(name: T) -> Tag {
+        Tag {
+            name: name.to_string(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct TopAst {
+    pub tag: Option<Tag>,
+    pub ast: TopAstVariant,
+}
+
+impl TopAst {
+    pub fn new(tag: Option<Tag>, ast: TopAstVariant) -> TopAst {
+        TopAst { tag, ast }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum TopAstVariant {
     Function(Function),
     Variable(Variable),
     Class(Class),

@@ -3,7 +3,7 @@ use super::*;
 
 #[test]
 fn test_symbols() {
-    let code = "+ - * / , = ( ) [ ] { } : :: ; . <:";
+    let code = "+ - * / , = ( ) [ ] { } : :: ; . <: @";
 
     let tokens = lex("", code);
     let tk_types: Vec<_> = tokens.iter().map(|tok| tok.tk_type()).collect();
@@ -28,6 +28,7 @@ fn test_symbols() {
             &Semicolon,
             &Dot,
             &IsSubTypeOf,
+            &AtSign,
             &EOF,
         ]
     )

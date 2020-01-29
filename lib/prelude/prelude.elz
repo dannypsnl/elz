@@ -1,10 +1,18 @@
 // builtin types
+@builtin
 class void {}
+@builtin
 class int {}
+@builtin
 class f64 {}
+@builtin
 class bool {}
+@builtin
 class string {}
+@builtin
 class List[T] {}
 
+// Builtin function would skip code generation
+@builtin
 println(content: string): void;
 

@@ -61,6 +61,8 @@ pub enum TkType {
     Dot,
     #[strum(serialize = "<:")]
     IsSubTypeOf,
+    #[strum(serialize = "@")]
+    AtSign,
     // ignored
     #[strum(serialize = "<comment>")]
     Comment,
@@ -294,6 +296,11 @@ fn whitespace(lexer: &mut Lexer) -> State {
             } else {
                 unimplemented!("less than operator");
             }
+            State::Fn(whitespace)
+        }
+        Some('@') => {
+            lexer.next();
+            lexer.emit(TkType::AtSign);
             State::Fn(whitespace)
         }
         Some(':') => {

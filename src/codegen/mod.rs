@@ -1,8 +1,10 @@
 use crate::ast::*;
+use crate::codegen::tag::CodegenTag;
 
 pub mod formatted_elz;
 pub mod ir;
 pub mod llvm;
+mod tag;
 
 pub struct CodeGenerator {}
 
@@ -14,26 +16,23 @@ impl CodeGenerator {
     pub fn generate_module(&self, asts: &Vec<TopAst>) -> ir::Module {
         let mut module = ir::Module::new();
         for top in asts {
-            match top {
-                TopAst::Function(f) => {
+            use TopAstVariant::*;
+            match &top.ast {
+                Function(f) => {
                     module.remember_function(f);
                 }
-                TopAst::Variable(v) => {
+                Variable(v) => {
                     module.remember_variable(v);
                 }
-                TopAst::Class(_) => {}
-                TopAst::Trait(_) => unimplemented!(),
+                Class(_) => {}
+                Trait(_) => unimplemented!(),
             }
         }
         for top in asts {
-            match top {
-                TopAst::Function(f) => {
-                    // FIXME: provide a tag, e.g.
-                    // ```
-                    // @Codegen(Omit)
-                    // println(content: string): void;
-                    // ```
-                    if f.name.as_str() == "println" {
+            use TopAstVariant::*;
+            match &top.ast {
+                Function(f) => {
+                    if top.tag.is_builtin() {
                         continue;
                     }
                     let body = match &f.body {
@@ -48,12 +47,12 @@ impl CodeGenerator {
                     );
                     module.push_function(func);
                 }
-                TopAst::Variable(v) => {
+                Variable(v) => {
                     let var =
                         ir::Variable::new(v.name.clone(), ir::Expr::from_ast(&v.expr, &module));
                     module.push_variable(var);
                 }
-                TopAst::Class(c) => {
+                Class(c) => {
                     match c.name.as_str() {
                         // FIXME: provide a tag, e.g.
                         // ```
@@ -102,7 +101,7 @@ impl CodeGenerator {
                         }
                     }
                 }
-                TopAst::Trait(_) => unimplemented!(),
+                Trait(_) => unimplemented!(),
             }
         }
         module
