@@ -29,8 +29,8 @@ impl Parser {
     pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<TopAst>> {
         let mut program = vec![];
         while self.peek(0)?.tk_type() != &end_token_type {
-            let ast = self.parse_top_ast()?;
             let tag = self.parse_tag()?;
+            let ast = self.parse_top_ast()?;
             program.push(TopAst::new(tag, ast));
         }
         Ok(program)
