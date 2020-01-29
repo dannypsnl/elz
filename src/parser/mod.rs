@@ -29,11 +29,19 @@ impl Parser {
     pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<TopAst>> {
         let mut program = vec![];
         while self.peek(0)?.tk_type() != &end_token_type {
-            let ast =  self.parse_top_ast()?;
-            // TODO: parse tag
-            program.push(TopAst::new(None,  ast));
+            let ast = self.parse_top_ast()?;
+            let tag = self.parse_tag()?;
+            program.push(TopAst::new(tag, ast));
         }
         Ok(program)
+    }
+    pub fn parse_tag(&mut self) -> Result<Option<Tag>> {
+        if self.predict_and_consume(vec![TkType::AtSign]).is_ok() {
+            let tag_name = self.parse_identifier()?;
+            Ok(Some(Tag::new(tag_name)))
+        } else {
+            Ok(None)
+        }
     }
     pub fn parse_top_ast(&mut self) -> Result<TopAstVariant> {
         let tok = self.peek(0)?;
@@ -47,7 +55,7 @@ impl Parser {
                 {
                     let v = self.parse_variable()?;
                     self.predict_and_consume(vec![TkType::Semicolon])?;
-                   Ok(Variable(v))
+                    Ok(Variable(v))
                 } else {
                     // else we just seems it as a function to parse
                     let f = self.parse_function()?;

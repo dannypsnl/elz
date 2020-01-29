@@ -13,10 +13,10 @@ impl FormattedElz for FormatTopAstList {
         for ast in &self.0 {
             use TopAstVariant::*;
             match &ast.ast {
-               Variable(v) => s.push_str(v.formatted_elz(level).as_str()),
-               Function(f) => s.push_str(f.formatted_elz(level).as_str()),
-               Class(c) => s.push_str(c.formatted_elz(level).as_str()),
-               Trait(t) => s.push_str(t.formatted_elz(level).as_str()),
+                Variable(v) => s.push_str(v.formatted_elz(level).as_str()),
+                Function(f) => s.push_str(f.formatted_elz(level).as_str()),
+                Class(c) => s.push_str(c.formatted_elz(level).as_str()),
+                Trait(t) => s.push_str(t.formatted_elz(level).as_str()),
             }
             s.push_str("\n");
         }

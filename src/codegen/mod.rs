@@ -28,7 +28,7 @@ impl CodeGenerator {
         }
         for top in asts {
             use TopAstVariant::*;
-            match  &top.ast {
+            match &top.ast {
                 Function(f) => {
                     // FIXME: provide a tag, e.g.
                     // ```
