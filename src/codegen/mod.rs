@@ -1,8 +1,10 @@
 use crate::ast::*;
+use crate::codegen::tag::CodegenTag;
 
 pub mod formatted_elz;
 pub mod ir;
 pub mod llvm;
+mod tag;
 
 pub struct CodeGenerator {}
 
@@ -30,12 +32,7 @@ impl CodeGenerator {
             use TopAstVariant::*;
             match &top.ast {
                 Function(f) => {
-                    // FIXME: provide a tag, e.g.
-                    // ```
-                    // @Codegen(Omit)
-                    // println(content: string): void;
-                    // ```
-                    if f.name.as_str() == "println" {
+                    if top.tag.is_builtin() {
                         continue;
                     }
                     let body = match &f.body {

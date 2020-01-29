@@ -3,6 +3,7 @@ use super::error::SemanticError;
 use crate::ast::*;
 use crate::ast::{Function, ParsedType};
 use crate::lexer::Location;
+use crate::semantic::tag::SemanticTag;
 use std::collections::HashMap;
 
 pub struct TypeEnv {
@@ -208,49 +209,49 @@ impl TypeEnv {
             self.from(&f.ret_typ)?.into(),
         ))
     }
-    pub fn new_class(&self, c: &Class) -> Result<Type> {
-        match c.name.as_str() {
-            // FIXME: provide a tag, e.g.
-            // ```
-            // @Codegen(Omit)
-            // class int {}
-            // ```
-            "void" => Ok(Type::Void),
-            "int" => Ok(Type::Int),
-            "f64" => Ok(Type::F64),
-            "bool" => Ok(Type::Bool),
-            "string" => Ok(Type::String),
-            _ => {
-                let mut should_inits = vec![];
-                for member in &c.members {
-                    match member {
-                        ClassMember::Field(field) => match &field.expr {
-                            None => {
-                                should_inits.push(field.name.clone());
-                            }
-                            _ => (),
-                        },
-                        _ => (),
+    pub fn new_class(&self, tag: &Option<Tag>, c: &Class) -> Result<Type> {
+        if tag.is_builtin() {
+            match c.name.as_str() {
+                "void" => Ok(Type::Void),
+                "int" => Ok(Type::Int),
+                "f64" => Ok(Type::F64),
+                "bool" => Ok(Type::Bool),
+                "string" => Ok(Type::String),
+                "List" => self.new_normal_class(c),
+                typ_name => unreachable!("unknown builtin type: {}", typ_name),
+            }
+        } else {
+            self.new_normal_class(c)
+        }
+    }
+
+    fn new_normal_class(&self, c: &Class) -> Result<Type> {
+        let mut should_inits = vec![];
+        for member in &c.members {
+            match member {
+                ClassMember::Field(field) => match &field.expr {
+                    None => {
+                        should_inits.push(field.name.clone());
                     }
-                }
-                let mut parents = vec![];
-                for p_name in &c.parents {
-                    let parent_typ = self.get_type(&c.location, p_name.as_str())?;
-                    match &parent_typ.typ {
-                        Type::TraitType => parents.push(parent_typ.typ),
-                        t => {
-                            return Err(SemanticError::only_trait_can_be_super_type(&c.location, t))
-                        }
-                    }
-                }
-                Ok(Type::ClassType(
-                    c.name.clone(),
-                    parents,
-                    vec![],
-                    should_inits,
-                ))
+                    _ => (),
+                },
+                _ => (),
             }
         }
+        let mut parents = vec![];
+        for p_name in &c.parents {
+            let parent_typ = self.get_type(&c.location, p_name.as_str())?;
+            match &parent_typ.typ {
+                Type::TraitType => parents.push(parent_typ.typ),
+                t => return Err(SemanticError::only_trait_can_be_super_type(&c.location, t)),
+            }
+        }
+        Ok(Type::ClassType(
+            c.name.clone(),
+            parents,
+            vec![],
+            should_inits,
+        ))
     }
 }
 

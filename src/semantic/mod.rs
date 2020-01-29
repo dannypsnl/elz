@@ -1,10 +1,12 @@
 use crate::ast::*;
-mod error;
-mod types;
 use crate::lexer::Location;
 use crate::semantic::types::TypeEnv;
 use error::Result;
 use types::Type;
+
+mod error;
+mod tag;
+mod types;
 
 pub struct SemanticChecker {
     type_env: TypeEnv,
@@ -24,7 +26,7 @@ impl SemanticChecker {
             use TopAstVariant::*;
             match &top.ast {
                 Class(c) => {
-                    let typ = self.type_env.new_class(c)?;
+                    let typ = self.type_env.new_class(&top.tag, c)?;
                     self.type_env.add_type(&c.location, &c.name, typ)?;
                     for member in &c.members {
                         match member {
