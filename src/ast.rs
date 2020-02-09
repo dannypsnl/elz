@@ -144,27 +144,35 @@ impl Field {
 #[derive(Clone, Debug, PartialEq)]
 pub enum ParsedType {
     TypeName(String),
-    GenericType(String, Vec<ParsedType>),
+    GenericType {
+        name: String,
+        type_parameters: Vec<ParsedType>,
+    },
 }
 
 impl ParsedType {
     pub fn type_name<T: ToString>(name: T) -> ParsedType {
         ParsedType::TypeName(name.to_string())
     }
-    pub fn generic_type<T: ToString>(name: T, generics: Vec<ParsedType>) -> ParsedType {
-        ParsedType::GenericType(name.to_string(), generics)
+    pub fn generic_type<T: ToString>(name: T, type_parameters: Vec<ParsedType>) -> ParsedType {
+        ParsedType::GenericType {
+            name: name.to_string(),
+            type_parameters,
+        }
     }
 
     pub fn name(&self) -> String {
         match self {
             ParsedType::TypeName(name) => name.clone(),
-            ParsedType::GenericType(name, _) => name.clone(),
+            ParsedType::GenericType { name, .. } => name.clone(),
         }
     }
     pub fn generics(&self) -> Vec<ParsedType> {
         match self {
             ParsedType::TypeName(_) => vec![],
-            ParsedType::GenericType(_, lst) => lst.clone(),
+            ParsedType::GenericType {
+                type_parameters, ..
+            } => type_parameters.clone(),
         }
     }
 }

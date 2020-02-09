@@ -318,7 +318,10 @@ impl FormattedElz for ParsedType {
         use ParsedType::*;
         match self {
             TypeName(name) => name.clone(),
-            GenericType(name, type_parameters) => {
+            GenericType {
+                name,
+                type_parameters,
+            } => {
                 let mut s = String::new();
                 s.push_str(name.as_str());
                 s.push_str("[");

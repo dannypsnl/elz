@@ -68,7 +68,7 @@ impl TypeEnv {
             DotAccess(from, access) => {
                 let typ = self.type_of_expr(from)?;
                 match typ {
-                    Type::ClassType(name, ..) => {
+                    Type::ClassType { name, .. } => {
                         let transform_name = format!("{}::{}", name, access);
                         self.type_of_expr(&Expr::identifier(location.clone(), transform_name))
                     }
@@ -87,7 +87,11 @@ impl TypeEnv {
                 }
                 let type_info = self.get_type(location, name)?;
                 match &type_info.typ {
-                    Type::ClassType(.., should_inits) => {
+                    Type::ClassType {
+                        uninitialized_fields,
+                        ..
+                    } => {
+                        let should_inits = uninitialized_fields;
                         let mut missing_init_fields = vec![];
                         for should_init in should_inits {
                             if !field_inits.contains_key(should_init) {
@@ -124,8 +128,17 @@ impl TypeEnv {
                 }
             }
             (
-                ClassType(name, _, type_parameters, _),
-                ClassType(name2, parents, type_parameters2, _),
+                ClassType {
+                    name,
+                    type_parameters,
+                    ..
+                },
+                ClassType {
+                    name: name2,
+                    parents,
+                    type_parameters: type_parameters2,
+                    ..
+                },
             ) => {
                 if name != name2 {
                     for parent in parents {
@@ -226,12 +239,12 @@ impl TypeEnv {
     }
 
     fn new_normal_class(&self, c: &Class) -> Result<Type> {
-        let mut should_inits = vec![];
+        let mut uninitialized_fields = vec![];
         for member in &c.members {
             match member {
                 ClassMember::Field(field) => match &field.expr {
                     None => {
-                        should_inits.push(field.name.clone());
+                        uninitialized_fields.push(field.name.clone());
                     }
                     _ => (),
                 },
@@ -246,12 +259,12 @@ impl TypeEnv {
                 t => return Err(SemanticError::only_trait_can_be_super_type(&c.location, t)),
             }
         }
-        Ok(Type::ClassType(
-            c.name.clone(),
+        Ok(Type::ClassType {
+            name: c.name.clone(),
             parents,
-            vec![],
-            should_inits,
-        ))
+            type_parameters: vec![],
+            uninitialized_fields,
+        })
     }
 }
 
@@ -321,8 +334,12 @@ pub enum Type {
     String,
     // TODO: complete definition
     TraitType,
-    // name, parents, type parameters, uninitialized fields
-    ClassType(String, Vec<Type>, Vec<Type>, Vec<String>),
+    ClassType {
+        name: String,
+        parents: Vec<Type>,
+        type_parameters: Vec<Type>,
+        uninitialized_fields: Vec<String>,
+    },
     FunctionType(Vec<Type>, Box<Type>),
     FreeVar(usize),
 }
@@ -340,7 +357,9 @@ impl Type {
                 }
                 self.occurs(*t2)
             }
-            ClassType(_, _, type_parameters, _) => {
+            ClassType {
+                type_parameters, ..
+            } => {
                 for t in type_parameters {
                     if self.occurs(t) {
                         return true;
@@ -363,7 +382,11 @@ impl std::fmt::Display for Type {
             F64 => write!(f, "f64"),
             Bool => write!(f, "bool"),
             String => write!(f, "string"),
-            ClassType(name, _, type_parameters, _) => {
+            ClassType {
+                name,
+                type_parameters,
+                ..
+            } => {
                 write!(f, "{}", name)?;
                 if type_parameters.len() > 0 {
                     write!(f, "[")?;
