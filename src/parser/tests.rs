@@ -133,7 +133,7 @@ fn parse_statement_if_block() {
                 (Expr::bool(Location::from(1, 3), true), Block::new()),
                 (Expr::bool(Location::from(1, 19), false), Block::new())
             ],
-            Some(Block::new())
+            Block::new()
         )
     )
 }

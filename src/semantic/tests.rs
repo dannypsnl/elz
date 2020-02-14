@@ -230,6 +230,32 @@ fn only_trait_can_be_super_type() {
     assert_eq!(result.is_err(), true);
 }
 
+#[test]
+fn if_else_block_must_return_same_type_as_return_type() {
+    let code = "
+    foo(): int {
+      if true {
+        return 1;
+      } else {
+        return false;
+      }
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
+#[test]
+fn condition_must_be_a_bool() {
+    let code = "
+    foo(): void {
+      if 1 {}
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let mut program = Parser::parse_program("", code).unwrap();
