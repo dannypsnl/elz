@@ -256,6 +256,18 @@ fn condition_must_be_a_bool() {
     assert_eq!(result.is_err(), true);
 }
 
+#[test]
+fn dead_code_after_return_statement_is_invalid() {
+    let code = "
+    foo(): void {
+      return;
+      x: int = 1;
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let mut program = Parser::parse_program("", code).unwrap();

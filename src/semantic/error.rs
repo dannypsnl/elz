@@ -31,6 +31,8 @@ enum SemanticErrorVariant {
     CannotUseClassConstructionOutOfClass(),
     #[error("only trait can be super type, but got: {}", .got_type)]
     OnlyTraitCanBeSuperType { got_type: Type },
+    #[error("dead code after return statement")]
+    DeadCodeAfterReturnStatement,
 }
 
 impl SemanticError {
@@ -89,6 +91,9 @@ impl SemanticError {
                 got_type: got_type.clone(),
             },
         )
+    }
+    pub fn dead_code_after_return_statement(location: &Location) -> SemanticError {
+        SemanticError::new(location, SemanticErrorVariant::DeadCodeAfterReturnStatement)
     }
 }
 

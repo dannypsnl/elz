@@ -1,5 +1,6 @@
 use crate::ast::*;
 use crate::lexer::Location;
+use crate::semantic::error::SemanticError;
 use crate::semantic::types::TypeEnv;
 use error::Result;
 use types::Type;
@@ -142,7 +143,7 @@ impl SemanticChecker {
     }
 
     fn check_block(&self, type_env: &mut TypeEnv, b: &Block, return_type: &Type) -> Result<()> {
-        for stmt in &b.statements {
+        for (i, stmt) in b.statements.iter().enumerate() {
             use StatementVariant::*;
             let location = &stmt.location;
             match &stmt.value {
@@ -151,6 +152,9 @@ impl SemanticChecker {
                         Some(e) => type_env.type_of_expr(e)?,
                         None => Type::Void,
                     };
+                    if i != b.statements.len() - 1 {
+                        return Err(SemanticError::dead_code_after_return_statement(location));
+                    }
                     type_env.unify(location, return_type, &typ)?
                 }
                 Variable(v) => {
