@@ -257,6 +257,20 @@ fn condition_must_be_a_bool() {
 }
 
 #[test]
+fn missing_return_statement_is_invalid() {
+    let code = "
+    foo(): int {
+      if true {
+        return 1;
+      } else {
+      }
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
+#[test]
 fn dead_code_after_return_statement_is_invalid() {
     let code = "
     foo(): void {

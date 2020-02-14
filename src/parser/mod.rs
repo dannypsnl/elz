@@ -377,7 +377,7 @@ impl Parser {
     /// }
     pub fn parse_block(&mut self) -> Result<Block> {
         self.predict_and_consume(vec![TkType::OpenBrace])?;
-        let mut block = Block::new();
+        let mut block = Block::new(self.peek(0)?.location());
         while self.peek(0)?.tk_type() != &TkType::CloseBrace {
             let stmt = self.parse_statement()?;
             block.append(stmt);
@@ -435,7 +435,11 @@ impl Parser {
                         ));
                     }
                 }
-                Ok(Statement::if_block(tok.location(), clauses, Block::new()))
+                Ok(Statement::if_block(
+                    tok.location(),
+                    clauses,
+                    Block::new(tok.location()),
+                ))
             }
             _ => unimplemented!("{}", tok),
         }
