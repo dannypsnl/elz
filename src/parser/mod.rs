@@ -376,8 +376,9 @@ impl Parser {
     ///   <statement>*
     /// }
     pub fn parse_block(&mut self) -> Result<Block> {
+        let location = self.peek(0)?.location();
         self.predict_and_consume(vec![TkType::OpenBrace])?;
-        let mut block = Block::new();
+        let mut block = Block::new(location);
         while self.peek(0)?.tk_type() != &TkType::CloseBrace {
             let stmt = self.parse_statement()?;
             block.append(stmt);
@@ -387,13 +388,16 @@ impl Parser {
     }
     pub fn parse_statement(&mut self) -> Result<Statement> {
         let tok = self.peek(0)?;
-        let stmt = match tok.tk_type() {
+        match tok.tk_type() {
             TkType::Identifier => {
                 if self.peek(1)?.tk_type() == &TkType::Colon {
-                    Ok(Statement::variable(tok.location(), self.parse_variable()?))
+                    let var = self.parse_variable()?;
+                    self.predict_and_consume(vec![TkType::Semicolon])?;
+                    Ok(Statement::variable(tok.location(), var))
                 } else if vec![TkType::OpenParen, TkType::Dot].contains(self.peek(1)?.tk_type()) {
                     let unary = self.parse_unary()?;
                     let expr = self.parse_primary(unary)?;
+                    self.predict_and_consume(vec![TkType::Semicolon])?;
                     Ok(Statement::expression(tok.location(), expr))
                 } else {
                     Err(ParseError::not_expected_token(
@@ -410,14 +414,13 @@ impl Parser {
                 } else {
                     Some(self.parse_expression(None, None)?)
                 };
+                self.predict_and_consume(vec![TkType::Semicolon])?;
                 Ok(Statement::return_stmt(tok.location(), expr))
             }
             TkType::If => {
                 self.consume()?;
                 let mut clauses = vec![];
-                let condition = self.parse_expression(None, None)?;
-                let first_if_block = self.parse_block()?;
-                clauses.push((condition, first_if_block));
+                clauses.push((self.parse_expression(None, None)?, self.parse_block()?));
                 while self.predict_and_consume(vec![TkType::Else]).is_ok() {
                     // and remember that else block was optional, so failed at this condition was fine
                     if self.predict_and_consume(vec![TkType::If]).is_ok() {
@@ -429,16 +432,18 @@ impl Parser {
                         return Ok(Statement::if_block(
                             tok.location(),
                             clauses,
-                            Some(self.parse_block()?),
+                            self.parse_block()?,
                         ));
                     }
                 }
-                Ok(Statement::if_block(tok.location(), clauses, None))
+                Ok(Statement::if_block(
+                    tok.location(),
+                    clauses,
+                    Block::new(tok.location()),
+                ))
             }
             _ => unimplemented!("{}", tok),
-        };
-        self.predict_and_consume(vec![TkType::Semicolon])?;
-        stmt
+        }
     }
 }
 

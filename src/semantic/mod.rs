@@ -129,32 +129,7 @@ impl SemanticChecker {
                 let e_type = type_env.type_of_expr(e)?;
                 type_env.unify(location, &return_type, &e_type)
             }
-            Some(Body::Block(b)) => {
-                for stmt in &b.statements {
-                    use StatementVariant::*;
-                    match &stmt.value {
-                        Return(e) => {
-                            let typ = match e {
-                                Some(e) => type_env.type_of_expr(e)?,
-                                None => Type::Void,
-                            };
-                            type_env.unify(&stmt.location, &return_type, &typ)?
-                        }
-                        Variable(v) => {
-                            let var_def_typ = type_env.from(&v.typ)?;
-                            let var_typ = type_env.type_of_expr(&v.expr)?;
-                            type_env.unify(&stmt.location, &var_def_typ, &var_typ)?;
-                            type_env.add_variable(&stmt.location, &v.name, var_def_typ)?
-                        }
-                        Expression(func_call) => {
-                            let func_call_ret_typ = type_env.type_of_expr(func_call)?;
-                            type_env.unify(&stmt.location, &Type::Void, &func_call_ret_typ)?;
-                        }
-                        IfBlock { .. } => unimplemented!(),
-                    }
-                }
-                Ok(())
-            }
+            Some(Body::Block(b)) => self.check_block(&mut type_env, b, &return_type),
             None => {
                 // function declaration has no body need to check
                 // e.g.
@@ -164,6 +139,61 @@ impl SemanticChecker {
                 Ok(())
             }
         }
+    }
+
+    fn check_block(&self, type_env: &mut TypeEnv, b: &Block, return_type: &Type) -> Result<()> {
+        use error::SemanticError;
+        let location = &b.location;
+        if b.statements.len() == 0 {
+            if type_env.unify(location, return_type, &Type::Void).is_err() {
+                return Err(SemanticError::dead_code_after_return_statement(location));
+            }
+        } else {
+            for (i, stmt) in b.statements.iter().enumerate() {
+                use StatementVariant::*;
+                let location = &stmt.location;
+                match &stmt.value {
+                    Return(e) => {
+                        let typ = match e {
+                            Some(e) => type_env.type_of_expr(e)?,
+                            None => Type::Void,
+                        };
+                        if i != b.statements.len() - 1 {
+                            return Err(SemanticError::dead_code_after_return_statement(location));
+                        }
+                        type_env.unify(location, return_type, &typ)?;
+                    }
+                    Variable(v) => {
+                        let var_def_typ = type_env.from(&v.typ)?;
+                        let var_typ = type_env.type_of_expr(&v.expr)?;
+                        type_env.unify(location, &var_def_typ, &var_typ)?;
+                        type_env.add_variable(location, &v.name, var_def_typ)?;
+                        if i == b.statements.len() - 1 {
+                            type_env.unify(location, return_type, &Type::Void)?;
+                        }
+                    }
+                    Expression(func_call) => {
+                        let func_call_ret_typ = type_env.type_of_expr(func_call)?;
+                        type_env.unify(location, &Type::Void, &func_call_ret_typ)?;
+                        if i == b.statements.len() - 1 {
+                            type_env.unify(location, return_type, &Type::Void)?;
+                        }
+                    }
+                    IfBlock {
+                        clauses,
+                        else_block,
+                    } => {
+                        for (condition, then_block) in clauses {
+                            let cond_type = type_env.type_of_expr(condition)?;
+                            type_env.unify(location, &Type::Bool, &cond_type)?;
+                            self.check_block(type_env, then_block, return_type)?;
+                        }
+                        self.check_block(type_env, else_block, return_type)?;
+                    }
+                }
+            }
+        }
+        Ok(())
     }
 }
 

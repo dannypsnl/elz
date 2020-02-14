@@ -245,15 +245,19 @@ pub enum Body {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Block {
+    pub location: Location,
     pub statements: Vec<Statement>,
 }
 
 impl Block {
-    pub fn new() -> Block {
-        Block::from(vec![])
+    pub fn new(location: Location) -> Block {
+        Block::from(location, vec![])
     }
-    pub fn from(statements: Vec<Statement>) -> Block {
-        Block { statements }
+    pub fn from(location: Location, statements: Vec<Statement>) -> Block {
+        Block {
+            location,
+            statements,
+        }
     }
     pub fn append(&mut self, stmt: Statement) {
         self.statements.push(stmt);
@@ -303,7 +307,7 @@ impl Statement {
     pub fn if_block(
         location: Location,
         clauses: Vec<(Expr, Block)>,
-        else_block: Option<Block>,
+        else_block: Block,
     ) -> Statement {
         Statement {
             location,
@@ -327,7 +331,7 @@ pub enum StatementVariant {
     /// `if <condition> {} else if <condition> else {}`
     IfBlock {
         clauses: Vec<(Expr, Block)>,
-        else_block: Option<Block>,
+        else_block: Block,
     },
 }
 
