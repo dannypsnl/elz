@@ -18,7 +18,7 @@ fn parse_function_with_block_body() {
             "main",
             vec![],
             ParsedType::type_name("void"),
-            Body::Block(Block::new(Location::from(1, 14)))
+            Body::Block(Block::new(Location::from(1, 13)))
         )
     )
 }
@@ -132,14 +132,14 @@ fn parse_statement_if_block() {
             vec![
                 (
                     Expr::bool(Location::from(1, 3), true),
-                    Block::new(Location::from(1, 9))
+                    Block::new(Location::from(1, 8))
                 ),
                 (
                     Expr::bool(Location::from(1, 19), false),
-                    Block::new(Location::from(1, 26))
+                    Block::new(Location::from(1, 25))
                 )
             ],
-            Block::new(Location::from(1, 34))
+            Block::new(Location::from(1, 33))
         )
     )
 }
