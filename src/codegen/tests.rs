@@ -129,8 +129,7 @@ label0:
 fn gen_code(code: &'static str) -> ir::Module {
     let mut program = crate::parser::Parser::parse_program("", code)
         .map_err(|err| {
-            println!("{}", err);
-            err
+            panic!("{}", err);
         })
         .unwrap();
     let mut prelude = crate::parser::parse_prelude();
