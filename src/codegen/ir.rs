@@ -1,6 +1,7 @@
 use crate::ast;
 use crate::ast::*;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 pub struct Module {
     pub(crate) known_functions: HashMap<String, Type>,
@@ -58,10 +59,41 @@ pub(crate) struct TypeDefinition {
     pub(crate) fields: Vec<Type>,
 }
 
+/// Label represents a location which can be the target of jump instructions
+///
+/// LLVM example: `; <label>:9:`, here `id` is `9`
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct Label {
+    pub(crate) id: u64,
+}
+
+impl Label {
+    pub(crate) fn new(id: u64) -> Label {
+        Label { id }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum Instruction {
     Return(Option<Expr>),
     TempVariable(u64, Expr),
+    Label(Rc<Label>),
+    Branch {
+        cond: Expr,
+        if_true: Rc<Label>,
+        if_false: Rc<Label>,
+    },
+    Goto(Rc<Label>),
+}
+
+impl Instruction {
+    pub(crate) fn is_terminator(&self) -> bool {
+        use Instruction::*;
+        match self {
+            Return(..) | Branch { .. } | Goto(..) => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -87,25 +119,67 @@ impl Body {
         body
     }
     pub(crate) fn generate_instructions(&mut self, stmts: &Vec<Statement>, module: &Module) {
-        self.statements = stmts
-            .iter()
-            .map(|stmt| {
-                use ast::StatementVariant::*;
-                match &stmt.value {
-                    Return(e) => match e {
+        for stmt in stmts {
+            use ast::StatementVariant::*;
+            match &stmt.value {
+                Return(e) => {
+                    let inst = match e {
                         None => Instruction::Return(None),
                         Some(ex) => Instruction::Return(Some(Expr::from_ast(ex, module))),
-                    },
-                    Expression(expr) => {
-                        let instruction =
-                            Instruction::TempVariable(self.counter, Expr::from_ast(expr, module));
-                        self.counter += 1;
-                        instruction
-                    }
-                    st => unimplemented!("for statement: {:#?}", st),
+                    };
+                    self.statements.push(inst)
                 }
-            })
-            .collect();
+                Expression(expr) => {
+                    let instruction = Instruction::TempVariable(
+                        self.get_and_update_count(),
+                        Expr::from_ast(expr, module),
+                    );
+                    self.statements.push(instruction)
+                }
+                IfBlock {
+                    clauses,
+                    else_block,
+                } => {
+                    let leave_label = Rc::new(Label::new(self.get_and_update_count()));
+                    for (cond, then_block) in clauses {
+                        let if_then_label = Rc::new(Label::new(self.get_and_update_count()));
+                        let else_then_label = Rc::new(Label::new(self.get_and_update_count()));
+                        let inst = Instruction::Branch {
+                            cond: Expr::from_ast(cond, module),
+                            if_true: Rc::clone(&if_then_label),
+                            if_false: Rc::clone(&else_then_label),
+                        };
+                        self.statements.push(inst);
+                        // if then
+                        self.statements
+                            .push(Instruction::Label(Rc::clone(&if_then_label)));
+                        self.generate_instructions(&then_block.statements, module);
+                        self.goto(&leave_label);
+                        // else then
+                        self.statements
+                            .push(Instruction::Label(Rc::clone(&else_then_label)));
+                    }
+                    self.generate_instructions(&else_block.statements, module);
+                    self.goto(&leave_label);
+                    self.statements
+                        .push(Instruction::Label(Rc::clone(&leave_label)));
+                }
+                st => unimplemented!("for statement: {:#?}", st),
+            }
+        }
+    }
+    fn get_and_update_count(&mut self) -> u64 {
+        let tmp = self.counter;
+        self.counter += 1;
+        tmp
+    }
+    fn goto(&mut self, label: &Rc<Label>) {
+        if let Some(inst) = self.statements.last() {
+            if inst.is_terminator() {
+                return;
+            }
+        }
+        self.statements.push(Instruction::Goto(Rc::clone(label)));
     }
 }
 

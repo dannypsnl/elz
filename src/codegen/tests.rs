@@ -9,10 +9,11 @@ fn test_codegen_main() {
     let module = gen_code(code);
     assert_eq!(
         module.llvm_represent(),
-        "\
-         @x = global i64 1\n\
-         define void @main() {\n  ret void\n\
-         }\n"
+        "@x = global i64 1
+define void @main() {
+  ret void
+}
+"
     );
 }
 
@@ -22,9 +23,10 @@ fn test_return_value() {
     let module = gen_code(code);
     assert_eq!(
         module.llvm_represent(),
-        "\
-         define i64 @foo() {\n  ret i64 1\n\
-         }\n"
+        "define i64 @foo() {
+  ret i64 1
+}
+"
     );
 }
 
@@ -92,9 +94,45 @@ define void @\"Foo::bar\"(%Foo* %self) {
     )
 }
 
+#[test]
+fn llvm_if_else() {
+    let code = "
+    foo(): void {
+      if true {
+        return;
+      } else if true {
+      } else {
+      }
+    }
+    ";
+    let module = gen_code(code);
+    assert_eq!(
+        module.llvm_represent(),
+        "define void @foo() {
+  br i1 true, label %label1, label %label2
+label1:
+  ret void
+label2:
+  br i1 true, label %label3, label %label4
+label3:
+  br label %label0
+label4:
+  br label %label0
+label0:
+  ret void
+}
+"
+    )
+}
+
 // helpers, must put tests before this line
 fn gen_code(code: &'static str) -> ir::Module {
-    let mut program = crate::parser::Parser::parse_program("", code).unwrap();
+    let mut program = crate::parser::Parser::parse_program("", code)
+        .map_err(|err| {
+            println!("{}", err);
+            err
+        })
+        .unwrap();
     let mut prelude = crate::parser::parse_prelude();
     prelude.append(&mut program);
     let code_generator = CodeGenerator::new();
