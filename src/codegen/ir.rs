@@ -101,18 +101,18 @@ pub(crate) struct Body {
     // helper part
     pub(crate) counter: u64,
     // value part
-    pub(crate) statements: Vec<Instruction>,
+    pub(crate) instructions: Vec<Instruction>,
 }
 
 impl Body {
     pub(crate) fn from_ast(b: &ast::Body, module: &Module) -> Body {
         let mut body = Body {
             counter: 0,
-            statements: vec![],
+            instructions: vec![],
         };
         match b {
             ast::Body::Expr(e) => {
-                body.statements = vec![Instruction::Return(Some(Expr::from_ast(e, module)))];
+                body.instructions = vec![Instruction::Return(Some(Expr::from_ast(e, module)))];
             }
             ast::Body::Block(b) => body.generate_instructions(&b.statements, module),
         };
@@ -127,14 +127,14 @@ impl Body {
                         None => Instruction::Return(None),
                         Some(ex) => Instruction::Return(Some(Expr::from_ast(ex, module))),
                     };
-                    self.statements.push(inst)
+                    self.instructions.push(inst)
                 }
                 Expression(expr) => {
-                    let instruction = Instruction::TempVariable(
+                    let inst = Instruction::TempVariable(
                         self.get_and_update_count(),
                         Expr::from_ast(expr, module),
                     );
-                    self.statements.push(instruction)
+                    self.instructions.push(inst)
                 }
                 IfBlock {
                     clauses,
@@ -149,19 +149,19 @@ impl Body {
                             if_true: Rc::clone(&if_then_label),
                             if_false: Rc::clone(&else_then_label),
                         };
-                        self.statements.push(inst);
+                        self.instructions.push(inst);
                         // if then
-                        self.statements
+                        self.instructions
                             .push(Instruction::Label(Rc::clone(&if_then_label)));
                         self.generate_instructions(&then_block.statements, module);
                         self.goto(&leave_label);
                         // else then
-                        self.statements
+                        self.instructions
                             .push(Instruction::Label(Rc::clone(&else_then_label)));
                     }
                     self.generate_instructions(&else_block.statements, module);
                     self.goto(&leave_label);
-                    self.statements
+                    self.instructions
                         .push(Instruction::Label(Rc::clone(&leave_label)));
                 }
                 st => unimplemented!("for statement: {:#?}", st),
@@ -174,12 +174,12 @@ impl Body {
         tmp
     }
     fn goto(&mut self, label: &Rc<Label>) {
-        if let Some(inst) = self.statements.last() {
+        if let Some(inst) = self.instructions.last() {
             if inst.is_terminator() {
                 return;
             }
         }
-        self.statements.push(Instruction::Goto(Rc::clone(label)));
+        self.instructions.push(Instruction::Goto(Rc::clone(label)));
     }
 }
 

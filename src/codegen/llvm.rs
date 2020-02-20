@@ -82,13 +82,13 @@ impl LLVMValue for ir::Label {
 impl LLVMValue for ir::Body {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
-        for stmt in &self.statements {
-            match stmt {
+        for instruction in &self.instructions {
+            match instruction {
                 ir::Instruction::Label(_) => {
-                    s.push_str(format!("{}\n", stmt.llvm_represent()).as_str());
+                    s.push_str(format!("{}\n", instruction.llvm_represent()).as_str());
                 }
                 _ => {
-                    s.push_str(format!("  {}\n", stmt.llvm_represent()).as_str());
+                    s.push_str(format!("  {}\n", instruction.llvm_represent()).as_str());
                 }
             }
         }
