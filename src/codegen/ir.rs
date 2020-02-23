@@ -60,8 +60,6 @@ pub(crate) struct TypeDefinition {
 }
 
 /// Label represents a location which can be the target of jump instructions
-///
-/// LLVM example: `; <label>:9:`, here `id` is `9`
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Label {
     pub(crate) id: u64,
@@ -98,10 +96,9 @@ impl Instruction {
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Body {
+    pub(crate) instructions: Vec<Instruction>,
     // helper part
     pub(crate) counter: u64,
-    // value part
-    pub(crate) instructions: Vec<Instruction>,
 }
 
 impl Body {
