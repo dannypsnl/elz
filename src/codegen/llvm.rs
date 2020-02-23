@@ -90,7 +90,7 @@ impl LLVMValue for ir::Body {
         let mut s = String::new();
         for instruction in &self.instructions {
             match instruction {
-                ir::Instruction::Label(_) => {
+                ir::Instruction::Label(..) => {
                     s.push_str(format!("{}\n", instruction.llvm_represent()).as_str());
                 }
                 _ => {
