@@ -150,13 +150,17 @@ impl Body {
                         self.instructions
                             .push(Instruction::Label(Rc::clone(&if_then_label)));
                         self.generate_instructions(&then_block.statements, module);
-                        self.goto(&leave_label);
+                        if !self.end_with_terminator() {
+                            self.goto(&leave_label);
+                        }
                         // else then
                         self.instructions
                             .push(Instruction::Label(Rc::clone(&else_then_label)));
                     }
                     self.generate_instructions(&else_block.statements, module);
-                    self.goto(&leave_label);
+                    if !self.end_with_terminator() {
+                        self.goto(&leave_label);
+                    }
                     self.instructions
                         .push(Instruction::Label(Rc::clone(&leave_label)));
                 }
@@ -169,12 +173,13 @@ impl Body {
         self.counter += 1;
         tmp
     }
-    fn goto(&mut self, label: &Rc<Label>) {
-        if let Some(inst) = self.instructions.last() {
-            if inst.is_terminator() {
-                return;
-            }
+    fn end_with_terminator(&self) -> bool {
+        match self.instructions.last() {
+            None => false,
+            Some(inst) => inst.is_terminator(),
         }
+    }
+    fn goto(&mut self, label: &Rc<Label>) {
         self.instructions.push(Instruction::Goto(Rc::clone(label)));
     }
 }
