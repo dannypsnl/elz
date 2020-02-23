@@ -109,7 +109,8 @@ impl Body {
         };
         match b {
             ast::Body::Expr(e) => {
-                body.instructions = vec![Instruction::Return(Some(Expr::from_ast(e, module)))];
+                body.instructions
+                    .push(Instruction::Return(Some(Expr::from_ast(e, module))));
             }
             ast::Body::Block(b) => body.generate_instructions(&b.statements, module),
         };
@@ -127,11 +128,9 @@ impl Body {
                     self.instructions.push(inst)
                 }
                 Expression(expr) => {
-                    let inst = Instruction::TempVariable(
-                        self.get_and_update_count(),
-                        Expr::from_ast(expr, module),
-                    );
-                    self.instructions.push(inst)
+                    let id = self.get_and_update_count();
+                    self.instructions
+                        .push(Instruction::TempVariable(id, Expr::from_ast(expr, module)))
                 }
                 IfBlock {
                     clauses,
