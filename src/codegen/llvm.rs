@@ -68,14 +68,20 @@ impl LLVMValue for ir::Instruction {
                 if_false.llvm_represent(),
             ),
             Goto(block) => format!("br {}", block.llvm_represent()),
-            Label(label) => format!("label{}:", label.id),
+            Label(label) => format!("{}:", label.name()),
         }
+    }
+}
+
+impl ir::Label {
+    fn name(&self) -> String {
+        format!("label{}", self.id)
     }
 }
 
 impl LLVMValue for ir::Label {
     fn llvm_represent(&self) -> String {
-        format!("label %label{}", self.id)
+        format!("label %{}", self.name())
     }
 }
 
