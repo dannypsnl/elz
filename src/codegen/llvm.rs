@@ -57,15 +57,46 @@ impl LLVMValue for ir::Instruction {
                     format!("%{} = {}", counter, e.llvm_represent().as_str())
                 }
             }
+            Branch {
+                cond,
+                if_true,
+                if_false,
+            } => format!(
+                "br {}, {}, {}",
+                cond.llvm_represent(),
+                if_true.llvm_represent(),
+                if_false.llvm_represent(),
+            ),
+            Goto(block) => format!("br {}", block.llvm_represent()),
+            Label(label) => format!("{}:", label.name()),
         }
+    }
+}
+
+impl ir::Label {
+    fn name(&self) -> String {
+        format!("label{}", self.id)
+    }
+}
+
+impl LLVMValue for ir::Label {
+    fn llvm_represent(&self) -> String {
+        format!("label %{}", self.name())
     }
 }
 
 impl LLVMValue for ir::Body {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
-        for stmt in &self.statements {
-            s.push_str(format!("  {}\n", stmt.llvm_represent()).as_str());
+        for instruction in &self.instructions {
+            match instruction {
+                ir::Instruction::Label(..) => {
+                    s.push_str(format!("{}\n", instruction.llvm_represent()).as_str());
+                }
+                _ => {
+                    s.push_str(format!("  {}\n", instruction.llvm_represent()).as_str());
+                }
+            }
         }
         s
     }
