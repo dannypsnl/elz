@@ -48,8 +48,7 @@ impl CodeGenerator {
                     module.push_function(func);
                 }
                 Variable(v) => {
-                    let var =
-                        ir::Variable::new(v.name.clone(), ir::Expr::from_ast(&v.expr, &module));
+                    let var = ir::Variable::new(v.name.clone(), ir::Expr::from_ast(&v.expr));
                     module.push_variable(var);
                 }
                 Class(c) => {
