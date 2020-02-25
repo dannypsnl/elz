@@ -87,6 +87,12 @@ pub(crate) enum Instruction {
         ret_type: Box<Type>,
         args_expr: Vec<Expr>,
     },
+    BinaryOperation {
+        id: u64,
+        op_name: String,
+        lhs: Expr,
+        rhs: Expr,
+    },
 }
 
 impl Instruction {
@@ -174,10 +180,28 @@ impl Body {
     fn expr_from_ast(&mut self, expr: &ast::Expr, module: &Module) -> Expr {
         use ast::ExprVariant::*;
         match &expr.value {
+            Binary(lhs, rhs, op) => {
+                let id = self.get_and_update_count();
+                let lhs = self.expr_from_ast(lhs, module);
+                let rhs = self.expr_from_ast(rhs, module);
+                let result_typ = lhs.type_();
+                let op_name = match op {
+                    Operator::Plus => "add",
+                }
+                .to_string();
+                let inst = Instruction::BinaryOperation {
+                    id,
+                    op_name,
+                    lhs,
+                    rhs,
+                };
+                self.instructions.push(inst);
+                Expr::id(result_typ, id)
+            }
             FuncCall(f, args) => {
                 let id = self.expr_from_ast(f, module);
                 let name = match id {
-                    Expr::Identifier(name) => name,
+                    Expr::Identifier(_, name) => name,
                     e => unreachable!("call on a non-function expression: {:#?}", e),
                 };
                 match module.known_functions.get(&name) {
@@ -189,12 +213,12 @@ impl Body {
                         let id = self.get_and_update_count();
                         let inst = Instruction::FunctionCall{
                             id,
-                            func_name:format!("@{}", name),
-                            ret_type:ret_type.to_owned().into(),
+                            func_name: format!("@{}", name),
+                            ret_type: ret_type.clone().into(),
                             args_expr,
                         };
                         self.instructions.push(inst);
-                        Expr::Identifier(format!("{}",id))
+                        Expr::id(ret_type.clone(),id)
                     },
                     None => unreachable!("no function named: {} which unlikely happened, semantic module must has bug there!", name),
                 }
@@ -289,7 +313,7 @@ pub(crate) enum Expr {
     F64(f64),
     Bool(bool),
     String(String),
-    Identifier(String),
+    Identifier(Type, String),
 }
 
 impl Expr {
@@ -300,8 +324,20 @@ impl Expr {
             Int(i) => Expr::I64(*i),
             Bool(b) => Expr::Bool(*b),
             String(s) => Expr::String(s.clone()),
-            Identifier(name) => Expr::Identifier(name.clone()),
             expr => unimplemented!("codegen: expr {:#?}", expr),
         }
+    }
+    pub(crate) fn type_(&self) -> Type {
+        match self {
+            Expr::I64(..) => Type::Int(64),
+            Expr::F64(..) => Type::Float(64),
+            Expr::Bool(..) => Type::Int(1),
+            Expr::String(..) => Type::UserDefined("string".to_string()),
+            Expr::Identifier(typ, ..) => typ.clone(),
+        }
+    }
+
+    fn id(typ: Type, id: u64) -> Expr {
+        Expr::Identifier(typ, format!("{}", id))
     }
 }

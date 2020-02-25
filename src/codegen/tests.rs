@@ -75,6 +75,22 @@ define void @foo(i64 %x) {
 }
 
 #[test]
+fn binary_expr() {
+    let code = "
+    foo(): int = 1 + 2;
+    ";
+    let module = gen_code(code);
+    assert_eq!(
+        module.llvm_represent(),
+        "define i64 @foo() {
+  %1 = add i64 1, 2
+  ret i64 %1
+}
+"
+    )
+}
+
+#[test]
 fn test_class_define() {
     let code = "
     class Foo {

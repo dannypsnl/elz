@@ -58,12 +58,34 @@ impl LLVMValue for ir::Instruction {
     fn llvm_represent(&self) -> String {
         use ir::Instruction::*;
         match self {
-            Return(e) => {
-                let es = match e {
-                    None => "void".to_string(),
-                    Some(ex) => ex.llvm_represent(),
-                };
-                format!("ret {}", es)
+            Return(e) => match e {
+                None => "ret void".to_string(),
+                Some(ex) => {
+                    let es = ex.llvm_represent();
+                    let ret_typ = ex.type_();
+                    format!("ret {} {}", ret_typ.llvm_represent(), es)
+                }
+            },
+            BinaryOperation {
+                id,
+                op_name,
+                lhs,
+                rhs,
+            } => {
+                let mut s = String::new();
+                let ret_type = lhs.type_();
+                s.push_str(
+                    format!(
+                        "%{} = {} {} {}, {}",
+                        id,
+                        op_name,
+                        ret_type.llvm_represent(),
+                        lhs.llvm_represent(),
+                        rhs.llvm_represent()
+                    )
+                    .as_str(),
+                );
+                s
             }
             FunctionCall {
                 id,
@@ -80,6 +102,8 @@ impl LLVMValue for ir::Instruction {
                 s.push_str(func_name.as_str());
                 s.push_str("(");
                 for (index, arg_expr) in args_expr.iter().enumerate() {
+                    s.push_str(arg_expr.type_().llvm_represent().as_str());
+                    s.push_str(" ");
                     s.push_str(arg_expr.llvm_represent().as_str());
                     if index < args_expr.len() - 1 {
                         s.push_str(", ");
@@ -93,7 +117,8 @@ impl LLVMValue for ir::Instruction {
                 if_true,
                 if_false,
             } => format!(
-                "br {}, {}, {}",
+                "br {} {}, {}, {}",
+                cond.type_().llvm_represent(),
                 cond.llvm_represent(),
                 if_true.llvm_represent(),
                 if_false.llvm_represent(),
@@ -179,6 +204,8 @@ impl LLVMValue for ir::Variable {
         s.push_str(self.name.as_str());
         s.push_str(" = ");
         s.push_str("global ");
+        s.push_str(self.expr.type_().llvm_represent().as_str());
+        s.push_str(" ");
         s.push_str(self.expr.llvm_represent().as_str());
         s
     }
@@ -203,11 +230,11 @@ impl LLVMValue for ir::Expr {
         use ir::Expr;
         let mut s = String::new();
         match self {
-            Expr::F64(f) => s.push_str(format!("f64 {}", f).as_str()),
-            Expr::I64(i) => s.push_str(format!("i64 {}", i).as_str()),
-            Expr::Bool(b) => s.push_str(format!("i1 {}", b).as_str()),
-            Expr::String(s_l) => s.push_str(format!("String* {}", s_l).as_str()),
-            e => unreachable!("we shouldn't call llvm_represent on: {:#?}", e),
+            Expr::F64(f) => s.push_str(format!("{}", f).as_str()),
+            Expr::I64(i) => s.push_str(format!("{}", i).as_str()),
+            Expr::Bool(b) => s.push_str(format!("{}", b).as_str()),
+            Expr::String(s_l) => s.push_str(format!("{}", s_l).as_str()),
+            Expr::Identifier(_, name) => s.push_str(format!("%{}", name).as_str()),
         }
         s
     }
