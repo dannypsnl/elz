@@ -220,7 +220,15 @@ impl Body {
                         self.instructions.push(inst);
                         Expr::id(ret_type.clone(),id)
                     },
-                    None => unreachable!("no function named: {} which unlikely happened, semantic module must has bug there!", name),
+                    None => unreachable!("no function named: {} which unlikely happened, semantic module must have a bug there!", name),
+                }
+            }
+            Identifier(name) =>{
+                match module.known_functions.get(name) {
+                    Some(ret_type) => {
+                        Expr::Identifier(ret_type.clone(), name.clone())
+                    },
+                    None => unreachable!("no variable named: {} which unlikely happened, semantic module must have a bug there!", name),
                 }
             }
             _ => Expr::from_ast(expr),
