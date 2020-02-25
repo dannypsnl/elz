@@ -115,7 +115,7 @@ pub(crate) struct Body {
 impl Body {
     pub(crate) fn from_ast(b: &ast::Body, module: &Module) -> Body {
         let mut body = Body {
-            counter: 0,
+            counter: 1, // FIXME: should not count at here
             instructions: vec![],
         };
         match b {
