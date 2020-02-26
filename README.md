@@ -12,4 +12,4 @@ cd elz && cargo install
 
 ### Usage
 
-Take a look at [CHANGELOG](https://github.com/elz-lang/elz/blob/master/CHANGELOG.md)
+Take a look at [CHANGELOG](https://github.com/dannypsnl/elz/blob/master/CHANGELOG.md)
