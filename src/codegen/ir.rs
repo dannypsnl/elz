@@ -217,7 +217,7 @@ impl Body {
         use ast::ExprVariant::*;
         match &expr.value {
             Binary(lhs, rhs, op) => {
-                let id= ID::new();
+                let id = ID::new();
                 let lhs = self.expr_from_ast(lhs, module);
                 let rhs = self.expr_from_ast(rhs, module);
                 let result_typ = lhs.type_();
@@ -226,7 +226,7 @@ impl Body {
                 }
                 .to_string();
                 let inst = Instruction::BinaryOperation {
-                    id:  id.clone(),
+                    id: id.clone(),
                     op_name,
                     lhs,
                     rhs,
