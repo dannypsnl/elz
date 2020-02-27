@@ -254,12 +254,12 @@ impl Body {
                             args_expr,
                         };
                         self.instructions.push(inst);
-                        Expr::id(ret_type.clone(),    id)
+                        Expr::id(ret_type.clone(), id)
                     },
                     None => unreachable!("no function named: {} which unlikely happened, semantic module must have a bug there!", name),
                 }
             }
-            Identifier(name) =>{
+            Identifier(name) => {
                 match module.known_functions.get(name) {
                     Some(ret_type) => {
                         Expr::Identifier(ret_type.clone(), name.clone())
