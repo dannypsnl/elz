@@ -74,7 +74,6 @@ impl Label {
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum Instruction {
     Return(Option<Expr>),
-    TempVariable(u64, Expr),
     Label(Rc<Label>),
     Branch {
         cond: Expr,
@@ -82,6 +81,18 @@ pub(crate) enum Instruction {
         if_false: Rc<Label>,
     },
     Goto(Rc<Label>),
+    FunctionCall {
+        id: u64,
+        func_name: String,
+        ret_type: Box<Type>,
+        args_expr: Vec<Expr>,
+    },
+    BinaryOperation {
+        id: u64,
+        op_name: String,
+        lhs: Expr,
+        rhs: Expr,
+    },
 }
 
 impl Instruction {
@@ -104,13 +115,13 @@ pub(crate) struct Body {
 impl Body {
     pub(crate) fn from_ast(b: &ast::Body, module: &Module) -> Body {
         let mut body = Body {
-            counter: 0,
+            counter: 1, // FIXME: should not count at here
             instructions: vec![],
         };
         match b {
             ast::Body::Expr(e) => {
-                body.instructions
-                    .push(Instruction::Return(Some(Expr::from_ast(e, module))));
+                let e = body.expr_from_ast(e, module);
+                body.instructions.push(Instruction::Return(Some(e)));
             }
             ast::Body::Block(b) => body.generate_instructions(&b.statements, module),
         };
@@ -123,14 +134,12 @@ impl Body {
                 Return(e) => {
                     let inst = match e {
                         None => Instruction::Return(None),
-                        Some(ex) => Instruction::Return(Some(Expr::from_ast(ex, module))),
+                        Some(ex) => Instruction::Return(Some(self.expr_from_ast(ex, module))),
                     };
                     self.instructions.push(inst)
                 }
                 Expression(expr) => {
-                    let id = self.get_and_update_count();
-                    self.instructions
-                        .push(Instruction::TempVariable(id, Expr::from_ast(expr, module)))
+                    self.expr_from_ast(expr, module);
                 }
                 IfBlock {
                     clauses,
@@ -141,7 +150,7 @@ impl Body {
                         let if_then_label = Rc::new(Label::new(self.get_and_update_count()));
                         let else_then_label = Rc::new(Label::new(self.get_and_update_count()));
                         let inst = Instruction::Branch {
-                            cond: Expr::from_ast(cond, module),
+                            cond: self.expr_from_ast(cond, module),
                             if_true: Rc::clone(&if_then_label),
                             if_false: Rc::clone(&else_then_label),
                         };
@@ -166,6 +175,63 @@ impl Body {
                 }
                 st => unimplemented!("for statement: {:#?}", st),
             }
+        }
+    }
+    fn expr_from_ast(&mut self, expr: &ast::Expr, module: &Module) -> Expr {
+        use ast::ExprVariant::*;
+        match &expr.value {
+            Binary(lhs, rhs, op) => {
+                let id = self.get_and_update_count();
+                let lhs = self.expr_from_ast(lhs, module);
+                let rhs = self.expr_from_ast(rhs, module);
+                let result_typ = lhs.type_();
+                let op_name = match op {
+                    Operator::Plus => "add",
+                }
+                .to_string();
+                let inst = Instruction::BinaryOperation {
+                    id,
+                    op_name,
+                    lhs,
+                    rhs,
+                };
+                self.instructions.push(inst);
+                Expr::id(result_typ, id)
+            }
+            FuncCall(f, args) => {
+                let id = self.expr_from_ast(f, module);
+                let name = match id {
+                    Expr::Identifier(_, name) => name,
+                    e => unreachable!("call on a non-function expression: {:#?}", e),
+                };
+                match module.known_functions.get(&name) {
+                    Some(ret_type) => {
+                        let args_expr: Vec<Expr> = args
+                            .iter()
+                            .map(|arg| self.expr_from_ast(&arg.expr, module))
+                            .collect();
+                        let id = self.get_and_update_count();
+                        let inst = Instruction::FunctionCall{
+                            id,
+                            func_name: format!("@{}", name),
+                            ret_type: ret_type.clone().into(),
+                            args_expr,
+                        };
+                        self.instructions.push(inst);
+                        Expr::id(ret_type.clone(),id)
+                    },
+                    None => unreachable!("no function named: {} which unlikely happened, semantic module must have a bug there!", name),
+                }
+            }
+            Identifier(name) =>{
+                match module.known_functions.get(name) {
+                    Some(ret_type) => {
+                        Expr::Identifier(ret_type.clone(), name.clone())
+                    },
+                    None => unreachable!("no variable named: {} which unlikely happened, semantic module must have a bug there!", name),
+                }
+            }
+            _ => Expr::from_ast(expr),
         }
     }
     fn get_and_update_count(&mut self) -> u64 {
@@ -255,57 +321,31 @@ pub(crate) enum Expr {
     F64(f64),
     Bool(bool),
     String(String),
-    Identifier(String),
-    // name, return type, argument expression
-    FunctionCall(String, Box<Type>, Vec<Expr>),
+    Identifier(Type, String),
 }
 
 impl Expr {
-    pub(crate) fn from_ast(a: &ast::Expr, module: &Module) -> Expr {
+    pub(crate) fn from_ast(a: &ast::Expr) -> Expr {
         use ExprVariant::*;
         match &a.value {
             F64(f) => Expr::F64(*f),
             Int(i) => Expr::I64(*i),
             Bool(b) => Expr::Bool(*b),
             String(s) => Expr::String(s.clone()),
-            Identifier(name) => Expr::Identifier(name.clone()),
-            FuncCall(f, args) => {
-                let id = Expr::from_ast(f, module);
-                let name = match id {
-                    Expr::Identifier(name) => name,
-                    e => unreachable!("call on a non-function expression: {:#?}", e),
-                };
-                match module.known_functions.get(&name) {
-                    Some(ret_type) => {
-                        let args_expr: Vec<Expr> = args
-                            .iter()
-                            .map(|arg| Expr::from_ast(&arg.expr, module))
-                            .collect();
-                        Expr::FunctionCall(
-                            format!("@{}", name),
-                            ret_type.to_owned().into(),
-                            args_expr,
-                        )
-                    },
-                    None => unreachable!("no function named: {} which unlikely happened, semantic module must has bug there!", name),
-                }
-            }
             expr => unimplemented!("codegen: expr {:#?}", expr),
         }
     }
-}
-
-impl Expr {
-    pub(crate) fn return_void(&self) -> bool {
+    pub(crate) fn type_(&self) -> Type {
         match self {
-            Expr::FunctionCall(_, ret_type, _) => {
-                if ret_type == &Box::new(Type::Void) {
-                    true
-                } else {
-                    false
-                }
-            }
-            _ => false,
+            Expr::I64(..) => Type::Int(64),
+            Expr::F64(..) => Type::Float(64),
+            Expr::Bool(..) => Type::Int(1),
+            Expr::String(..) => Type::UserDefined("string".to_string()),
+            Expr::Identifier(typ, ..) => typ.clone(),
         }
+    }
+
+    fn id(typ: Type, id: u64) -> Expr {
+        Expr::Identifier(typ, format!("{}", id))
     }
 }
