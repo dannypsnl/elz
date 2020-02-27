@@ -125,16 +125,16 @@ fn llvm_if_else() {
     assert_eq!(
         module.llvm_represent(),
         "define void @foo() {
-  br i1 true, label %label2, label %label3
-label2:
+  br i1 true, label %1, label %2
+; <label>:1:
   ret void
-label3:
-  br i1 true, label %label4, label %label5
-label4:
-  br label %label1
-label5:
-  br label %label1
-label1:
+; <label>:2:
+  br i1 true, label %3, label %4
+; <label>:3:
+  br label %5
+; <label>:4:
+  br label %5
+; <label>:5:
   ret void
 }
 "

@@ -1,6 +1,8 @@
 use crate::ast;
 use crate::ast::*;
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fmt::Formatter;
 use std::rc::Rc;
 
 pub struct Module {
@@ -59,15 +61,36 @@ pub(crate) struct TypeDefinition {
     pub(crate) fields: Vec<Type>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct ID {
+    value: u64,
+}
+
+impl ID {
+    fn new() -> Rc<RefCell<ID>> {
+        Rc::new(RefCell::new(ID { value: 0 }))
+    }
+    fn set_id(&mut self, value: u64) -> bool {
+        self.value = value;
+        true
+    }
+}
+
+impl std::fmt::Display for ID {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
 /// Label represents a location which can be the target of jump instructions
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Label {
-    pub(crate) id: u64,
+    pub(crate) id: Rc<RefCell<ID>>,
 }
 
 impl Label {
-    pub(crate) fn new(id: u64) -> Label {
-        Label { id }
+    pub(crate) fn new(id: Rc<RefCell<ID>>) -> Rc<Label> {
+        Rc::new(Label { id })
     }
 }
 
@@ -82,13 +105,13 @@ pub(crate) enum Instruction {
     },
     Goto(Rc<Label>),
     FunctionCall {
-        id: u64,
+        id: Rc<RefCell<ID>>,
         func_name: String,
         ret_type: Box<Type>,
         args_expr: Vec<Expr>,
     },
     BinaryOperation {
-        id: u64,
+        id: Rc<RefCell<ID>>,
         op_name: String,
         lhs: Expr,
         rhs: Expr,
@@ -103,19 +126,25 @@ impl Instruction {
             _ => false,
         }
     }
+
+    fn set_id(&mut self, value: u64) -> bool {
+        use Instruction::*;
+        match self {
+            Label(label) => label.id.borrow_mut().set_id(value),
+            FunctionCall { id, .. } | BinaryOperation { id, .. } => id.borrow_mut().set_id(value),
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Body {
     pub(crate) instructions: Vec<Instruction>,
-    // helper part
-    pub(crate) counter: u64,
 }
 
 impl Body {
     pub(crate) fn from_ast(b: &ast::Body, module: &Module) -> Body {
         let mut body = Body {
-            counter: 1, // FIXME: should not count at here
             instructions: vec![],
         };
         match b {
@@ -125,6 +154,13 @@ impl Body {
             }
             ast::Body::Block(b) => body.generate_instructions(&b.statements, module),
         };
+        // update local identifier value
+        let mut counter = 1;
+        for inst in &mut body.instructions {
+            if inst.set_id(counter) {
+                counter += 1;
+            }
+        }
         body
     }
     pub(crate) fn generate_instructions(&mut self, stmts: &Vec<Statement>, module: &Module) {
@@ -145,33 +181,33 @@ impl Body {
                     clauses,
                     else_block,
                 } => {
-                    let leave_label = Rc::new(Label::new(self.get_and_update_count()));
+                    let leave_label = Label::new(ID::new());
                     for (cond, then_block) in clauses {
-                        let if_then_label = Rc::new(Label::new(self.get_and_update_count()));
-                        let else_then_label = Rc::new(Label::new(self.get_and_update_count()));
+                        let if_then_label = Label::new(ID::new());
+                        let else_then_label = Label::new(ID::new());
                         let inst = Instruction::Branch {
                             cond: self.expr_from_ast(cond, module),
-                            if_true: Rc::clone(&if_then_label),
-                            if_false: Rc::clone(&else_then_label),
+                            if_true: if_then_label.clone(),
+                            if_false: else_then_label.clone(),
                         };
                         self.instructions.push(inst);
                         // if then
                         self.instructions
-                            .push(Instruction::Label(Rc::clone(&if_then_label)));
+                            .push(Instruction::Label(if_then_label.clone()));
                         self.generate_instructions(&then_block.statements, module);
                         if !self.end_with_terminator() {
                             self.goto(&leave_label);
                         }
                         // else then
                         self.instructions
-                            .push(Instruction::Label(Rc::clone(&else_then_label)));
+                            .push(Instruction::Label(else_then_label.clone()));
                     }
                     self.generate_instructions(&else_block.statements, module);
                     if !self.end_with_terminator() {
                         self.goto(&leave_label);
                     }
                     self.instructions
-                        .push(Instruction::Label(Rc::clone(&leave_label)));
+                        .push(Instruction::Label(leave_label.clone()));
                 }
                 st => unimplemented!("for statement: {:#?}", st),
             }
@@ -181,7 +217,7 @@ impl Body {
         use ast::ExprVariant::*;
         match &expr.value {
             Binary(lhs, rhs, op) => {
-                let id = self.get_and_update_count();
+                let id = ID::new();
                 let lhs = self.expr_from_ast(lhs, module);
                 let rhs = self.expr_from_ast(rhs, module);
                 let result_typ = lhs.type_();
@@ -190,7 +226,7 @@ impl Body {
                 }
                 .to_string();
                 let inst = Instruction::BinaryOperation {
-                    id,
+                    id: id.clone(),
                     op_name,
                     lhs,
                     rhs,
@@ -210,20 +246,20 @@ impl Body {
                             .iter()
                             .map(|arg| self.expr_from_ast(&arg.expr, module))
                             .collect();
-                        let id = self.get_and_update_count();
+                        let id = ID::new();
                         let inst = Instruction::FunctionCall{
-                            id,
+                            id: id.clone(),
                             func_name: format!("@{}", name),
                             ret_type: ret_type.clone().into(),
                             args_expr,
                         };
                         self.instructions.push(inst);
-                        Expr::id(ret_type.clone(),id)
+                        Expr::id(ret_type.clone(), id)
                     },
                     None => unreachable!("no function named: {} which unlikely happened, semantic module must have a bug there!", name),
                 }
             }
-            Identifier(name) =>{
+            Identifier(name) => {
                 match module.known_functions.get(name) {
                     Some(ret_type) => {
                         Expr::Identifier(ret_type.clone(), name.clone())
@@ -234,11 +270,6 @@ impl Body {
             _ => Expr::from_ast(expr),
         }
     }
-    fn get_and_update_count(&mut self) -> u64 {
-        let tmp = self.counter;
-        self.counter += 1;
-        tmp
-    }
     fn end_with_terminator(&self) -> bool {
         match self.instructions.last() {
             None => false,
@@ -246,7 +277,7 @@ impl Body {
         }
     }
     fn goto(&mut self, label: &Rc<Label>) {
-        self.instructions.push(Instruction::Goto(Rc::clone(label)));
+        self.instructions.push(Instruction::Goto(label.clone()));
     }
 }
 
@@ -322,6 +353,7 @@ pub(crate) enum Expr {
     Bool(bool),
     String(String),
     Identifier(Type, String),
+    LocalIdentifier(Type, Rc<RefCell<ID>>),
 }
 
 impl Expr {
@@ -342,10 +374,11 @@ impl Expr {
             Expr::Bool(..) => Type::Int(1),
             Expr::String(..) => Type::UserDefined("string".to_string()),
             Expr::Identifier(typ, ..) => typ.clone(),
+            Expr::LocalIdentifier(typ, ..) => typ.clone(),
         }
     }
 
-    fn id(typ: Type, id: u64) -> Expr {
-        Expr::Identifier(typ, format!("{}", id))
+    fn id(typ: Type, id: Rc<RefCell<ID>>) -> Expr {
+        Expr::LocalIdentifier(typ, id)
     }
 }
