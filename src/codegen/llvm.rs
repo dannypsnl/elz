@@ -77,7 +77,7 @@ impl LLVMValue for ir::Instruction {
                 s.push_str(
                     format!(
                         "%{} = {} {} {}, {}",
-                        id,
+                        id.borrow(),
                         op_name,
                         ret_type.llvm_represent(),
                         lhs.llvm_represent(),
@@ -95,7 +95,7 @@ impl LLVMValue for ir::Instruction {
             } => {
                 let mut s = String::new();
                 if !self.return_void() {
-                    s.push_str(format!("%{} = ", id).as_str());
+                    s.push_str(format!("%{} = ", id.borrow()).as_str());
                 }
                 s.push_str("call ");
                 s.push_str(format!("{} ", ret_type.llvm_represent()).as_str());
@@ -124,20 +124,14 @@ impl LLVMValue for ir::Instruction {
                 if_false.llvm_represent(),
             ),
             Goto(block) => format!("br {}", block.llvm_represent()),
-            Label(label) => format!("{}:", label.name()),
+            Label(label) => format!("; <label>:{}:", label.id.borrow()),
         }
-    }
-}
-
-impl ir::Label {
-    fn name(&self) -> String {
-        format!("label{}", self.id)
     }
 }
 
 impl LLVMValue for ir::Label {
     fn llvm_represent(&self) -> String {
-        format!("label %{}", self.name())
+        format!("label %{}", self.id.borrow())
     }
 }
 
@@ -235,6 +229,7 @@ impl LLVMValue for ir::Expr {
             Expr::Bool(b) => s.push_str(format!("{}", b).as_str()),
             Expr::String(s_l) => s.push_str(format!("{}", s_l).as_str()),
             Expr::Identifier(_, name) => s.push_str(format!("%{}", name).as_str()),
+            Expr::LocalIdentifier(_, id) => s.push_str(format!("%{}", id.borrow()).as_str()),
         }
         s
     }
