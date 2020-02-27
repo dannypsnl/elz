@@ -10,6 +10,24 @@ git clone https://github.com/elz-lang/elz.git
 cd elz && cargo install
 ```
 
-### Usage
+### Features
+
+#### Type
+
+- [x] `void`
+- [x] `int`
+- [x] `f64`
+- [x] `bool`
+- [ ] `string` TODO: #257
+- [ ] `List[T]` TODO: #200
+
+#### Top level construction
+
+- [x] Variable
+- [x] Function
+- [x] Class
+- [ ] Trait, TODO: #241, #225, #250
+
+### Changelog
 
 Take a look at [CHANGELOG](https://github.com/dannypsnl/elz/blob/master/CHANGELOG.md)
