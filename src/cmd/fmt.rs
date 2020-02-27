@@ -31,6 +31,7 @@ fn handle_dir(dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+// TODO: add reporter
 fn handle_entry(file_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
     if file_path.extension() == Some(OsStr::new("elz")) {
         let code = std::fs::read_to_string(file_path)?;

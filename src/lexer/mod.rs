@@ -73,6 +73,8 @@ pub struct Location {
     file_name: String,
     line: u32,
     column: u32,
+    pub start: u32,
+    pub end: u32,
 }
 
 impl Location {
@@ -80,13 +82,21 @@ impl Location {
         Location::from(0, 0)
     }
     pub fn from(line: u32, column: u32) -> Location {
-        Location::new("", line, column)
+        Location::new("", line, column, 0, 0)
     }
-    pub fn new<T: ToString>(file_name: T, line: u32, column: u32) -> Location {
+    pub fn new<T: ToString>(
+        file_name: T,
+        line: u32,
+        column: u32,
+        start: u32,
+        end: u32,
+    ) -> Location {
         Location {
             file_name: file_name.to_string(),
             line,
             column,
+            start,
+            end,
         }
     }
 }
@@ -171,7 +181,13 @@ impl Lexer {
     }
     fn new_token(&mut self, token_type: TkType, value: String) -> Token {
         Token(
-            Location::new(self.file_name.clone(), self.line, self.pos),
+            Location::new(
+                self.file_name.clone(),
+                self.line,
+                self.pos,
+                self.start as u32,
+                self.offset as u32,
+            ),
             token_type,
             value,
         )
