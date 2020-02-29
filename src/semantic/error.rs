@@ -42,6 +42,26 @@ impl SemanticError {
             err,
         }
     }
+    pub(crate) fn location(&self) -> Location {
+        self.location.clone()
+    }
+    pub(crate) fn message(&self) -> String {
+        use SemanticErrorVariant::*;
+        match &self.err {
+            NameRedefined(..) => "name redefined",
+            TypeMismatched(..) => "type mismatched",
+            NoVariableNamed(..) => "no variable named",
+            NoTypeNamed(..) => "no type named",
+            CallOnNonFunctionType(..) => "call on non function type",
+            FieldsMissingInit(..) => "field missing init",
+            CannotConstructNonClassType(..) => "cannot construct non class type",
+            CannotUseClassConstructionOutOfClass() => "cannot use class construction out of class",
+            OnlyTraitCanBeSuperType { .. } => "only trait can be super type",
+            DeadCodeAfterReturnStatement => "dead code after return statement",
+        }
+        .to_string()
+    }
+
     pub fn name_redefined<T: ToString>(location: &Location, name: T) -> SemanticError {
         SemanticError::new(
             location,
