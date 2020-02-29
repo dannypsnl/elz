@@ -68,7 +68,7 @@ pub enum TkType {
     Comment,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Location {
     file_name: String,
     line: u32,
@@ -98,6 +98,12 @@ impl Location {
             start,
             end,
         }
+    }
+}
+
+impl PartialEq for Location {
+    fn eq(&self, other: &Self) -> bool {
+        self.file_name == other.file_name && self.line == other.line && self.column == other.column
     }
 }
 
