@@ -1,6 +1,7 @@
 use crate::ast::*;
 
 pub(crate) const DEFAULT_LEVEL: usize = 0;
+const INDENT: &'static str = "  ";
 
 pub(crate) trait FormattedElz {
     fn formatted_elz(&self, level: usize) -> String;
@@ -38,7 +39,7 @@ impl FormattedElz for Trait {
             s.push_str("\n");
         }
         for member in &self.members {
-            s.push_str("  ".repeat(level + 1).as_str());
+            s.push_str(INDENT.repeat(level + 1).as_str());
             s.push_str(member.formatted_elz(level + 1).as_str());
             s.push_str("\n");
         }
@@ -140,7 +141,7 @@ impl FormattedElz for Class {
             s.push_str("\n");
         }
         for member in &self.members {
-            s.push_str("  ".repeat(level + 1).as_str());
+            s.push_str(INDENT.repeat(level + 1).as_str());
             s.push_str(member.formatted_elz(level + 1).as_str());
             s.push_str("\n");
         }
@@ -196,11 +197,11 @@ impl FormattedElz for Block {
         if self.statements.len() > 0 {
             s.push_str("\n");
             for stmt in &self.statements {
-                s.push_str("  ".repeat(level + 1).as_str());
+                s.push_str(INDENT.repeat(level + 1).as_str());
                 s.push_str(stmt.formatted_elz(level + 1).as_str());
                 s.push_str("\n");
             }
-            s.push_str("  ".repeat(level).as_str());
+            s.push_str(INDENT.repeat(level).as_str());
         }
         s.push_str("}");
         s
