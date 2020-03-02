@@ -33,6 +33,12 @@ enum SemanticErrorVariant {
     OnlyTraitCanBeSuperType { got_type: Type },
     #[error("dead code after return statement")]
     DeadCodeAfterReturnStatement,
+    #[error("redefined field `{}` in class `{}`, already defined at {}", .field_name, .class_name, .previous_definition)]
+    RedefinedField {
+        field_name: String,
+        class_name: String,
+        previous_definition: Location,
+    },
 }
 
 impl SemanticError {
@@ -94,6 +100,21 @@ impl SemanticError {
     }
     pub fn dead_code_after_return_statement(location: &Location) -> SemanticError {
         SemanticError::new(location, SemanticErrorVariant::DeadCodeAfterReturnStatement)
+    }
+    pub fn redefined_field(
+        location: &Location,
+        field_name: String,
+        class_name: String,
+        previous_definition: Location,
+    ) -> SemanticError {
+        SemanticError::new(
+            location,
+            SemanticErrorVariant::RedefinedField {
+                field_name,
+                class_name,
+                previous_definition,
+            },
+        )
     }
 }
 

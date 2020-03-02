@@ -222,7 +222,7 @@ impl TypeEnv {
             self.from(&f.ret_typ)?.into(),
         ))
     }
-    pub fn new_class(&self, tag: &Option<Tag>, c: &Class) -> Result<Type> {
+    pub fn new_class(&mut self, tag: &Option<Tag>, c: &Class) -> Result<Type> {
         if tag.is_builtin() {
             match c.name.as_str() {
                 "void" => Ok(Type::Void),
@@ -238,16 +238,37 @@ impl TypeEnv {
         }
     }
 
-    fn new_normal_class(&self, c: &Class) -> Result<Type> {
+    fn new_normal_class(&mut self, c: &Class) -> Result<Type> {
         let mut uninitialized_fields = vec![];
+        let mut fields = HashMap::new();
         for member in &c.members {
             match member {
-                ClassMember::Field(field) => match &field.expr {
-                    None => {
-                        uninitialized_fields.push(field.name.clone());
+                ClassMember::Field(field) => {
+                    let f = ClassField {
+                        name: field.name.clone(),
+                        location: field.location.clone(),
+                        typ: self.from(&field.typ)?,
+                    };
+                    match fields.insert(f.name.clone(), f.clone()) {
+                        Some(previous_field) => {
+                            return Err(SemanticError::redefined_field(
+                                &field.location,
+                                f.name.clone(),
+                                c.name.clone(),
+                                previous_field.location,
+                            ));
+                        }
+                        None => (),
                     }
-                    _ => (),
-                },
+                    match &field.expr {
+                        None => uninitialized_fields.push(field.name.clone()),
+                        Some(expr) => {
+                            // check expression type same as field type
+                            let expr_type = self.type_of_expr(expr)?;
+                            self.unify(&field.location, &f.typ, &expr_type)?;
+                        }
+                    }
+                }
                 _ => (),
             }
         }
@@ -264,6 +285,7 @@ impl TypeEnv {
             parents,
             type_parameters: vec![],
             uninitialized_fields,
+            fields,
         })
     }
 }
@@ -326,6 +348,13 @@ impl TypeInfo {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct ClassField {
+    name: String,
+    location: Location,
+    typ: Type,
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum Type {
     Void,
     Int,
@@ -339,6 +368,7 @@ pub enum Type {
         parents: Vec<Type>,
         type_parameters: Vec<Type>,
         uninitialized_fields: Vec<String>,
+        fields: HashMap<String, ClassField>,
     },
     FunctionType(Vec<Type>, Box<Type>),
     FreeVar(usize),

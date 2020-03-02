@@ -282,6 +282,29 @@ fn dead_code_after_return_statement_is_invalid() {
     assert_eq!(result.is_err(), true);
 }
 
+#[test]
+fn init_expression_must_has_same_type_as_define() {
+    let code = "
+    class Foo {
+      flag: bool = 1;
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
+#[test]
+fn redefine_field_is_invalid() {
+    let code = "
+    class Foo {
+      a: int;
+      a: int;
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let mut program = Parser::parse_program("", code).unwrap();
