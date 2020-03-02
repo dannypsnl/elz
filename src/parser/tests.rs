@@ -218,10 +218,7 @@ fn parse_class() {
                 ClassMember::Method(Function::new_declaration(
                     Location::from(4, 0),
                     "bar",
-                    vec![
-                        Parameter::new("self", ParsedType::type_name("Car")),
-                        Parameter::new("i", ParsedType::type_name("int"))
-                    ],
+                    vec![Parameter::new("i", ParsedType::type_name("int"))],
                     ParsedType::type_name("void"),
                 )),
             ]

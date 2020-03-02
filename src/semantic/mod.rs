@@ -36,6 +36,11 @@ impl SemanticChecker {
             use TopAstVariant::*;
             match &top.ast {
                 Class(c) => {
+                    let class_type = self.type_env.get_type(&c.location, &c.name)?;
+                    match class_type.typ {
+                        types::Type::ClassType { .. } => {}
+                        _ => (),
+                    }
                     for member in &c.members {
                         match member {
                             ClassMember::StaticMethod(static_method) => {
@@ -43,13 +48,6 @@ impl SemanticChecker {
                                     &static_method.location,
                                     &format!("{}::{}", c.name, static_method.name),
                                     self.type_env.new_function_type(static_method)?,
-                                )?;
-                            }
-                            ClassMember::Method(method) => {
-                                self.type_env.add_variable(
-                                    &method.location,
-                                    &format!("{}::{}", c.name, method.name),
-                                    self.type_env.new_function_type(method)?,
                                 )?;
                             }
                             _ => (),

@@ -84,6 +84,11 @@ impl CodeGenerator {
                                 module.push_function(func);
                             }
                             ClassMember::Method(method) => {
+                                let mut method = method.clone();
+                                method.parameters.insert(
+                                    0,
+                                    Parameter::new("self", ParsedType::TypeName(c.name.clone())),
+                                );
                                 let body = match &method.body {
                                     Some(b) => Some(ir::Body::from_ast(b, &module)),
                                     None => None,

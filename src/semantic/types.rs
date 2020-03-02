@@ -68,10 +68,16 @@ impl TypeEnv {
             DotAccess(from, access) => {
                 let typ = self.type_of_expr(from)?;
                 match typ {
-                    Type::ClassType { name, .. } => {
-                        let transform_name = format!("{}::{}", name, access);
-                        self.type_of_expr(&Expr::identifier(location.clone(), transform_name))
-                    }
+                    Type::ClassType { name, fields, .. } => match fields.get(access) {
+                        None => {
+                            return Err(SemanticError::no_member_named(
+                                location,
+                                name,
+                                access.clone(),
+                            ));
+                        }
+                        Some(member) => Ok(member.typ.clone()),
+                    },
                     _ => unreachable!(),
                 }
             }
@@ -267,6 +273,24 @@ impl TypeEnv {
                             let expr_type = self.type_of_expr(expr)?;
                             self.unify(&field.location, &f.typ, &expr_type)?;
                         }
+                    }
+                }
+                ClassMember::Method(m) => {
+                    let f = ClassField {
+                        name: m.name.clone(),
+                        location: m.location.clone(),
+                        typ: self.new_function_type(m)?,
+                    };
+                    match fields.insert(f.name.clone(), f.clone()) {
+                        Some(previous_field) => {
+                            return Err(SemanticError::redefined_field(
+                                &m.location,
+                                f.name.clone(),
+                                c.name.clone(),
+                                previous_field.location,
+                            ));
+                        }
+                        None => (),
                     }
                 }
                 _ => (),

@@ -39,6 +39,11 @@ enum SemanticErrorVariant {
         class_name: String,
         previous_definition: Location,
     },
+    #[error("class `{}` has no member named `{}`", .class_name, .member_name)]
+    NoMemberNamed {
+        class_name: String,
+        member_name: String,
+    },
 }
 
 impl SemanticError {
@@ -113,6 +118,19 @@ impl SemanticError {
                 field_name,
                 class_name,
                 previous_definition,
+            },
+        )
+    }
+    pub fn no_member_named(
+        location: &Location,
+        class_name: String,
+        member_name: String,
+    ) -> SemanticError {
+        SemanticError::new(
+            location,
+            SemanticErrorVariant::NoMemberNamed {
+                class_name,
+                member_name,
             },
         )
     }

@@ -101,7 +101,7 @@ impl Parser {
             vec![]
         };
         self.predict_and_consume(vec![TkType::OpenBrace])?;
-        let members = self.parse_class_members(&class_name)?;
+        let members = self.parse_class_members()?;
         self.predict_and_consume(vec![TkType::CloseBrace])?;
         Ok(Class::new(
             kw_class.location().clone(),
@@ -130,7 +130,7 @@ impl Parser {
             },
         )
     }
-    fn parse_class_members(&mut self, class_name: &String) -> Result<Vec<ClassMember>> {
+    fn parse_class_members(&mut self) -> Result<Vec<ClassMember>> {
         let mut members = vec![];
         while self.peek(0)?.tk_type() != &TkType::CloseBrace {
             if self
@@ -143,11 +143,7 @@ impl Parser {
                 if self.predict_and_consume(vec![TkType::Accessor]).is_ok() {
                     members.push(ClassMember::StaticMethod(self.parse_function()?));
                 } else {
-                    let mut method = self.parse_function()?;
-                    method.parameters.insert(
-                        0,
-                        Parameter::new("self", ParsedType::TypeName(class_name.clone())),
-                    );
+                    let method = self.parse_function()?;
                     members.push(ClassMember::Method(method));
                 }
             }

@@ -188,7 +188,7 @@ fn test_static_method_should_not_available_in_class_scope() {
 }
 
 #[test]
-fn test_method_should_get_transform() {
+fn method() {
     let code = "\
     main(): void {
       foo: Foo = Foo::new();
