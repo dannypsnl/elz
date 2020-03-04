@@ -1,13 +1,13 @@
 use crate::ast::*;
 
-pub(crate) const DEFAULT_LEVEL: usize = 0;
+pub const DEFAULT_LEVEL: usize = 0;
 const INDENT: &'static str = "  ";
 
-pub(crate) trait FormattedElz {
+pub trait FormattedElz {
     fn formatted_elz(&self, level: usize) -> String;
 }
 
-pub(crate) struct FormatTopAstList(pub(crate) Vec<TopAst>);
+pub struct FormatTopAstList(pub Vec<TopAst>);
 impl FormattedElz for FormatTopAstList {
     fn formatted_elz(&self, level: usize) -> String {
         let mut s = String::new();

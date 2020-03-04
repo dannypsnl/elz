@@ -1,5 +1,5 @@
-use crate::codegen::formatted_elz::{FormatTopAstList, FormattedElz, DEFAULT_LEVEL};
-use crate::parser::Parser;
+use elz::codegen::formatted_elz::{FormatTopAstList, FormattedElz, DEFAULT_LEVEL};
+use elz::parser::Parser;
 use std::ffi::OsStr;
 use std::io::Write;
 use std::path::Path;

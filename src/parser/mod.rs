@@ -11,7 +11,7 @@ use error::ParseError;
 use error::Result;
 use std::collections::HashMap;
 
-pub(crate) fn parse_prelude() -> Vec<TopAst> {
+pub fn parse_prelude() -> Vec<TopAst> {
     let prelude_file = Asset::get("prelude.elz").unwrap();
     let content = std::str::from_utf8(prelude_file.as_ref()).unwrap();
     let prelude_program = Parser::parse_program("prelude.elz", content).unwrap();

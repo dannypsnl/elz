@@ -1,5 +1,6 @@
 use clap::{App, Arg, SubCommand};
-use elz::cmd;
+
+mod cmd;
 
 fn main() {
     let matches = App::new("elz")

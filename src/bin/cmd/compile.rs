@@ -1,8 +1,8 @@
-use crate::ast::TopAst;
-use crate::codegen::llvm::LLVMValue;
-use crate::codegen::CodeGenerator;
-use crate::parser::{parse_prelude, Parser};
-use crate::semantic::SemanticChecker;
+use elz::ast::TopAst;
+use elz::codegen::llvm::LLVMValue;
+use elz::codegen::CodeGenerator;
+use elz::parser::{parse_prelude, Parser};
+use elz::semantic::SemanticChecker;
 
 pub const CMD_NAME: &'static str = "compile";
 
