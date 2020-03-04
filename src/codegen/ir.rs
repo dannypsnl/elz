@@ -104,6 +104,11 @@ pub(crate) enum Instruction {
         if_false: Rc<Label>,
     },
     Goto(Rc<Label>),
+    GEP {
+        id: Rc<RefCell<ID>>,
+        result_type: Type,
+        load_id: Rc<RefCell<ID>>,
+    },
     FunctionCall {
         id: Rc<RefCell<ID>>,
         func_name: String,
@@ -140,12 +145,22 @@ impl Instruction {
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Body {
     pub(crate) instructions: Vec<Instruction>,
+    // local variables(including parameters)
+    variables: HashMap<String, (Type, Rc<RefCell<ID>>)>,
 }
 
 impl Body {
-    pub(crate) fn from_ast(b: &ast::Body, module: &Module) -> Body {
+    fn from_ast(b: &ast::Body, module: &mut Module, parameters: &Vec<Parameter>) -> Body {
+        let mut variables = HashMap::new();
+
+        for p in parameters {
+            // FIXME: type from duplicate in ir::Function, share information
+            variables.insert(p.name.clone(), (Type::from_ast(&p.typ), ID::new()));
+        }
+
         let mut body = Body {
             instructions: vec![],
+            variables,
         };
         match b {
             ast::Body::Expr(e) => {
@@ -156,6 +171,11 @@ impl Body {
         };
         // update local identifier value
         let mut counter = 1;
+        for (_, (_, v_id)) in &mut body.variables {
+            if v_id.borrow_mut().set_id(counter) {
+                counter += 1;
+            }
+        }
         for inst in &mut body.instructions {
             if inst.set_id(counter) {
                 counter += 1;
@@ -163,7 +183,12 @@ impl Body {
         }
         body
     }
-    pub(crate) fn generate_instructions(&mut self, stmts: &Vec<Statement>, module: &Module) {
+
+    fn lookup_variable(&self, name: &String) -> Option<&(Type, Rc<RefCell<ID>>)> {
+        self.variables.get(name)
+    }
+
+    pub(crate) fn generate_instructions(&mut self, stmts: &Vec<Statement>, module: &mut Module) {
         for stmt in stmts {
             use ast::StatementVariant::*;
             match &stmt.value {
@@ -209,65 +234,10 @@ impl Body {
                     self.instructions
                         .push(Instruction::Label(leave_label.clone()));
                 }
-                st => unimplemented!("for statement: {:#?}", st),
-            }
-        }
-    }
-    fn expr_from_ast(&mut self, expr: &ast::Expr, module: &Module) -> Expr {
-        use ast::ExprVariant::*;
-        match &expr.value {
-            Binary(lhs, rhs, op) => {
-                let id = ID::new();
-                let lhs = self.expr_from_ast(lhs, module);
-                let rhs = self.expr_from_ast(rhs, module);
-                let result_typ = lhs.type_();
-                let op_name = match op {
-                    Operator::Plus => "add",
-                }
-                .to_string();
-                let inst = Instruction::BinaryOperation {
-                    id: id.clone(),
-                    op_name,
-                    lhs,
-                    rhs,
-                };
-                self.instructions.push(inst);
-                Expr::id(result_typ, id)
-            }
-            FuncCall(f, args) => {
-                let id = self.expr_from_ast(f, module);
-                let name = match id {
-                    Expr::Identifier(_, name) => name,
-                    e => unreachable!("call on a non-function expression: {:#?}", e),
-                };
-                match module.known_functions.get(&name) {
-                    Some(ret_type) => {
-                        let args_expr: Vec<Expr> = args
-                            .iter()
-                            .map(|arg| self.expr_from_ast(&arg.expr, module))
-                            .collect();
-                        let id = ID::new();
-                        let inst = Instruction::FunctionCall{
-                            id: id.clone(),
-                            func_name: format!("@{}", name),
-                            ret_type: ret_type.clone().into(),
-                            args_expr,
-                        };
-                        self.instructions.push(inst);
-                        Expr::id(ret_type.clone(), id)
-                    },
-                    None => unreachable!("no function named: {} which unlikely happened, semantic module must have a bug there!", name),
+                Variable(v) => {
+                    self.expr_from_ast(&v.expr, module);
                 }
             }
-            Identifier(name) => {
-                match module.known_functions.get(name) {
-                    Some(ret_type) => {
-                        Expr::Identifier(ret_type.clone(), name.clone())
-                    },
-                    None => unreachable!("no variable named: {} which unlikely happened, semantic module must have a bug there!", name),
-                }
-            }
-            _ => Expr::from_ast(expr),
         }
     }
     fn end_with_terminator(&self) -> bool {
@@ -290,7 +260,27 @@ pub(crate) struct Function {
 }
 
 impl Function {
-    pub(crate) fn new(
+    pub(crate) fn from_ast(
+        f: &ast::Function,
+        class_name: Option<String>,
+        module: &mut Module,
+    ) -> Function {
+        let body = match &f.body {
+            Some(b) => Some(Body::from_ast(b, module, &f.parameters)),
+            None => None,
+        };
+        let function_name = match class_name {
+            None => f.name.clone(),
+            Some(class_name) => format!("\"{}::{}\"", class_name, f.name),
+        };
+        Function::new(
+            function_name,
+            &f.parameters,
+            Type::from_ast(&f.ret_typ),
+            body,
+        )
+    }
+    fn new(
         name: String,
         parsed_params: &Vec<Parameter>,
         ret_typ: Type,
@@ -312,14 +302,26 @@ impl Function {
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Variable {
-    pub(crate) name: String,
+    pub(crate) name: GlobalName,
     pub(crate) expr: Expr,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) enum GlobalName {
+    ID(Rc<RefCell<ID>>),
+    String(String),
 }
 
 impl Variable {
     pub(crate) fn new(name: String, expr: Expr) -> Variable {
         Variable {
-            name: format!("@{}", name),
+            name: GlobalName::String(format!("@{}", name)),
+            expr,
+        }
+    }
+    pub(crate) fn from_id(id: Rc<RefCell<ID>>, expr: Expr) -> Variable {
+        Variable {
+            name: GlobalName::ID(id),
             expr,
         }
     }
@@ -330,6 +332,8 @@ pub(crate) enum Type {
     Void,
     Int(usize),
     Float(usize),
+    Pointer(Rc<Type>),
+    Array { len: usize, element_type: Rc<Type> },
     UserDefined(String),
 }
 
@@ -341,7 +345,90 @@ impl Type {
             "int" => Int(64),
             "f64" => Float(64),
             "bool" => Int(1),
+            "_c_string" => Pointer(Int(8).into()),
             name => UserDefined(name.to_string()),
+        }
+    }
+}
+
+impl Body {
+    fn expr_from_ast(&mut self, expr: &ast::Expr, module: &mut Module) -> Expr {
+        use ast::ExprVariant::*;
+        match &expr.value {
+            String(string_literal) => {
+                let str_literal_id = ID::new();
+                module.push_variable(Variable::from_id(
+                    str_literal_id.clone(),
+                    Expr::CString(string_literal.clone()),
+                ));
+                let str_load_id = ID::new();
+                let inst = Instruction::GEP {
+                    id: str_load_id.clone(),
+                    result_type: Type::Array {
+                        len: string_literal.len(),
+                        element_type: Type::Int(8).into(),
+                    },
+                    load_id: str_literal_id,
+                };
+                self.instructions.push(inst);
+                Expr::local_id(Type::Pointer(Type::Int(8).into()), str_load_id)
+            }
+            DotAccess(from, access) => {
+                // TODO:
+                //  - from access to indices to use GEP
+                self.expr_from_ast(from, module)
+            },
+            Binary(lhs, rhs, op) => {
+                let id = ID::new();
+                let lhs = self.expr_from_ast(lhs, module);
+                let rhs = self.expr_from_ast(rhs, module);
+                let result_typ = lhs.type_();
+                let op_name = match op {
+                    Operator::Plus => "add",
+                }
+                .to_string();
+                let inst = Instruction::BinaryOperation {
+                    id: id.clone(),
+                    op_name,
+                    lhs,
+                    rhs,
+                };
+                self.instructions.push(inst);
+                Expr::local_id(result_typ, id)
+            }
+            FuncCall(f, args) => {
+                let id = self.expr_from_ast(f, module);
+                let name = match id {
+                    Expr::Identifier(_, name) => name,
+                    e => unreachable!("call on a non-function expression: {:#?}", e),
+                };
+                match module.known_functions.get(&name).cloned() {
+                    Some(ret_type) => {
+                        let args_expr: Vec<Expr> = args
+                            .iter()
+                            .map(|arg| self.expr_from_ast(&arg.expr, module))
+                            .collect();
+                        let id = ID::new();
+                        let inst = Instruction::FunctionCall{
+                            id: id.clone(),
+                            func_name: format!("@{}", name),
+                            ret_type: ret_type.clone().into(),
+                            args_expr,
+                        };
+                        self.instructions.push(inst);
+                        Expr::local_id(ret_type.clone(), id)
+                    },
+                    None => unreachable!("no function named: `{}` which unlikely happened, semantic module must have a bug there!", name),
+                }
+            }
+            Identifier(name) => match self.lookup_variable(name) {
+                Some((typ, id)) => Expr::local_id(typ.clone(), id.clone()),
+                None => match module.known_functions.get(name) {
+                    Some(ret_type) => Expr::Identifier(ret_type.clone(), name.clone()),
+                    None => unreachable!("no variable named: `{}` which unlikely happened, semantic module must have a bug there!", name),
+                },
+            },
+            _ => Expr::from_ast(expr),
         }
     }
 }
@@ -351,7 +438,7 @@ pub(crate) enum Expr {
     I64(i64),
     F64(f64),
     Bool(bool),
-    String(String),
+    CString(String),
     Identifier(Type, String),
     LocalIdentifier(Type, Rc<RefCell<ID>>),
 }
@@ -363,7 +450,7 @@ impl Expr {
             F64(f) => Expr::F64(*f),
             Int(i) => Expr::I64(*i),
             Bool(b) => Expr::Bool(*b),
-            String(s) => Expr::String(s.clone()),
+            String(s) => Expr::CString(s.clone()),
             expr => unimplemented!("codegen: expr {:#?}", expr),
         }
     }
@@ -372,13 +459,16 @@ impl Expr {
             Expr::I64(..) => Type::Int(64),
             Expr::F64(..) => Type::Float(64),
             Expr::Bool(..) => Type::Int(1),
-            Expr::String(..) => Type::UserDefined("string".to_string()),
+            Expr::CString(s) => Type::Array {
+                len: s.len(),
+                element_type: Type::Int(8).into(),
+            },
             Expr::Identifier(typ, ..) => typ.clone(),
             Expr::LocalIdentifier(typ, ..) => typ.clone(),
         }
     }
 
-    fn id(typ: Type, id: Rc<RefCell<ID>>) -> Expr {
+    fn local_id(typ: Type, id: Rc<RefCell<ID>>) -> Expr {
         Expr::LocalIdentifier(typ, id)
     }
 }

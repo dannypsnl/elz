@@ -23,5 +23,5 @@ fn check(files: Vec<&str>) -> Result<Vec<TopAst>, Box<dyn std::error::Error>> {
     // check program
     let mut semantic_checker = SemanticChecker::new();
     semantic_checker.check_program(&prelude)?;
-    Ok(program)
+    Ok(prelude)
 }

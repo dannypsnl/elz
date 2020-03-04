@@ -39,6 +39,16 @@ impl LLVMValue for ir::TypeDefinition {
     }
 }
 
+impl LLVMValue for ir::GlobalName {
+    fn llvm_represent(&self) -> String {
+        use ir::GlobalName::*;
+        match self {
+            String(s) => s.clone(),
+            ID(id) => format!("@{}", id.borrow()),
+        }
+    }
+}
+
 impl ir::Instruction {
     pub(crate) fn return_void(&self) -> bool {
         match self {
@@ -58,6 +68,26 @@ impl LLVMValue for ir::Instruction {
     fn llvm_represent(&self) -> String {
         use ir::Instruction::*;
         match self {
+            GEP {
+                id,
+                result_type,
+                load_id,
+            } => {
+                let mut s = String::new();
+                s.push_str(
+                    format!(
+                        // FIXME: load_from and indices are hardcode part, remove them
+                        "%{id} = getelementptr {target}, {ptr_to_target} @{load_from}, i32 0, i32 0",
+                        id = id.borrow(),
+                        target = result_type.llvm_represent(),
+                        ptr_to_target =
+                            ir::Type::Pointer(result_type.clone().into()).llvm_represent(),
+                        load_from = load_id.borrow()
+                    )
+                    .as_str(),
+                );
+                s
+            }
             Return(e) => match e {
                 None => "ret void".to_string(),
                 Some(ex) => {
@@ -195,7 +225,7 @@ impl LLVMValue for ir::Function {
 impl LLVMValue for ir::Variable {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
-        s.push_str(self.name.as_str());
+        s.push_str(self.name.llvm_represent().as_str());
         s.push_str(" = ");
         s.push_str("global ");
         s.push_str(self.expr.type_().llvm_represent().as_str());
@@ -207,15 +237,15 @@ impl LLVMValue for ir::Variable {
 
 impl LLVMValue for ir::Type {
     fn llvm_represent(&self) -> String {
-        use ir::Type;
-        let mut s = String::new();
+        use ir::Type::*;
         match self {
-            Type::Void => s.push_str("void"),
-            Type::Float(n) => s.push_str(format!("f{}", n).as_str()),
-            Type::Int(n) => s.push_str(format!("i{}", n).as_str()),
-            Type::UserDefined(name) => s.push_str(format!("%{}*", name).as_str()),
+            Void => format!("void"),
+            Float(n) => format!("f{}", n),
+            Int(n) => format!("i{}", n),
+            Pointer(typ) => format!("{}*", typ.llvm_represent()),
+            Array { len, element_type } => format!("[{} x {}]", len, element_type.llvm_represent()),
+            UserDefined(name) => format!("%{}*", name),
         }
-        s
     }
 }
 
@@ -227,7 +257,7 @@ impl LLVMValue for ir::Expr {
             Expr::F64(f) => s.push_str(format!("{}", f).as_str()),
             Expr::I64(i) => s.push_str(format!("{}", i).as_str()),
             Expr::Bool(b) => s.push_str(format!("{}", b).as_str()),
-            Expr::String(s_l) => s.push_str(format!("{}", s_l).as_str()),
+            Expr::CString(s_l) => s.push_str(format!("\"{}\"", s_l).as_str()),
             Expr::Identifier(_, name) => s.push_str(format!("%{}", name).as_str()),
             Expr::LocalIdentifier(_, id) => s.push_str(format!("%{}", id.borrow()).as_str()),
         }

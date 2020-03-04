@@ -1,6 +1,8 @@
 use super::*;
 use llvm::LLVMValue;
 
+// FIXME: codegen test would fail since prelude module, split them to fix unit test. Related to module's issue.
+
 #[test]
 fn test_codegen_main() {
     let code = "\

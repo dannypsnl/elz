@@ -32,7 +32,7 @@ impl TypeEnv {
             F64(_) => Ok(Type::F64),
             Int(_) => Ok(Type::Int),
             Bool(_) => Ok(Type::Bool),
-            String(_) => Ok(Type::String),
+            String(_) => Ok(self.get_type(location, "string")?.typ),
             List(es) => {
                 let expr_type: Type = if es.len() < 1 {
                     self.free_var()
@@ -230,7 +230,8 @@ impl TypeEnv {
                 "int" => Ok(Type::Int),
                 "f64" => Ok(Type::F64),
                 "bool" => Ok(Type::Bool),
-                "string" => Ok(Type::String),
+                "string" => self.new_normal_class(c),
+                "_c_string" => Ok(Type::String),
                 "List" => self.new_normal_class(c),
                 typ_name => unreachable!("unknown builtin type: {}", typ_name),
             }

@@ -35,16 +35,7 @@ impl CodeGenerator {
                     if top.tag.is_builtin() {
                         continue;
                     }
-                    let body = match &f.body {
-                        Some(b) => Some(ir::Body::from_ast(b, &module)),
-                        None => None,
-                    };
-                    let func = ir::Function::new(
-                        f.name.clone(),
-                        &f.parameters,
-                        ir::Type::from_ast(&f.ret_typ),
-                        body,
-                    );
+                    let func = ir::Function::from_ast(f, None, &mut module);
                     module.push_function(func);
                 }
                 Variable(v) => {
@@ -62,6 +53,7 @@ impl CodeGenerator {
                         "int" => continue,
                         "f64" => continue,
                         "bool" => continue,
+                        "_c_string" => continue,
                         "string" => continue,
                         "List" => continue,
                         _ => {}
@@ -71,15 +63,10 @@ impl CodeGenerator {
                     for member in &c.members {
                         match member {
                             ClassMember::StaticMethod(static_method) => {
-                                let body = match &static_method.body {
-                                    Some(b) => Some(ir::Body::from_ast(b, &module)),
-                                    None => None,
-                                };
-                                let func = ir::Function::new(
-                                    format!("\"{}::{}\"", c.name, static_method.name),
-                                    &static_method.parameters,
-                                    ir::Type::from_ast(&static_method.ret_typ),
-                                    body,
+                                let func = ir::Function::from_ast(
+                                    static_method,
+                                    Some(c.name.clone()),
+                                    &mut module,
                                 );
                                 module.push_function(func);
                             }
@@ -89,15 +76,10 @@ impl CodeGenerator {
                                     0,
                                     Parameter::new("self", ParsedType::TypeName(c.name.clone())),
                                 );
-                                let body = match &method.body {
-                                    Some(b) => Some(ir::Body::from_ast(b, &module)),
-                                    None => None,
-                                };
-                                let func = ir::Function::new(
-                                    format!("\"{}::{}\"", c.name, method.name),
-                                    &method.parameters,
-                                    ir::Type::from_ast(&method.ret_typ),
-                                    body,
+                                let func = ir::Function::from_ast(
+                                    &method,
+                                    Some(c.name.clone()),
+                                    &mut module,
                                 );
                                 module.push_function(func);
                             }
