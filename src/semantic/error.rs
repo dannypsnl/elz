@@ -34,7 +34,7 @@ enum SemanticErrorVariant {
     #[error("dead code after return statement")]
     DeadCodeAfterReturnStatement,
     #[error("redefined member `{}` in class `{}`, already defined at {}", .member_name, .class_name, .previous_definition)]
-    RedefinedField {
+    RedefinedMember {
         member_name: String,
         class_name: String,
         previous_definition: Location,
@@ -69,6 +69,8 @@ impl SemanticError {
             CannotUseClassConstructionOutOfClass() => "cannot use class construction out of class",
             OnlyTraitCanBeSuperType { .. } => "only trait can be super type",
             DeadCodeAfterReturnStatement => "dead code after return statement",
+            RedefinedMember { .. } => "redefined member",
+            NoMemberNamed { .. } => "no member",
         }
         .to_string()
     }
@@ -126,7 +128,7 @@ impl SemanticError {
     pub fn dead_code_after_return_statement(location: &Location) -> SemanticError {
         SemanticError::new(location, SemanticErrorVariant::DeadCodeAfterReturnStatement)
     }
-    pub fn redefined_field(
+    pub fn redefined_member(
         location: &Location,
         member_name: String,
         class_name: String,
@@ -134,7 +136,7 @@ impl SemanticError {
     ) -> SemanticError {
         SemanticError::new(
             location,
-            SemanticErrorVariant::RedefinedField {
+            SemanticErrorVariant::RedefinedMember {
                 member_name,
                 class_name,
                 previous_definition,
