@@ -220,7 +220,7 @@ impl Lexer {
 
 fn whitespace(lexer: &mut Lexer) -> State {
     while let Some(c) = lexer.peek() {
-        if c == ' ' || c == '\n' {
+        if c == ' ' || c == '\r' || c == '\n' {
             if c == '\n' {
                 lexer.next();
                 lexer.start = lexer.offset;

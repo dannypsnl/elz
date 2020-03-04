@@ -33,6 +33,17 @@ enum SemanticErrorVariant {
     OnlyTraitCanBeSuperType { got_type: Type },
     #[error("dead code after return statement")]
     DeadCodeAfterReturnStatement,
+    #[error("redefined member `{}` in class `{}`, already defined at {}", .member_name, .class_name, .previous_definition)]
+    RedefinedField {
+        member_name: String,
+        class_name: String,
+        previous_definition: Location,
+    },
+    #[error("class `{}` has no member named `{}`", .class_name, .member_name)]
+    NoMemberNamed {
+        class_name: String,
+        member_name: String,
+    },
 }
 
 impl SemanticError {
@@ -114,6 +125,34 @@ impl SemanticError {
     }
     pub fn dead_code_after_return_statement(location: &Location) -> SemanticError {
         SemanticError::new(location, SemanticErrorVariant::DeadCodeAfterReturnStatement)
+    }
+    pub fn redefined_field(
+        location: &Location,
+        member_name: String,
+        class_name: String,
+        previous_definition: Location,
+    ) -> SemanticError {
+        SemanticError::new(
+            location,
+            SemanticErrorVariant::RedefinedField {
+                member_name,
+                class_name,
+                previous_definition,
+            },
+        )
+    }
+    pub fn no_member_named(
+        location: &Location,
+        class_name: String,
+        member_name: String,
+    ) -> SemanticError {
+        SemanticError::new(
+            location,
+            SemanticErrorVariant::NoMemberNamed {
+                class_name,
+                member_name,
+            },
+        )
     }
 }
 

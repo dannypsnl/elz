@@ -1,5 +1,6 @@
 use super::error::Result;
 use super::error::SemanticError;
+use crate::ast;
 use crate::ast::*;
 use crate::ast::{Function, ParsedType};
 use crate::lexer::Location;
@@ -68,9 +69,9 @@ impl TypeEnv {
             DotAccess(from, access) => {
                 let typ = self.type_of_expr(from)?;
                 match typ {
-                    Type::ClassType { name, .. } => {
-                        let transform_name = format!("{}::{}", name, access);
-                        self.type_of_expr(&Expr::identifier(location.clone(), transform_name))
+                    Type::ClassType { name, members, .. } => {
+                        let member = members.get_member(location, name, access)?;
+                        Ok(member.typ.clone())
                     }
                     _ => unreachable!(),
                 }
@@ -222,7 +223,7 @@ impl TypeEnv {
             self.from(&f.ret_typ)?.into(),
         ))
     }
-    pub fn new_class(&self, tag: &Option<Tag>, c: &Class) -> Result<Type> {
+    pub fn new_class(&mut self, tag: &Option<Tag>, c: &Class) -> Result<Type> {
         if tag.is_builtin() {
             match c.name.as_str() {
                 "void" => Ok(Type::Void),
@@ -238,16 +239,40 @@ impl TypeEnv {
         }
     }
 
-    fn new_normal_class(&self, c: &Class) -> Result<Type> {
+    fn new_normal_class(&mut self, c: &Class) -> Result<Type> {
         let mut uninitialized_fields = vec![];
+        let mut members = ClassMembers::new();
         for member in &c.members {
             match member {
-                ClassMember::Field(field) => match &field.expr {
-                    None => {
-                        uninitialized_fields.push(field.name.clone());
+                ast::ClassMember::Field(field) => {
+                    let field_type = self.from(&field.typ)?;
+                    members.add_member(
+                        c.name.clone(),
+                        ClassMember {
+                            name: field.name.clone(),
+                            location: field.location.clone(),
+                            typ: field_type.clone(),
+                        },
+                    )?;
+                    match &field.expr {
+                        None => uninitialized_fields.push(field.name.clone()),
+                        Some(expr) => {
+                            // check expression type same as field type
+                            let expr_type = self.type_of_expr(expr)?;
+                            self.unify(&field.location, &field_type, &expr_type)?;
+                        }
                     }
-                    _ => (),
-                },
+                }
+                ast::ClassMember::Method(method) => {
+                    members.add_member(
+                        c.name.clone(),
+                        ClassMember {
+                            name: method.name.clone(),
+                            location: method.location.clone(),
+                            typ: self.new_function_type(method)?,
+                        },
+                    )?;
+                }
                 _ => (),
             }
         }
@@ -264,6 +289,7 @@ impl TypeEnv {
             parents,
             type_parameters: vec![],
             uninitialized_fields,
+            members,
         })
     }
 }
@@ -326,6 +352,50 @@ impl TypeInfo {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct ClassMember {
+    name: String,
+    location: Location,
+    typ: Type,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ClassMembers(HashMap<String, ClassMember>);
+
+impl ClassMembers {
+    fn new() -> ClassMembers {
+        ClassMembers(HashMap::new())
+    }
+    fn add_member(&mut self, class_name: String, member: ClassMember) -> Result<()> {
+        let location = &member.location.clone();
+        let member_name = member.name.clone();
+        match self.0.insert(member.name.clone(), member) {
+            Some(previous_field) => Err(SemanticError::redefined_field(
+                location,
+                member_name,
+                class_name,
+                previous_field.location,
+            )),
+            None => Ok(()),
+        }
+    }
+    fn get_member(
+        &self,
+        location: &Location,
+        class_name: String,
+        name: &String,
+    ) -> Result<&ClassMember> {
+        match self.0.get(name) {
+            Some(v) => Ok(v),
+            None => Err(SemanticError::no_member_named(
+                location,
+                class_name,
+                name.clone(),
+            )),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum Type {
     Void,
     Int,
@@ -339,6 +409,7 @@ pub enum Type {
         parents: Vec<Type>,
         type_parameters: Vec<Type>,
         uninitialized_fields: Vec<String>,
+        members: ClassMembers,
     },
     FunctionType(Vec<Type>, Box<Type>),
     FreeVar(usize),
