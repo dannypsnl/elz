@@ -143,13 +143,11 @@ fn llvm_if_else() {
 
 // helpers, must put tests before this line
 fn gen_code(code: &'static str) -> ir::Module {
-    let mut program = crate::parser::Parser::parse_program("", code)
+    let program = crate::parser::Parser::parse_program("", code)
         .map_err(|err| {
             panic!("{}", err);
         })
         .unwrap();
-    let mut prelude = crate::parser::parse_prelude();
-    prelude.append(&mut program);
     let code_generator = CodeGenerator::new();
-    code_generator.generate_module(&prelude)
+    code_generator.generate_module(&program)
 }
