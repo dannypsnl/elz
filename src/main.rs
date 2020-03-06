@@ -26,17 +26,17 @@ fn main() {
         )
         .get_matches();
 
-    let result = if let Some(compile_args) = matches.subcommand_matches(cmd::compile::CMD_NAME) {
+    if let Some(compile_args) = matches.subcommand_matches(cmd::compile::CMD_NAME) {
         let files: Vec<_> = compile_args.values_of("INPUT").unwrap().collect();
-        cmd::compile::compile(files)
+        match cmd::compile::compile(files) {
+            Ok(..) => (),
+            Err(..) => println!("compile failed"),
+        }
     } else if let Some(compile_args) = matches.subcommand_matches(cmd::fmt::CMD_NAME) {
         let files: Vec<_> = compile_args.values_of("INPUT").unwrap().collect();
-        cmd::fmt::format(files)
-    } else {
-        Ok(())
-    };
-    match result {
-        Ok(()) => (),
-        Err(err) => println!("{}", err),
+        match cmd::fmt::format(files) {
+            Ok(..) => (),
+            Err(..) => println!("format failed"),
+        }
     }
 }
