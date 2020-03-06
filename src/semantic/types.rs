@@ -370,7 +370,7 @@ impl ClassMembers {
         let location = &member.location.clone();
         let member_name = member.name.clone();
         match self.0.insert(member.name.clone(), member) {
-            Some(previous_field) => Err(SemanticError::redefined_field(
+            Some(previous_field) => Err(SemanticError::redefined_member(
                 location,
                 member_name,
                 class_name,

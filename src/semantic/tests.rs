@@ -3,7 +3,7 @@ use crate::parser::{parse_prelude, Parser};
 
 #[test]
 fn test_redefine_variable_would_get_error() {
-    let code = "\
+    let code = "
     x: int = 1;
     x: int = 2;
     ";
@@ -13,7 +13,7 @@ fn test_redefine_variable_would_get_error() {
 
 #[test]
 fn test_function_and_variable_use_the_same_space() {
-    let code = "\
+    let code = "
     x: int = 1;
     x(): void {}
     ";
@@ -23,7 +23,7 @@ fn test_function_and_variable_use_the_same_space() {
 
 #[test]
 fn test_type_mismatched() {
-    let code = "\
+    let code = "
     x: int = \"str\";
     ";
     let result = check_code(code);
@@ -32,7 +32,7 @@ fn test_type_mismatched() {
 
 #[test]
 fn call_non_void_function_as_statement() {
-    let code = "\
+    let code = "
     main(): void {
       foo();
     }
@@ -43,93 +43,85 @@ fn call_non_void_function_as_statement() {
 }
 
 #[test]
-fn call_void_function_as_statement() {
-    let code = "\
+fn call_void_function_as_statement() -> Result<()> {
+    let code = "
     main(): void {
       foo();
     }
     foo(): void {}
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
-fn test_check_function_call() {
-    let code = "\
+fn test_check_function_call() -> Result<()> {
+    let code = "
     x(a: int): int = a;
     y: int = x(2);
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
-fn test_unify_list_type() {
-    let code = "\
+fn test_unify_list_type() -> Result<()> {
+    let code = "
     x: List[int] = [1, 2, 3];
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
-fn test_unify_free_var() {
-    let code = "\
+fn test_unify_free_var() -> Result<()> {
+    let code = "
     x: List[int] = [];
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
-fn test_check_return_nothing() {
-    let code = "\
+fn test_check_return_nothing() -> Result<()> {
+    let code = "
     x(): void {
       return;
     }
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
-fn test_check_local_variable_define() {
-    let code = "\
+fn test_check_local_variable_define() -> Result<()> {
+    let code = "
     x(): int {
       y: int = 1;
       return y;
     }
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
-fn test_static_method_check() {
-    let code = "\
+fn test_static_method_check() -> Result<()> {
+    let code = "
     class Foo {
       ::new(): Foo = Foo {};
     }
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
-fn test_method_check() {
-    let code = "\
+fn test_method_check() -> Result<()> {
+    let code = "
     class Foo {
       bar(): int = 1;
     }
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
 fn test_all_class_field_must_init() {
-    let code = "\
+    let code = "
     class Foo {
       bar: int;
       ::new(): Foo = Foo {};
@@ -141,7 +133,7 @@ fn test_all_class_field_must_init() {
 
 #[test]
 fn test_cannot_use_class_construction_on_non_class_type() {
-    let code = "\
+    let code = "
     class Foo {
       ::new(): Foo = int {};
     }
@@ -152,7 +144,7 @@ fn test_cannot_use_class_construction_on_non_class_type() {
 
 #[test]
 fn test_cannot_use_class_construction_out_of_class() {
-    let code = "\
+    let code = "
     class Foo {}
     x: Foo = Foo {};
     ";
@@ -161,8 +153,8 @@ fn test_cannot_use_class_construction_out_of_class() {
 }
 
 #[test]
-fn test_global_should_be_able_to_use_class_static_method() {
-    let code = "\
+fn test_global_should_be_able_to_use_class_static_method() -> Result<()> {
+    let code = "
     main(): void {
       foo: Foo = Foo::new();
     }
@@ -171,13 +163,12 @@ fn test_global_should_be_able_to_use_class_static_method() {
       ::new(): Foo = Foo {};
     }
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
 fn test_static_method_should_not_available_in_class_scope() {
-    let code = "\
+    let code = "
     class Foo {
       ::new2(): void {new1();}
       ::new1(): void {}
@@ -188,8 +179,8 @@ fn test_static_method_should_not_available_in_class_scope() {
 }
 
 #[test]
-fn method() {
-    let code = "\
+fn method() -> Result<()> {
+    let code = "
     main(): void {
       foo: Foo = Foo::new();
       foo.bar();
@@ -200,13 +191,12 @@ fn method() {
       bar(): void;
     }
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]
-fn test_method_should_be_able_to_call_with_instance() {
-    let code = "\
+fn test_method_should_be_able_to_call_with_instance() -> Result<()> {
+    let code = "
     class Foo {
       ::new(): Foo {
         f: Foo = Foo {};
@@ -216,8 +206,7 @@ fn test_method_should_be_able_to_call_with_instance() {
       bar(): void;
     }
     ";
-    let result = check_code(code);
-    assert_eq!(result.is_ok(), true);
+    check_code(code)
 }
 
 #[test]

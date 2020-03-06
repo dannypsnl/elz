@@ -34,7 +34,7 @@ enum SemanticErrorVariant {
     #[error("dead code after return statement")]
     DeadCodeAfterReturnStatement,
     #[error("redefined member `{}` in class `{}`, already defined at {}", .member_name, .class_name, .previous_definition)]
-    RedefinedField {
+    RedefinedMember {
         member_name: String,
         class_name: String,
         previous_definition: Location,
@@ -53,6 +53,28 @@ impl SemanticError {
             err,
         }
     }
+    pub(crate) fn location(&self) -> Location {
+        self.location.clone()
+    }
+    pub(crate) fn message(&self) -> String {
+        use SemanticErrorVariant::*;
+        match &self.err {
+            NameRedefined(..) => "name redefined",
+            TypeMismatched(..) => "type mismatched",
+            NoVariableNamed(..) => "no variable named",
+            NoTypeNamed(..) => "no type named",
+            CallOnNonFunctionType(..) => "call on non function type",
+            FieldsMissingInit(..) => "field missing init",
+            CannotConstructNonClassType(..) => "cannot construct non class type",
+            CannotUseClassConstructionOutOfClass() => "cannot use class construction out of class",
+            OnlyTraitCanBeSuperType { .. } => "only trait can be super type",
+            DeadCodeAfterReturnStatement => "dead code after return statement",
+            RedefinedMember { .. } => "redefined member",
+            NoMemberNamed { .. } => "no member",
+        }
+        .to_string()
+    }
+
     pub fn name_redefined<T: ToString>(location: &Location, name: T) -> SemanticError {
         SemanticError::new(
             location,
@@ -106,7 +128,7 @@ impl SemanticError {
     pub fn dead_code_after_return_statement(location: &Location) -> SemanticError {
         SemanticError::new(location, SemanticErrorVariant::DeadCodeAfterReturnStatement)
     }
-    pub fn redefined_field(
+    pub fn redefined_member(
         location: &Location,
         member_name: String,
         class_name: String,
@@ -114,7 +136,7 @@ impl SemanticError {
     ) -> SemanticError {
         SemanticError::new(
             location,
-            SemanticErrorVariant::RedefinedField {
+            SemanticErrorVariant::RedefinedMember {
                 member_name,
                 class_name,
                 previous_definition,

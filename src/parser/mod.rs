@@ -7,6 +7,7 @@ mod error;
 #[cfg(test)]
 mod tests;
 
+use crate::lexer::Location;
 use error::ParseError;
 use error::Result;
 use std::collections::HashMap;
@@ -701,7 +702,11 @@ impl Parser {
     }
     fn get_token(&self, n: usize) -> Result<Token> {
         if self.tokens.len() <= n {
-            Err(ParseError::EOF)
+            let loc = match self.tokens.last() {
+                None => Location::new(self.file_name.clone(), 0, 0, 0, 0),
+                Some(tk) => tk.location(),
+            };
+            Err(ParseError::eof(&loc))
         } else {
             Ok(self.tokens[n].clone())
         }
