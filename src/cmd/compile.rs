@@ -36,7 +36,7 @@ fn check(
     // check program
     let mut semantic_checker = SemanticChecker::new();
     match semantic_checker.check_program(&prelude) {
-        Ok(..) => Ok(program),
+        Ok(..) => Ok(prelude),
         Err(err) => {
             file_reporter.add_diagnostic(err.location(), format!("{}", err), err.message());
             file_reporter.report(reporter);
