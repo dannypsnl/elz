@@ -1,14 +1,16 @@
 use crate::ast;
 use crate::ast::*;
-use crate::codegen::ir::Expr::LocalIdentifier;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Formatter;
 use std::rc::Rc;
 
 pub struct Module {
+    // helpers
     pub(crate) known_functions: HashMap<String, Type>,
     pub(crate) known_variables: HashMap<String, Type>,
+    pub(crate) known_types: HashMap<String, TypeDefinition>,
+    // output parts
     pub(crate) functions: Vec<Function>,
     pub(crate) variables: Vec<Variable>,
     pub(crate) types: Vec<TypeDefinition>,
@@ -19,6 +21,7 @@ impl Module {
         Module {
             known_functions: HashMap::new(),
             known_variables: HashMap::new(),
+            known_types: HashMap::new(),
             functions: vec![],
             variables: vec![],
             types: vec![],
@@ -39,7 +42,7 @@ impl Module {
         self.variables.push(v);
     }
     pub(crate) fn push_type(&mut self, type_name: &String, fields: &Vec<ClassMember>) {
-        self.types.push(TypeDefinition {
+        let typ = TypeDefinition {
             name: type_name.clone(),
             fields: fields
                 .iter()
@@ -48,18 +51,43 @@ impl Module {
                     _ => false,
                 })
                 .map(|member| match member {
-                    ClassMember::Field(field) => Type::from_ast(&field.typ),
+                    ClassMember::Field(field) => Field {
+                        name: field.name.clone(),
+                        typ: Type::from_ast(&field.typ),
+                    },
                     _ => unreachable!(),
                 })
                 .collect(),
-        });
+        };
+        self.known_types.insert(type_name.clone(), typ.clone());
+        self.types.push(typ);
+    }
+    pub(crate) fn lookup_type(&self, type_name: &String) -> &TypeDefinition {
+        self.known_types.get(type_name).unwrap()
     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TypeDefinition {
     pub(crate) name: String,
-    pub(crate) fields: Vec<Type>,
+    pub(crate) fields: Vec<Field>,
+}
+
+impl TypeDefinition {
+    fn access_field(&self, field_name: &String) -> usize {
+        for (i, f) in self.fields.iter().enumerate() {
+            if f.name == *field_name {
+                return i;
+            }
+        }
+        unreachable!()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct Field {
+    pub(crate) name: String,
+    pub(crate) typ: Type,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -147,25 +175,11 @@ impl Instruction {
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum LocalVariable {
     Name { typ: Type, name: String },
-    ID { typ: Type, id: Rc<RefCell<ID>> },
 }
 
 impl LocalVariable {
-    fn from_id(id: Rc<RefCell<ID>>, typ: Type) -> LocalVariable {
-        LocalVariable::ID { typ, id }
-    }
     fn from_name(name: String, typ: Type) -> LocalVariable {
         LocalVariable::Name { typ, name }
-    }
-    fn set_id(&mut self, value: u64) -> bool {
-        use LocalVariable::*;
-        match self {
-            Name { .. } => false,
-            ID { id, .. } => {
-                id.borrow_mut().set_id(value);
-                true
-            }
-        }
     }
 }
 
@@ -199,11 +213,6 @@ impl Body {
         };
         // update local identifier value
         let mut counter = 1;
-        for (_, local_var) in &mut body.variables {
-            if local_var.set_id(counter) {
-                counter += 1;
-            }
-        }
         for inst in &mut body.instructions {
             if inst.set_id(counter) {
                 counter += 1;
@@ -362,6 +371,7 @@ pub(crate) enum Type {
     Float(usize),
     Pointer(Rc<Type>),
     Array { len: usize, element_type: Rc<Type> },
+    Structure { fields: Vec<Type> },
     UserDefined(String),
 }
 
@@ -402,11 +412,38 @@ impl Body {
                 self.instructions.push(inst);
                 Expr::local_id(Type::Pointer(Type::Int(8).into()), str_load_id)
             }
+            ClassConstruction(class_name, init_fields) => {
+                let type_def = module.lookup_type(class_name).clone();
+                let mut fields = vec![];
+                for f in type_def.fields {
+                    let expr = self.expr_from_ast(init_fields.get(&f.name).unwrap(), module);
+                    fields.push((f.typ, Box::new(expr)));
+                }
+                Expr::Structure { fields }
+            }
             DotAccess(from, access) => {
                 // TODO:
                 //  - from access to indices to use GEP
-                self.expr_from_ast(from, module)
-            },
+                let expr = self.expr_from_ast(from, module);
+                match expr.type_() {
+                    Type::UserDefined(type_name) => {
+                        let type_def = module.lookup_type(&type_name);
+                        let index = type_def.access_field(access);
+                        let id = ID::new();
+                        let load_id = ID::new();
+                        Instruction::GEP {
+                            id: id.clone(),
+                            result_type: Type::Void,
+                            load_id,
+                            indices: vec![index as u64],
+                        };
+                        Expr::local_id(expr.type_(), id)
+                    }
+                    _ => unreachable!(
+                        "dot access should not apply on non-class type, semantic module has a bug"
+                    ),
+                }
+            }
             Binary(lhs, rhs, op) => {
                 let id = ID::new();
                 let lhs = self.expr_from_ast(lhs, module);
@@ -451,16 +488,15 @@ impl Body {
                 }
             }
             Identifier(name) => match self.lookup_variable(name) {
-                Some(local_var) => {
-                    match local_var {
-                        LocalVariable::Name {name, typ} => Expr::Identifier(typ.clone(),name.clone()),
-                        LocalVariable::ID { id, typ} => Expr::local_id(typ.clone(), id.clone())
+                Some(local_var) => match local_var {
+                    LocalVariable::Name { name, typ } => {
+                        Expr::Identifier(typ.clone(), name.clone())
                     }
                 },
-                None => match module.known_functions.get(name) {
-                    Some(ret_type) => Expr::Identifier(ret_type.clone(), name.clone()),
-                    None => unreachable!("no variable named: `{}` which unlikely happened, semantic module must have a bug there!", name),
-                },
+                None => {
+                    let ret_type = module.known_functions.get(name).expect(format!("no variable named: `{}` which unlikely happened, semantic module must have a bug there!", name).as_str());
+                    Expr::Identifier(ret_type.clone(), name.clone())
+                }
             },
             _ => Expr::from_ast(expr),
         }
@@ -473,6 +509,7 @@ pub(crate) enum Expr {
     F64(f64),
     Bool(bool),
     CString(String),
+    Structure { fields: Vec<(Type, Box<Expr>)> },
     Identifier(Type, String),
     LocalIdentifier(Type, Rc<RefCell<ID>>),
 }
@@ -496,6 +533,9 @@ impl Expr {
             Expr::CString(s) => Type::Array {
                 len: s.len(),
                 element_type: Type::Int(8).into(),
+            },
+            Expr::Structure { fields } => Type::Structure {
+                fields: fields.iter().map(|(typ, ..)| typ.clone()).collect(),
             },
             Expr::Identifier(typ, ..) => typ.clone(),
             Expr::LocalIdentifier(typ, ..) => typ.clone(),

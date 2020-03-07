@@ -39,6 +39,12 @@ impl LLVMValue for ir::TypeDefinition {
     }
 }
 
+impl LLVMValue for ir::Field {
+    fn llvm_represent(&self) -> String {
+        self.name.clone()
+    }
+}
+
 impl LLVMValue for ir::GlobalName {
     fn llvm_represent(&self) -> String {
         use ir::GlobalName::*;
@@ -247,6 +253,18 @@ impl LLVMValue for ir::Type {
             Int(n) => format!("i{}", n),
             Pointer(typ) => format!("{}*", typ.llvm_represent()),
             Array { len, element_type } => format!("[{} x {}]", len, element_type.llvm_represent()),
+            Structure { fields } => {
+                let mut s = String::new();
+                s.push_str("{ ");
+                for (i, field_type) in fields.iter().enumerate() {
+                    if i != 0 {
+                        s.push_str(", ")
+                    }
+                    s.push_str(format!("{}", field_type.llvm_represent(),).as_str());
+                }
+                s.push_str(" }");
+                s
+            }
             UserDefined(name) => format!("%{}*", name),
         }
     }
@@ -255,15 +273,32 @@ impl LLVMValue for ir::Type {
 impl LLVMValue for ir::Expr {
     fn llvm_represent(&self) -> String {
         use ir::Expr;
-        let mut s = String::new();
         match self {
-            Expr::F64(f) => s.push_str(format!("{}", f).as_str()),
-            Expr::I64(i) => s.push_str(format!("{}", i).as_str()),
-            Expr::Bool(b) => s.push_str(format!("{}", b).as_str()),
-            Expr::CString(s_l) => s.push_str(format!("\"{}\"", s_l).as_str()),
-            Expr::Identifier(_, name) => s.push_str(format!("%{}", name).as_str()),
-            Expr::LocalIdentifier(_, id) => s.push_str(format!("%{}", id.borrow()).as_str()),
+            Expr::F64(f) => format!("{}", f),
+            Expr::I64(i) => format!("{}", i),
+            Expr::Bool(b) => format!("{}", b),
+            Expr::CString(s_l) => format!("\"{}\"", s_l),
+            Expr::Identifier(_, name) => format!("%{}", name),
+            Expr::LocalIdentifier(_, id) => format!("%{}", id.borrow()),
+            Expr::Structure { fields } => {
+                let mut s = String::new();
+                s.push_str("{ ");
+                for (i, (field_type, field_expr)) in fields.iter().enumerate() {
+                    if i != 0 {
+                        s.push_str(", ")
+                    }
+                    s.push_str(
+                        format!(
+                            "{ty} {expr}",
+                            ty = field_type.llvm_represent(),
+                            expr = field_expr.llvm_represent()
+                        )
+                        .as_str(),
+                    );
+                }
+                s.push_str(" }");
+                s
+            }
         }
-        s
     }
 }

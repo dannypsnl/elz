@@ -49,13 +49,7 @@ impl CodeGenerator {
                         // @Codegen(Omit)
                         // class int {}
                         // ```
-                        "void" => continue,
-                        "int" => continue,
-                        "f64" => continue,
-                        "bool" => continue,
-                        "_c_string" => continue,
-                        "string" => continue,
-                        "List" => continue,
+                        "void" | "int" | "f64" | "bool" | "_c_string" | "List" => continue,
                         _ => {}
                     }
                     module.push_type(&c.name, &c.members);
