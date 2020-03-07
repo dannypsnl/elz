@@ -72,12 +72,12 @@ impl LLVMValue for ir::Instruction {
                 id,
                 result_type,
                 load_id,
+                indices,
             } => {
                 let mut s = String::new();
                 s.push_str(
                     format!(
-                        // FIXME: load_from and indices are hardcode part, remove them
-                        "%{id} = getelementptr {target}, {ptr_to_target} @{load_from}, i32 0, i32 0",
+                        "%{id} = getelementptr {target}, {ptr_to_target} @{load_from}",
                         id = id.borrow(),
                         target = result_type.llvm_represent(),
                         ptr_to_target =
@@ -86,6 +86,9 @@ impl LLVMValue for ir::Instruction {
                     )
                     .as_str(),
                 );
+                for i in indices {
+                    s.push_str(format!(", i32 {}", i).as_str())
+                }
                 s
             }
             Return(e) => match e {

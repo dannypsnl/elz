@@ -109,6 +109,7 @@ pub(crate) enum Instruction {
         id: Rc<RefCell<ID>>,
         result_type: Type,
         load_id: Rc<RefCell<ID>>,
+        indices: Vec<u64>,
     },
     FunctionCall {
         id: Rc<RefCell<ID>>,
@@ -396,6 +397,7 @@ impl Body {
                         element_type: Type::Int(8).into(),
                     },
                     load_id: str_literal_id,
+                    indices: vec![0, 0],
                 };
                 self.instructions.push(inst);
                 Expr::local_id(Type::Pointer(Type::Int(8).into()), str_load_id)
