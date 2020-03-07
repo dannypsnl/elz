@@ -1,5 +1,6 @@
 use crate::ast;
 use crate::ast::*;
+use crate::codegen::ir::Expr::LocalIdentifier;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Formatter;
@@ -143,10 +144,35 @@ impl Instruction {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub(crate) enum LocalVariable {
+    Name { typ: Type, name: String },
+    ID { typ: Type, id: Rc<RefCell<ID>> },
+}
+
+impl LocalVariable {
+    fn from_id(id: Rc<RefCell<ID>>, typ: Type) -> LocalVariable {
+        LocalVariable::ID { typ, id }
+    }
+    fn from_name(name: String, typ: Type) -> LocalVariable {
+        LocalVariable::Name { typ, name }
+    }
+    fn set_id(&mut self, value: u64) -> bool {
+        use LocalVariable::*;
+        match self {
+            Name { .. } => false,
+            ID { id, .. } => {
+                id.borrow_mut().set_id(value);
+                true
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Body {
     pub(crate) instructions: Vec<Instruction>,
     // local variables(including parameters)
-    variables: HashMap<String, (Type, Rc<RefCell<ID>>)>,
+    variables: HashMap<String, LocalVariable>,
 }
 
 impl Body {
@@ -155,7 +181,8 @@ impl Body {
 
         for p in parameters {
             // FIXME: type from duplicate in ir::Function, share information
-            variables.insert(p.name.clone(), (Type::from_ast(&p.typ), ID::new()));
+            let local_var = LocalVariable::from_name(p.name.clone(), Type::from_ast(&p.typ));
+            variables.insert(p.name.clone(), local_var);
         }
 
         let mut body = Body {
@@ -171,8 +198,8 @@ impl Body {
         };
         // update local identifier value
         let mut counter = 1;
-        for (_, (_, v_id)) in &mut body.variables {
-            if v_id.borrow_mut().set_id(counter) {
+        for (_, local_var) in &mut body.variables {
+            if local_var.set_id(counter) {
                 counter += 1;
             }
         }
@@ -184,7 +211,7 @@ impl Body {
         body
     }
 
-    fn lookup_variable(&self, name: &String) -> Option<&(Type, Rc<RefCell<ID>>)> {
+    fn lookup_variable(&self, name: &String) -> Option<&LocalVariable> {
         self.variables.get(name)
     }
 
@@ -422,7 +449,12 @@ impl Body {
                 }
             }
             Identifier(name) => match self.lookup_variable(name) {
-                Some((typ, id)) => Expr::local_id(typ.clone(), id.clone()),
+                Some(local_var) => {
+                    match local_var {
+                        LocalVariable::Name {name, typ} => Expr::Identifier(typ.clone(),name.clone()),
+                        LocalVariable::ID { id, typ} => Expr::local_id(typ.clone(), id.clone())
+                    }
+                },
                 None => match module.known_functions.get(name) {
                     Some(ret_type) => Expr::Identifier(ret_type.clone(), name.clone()),
                     None => unreachable!("no variable named: `{}` which unlikely happened, semantic module must have a bug there!", name),
