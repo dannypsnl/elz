@@ -261,7 +261,7 @@ impl FormattedElz for Expr {
                 s.push_str(")");
                 s
             }
-            ExprVariant::DotAccess(var, field_name) => {
+            ExprVariant::MemberAccess(var, field_name) => {
                 format!("{}.{}", var.formatted_elz(level), field_name)
             }
             ExprVariant::Identifier(name) => name.clone(),

@@ -66,7 +66,7 @@ impl TypeEnv {
                     )),
                 }
             }
-            DotAccess(from, access) => {
+            MemberAccess(from, access) => {
                 let typ = self.type_of_expr(from)?;
                 match typ {
                     Type::ClassType { name, members, .. } => {

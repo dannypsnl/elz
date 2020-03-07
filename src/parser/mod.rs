@@ -490,7 +490,7 @@ impl Parser {
             TkType::Dot => {
                 self.predict_and_consume(vec![TkType::Dot])?;
                 let field_name = self.parse_access_identifier()?;
-                self.parse_primary(Expr::dot_access(tok.location(), unary, field_name))
+                self.parse_primary(Expr::member_access(tok.location(), unary, field_name))
             }
             _ => Ok(unary),
         }
