@@ -77,7 +77,6 @@ impl LLVMValue for ir::Instruction {
             ),
             GEP {
                 id,
-                result_type,
                 load_from,
                 indices,
             } => {
@@ -86,9 +85,8 @@ impl LLVMValue for ir::Instruction {
                     format!(
                         "%{id} = getelementptr {target}, {ptr_to_target} {load_from}",
                         id = id.borrow(),
-                        target = result_type.llvm_represent(),
-                        ptr_to_target =
-                            ir::Type::Pointer(result_type.clone().into()).llvm_represent(),
+                        target = load_from.type_().element_type().llvm_represent(),
+                        ptr_to_target = load_from.type_().llvm_represent(),
                         load_from = load_from.llvm_represent()
                     )
                     .as_str(),
@@ -259,7 +257,8 @@ impl LLVMValue for ir::Type {
             Int(n) => format!("i{}", n),
             Pointer(typ) => format!("{}*", typ.llvm_represent()),
             Array { len, element_type } => format!("[{} x {}]", len, element_type.llvm_represent()),
-            UserDefined(name) => format!("%{}", name),
+            UserDefined(name) => format!("%{}*", name),
+            Named(name) => format!("%{}", name),
         }
     }
 }
@@ -271,7 +270,7 @@ impl LLVMValue for ir::Expr {
             Expr::F64(f) => format!("{}", f),
             Expr::I64(i) => format!("{}", i),
             Expr::Bool(b) => format!("{}", b),
-            Expr::CString(s_l) => format!("\"{}\"", s_l),
+            Expr::CString(s_l) => format!("c\"{}\"", s_l),
             Expr::Identifier(_, name) => format!("%{}", name),
             Expr::LocalIdentifier(_, id) => format!("%{}", id.borrow()),
             Expr::GlobalIdentifier(_, id) => format!("@{}", id.borrow()),

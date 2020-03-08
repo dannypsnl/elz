@@ -124,7 +124,6 @@ pub(crate) enum Instruction {
     Goto(Rc<Label>),
     GEP {
         id: Rc<RefCell<ID>>,
-        result_type: Type,
         load_from: Expr,
         indices: Vec<u64>,
     },
@@ -373,6 +372,7 @@ pub(crate) enum Type {
     Pointer(Rc<Type>),
     Array { len: usize, element_type: Rc<Type> },
     UserDefined(String),
+    Named(String),
 }
 
 impl Type {
@@ -385,6 +385,15 @@ impl Type {
             "bool" => Int(1),
             "_c_string" => Pointer(Int(8).into()),
             name => UserDefined(name.to_string()),
+        }
+    }
+
+    pub(crate) fn element_type(&self) -> Rc<Type> {
+        use Type::*;
+        match self {
+            UserDefined(name) => Named(name.clone()).into(),
+            Pointer(element_type) | Array { element_type, .. } => element_type.clone(),
+            _ => unreachable!("`{:?}` don't have element type", self),
         }
     }
 }
@@ -400,25 +409,19 @@ impl Body {
                     Expr::CString(string_literal.clone()),
                 ));
                 let str_load_id = ID::new();
+                let array_type = Type::Array {
+                    len: string_literal.len(),
+                    element_type: Type::Int(8).into(),
+                };
                 let inst = Instruction::GEP {
                     id: str_load_id.clone(),
-                    result_type: Type::Array {
-                        len: string_literal.len(),
-                        element_type: Type::Int(8).into(),
-                    },
-                    load_from: Expr::global_id(
-                        Type::Array {
-                            len: string_literal.len(),
-                            element_type: Type::Int(8).into(),
-                        },
-                        str_literal_id,
-                    ),
+                    load_from: Expr::global_id(Type::Pointer(array_type.into()), str_literal_id),
                     indices: vec![0, 0],
                 };
                 self.instructions.push(inst);
                 let ptr_to_str = Expr::local_id(Type::Pointer(Type::Int(8).into()), str_load_id);
                 let id = ID::new();
-                let ret_type = Type::Pointer(Type::UserDefined("string".to_string()).into());
+                let ret_type: Type = Type::UserDefined("string".to_string()).into();
                 let inst = Instruction::FunctionCall {
                     id: id.clone(),
                     func_name: format!("@\"string::new\""),
@@ -432,11 +435,18 @@ impl Body {
                 // TODO:
                 //  1. gep fields
                 //  2. store value to fields
-                let id = ID::new();
+                let alloca_id = ID::new();
                 let type_name = Type::UserDefined(class_name.clone());
                 let inst = Instruction::Alloca {
-                    id: id.clone(),
+                    id: alloca_id.clone(),
                     typ: type_name.clone(),
+                };
+                self.instructions.push(inst);
+                let id = ID::new();
+                let type_name = Type::UserDefined(class_name.clone());
+                let inst = Instruction::Load {
+                    id: id.clone(),
+                    load_from: Expr::local_id(type_name.clone(), alloca_id),
                 };
                 self.instructions.push(inst);
                 Expr::local_id(type_name, id)
@@ -463,7 +473,6 @@ impl Body {
                 let gep_id = ID::new();
                 let inst = Instruction::GEP {
                     id: gep_id.clone(),
-                    result_type: v.type_(),
                     load_from: v.clone(),
                     indices: vec![0, i],
                 };
