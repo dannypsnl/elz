@@ -384,10 +384,10 @@ impl Expr {
             value: ExprVariant::FuncCall(expr.into(), args),
         }
     }
-    pub fn dot_access<T: ToString>(location: Location, from: Expr, access: T) -> Expr {
+    pub fn member_access<T: ToString>(location: Location, from: Expr, access: T) -> Expr {
         Expr {
             location,
-            value: ExprVariant::DotAccess(from.into(), access.to_string()),
+            value: ExprVariant::MemberAccess(from.into(), access.to_string()),
         }
     }
     pub fn identifier<T: ToString>(location: Location, id: T) -> Expr {
@@ -425,7 +425,7 @@ pub enum ExprVariant {
     /// `a(b)`
     FuncCall(Box<Expr>, Vec<Argument>),
     /// `foo.bar`, `foo.bar()`, `foo().bar`
-    DotAccess(Box<Expr>, String),
+    MemberAccess(Box<Expr>, String),
     /// `n`
     Identifier(String),
     /// We can have a class construction expression: `Foo { bar: 0 }` for definition `class Foo { bar: int; }`
