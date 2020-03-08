@@ -9,7 +9,6 @@ pub struct Module {
     // helpers
     pub(crate) known_functions: HashMap<String, Type>,
     pub(crate) known_variables: HashMap<String, Type>,
-    pub(crate) known_types: HashMap<String, TypeDefinition>,
     // output parts
     pub(crate) functions: Vec<Function>,
     pub(crate) variables: Vec<Variable>,
@@ -21,7 +20,6 @@ impl Module {
         Module {
             known_functions: HashMap::new(),
             known_variables: HashMap::new(),
-            known_types: HashMap::new(),
             functions: vec![],
             variables: vec![],
             types: vec![],
@@ -59,11 +57,9 @@ impl Module {
                 })
                 .collect(),
         };
-        self.known_types.insert(type_name.clone(), typ.clone());
+        self.known_variables
+            .insert(type_name.clone(), Type::Structure(typ.clone()));
         self.types.push(typ);
-    }
-    pub(crate) fn lookup_type(&self, type_name: &String) -> &TypeDefinition {
-        self.known_types.get(type_name).unwrap()
     }
 }
 
@@ -71,17 +67,6 @@ impl Module {
 pub(crate) struct TypeDefinition {
     pub(crate) name: String,
     pub(crate) fields: Vec<Field>,
-}
-
-impl TypeDefinition {
-    fn access_field(&self, field_name: &String) -> usize {
-        for (i, f) in self.fields.iter().enumerate() {
-            if f.name == *field_name {
-                return i;
-            }
-        }
-        unreachable!()
-    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -136,7 +121,7 @@ pub(crate) enum Instruction {
     GEP {
         id: Rc<RefCell<ID>>,
         result_type: Type,
-        load_id: Rc<RefCell<ID>>,
+        load_from: Expr,
         indices: Vec<u64>,
     },
     FunctionCall {
@@ -150,6 +135,10 @@ pub(crate) enum Instruction {
         op_name: String,
         lhs: Expr,
         rhs: Expr,
+    },
+    Alloca {
+        id: Rc<RefCell<ID>>,
+        typ: Type,
     },
 }
 
@@ -371,7 +360,7 @@ pub(crate) enum Type {
     Float(usize),
     Pointer(Rc<Type>),
     Array { len: usize, element_type: Rc<Type> },
-    Structure { fields: Vec<Type> },
+    Structure(TypeDefinition),
     UserDefined(String),
 }
 
@@ -406,43 +395,54 @@ impl Body {
                         len: string_literal.len(),
                         element_type: Type::Int(8).into(),
                     },
-                    load_id: str_literal_id,
+                    load_from: Expr::local_id(
+                        Type::Array {
+                            len: string_literal.len(),
+                            element_type: Type::Int(8).into(),
+                        },
+                        str_literal_id,
+                    ),
                     indices: vec![0, 0],
                 };
                 self.instructions.push(inst);
-                Expr::local_id(Type::Pointer(Type::Int(8).into()), str_load_id)
+                let ptr_to_str = Expr::local_id(Type::Pointer(Type::Int(8).into()), str_load_id);
+                let id = ID::new();
+                let ret_type = Type::Pointer(Type::UserDefined("string".to_string()).into());
+                let inst = Instruction::FunctionCall {
+                    id: id.clone(),
+                    func_name: format!("@\"string::new\""),
+                    ret_type: ret_type.clone().into(),
+                    args_expr: vec![ptr_to_str],
+                };
+                self.instructions.push(inst);
+                Expr::local_id(ret_type.clone(), id)
             }
-            ClassConstruction(class_name, init_fields) => {
-                let type_def = module.lookup_type(class_name).clone();
-                let mut fields = vec![];
-                for f in type_def.fields {
-                    let expr = self.expr_from_ast(init_fields.get(&f.name).unwrap(), module);
-                    fields.push((f.typ, Box::new(expr)));
-                }
-                Expr::Structure { fields }
+            ClassConstruction(class_name, field_inits) => {
+                // TODO:
+                //  1. gep fields
+                //  2. store value to fields
+                let id = ID::new();
+                let type_name = Type::UserDefined(class_name.clone());
+                let inst = Instruction::Alloca {
+                    id: id.clone(),
+                    typ: type_name.clone(),
+                };
+                self.instructions.push(inst);
+                Expr::local_id(type_name, id)
             }
-            DotAccess(from, access) => {
+            MemberAccess(from, access) => {
                 // TODO:
                 //  - from access to indices to use GEP
-                let expr = self.expr_from_ast(from, module);
-                match expr.type_() {
-                    Type::UserDefined(type_name) => {
-                        let type_def = module.lookup_type(&type_name);
-                        let index = type_def.access_field(access);
-                        let id = ID::new();
-                        let load_id = ID::new();
-                        Instruction::GEP {
-                            id: id.clone(),
-                            result_type: Type::Void,
-                            load_id,
-                            indices: vec![index as u64],
-                        };
-                        Expr::local_id(expr.type_(), id)
-                    }
-                    _ => unreachable!(
-                        "dot access should not apply on non-class type, semantic module has a bug"
-                    ),
-                }
+                let v = self.expr_from_ast(from, module);
+                let id = ID::new();
+                let inst = Instruction::GEP {
+                    id: id.clone(),
+                    result_type: v.type_(),
+                    load_from: v.clone(),
+                    indices: vec![0, 0],
+                };
+                self.instructions.push(inst);
+                Expr::local_id(v.type_(), id)
             }
             Binary(lhs, rhs, op) => {
                 let id = ID::new();
@@ -509,7 +509,6 @@ pub(crate) enum Expr {
     F64(f64),
     Bool(bool),
     CString(String),
-    Structure { fields: Vec<(Type, Box<Expr>)> },
     Identifier(Type, String),
     LocalIdentifier(Type, Rc<RefCell<ID>>),
 }
@@ -533,9 +532,6 @@ impl Expr {
             Expr::CString(s) => Type::Array {
                 len: s.len(),
                 element_type: Type::Int(8).into(),
-            },
-            Expr::Structure { fields } => Type::Structure {
-                fields: fields.iter().map(|(typ, ..)| typ.clone()).collect(),
             },
             Expr::Identifier(typ, ..) => typ.clone(),
             Expr::LocalIdentifier(typ, ..) => typ.clone(),

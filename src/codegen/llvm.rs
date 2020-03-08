@@ -27,21 +27,15 @@ impl LLVMValue for ir::TypeDefinition {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
         s.push_str(format!("%{}", self.name).as_str());
-        s.push_str(" = type {");
+        s.push_str(" = type { ");
         for (index, field) in self.fields.iter().enumerate() {
-            s.push_str(field.llvm_represent().as_str());
+            s.push_str(field.typ.llvm_represent().as_str());
             if index < self.fields.len() - 1 {
                 s.push_str(" ");
             }
         }
-        s.push_str("}");
+        s.push_str(" }");
         s
-    }
-}
-
-impl LLVMValue for ir::Field {
-    fn llvm_represent(&self) -> String {
-        self.name.clone()
     }
 }
 
@@ -77,18 +71,18 @@ impl LLVMValue for ir::Instruction {
             GEP {
                 id,
                 result_type,
-                load_id,
+                load_from,
                 indices,
             } => {
                 let mut s = String::new();
                 s.push_str(
                     format!(
-                        "%{id} = getelementptr {target}, {ptr_to_target} @{load_from}",
+                        "%{id} = getelementptr {target}, {ptr_to_target} {load_from}",
                         id = id.borrow(),
                         target = result_type.llvm_represent(),
                         ptr_to_target =
                             ir::Type::Pointer(result_type.clone().into()).llvm_represent(),
-                        load_from = load_id.borrow()
+                        load_from = load_from.llvm_represent()
                     )
                     .as_str(),
                 );
@@ -151,6 +145,11 @@ impl LLVMValue for ir::Instruction {
                 s.push_str(")");
                 s
             }
+            Alloca { id, typ } => format!(
+                "%{id} = alloca {typ}",
+                id = id.borrow(),
+                typ = typ.llvm_represent()
+            ),
             Branch {
                 cond,
                 if_true,
@@ -253,19 +252,19 @@ impl LLVMValue for ir::Type {
             Int(n) => format!("i{}", n),
             Pointer(typ) => format!("{}*", typ.llvm_represent()),
             Array { len, element_type } => format!("[{} x {}]", len, element_type.llvm_represent()),
-            Structure { fields } => {
+            Structure(typ_def) => {
                 let mut s = String::new();
                 s.push_str("{ ");
-                for (i, field_type) in fields.iter().enumerate() {
+                for (i, field) in typ_def.fields.iter().enumerate() {
                     if i != 0 {
                         s.push_str(", ")
                     }
-                    s.push_str(format!("{}", field_type.llvm_represent(),).as_str());
+                    s.push_str(format!("{}", field.typ.llvm_represent(),).as_str());
                 }
                 s.push_str(" }");
                 s
             }
-            UserDefined(name) => format!("%{}*", name),
+            UserDefined(name) => format!("%{}", name),
         }
     }
 }
@@ -280,25 +279,6 @@ impl LLVMValue for ir::Expr {
             Expr::CString(s_l) => format!("\"{}\"", s_l),
             Expr::Identifier(_, name) => format!("%{}", name),
             Expr::LocalIdentifier(_, id) => format!("%{}", id.borrow()),
-            Expr::Structure { fields } => {
-                let mut s = String::new();
-                s.push_str("{ ");
-                for (i, (field_type, field_expr)) in fields.iter().enumerate() {
-                    if i != 0 {
-                        s.push_str(", ")
-                    }
-                    s.push_str(
-                        format!(
-                            "{ty} {expr}",
-                            ty = field_type.llvm_represent(),
-                            expr = field_expr.llvm_represent()
-                        )
-                        .as_str(),
-                    );
-                }
-                s.push_str(" }");
-                s
-            }
         }
     }
 }

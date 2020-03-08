@@ -12,7 +12,7 @@ class _c_string {}
 @builtin
 class string {
   value: _c_string;
-  ::new(): string = string {value: _c_string};
+  ::new(v: _c_string): string = string {value: v};
 }
 @builtin
 class List[T] {}
