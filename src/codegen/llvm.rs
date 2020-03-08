@@ -68,6 +68,13 @@ impl LLVMValue for ir::Instruction {
     fn llvm_represent(&self) -> String {
         use ir::Instruction::*;
         match self {
+            Load { id, load_from } => format!(
+                "%{id} = load {to_type}, {from_type} {load_from}",
+                id = id.borrow(),
+                to_type = load_from.type_().llvm_represent(),
+                from_type = (ir::Type::Pointer(load_from.type_().into())).llvm_represent(),
+                load_from = load_from.llvm_represent()
+            ),
             GEP {
                 id,
                 result_type,
@@ -252,18 +259,6 @@ impl LLVMValue for ir::Type {
             Int(n) => format!("i{}", n),
             Pointer(typ) => format!("{}*", typ.llvm_represent()),
             Array { len, element_type } => format!("[{} x {}]", len, element_type.llvm_represent()),
-            Structure(typ_def) => {
-                let mut s = String::new();
-                s.push_str("{ ");
-                for (i, field) in typ_def.fields.iter().enumerate() {
-                    if i != 0 {
-                        s.push_str(", ")
-                    }
-                    s.push_str(format!("{}", field.typ.llvm_represent(),).as_str());
-                }
-                s.push_str(" }");
-                s
-            }
             UserDefined(name) => format!("%{}", name),
         }
     }
@@ -279,6 +274,7 @@ impl LLVMValue for ir::Expr {
             Expr::CString(s_l) => format!("\"{}\"", s_l),
             Expr::Identifier(_, name) => format!("%{}", name),
             Expr::LocalIdentifier(_, id) => format!("%{}", id.borrow()),
+            Expr::GlobalIdentifier(_, id) => format!("@{}", id.borrow()),
         }
     }
 }

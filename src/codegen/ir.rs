@@ -9,6 +9,7 @@ pub struct Module {
     // helpers
     pub(crate) known_functions: HashMap<String, Type>,
     pub(crate) known_variables: HashMap<String, Type>,
+    known_types: HashMap<String, TypeDefinition>,
     // output parts
     pub(crate) functions: Vec<Function>,
     pub(crate) variables: Vec<Variable>,
@@ -20,6 +21,7 @@ impl Module {
         Module {
             known_functions: HashMap::new(),
             known_variables: HashMap::new(),
+            known_types: HashMap::new(),
             functions: vec![],
             variables: vec![],
             types: vec![],
@@ -57,9 +59,11 @@ impl Module {
                 })
                 .collect(),
         };
-        self.known_variables
-            .insert(type_name.clone(), Type::Structure(typ.clone()));
+        self.known_types.insert(type_name.clone(), typ.clone());
         self.types.push(typ);
+    }
+    fn lookup_type(&self, type_name: &String) -> &TypeDefinition {
+        self.known_types.get(type_name).unwrap()
     }
 }
 
@@ -140,6 +144,10 @@ pub(crate) enum Instruction {
         id: Rc<RefCell<ID>>,
         typ: Type,
     },
+    Load {
+        id: Rc<RefCell<ID>>,
+        load_from: Expr,
+    },
 }
 
 impl Instruction {
@@ -155,7 +163,11 @@ impl Instruction {
         use Instruction::*;
         match self {
             Label(label) => label.id.borrow_mut().set_id(value),
-            FunctionCall { id, .. } | BinaryOperation { id, .. } => id.borrow_mut().set_id(value),
+            Load { id, .. }
+            | Alloca { id, .. }
+            | GEP { id, .. }
+            | FunctionCall { id, .. }
+            | BinaryOperation { id, .. } => id.borrow_mut().set_id(value),
             _ => false,
         }
     }
@@ -360,7 +372,6 @@ pub(crate) enum Type {
     Float(usize),
     Pointer(Rc<Type>),
     Array { len: usize, element_type: Rc<Type> },
-    Structure(TypeDefinition),
     UserDefined(String),
 }
 
@@ -395,7 +406,7 @@ impl Body {
                         len: string_literal.len(),
                         element_type: Type::Int(8).into(),
                     },
-                    load_from: Expr::local_id(
+                    load_from: Expr::global_id(
                         Type::Array {
                             len: string_literal.len(),
                             element_type: Type::Int(8).into(),
@@ -431,18 +442,39 @@ impl Body {
                 Expr::local_id(type_name, id)
             }
             MemberAccess(from, access) => {
-                // TODO:
-                //  - from access to indices to use GEP
                 let v = self.expr_from_ast(from, module);
-                let id = ID::new();
+                let type_definition = match &v.type_() {
+                    Type::UserDefined(type_name) => module.lookup_type(type_name),
+                    _ => unreachable!(
+                        "access member on non-class type which unlikely happen: from `{:?}`",
+                        from
+                    ),
+                };
+                let mut result_type = v.type_();
+                let mut i = 0; // get index of field
+                for field in &type_definition.fields {
+                    if &field.name == access {
+                        result_type = field.typ.clone();
+                        break;
+                    } else {
+                        i += 1;
+                    }
+                }
+                let gep_id = ID::new();
                 let inst = Instruction::GEP {
-                    id: id.clone(),
+                    id: gep_id.clone(),
                     result_type: v.type_(),
                     load_from: v.clone(),
-                    indices: vec![0, 0],
+                    indices: vec![0, i],
                 };
                 self.instructions.push(inst);
-                Expr::local_id(v.type_(), id)
+                let id = ID::new();
+                let inst = Instruction::Load {
+                    id: id.clone(),
+                    load_from: Expr::local_id(result_type.clone(), gep_id),
+                };
+                self.instructions.push(inst);
+                Expr::local_id(result_type, id)
             }
             Binary(lhs, rhs, op) => {
                 let id = ID::new();
@@ -511,6 +543,7 @@ pub(crate) enum Expr {
     CString(String),
     Identifier(Type, String),
     LocalIdentifier(Type, Rc<RefCell<ID>>),
+    GlobalIdentifier(Type, Rc<RefCell<ID>>),
 }
 
 impl Expr {
@@ -535,10 +568,14 @@ impl Expr {
             },
             Expr::Identifier(typ, ..) => typ.clone(),
             Expr::LocalIdentifier(typ, ..) => typ.clone(),
+            Expr::GlobalIdentifier(typ, ..) => typ.clone(),
         }
     }
 
     fn local_id(typ: Type, id: Rc<RefCell<ID>>) -> Expr {
         Expr::LocalIdentifier(typ, id)
+    }
+    fn global_id(typ: Type, id: Rc<RefCell<ID>>) -> Expr {
+        Expr::GlobalIdentifier(typ, id)
     }
 }
