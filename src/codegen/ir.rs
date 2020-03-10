@@ -139,9 +139,14 @@ pub(crate) enum Instruction {
         lhs: Expr,
         rhs: Expr,
     },
-    Alloca {
+    Malloca {
         id: Rc<RefCell<ID>>,
         typ: Type,
+    },
+    BitCast {
+        id: Rc<RefCell<ID>>,
+        from_id: Rc<RefCell<ID>>,
+        target_type: Type,
     },
     Load {
         id: Rc<RefCell<ID>>,
@@ -163,7 +168,8 @@ impl Instruction {
         match self {
             Label(label) => label.id.borrow_mut().set_id(value),
             Load { id, .. }
-            | Alloca { id, .. }
+            | Malloca { id, .. }
+            | BitCast { id, .. }
             | GEP { id, .. }
             | FunctionCall { id, .. }
             | BinaryOperation { id, .. } => id.borrow_mut().set_id(value),
@@ -396,6 +402,18 @@ impl Type {
             _ => unreachable!("`{:?}` don't have element type", self),
         }
     }
+
+    pub(crate) fn size(&self) -> usize {
+        use Type::*;
+        match self {
+            Int(size) | Float(size) => *size,
+            Pointer(..) => 64,
+            Array { len, element_type } => len * element_type.size(),
+            // FIXME: remove user defined this kind of type, use struct type to get correct size
+            UserDefined(name) => 64,
+            _ => 0,
+        }
+    }
 }
 
 impl Body {
@@ -437,16 +455,23 @@ impl Body {
                 //  2. store value to fields
                 let alloca_id = ID::new();
                 let type_name = Type::UserDefined(class_name.clone());
-                let inst = Instruction::Alloca {
+                let inst = Instruction::Malloca {
                     id: alloca_id.clone(),
                     typ: type_name.clone(),
+                };
+                self.instructions.push(inst);
+                let bitcast_id = ID::new();
+                let inst = Instruction::BitCast {
+                    id: bitcast_id.clone(),
+                    from_id: alloca_id,
+                    target_type: type_name,
                 };
                 self.instructions.push(inst);
                 let id = ID::new();
                 let type_name = Type::UserDefined(class_name.clone());
                 let inst = Instruction::Load {
                     id: id.clone(),
-                    load_from: Expr::local_id(type_name.clone(), alloca_id),
+                    load_from: Expr::local_id(type_name.clone(), bitcast_id),
                 };
                 self.instructions.push(inst);
                 Expr::local_id(type_name, id)

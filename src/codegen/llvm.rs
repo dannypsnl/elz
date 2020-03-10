@@ -150,10 +150,20 @@ impl LLVMValue for ir::Instruction {
                 s.push_str(")");
                 s
             }
-            Alloca { id, typ } => format!(
-                "%{id} = alloca {typ}",
+            Malloca { id, typ } => format!(
+                "%{id} = call i8* @malloc(i64 {type_size})",
                 id = id.borrow(),
-                typ = typ.llvm_represent()
+                type_size = typ.size()
+            ),
+            BitCast {
+                id,
+                from_id,
+                target_type,
+            } => format!(
+                "%{id} = bitcast i8* %{from} to {target_type}",
+                id = id.borrow(),
+                from = from_id.borrow(),
+                target_type = target_type.llvm_represent()
             ),
             Branch {
                 cond,

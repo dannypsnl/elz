@@ -21,4 +21,4 @@ println(content: string): void {
   _: int = puts(content.value);
 }
 puts(str: _c_string): int;
-
+malloc(size: int): _c_string;
