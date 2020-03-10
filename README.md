@@ -18,7 +18,7 @@ cd elz && cargo install
 - [x] `int`
 - [x] `f64`
 - [x] `bool`
-- [ ] `string` TODO: #257
+- [x] `string`
 - [ ] `List[T]` TODO: #200
 
 #### Top level construction

@@ -27,12 +27,12 @@ impl Module {
         }
     }
     pub(crate) fn remember_function(&mut self, f: &ast::Function) {
-        let ret_type = Type::from_ast(&f.ret_typ);
+        let ret_type = Type::from_ast(&f.ret_typ, self);
         self.known_functions.insert(f.name.clone(), ret_type);
     }
     pub(crate) fn remember_variable(&mut self, v: &ast::Variable) {
         self.known_variables
-            .insert(v.name.clone(), Type::from_ast(&v.typ));
+            .insert(v.name.clone(), Type::from_ast(&v.typ, self));
     }
     pub(crate) fn push_function(&mut self, f: Function) {
         self.functions.insert(f.name.clone(), f);
@@ -52,7 +52,7 @@ impl Module {
                 .map(|member| match member {
                     ClassMember::Field(field) => Field {
                         name: field.name.clone(),
-                        typ: Type::from_ast(&field.typ).into(),
+                        typ: Type::from_ast(&field.typ, self).into(),
                     },
                     _ => unreachable!(),
                 })
@@ -192,7 +192,8 @@ impl Body {
 
         for p in parameters {
             // FIXME: type from duplicate in ir::Function, share information
-            let local_var = LocalVariable::from_name(p.name.clone(), Type::from_ast(&p.typ));
+            let local_var =
+                LocalVariable::from_name(p.name.clone(), Type::from_ast(&p.typ, module));
             variables.insert(p.name.clone(), local_var);
         }
 
@@ -309,8 +310,9 @@ impl Function {
         Function::new(
             function_name,
             &f.parameters,
-            Type::from_ast(&f.ret_typ),
+            Type::from_ast(&f.ret_typ, module),
             body,
+            module,
         )
     }
     fn new(
@@ -318,10 +320,11 @@ impl Function {
         parsed_params: &Vec<Parameter>,
         ret_typ: Type,
         body: Option<Body>,
+        module: &Module,
     ) -> Function {
         let parameters: Vec<(String, Type)> = parsed_params
             .iter()
-            .map(|p| (p.name.clone(), Type::from_ast(&p.typ)))
+            .map(|p| (p.name.clone(), Type::from_ast(&p.typ, module)))
             .collect();
         Function {
             // function name need @, e.g. @main
@@ -378,7 +381,7 @@ pub(crate) struct Field {
 }
 
 impl Type {
-    pub(crate) fn from_ast(t: &ast::ParsedType) -> Type {
+    pub(crate) fn from_ast(t: &ast::ParsedType, module: &Module) -> Type {
         use Type::*;
         match t.name().as_str() {
             "void" => Void,
@@ -386,10 +389,7 @@ impl Type {
             "f64" => Float(64),
             "bool" => Int(1),
             "_c_string" => Pointer(Int(8).into()),
-            name => Struct {
-                name: name.to_string(),
-                fields: vec![],
-            },
+            name => module.lookup_type(&name.to_string()).clone(),
         }
     }
 
@@ -510,21 +510,20 @@ impl Body {
                 };
                 match typ {
                     Type::Struct { fields, .. } => {
-                        let mut result_type = v.type_();
                         let mut i = 0; // get index of field
-                        for field in fields {
+                        for field in &fields {
                             if &field.name == access {
-                                result_type = field.typ.deref().clone();
                                 break;
                             } else {
                                 i += 1;
                             }
                         }
+                        let result_type = fields[i].typ.deref().clone();
                         let gep_id = ID::new();
                         let inst = Instruction::GEP {
                             id: gep_id.clone(),
                             load_from: v.clone(),
-                            indices: vec![0, i],
+                            indices: vec![0, i as u64],
                         };
                         self.instructions.push(inst);
                         let id = ID::new();
