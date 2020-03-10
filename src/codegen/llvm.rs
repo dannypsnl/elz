@@ -165,6 +165,16 @@ impl LLVMValue for ir::Instruction {
                 from = from_id.borrow(),
                 target_type = target_type.llvm_represent()
             ),
+            Store {
+                source,
+                destination,
+            } => format!(
+                "store {} {}, {} %{}",
+                source.type_().llvm_represent(),
+                source.llvm_represent(),
+                (ir::Type::Pointer(source.type_().into())).llvm_represent(),
+                destination.borrow()
+            ),
             Branch {
                 cond,
                 if_true,

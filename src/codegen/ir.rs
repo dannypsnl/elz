@@ -152,6 +152,10 @@ pub(crate) enum Instruction {
         id: Rc<RefCell<ID>>,
         load_from: Expr,
     },
+    Store {
+        source: Expr,
+        destination: Rc<RefCell<ID>>,
+    },
 }
 
 impl Instruction {
@@ -464,17 +468,36 @@ impl Body {
                 let inst = Instruction::BitCast {
                     id: bitcast_id.clone(),
                     from_id: alloca_id,
-                    target_type: type_name,
+                    target_type: type_name.clone(),
                 };
                 self.instructions.push(inst);
-                let id = ID::new();
-                let type_name = Type::UserDefined(class_name.clone());
-                let inst = Instruction::Load {
-                    id: id.clone(),
-                    load_from: Expr::local_id(type_name.clone(), bitcast_id),
-                };
-                self.instructions.push(inst);
-                Expr::local_id(type_name, id)
+
+                // store value into field
+                let type_def = module.lookup_type(class_name).clone();
+                for (i, field) in type_def.fields.iter().enumerate() {
+                    let gep_id = ID::new();
+                    let inst = Instruction::GEP {
+                        id: gep_id.clone(),
+                        load_from: Expr::local_id(type_name.clone(), bitcast_id.clone()),
+                        indices: vec![0, i as u64],
+                    };
+                    self.instructions.push(inst);
+                    let init_value = field_inits.get(&field.name).expect(
+                        format!(
+                            "field `{}` doesn't exist, which is unlikely happened",
+                            field.name
+                        )
+                        .as_str(),
+                    );
+                    let expr = self.expr_from_ast(init_value, module);
+                    let inst = Instruction::Store {
+                        source: expr,
+                        destination: gep_id,
+                    };
+                    self.instructions.push(inst);
+                }
+
+                Expr::local_id(type_name, bitcast_id)
             }
             MemberAccess(from, access) => {
                 let v = self.expr_from_ast(from, module);
