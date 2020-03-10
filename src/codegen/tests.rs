@@ -5,17 +5,13 @@ use llvm::LLVMValue;
 
 #[test]
 fn test_codegen_main() {
-    let code = "\
-        main(): void {}
-        x: int = 1;";
+    let code = "main(): void {}";
     let module = gen_code(code);
     assert_eq!(
-        module.llvm_represent(),
-        "@x = global i64 1
-define void @main() {
+        module.functions.get("@main").unwrap().llvm_represent(),
+        "define void @main() {
   ret void
-}
-"
+}"
     );
 }
 
@@ -24,11 +20,10 @@ fn test_return_value() {
     let code = "foo(): int = 1;";
     let module = gen_code(code);
     assert_eq!(
-        module.llvm_represent(),
+        module.functions.get("@foo").unwrap().llvm_represent(),
         "define i64 @foo() {
   ret i64 1
-}
-"
+}"
     );
 }
 
@@ -37,8 +32,8 @@ fn test_function_declaration_with_parameter() {
     let code = "add(x: int, y: int): int;";
     let module = gen_code(code);
     assert_eq!(
-        module.llvm_represent(),
-        "declare i64 @add(i64 %x, i64 %y)\n"
+        module.functions.get("@add").unwrap().llvm_represent(),
+        "declare i64 @add(i64 %x, i64 %y)"
     )
 }
 
@@ -47,11 +42,10 @@ fn test_function_define_with_parameter() {
     let code = "const(x: int): int = 1;";
     let module = gen_code(code);
     assert_eq!(
-        module.llvm_represent(),
+        module.functions.get("@const").unwrap().llvm_represent(),
         "define i64 @const(i64 %x) {
   ret i64 1
-}
-"
+}"
     )
 }
 
@@ -64,15 +58,11 @@ fn test_function_call() {
     foo(x: int): void {}";
     let module = gen_code(code);
     assert_eq!(
-        module.llvm_represent(),
+        module.functions.get("@main").unwrap().llvm_represent(),
         "define void @main() {
   call void @foo(i64 1)
   ret void
-}
-define void @foo(i64 %x) {
-  ret void
-}
-"
+}"
     )
 }
 
@@ -83,12 +73,11 @@ fn binary_expr() {
     ";
     let module = gen_code(code);
     assert_eq!(
-        module.llvm_represent(),
+        module.functions.get("@foo").unwrap().llvm_represent(),
         "define i64 @foo() {
   %1 = add i64 1, 2
   ret i64 %1
-}
-"
+}"
     )
 }
 
@@ -102,14 +91,27 @@ fn test_class_define() {
     }";
     let module = gen_code(code);
     assert_eq!(
-        module.llvm_represent(),
-        "%Foo = type {i64}
-declare %Foo* @\"Foo::new\"()
-define void @\"Foo::bar\"(%Foo* %self) {
+        module.types.get("Foo").unwrap().llvm_represent(),
+        "%Foo = type { i64 }"
+    );
+    assert_eq!(
+        module
+            .functions
+            .get("@\"Foo::new\"")
+            .unwrap()
+            .llvm_represent(),
+        "declare %Foo* @\"Foo::new\"()"
+    );
+    assert_eq!(
+        module
+            .functions
+            .get("@\"Foo::bar\"")
+            .unwrap()
+            .llvm_represent(),
+        "define void @\"Foo::bar\"(%Foo* %self) {
   ret void
-}
-"
-    )
+}"
+    );
 }
 
 #[test]
@@ -125,7 +127,7 @@ fn llvm_if_else() {
     ";
     let module = gen_code(code);
     assert_eq!(
-        module.llvm_represent(),
+        module.functions.get("@foo").unwrap().llvm_represent(),
         "define void @foo() {
   br i1 true, label %1, label %2
 ; <label>:1:
@@ -138,8 +140,7 @@ fn llvm_if_else() {
   br label %5
 ; <label>:5:
   ret void
-}
-"
+}"
     )
 }
 

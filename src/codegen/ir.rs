@@ -9,11 +9,10 @@ pub struct Module {
     // helpers
     pub(crate) known_functions: HashMap<String, Type>,
     pub(crate) known_variables: HashMap<String, Type>,
-    known_types: HashMap<String, TypeDefinition>,
     // output parts
-    pub(crate) functions: Vec<Function>,
+    pub(crate) functions: HashMap<String, Function>,
     pub(crate) variables: Vec<Variable>,
-    pub(crate) types: Vec<TypeDefinition>,
+    pub(crate) types: HashMap<String, TypeDefinition>,
 }
 
 impl Module {
@@ -21,10 +20,9 @@ impl Module {
         Module {
             known_functions: HashMap::new(),
             known_variables: HashMap::new(),
-            known_types: HashMap::new(),
-            functions: vec![],
+            functions: HashMap::new(),
             variables: vec![],
-            types: vec![],
+            types: HashMap::new(),
         }
     }
     pub(crate) fn remember_function(&mut self, f: &ast::Function) {
@@ -36,7 +34,7 @@ impl Module {
             .insert(v.name.clone(), Type::from_ast(&v.typ));
     }
     pub(crate) fn push_function(&mut self, f: Function) {
-        self.functions.push(f);
+        self.functions.insert(f.name.clone(), f);
     }
     pub(crate) fn push_variable(&mut self, v: Variable) {
         self.variables.push(v);
@@ -59,11 +57,10 @@ impl Module {
                 })
                 .collect(),
         };
-        self.known_types.insert(type_name.clone(), typ.clone());
-        self.types.push(typ);
+        self.types.insert(type_name.clone(), typ);
     }
     fn lookup_type(&self, type_name: &String) -> &TypeDefinition {
-        self.known_types.get(type_name).unwrap()
+        self.types.get(type_name).unwrap()
     }
 }
 
@@ -414,7 +411,7 @@ impl Type {
             Pointer(..) => 64,
             Array { len, element_type } => len * element_type.size(),
             // FIXME: remove user defined this kind of type, use struct type to get correct size
-            UserDefined(name) => 64,
+            UserDefined(..) => 64,
             _ => 0,
         }
     }
@@ -454,9 +451,6 @@ impl Body {
                 Expr::local_id(ret_type.clone(), id)
             }
             ClassConstruction(class_name, field_inits) => {
-                // TODO:
-                //  1. gep fields
-                //  2. store value to fields
                 let alloca_id = ID::new();
                 let type_name = Type::UserDefined(class_name.clone());
                 let inst = Instruction::Malloca {

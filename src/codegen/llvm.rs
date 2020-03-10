@@ -7,7 +7,7 @@ pub trait LLVMValue {
 impl LLVMValue for ir::Module {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
-        for t in &self.types {
+        for (_, t) in &self.types {
             s.push_str(t.llvm_represent().as_str());
             s.push_str("\n");
         }
@@ -15,7 +15,7 @@ impl LLVMValue for ir::Module {
             s.push_str(v.llvm_represent().as_str());
             s.push_str("\n");
         }
-        for f in &self.functions {
+        for (_, f) in &self.functions {
             s.push_str(f.llvm_represent().as_str());
             s.push_str("\n");
         }
