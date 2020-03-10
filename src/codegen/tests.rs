@@ -91,7 +91,7 @@ fn test_class_define() {
     }";
     let module = gen_code(code);
     assert_eq!(
-        module.types.get("Foo").unwrap().llvm_represent(),
+        module.types.get("Foo").unwrap().llvm_def(),
         "%Foo = type { i64 }"
     );
     assert_eq!(

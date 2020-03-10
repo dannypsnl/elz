@@ -8,7 +8,7 @@ impl LLVMValue for ir::Module {
     fn llvm_represent(&self) -> String {
         let mut s = String::new();
         for (_, t) in &self.types {
-            s.push_str(t.llvm_represent().as_str());
+            s.push_str(t.llvm_def().as_str());
             s.push_str("\n");
         }
         for v in &self.variables {
@@ -19,22 +19,6 @@ impl LLVMValue for ir::Module {
             s.push_str(f.llvm_represent().as_str());
             s.push_str("\n");
         }
-        s
-    }
-}
-
-impl LLVMValue for ir::TypeDefinition {
-    fn llvm_represent(&self) -> String {
-        let mut s = String::new();
-        s.push_str(format!("%{}", self.name).as_str());
-        s.push_str(" = type { ");
-        for (index, field) in self.fields.iter().enumerate() {
-            s.push_str(field.typ.llvm_represent().as_str());
-            if index < self.fields.len() - 1 {
-                s.push_str(" ");
-            }
-        }
-        s.push_str(" }");
         s
     }
 }
@@ -277,8 +261,30 @@ impl LLVMValue for ir::Type {
             Int(n) => format!("i{}", n),
             Pointer(typ) => format!("{}*", typ.llvm_represent()),
             Array { len, element_type } => format!("[{} x {}]", len, element_type.llvm_represent()),
-            UserDefined(name) => format!("%{}*", name),
+            Struct { name, .. } => format!("%{}*", name),
             Named(name) => format!("%{}", name),
+        }
+    }
+}
+
+impl ir::Type {
+    pub(crate) fn llvm_def(&self) -> String {
+        use ir::Type::*;
+        match self {
+            Struct { name, fields } => {
+                let mut s = String::new();
+                s.push_str(format!("%{}", name).as_str());
+                s.push_str(" = type { ");
+                for (index, field) in fields.iter().enumerate() {
+                    s.push_str(field.typ.llvm_represent().as_str());
+                    if index < fields.len() - 1 {
+                        s.push_str(" ");
+                    }
+                }
+                s.push_str(" }");
+                s
+            }
+            _ => unreachable!(),
         }
     }
 }

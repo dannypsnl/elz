@@ -3,6 +3,7 @@ use crate::ast::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Formatter;
+use std::ops::Deref;
 use std::rc::Rc;
 
 pub struct Module {
@@ -12,7 +13,7 @@ pub struct Module {
     // output parts
     pub(crate) functions: HashMap<String, Function>,
     pub(crate) variables: Vec<Variable>,
-    pub(crate) types: HashMap<String, TypeDefinition>,
+    pub(crate) types: HashMap<String, Type>,
 }
 
 impl Module {
@@ -40,7 +41,7 @@ impl Module {
         self.variables.push(v);
     }
     pub(crate) fn push_type(&mut self, type_name: &String, fields: &Vec<ClassMember>) {
-        let typ = TypeDefinition {
+        let typ = Type::Struct {
             name: type_name.clone(),
             fields: fields
                 .iter()
@@ -51,7 +52,7 @@ impl Module {
                 .map(|member| match member {
                     ClassMember::Field(field) => Field {
                         name: field.name.clone(),
-                        typ: Type::from_ast(&field.typ),
+                        typ: Type::from_ast(&field.typ).into(),
                     },
                     _ => unreachable!(),
                 })
@@ -59,21 +60,9 @@ impl Module {
         };
         self.types.insert(type_name.clone(), typ);
     }
-    fn lookup_type(&self, type_name: &String) -> &TypeDefinition {
+    fn lookup_type(&self, type_name: &String) -> &Type {
         self.types.get(type_name).unwrap()
     }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub(crate) struct TypeDefinition {
-    pub(crate) name: String,
-    pub(crate) fields: Vec<Field>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub(crate) struct Field {
-    pub(crate) name: String,
-    pub(crate) typ: Type,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -378,8 +367,14 @@ pub(crate) enum Type {
     Float(usize),
     Pointer(Rc<Type>),
     Array { len: usize, element_type: Rc<Type> },
-    UserDefined(String),
+    Struct { name: String, fields: Vec<Field> },
     Named(String),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct Field {
+    pub(crate) name: String,
+    pub(crate) typ: Rc<Type>,
 }
 
 impl Type {
@@ -391,14 +386,17 @@ impl Type {
             "f64" => Float(64),
             "bool" => Int(1),
             "_c_string" => Pointer(Int(8).into()),
-            name => UserDefined(name.to_string()),
+            name => Struct {
+                name: name.to_string(),
+                fields: vec![],
+            },
         }
     }
 
     pub(crate) fn element_type(&self) -> Rc<Type> {
         use Type::*;
         match self {
-            UserDefined(name) => Named(name.clone()).into(),
+            Struct { name, .. } => Named(name.clone()).into(),
             Pointer(element_type) | Array { element_type, .. } => element_type.clone(),
             _ => unreachable!("`{:?}` don't have element type", self),
         }
@@ -410,8 +408,13 @@ impl Type {
             Int(size) | Float(size) => *size,
             Pointer(..) => 64,
             Array { len, element_type } => len * element_type.size(),
-            // FIXME: remove user defined this kind of type, use struct type to get correct size
-            UserDefined(..) => 64,
+            Struct { fields, .. } => {
+                let mut size = 0;
+                for field in fields {
+                    size += field.typ.size();
+                }
+                size
+            }
             _ => 0,
         }
     }
@@ -440,7 +443,7 @@ impl Body {
                 self.instructions.push(inst);
                 let ptr_to_str = Expr::local_id(Type::Pointer(Type::Int(8).into()), str_load_id);
                 let id = ID::new();
-                let ret_type: Type = Type::UserDefined("string".to_string()).into();
+                let ret_type = module.lookup_type(&"string".to_string());
                 let inst = Instruction::FunctionCall {
                     id: id.clone(),
                     func_name: format!("@\"string::new\""),
@@ -452,27 +455,32 @@ impl Body {
             }
             ClassConstruction(class_name, field_inits) => {
                 let alloca_id = ID::new();
-                let type_name = Type::UserDefined(class_name.clone());
+                let class_type = module.lookup_type(class_name).clone();
                 let inst = Instruction::Malloca {
                     id: alloca_id.clone(),
-                    typ: type_name.clone(),
+                    typ: class_type.clone(),
                 };
                 self.instructions.push(inst);
                 let bitcast_id = ID::new();
                 let inst = Instruction::BitCast {
                     id: bitcast_id.clone(),
                     from_id: alloca_id,
-                    target_type: type_name.clone(),
+                    target_type: class_type.clone(),
                 };
                 self.instructions.push(inst);
 
                 // store value into field
-                let type_def = module.lookup_type(class_name).clone();
-                for (i, field) in type_def.fields.iter().enumerate() {
+                let fields =
+                    if let Type::Struct { fields, .. } = module.lookup_type(class_name).clone() {
+                        fields
+                    } else {
+                        unreachable!("non-class type cannot access member")
+                    };
+                for (i, field) in fields.iter().enumerate() {
                     let gep_id = ID::new();
                     let inst = Instruction::GEP {
                         id: gep_id.clone(),
-                        load_from: Expr::local_id(type_name.clone(), bitcast_id.clone()),
+                        load_from: Expr::local_id(class_type.clone(), bitcast_id.clone()),
                         indices: vec![0, i as u64],
                     };
                     self.instructions.push(inst);
@@ -491,41 +499,47 @@ impl Body {
                     self.instructions.push(inst);
                 }
 
-                Expr::local_id(type_name, bitcast_id)
+                Expr::local_id(class_type, bitcast_id)
             }
             MemberAccess(from, access) => {
                 let v = self.expr_from_ast(from, module);
-                let type_definition = match &v.type_() {
-                    Type::UserDefined(type_name) => module.lookup_type(type_name),
+                let typ = if let Type::Named(name) = v.type_() {
+                    module.lookup_type(&name).clone()
+                } else {
+                    v.type_()
+                };
+                match typ {
+                    Type::Struct { fields, .. } => {
+                        let mut result_type = v.type_();
+                        let mut i = 0; // get index of field
+                        for field in fields {
+                            if &field.name == access {
+                                result_type = field.typ.deref().clone();
+                                break;
+                            } else {
+                                i += 1;
+                            }
+                        }
+                        let gep_id = ID::new();
+                        let inst = Instruction::GEP {
+                            id: gep_id.clone(),
+                            load_from: v.clone(),
+                            indices: vec![0, i],
+                        };
+                        self.instructions.push(inst);
+                        let id = ID::new();
+                        let inst = Instruction::Load {
+                            id: id.clone(),
+                            load_from: Expr::local_id(result_type.clone(), gep_id),
+                        };
+                        self.instructions.push(inst);
+                        Expr::local_id(result_type, id)
+                    }
                     _ => unreachable!(
                         "access member on non-class type which unlikely happen: from `{:?}`",
                         from
                     ),
-                };
-                let mut result_type = v.type_();
-                let mut i = 0; // get index of field
-                for field in &type_definition.fields {
-                    if &field.name == access {
-                        result_type = field.typ.clone();
-                        break;
-                    } else {
-                        i += 1;
-                    }
                 }
-                let gep_id = ID::new();
-                let inst = Instruction::GEP {
-                    id: gep_id.clone(),
-                    load_from: v.clone(),
-                    indices: vec![0, i],
-                };
-                self.instructions.push(inst);
-                let id = ID::new();
-                let inst = Instruction::Load {
-                    id: id.clone(),
-                    load_from: Expr::local_id(result_type.clone(), gep_id),
-                };
-                self.instructions.push(inst);
-                Expr::local_id(result_type, id)
             }
             Binary(lhs, rhs, op) => {
                 let id = ID::new();
