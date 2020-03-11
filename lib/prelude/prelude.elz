@@ -8,11 +8,17 @@ class f64 {}
 @builtin
 class bool {}
 @builtin
-class string {}
+class _c_string {}
+@builtin
+class string {
+  value: _c_string;
+  ::new(v: _c_string): string = string {value: v};
+}
 @builtin
 class List[T] {}
 
-// Builtin function would skip code generation
-@builtin
-println(content: string): void;
-
+println(content: string): void {
+  _: int = puts(content.value);
+}
+puts(str: _c_string): int;
+malloc(size: int): _c_string;
