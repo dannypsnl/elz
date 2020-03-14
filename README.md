@@ -1,7 +1,7 @@
 # elz
 
 ![Rust](https://github.com/dannypsnl/elz/workflows/Rust/badge.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/dannypsnl/elz/badge.svg?branch=dannypsnl-coverage)](https://coveralls.io/github/dannypsnl/elz?branch=dannypsnl-coverage)
+[![Coverage Status](https://coveralls.io/repos/github/dannypsnl/elz/badge.svg?branch=master)](https://coveralls.io/github/dannypsnl/elz?branch=master)
 
 ### Installation
 
