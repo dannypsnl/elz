@@ -22,6 +22,31 @@ fn test_function_and_variable_use_the_same_space() {
 }
 
 #[test]
+fn binary_expression() -> Result<()> {
+    let code = "add(x: int, y: int): int = x + y;";
+    check_code(code)
+}
+
+#[test]
+fn heterogeneous_list() {
+    let code = "x: List[int] = [1, \"s\"];";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
+#[test]
+fn call_on_non_function_type() {
+    let code = "
+    x: int = 1;
+    main(): void {
+      x();
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
+#[test]
 fn test_type_mismatched() {
     let code = "
     x: int = \"str\";
@@ -296,7 +321,12 @@ fn redefine_field_is_invalid() {
 
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
-    let mut program = Parser::parse_program("", code).unwrap();
+    let mut program = Parser::parse_program("", code)
+        .map_err(|err| {
+            println!("{}", err);
+            err
+        })
+        .unwrap();
     let mut prelude = parse_prelude();
     prelude.append(&mut program);
     let mut checker = SemanticChecker::new();
