@@ -27,7 +27,7 @@ impl SemanticChecker {
             use TopAstVariant::*;
             match &top.ast {
                 Class(c) => {
-                    let typ = self.type_env.new_class(&c.tag, c)?;
+                    let typ = self.type_env.new_class(c)?;
                     self.type_env.add_type(&c.location, &c.name, typ)?;
                 }
                 _ => (),
@@ -154,7 +154,14 @@ impl SemanticChecker {
         let mut type_env = TypeEnv::with_parent(type_env);
         let location = &b.location;
         if b.statements.len() == 0 {
-            if type_env.unify(location, return_type, &Type::Void).is_err() {
+            if type_env
+                .unify(
+                    location,
+                    return_type,
+                    &type_env.lookup_type(location, "void")?.typ,
+                )
+                .is_err()
+            {
                 return Err(SemanticError::dead_code_after_return_statement(location));
             }
         } else {
@@ -165,7 +172,7 @@ impl SemanticChecker {
                     Return(e) => {
                         let typ = match e {
                             Some(e) => type_env.type_of_expr(e)?,
-                            None => Type::Void,
+                            None => type_env.lookup_type(location, "void")?.typ,
                         };
                         if i != b.statements.len() - 1 {
                             return Err(SemanticError::dead_code_after_return_statement(location));
@@ -178,14 +185,26 @@ impl SemanticChecker {
                         type_env.unify(location, &var_def_typ, &var_typ)?;
                         type_env.add_variable(location, &v.name, var_def_typ)?;
                         if i == b.statements.len() - 1 {
-                            type_env.unify(location, return_type, &Type::Void)?;
+                            type_env.unify(
+                                location,
+                                return_type,
+                                &type_env.lookup_type(location, "void")?.typ,
+                            )?;
                         }
                     }
                     Expression(func_call) => {
                         let func_call_ret_typ = type_env.type_of_expr(func_call)?;
-                        type_env.unify(location, &Type::Void, &func_call_ret_typ)?;
+                        type_env.unify(
+                            location,
+                            &type_env.lookup_type(location, "void")?.typ,
+                            &func_call_ret_typ,
+                        )?;
                         if i == b.statements.len() - 1 {
-                            type_env.unify(location, return_type, &Type::Void)?;
+                            type_env.unify(
+                                location,
+                                return_type,
+                                &type_env.lookup_type(location, "void")?.typ,
+                            )?;
                         }
                     }
                     IfBlock {
@@ -194,7 +213,11 @@ impl SemanticChecker {
                     } => {
                         for (condition, then_block) in clauses {
                             let cond_type = type_env.type_of_expr(condition)?;
-                            type_env.unify(location, &Type::Bool, &cond_type)?;
+                            type_env.unify(
+                                location,
+                                &type_env.lookup_type(location, "bool")?.typ,
+                                &cond_type,
+                            )?;
                             self.check_block(&type_env, then_block, return_type)?;
                         }
                         self.check_block(&type_env, else_block, return_type)?;

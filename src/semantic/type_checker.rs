@@ -4,7 +4,6 @@ use crate::ast;
 use crate::ast::*;
 use crate::ast::{Function, ParsedType};
 use crate::lexer::Location;
-use crate::semantic::tag::SemanticTag;
 use std::collections::HashMap;
 
 pub struct TypeEnv {
@@ -25,13 +24,23 @@ impl TypeEnv {
                 let left_type = self.type_of_expr(l)?;
                 let right_type = self.type_of_expr(r)?;
                 match (left_type, right_type, op) {
-                    (Type::Int, Type::Int, Operator::Plus) => Ok(Type::Int),
+                    (
+                        Type::ClassType { name: n1, .. },
+                        Type::ClassType { name: n2, .. },
+                        Operator::Plus,
+                    ) => {
+                        if n1.as_str() == "int" && n1 == n2 {
+                            Ok(self.lookup_type(location, "int")?.typ)
+                        } else {
+                            panic!("sadasdasda")
+                        }
+                    }
                     (l, r, op) => panic!("unsupported operator, {} {:?} {}", l, op, r),
                 }
             }
-            F64(_) => Ok(Type::F64),
-            Int(_) => Ok(Type::Int),
-            Bool(_) => Ok(Type::Bool),
+            F64(_) => Ok(self.lookup_type(location, "f64")?.typ),
+            Int(_) => Ok(self.lookup_type(location, "int")?.typ),
+            Bool(_) => Ok(self.lookup_type(location, "bool")?.typ),
             String(_) => Ok(self.lookup_type(location, "string")?.typ),
             List(es) => {
                 let expr_type: Type = if es.len() < 1 {
@@ -121,13 +130,6 @@ impl TypeEnv {
     pub(crate) fn unify(&self, location: &Location, expected: &Type, actual: &Type) -> Result<()> {
         use Type::*;
         match (expected, actual) {
-            (Void, Void) | (Int, Int) | (Bool, Bool) | (F64, F64) | (String, String) => {
-                if expected == actual {
-                    Ok(())
-                } else {
-                    Err(SemanticError::type_mismatched(location, expected, actual))
-                }
-            }
             (
                 ClassType {
                     name,
@@ -225,24 +227,7 @@ impl TypeEnv {
             self.from(&f.ret_typ)?.into(),
         ))
     }
-    pub fn new_class(&mut self, tag: &Option<Tag>, c: &Class) -> Result<Type> {
-        if tag.is_builtin() {
-            match c.name.as_str() {
-                "void" => Ok(Type::Void),
-                "int" => Ok(Type::Int),
-                "f64" => Ok(Type::F64),
-                "bool" => Ok(Type::Bool),
-                "string" => self.new_normal_class(c),
-                "_c_string" => Ok(Type::String),
-                "List" => self.new_normal_class(c),
-                typ_name => unreachable!("unknown builtin type: {}", typ_name),
-            }
-        } else {
-            self.new_normal_class(c)
-        }
-    }
-
-    fn new_normal_class(&mut self, c: &Class) -> Result<Type> {
+    pub fn new_class(&mut self, c: &Class) -> Result<Type> {
         let mut uninitialized_fields = vec![];
         let mut members = ClassMembers::new();
         for member in &c.members {
@@ -402,11 +387,6 @@ impl ClassMembers {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
-    Void,
-    Int,
-    Bool,
-    F64,
-    String,
     // TODO: complete definition
     TraitType,
     ClassType {
@@ -424,7 +404,6 @@ impl Type {
     fn occurs(&self, t: Type) -> bool {
         use Type::*;
         match t {
-            Void | Int | Bool | F64 | String => false,
             FunctionType(t1, t2) => {
                 for t in t1 {
                     if self.occurs(t) {
@@ -434,15 +413,20 @@ impl Type {
                 self.occurs(*t2)
             }
             ClassType {
-                type_parameters, ..
-            } => {
-                for t in type_parameters {
-                    if self.occurs(t) {
-                        return true;
+                name,
+                type_parameters,
+                ..
+            } => match name.as_str() {
+                "void" | "int" | "bool" | "f64" | "string" => false,
+                _ => {
+                    for t in type_parameters {
+                        if self.occurs(t) {
+                            return true;
+                        }
                     }
+                    false
                 }
-                false
-            }
+            },
             TraitType => unimplemented!("trait type"),
             FreeVar(_) => self.clone() == t,
         }
@@ -453,11 +437,6 @@ impl std::fmt::Display for Type {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         use Type::*;
         match self {
-            Void => write!(f, "void"),
-            Int => write!(f, "int"),
-            F64 => write!(f, "f64"),
-            Bool => write!(f, "bool"),
-            String => write!(f, "string"),
             ClassType {
                 name,
                 type_parameters,

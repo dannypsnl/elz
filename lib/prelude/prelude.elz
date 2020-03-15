@@ -1,20 +1,13 @@
 // builtin types
-@builtin
 class void {}
-@builtin
 class int {}
-@builtin
 class f64 {}
-@builtin
 class bool {}
-@builtin
 class _c_string {}
-@builtin
 class string {
   value: _c_string;
   ::new(v: _c_string): string = string {value: v};
 }
-@builtin
 class List[T] {}
 
 println(content: string): void {
