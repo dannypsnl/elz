@@ -14,6 +14,13 @@ fn test_codegen_main() {
 }
 
 #[test]
+fn global_variable() {
+    let code = "x: int = 1;";
+    let module = gen_code(code);
+    assert_eq!(module.variables[0].llvm_represent(), "@x = global i64 1");
+}
+
+#[test]
 fn test_return_value() {
     let code = "foo(): int = 1;";
     let module = gen_code(code);
