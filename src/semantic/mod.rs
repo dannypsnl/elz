@@ -1,12 +1,13 @@
 use crate::ast::*;
 use crate::lexer::Location;
-use crate::semantic::types::TypeEnv;
-use error::Result;
-use types::Type;
 
 mod error;
 mod tag;
 mod types;
+
+use error::{Result, SemanticError};
+use tag::SemanticTag;
+use types::{Type, TypeEnv};
 
 pub struct SemanticChecker {
     type_env: TypeEnv,
@@ -26,7 +27,7 @@ impl SemanticChecker {
             use TopAstVariant::*;
             match &top.ast {
                 Class(c) => {
-                    let typ = self.type_env.new_class(&top.tag, c)?;
+                    let typ = self.type_env.new_class(&c.tag, c)?;
                     self.type_env.add_type(&c.location, &c.name, typ)?;
                 }
                 _ => (),
@@ -132,18 +133,24 @@ impl SemanticChecker {
             }
             Some(Body::Block(b)) => self.check_block(&mut type_env, b, &return_type),
             None => {
-                // function declaration has no body need to check
-                // e.g.
-                // ```
-                // foo(): void;
-                // ```
-                Ok(())
+                if f.tag.is_extern() {
+                    // extern function declaration don't have body need to check
+                    // e.g.
+                    // ```
+                    // foo(): void;
+                    // ```
+                    Ok(())
+                } else {
+                    Err(SemanticError::non_extern_function_must_have_body(
+                        location,
+                        f.name.as_str(),
+                    ))
+                }
             }
         }
     }
 
     fn check_block(&self, type_env: &mut TypeEnv, b: &Block, return_type: &Type) -> Result<()> {
-        use error::SemanticError;
         let location = &b.location;
         if b.statements.len() == 0 {
             if type_env.unify(location, return_type, &Type::Void).is_err() {

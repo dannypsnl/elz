@@ -30,21 +30,28 @@ impl Parser {
     pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<TopAst>> {
         let mut program = vec![];
         while self.peek(0)?.tk_type() != &end_token_type {
-            let tag = self.parse_tag()?;
-            let ast = self.parse_top_ast()?;
-            program.push(TopAst::new(tag, ast));
+            program.push(TopAst {
+                ast: self.parse_top_ast()?,
+            });
         }
         Ok(program)
     }
     pub fn parse_tag(&mut self) -> Result<Option<Tag>> {
         if self.predict_and_consume(vec![TkType::AtSign]).is_ok() {
             let tag_name = self.parse_identifier()?;
-            Ok(Some(Tag::new(tag_name)))
+            let properties = self.parse_many_if_has_open_token(
+                TkType::OpenParen,
+                TkType::CloseParen,
+                TkType::Comma,
+                |parser| Ok(parser.parse_identifier()?),
+            )?;
+            Ok(Some(Tag::new(tag_name, properties)))
         } else {
             Ok(None)
         }
     }
     pub fn parse_top_ast(&mut self) -> Result<TopAstVariant> {
+        let tag = self.parse_tag()?;
         let tok = self.peek(0)?;
         use TopAstVariant::*;
         match tok.tk_type() {
@@ -54,21 +61,21 @@ impl Parser {
                     .predict(vec![TkType::Identifier, TkType::Colon])
                     .is_ok()
                 {
-                    let v = self.parse_variable()?;
+                    let v = self.parse_variable(tag)?;
                     self.predict_and_consume(vec![TkType::Semicolon])?;
                     Ok(Variable(v))
                 } else {
                     // else we just seems it as a function to parse
-                    let f = self.parse_function()?;
+                    let f = self.parse_function(tag)?;
                     Ok(Function(f))
                 }
             }
             TkType::Class => {
-                let c = self.parse_class()?;
+                let c = self.parse_class(tag)?;
                 Ok(Class(c))
             }
             TkType::Trait => {
-                let t = self.parse_trait()?;
+                let t = self.parse_trait(tag)?;
                 Ok(Trait(t))
             }
             _ => {
@@ -82,7 +89,7 @@ impl Parser {
     /// handle:
     /// basic: `class Car { name: string; ::new(name: string): Car; }`
     /// implements trait: `class Rectangle <: Shape {}`
-    pub fn parse_class(&mut self) -> Result<Class> {
+    pub fn parse_class(&mut self, tag: Option<Tag>) -> Result<Class> {
         let kw_class = self.peek(0)?;
         self.predict_and_consume(vec![TkType::Class])?;
         let class_name = self.parse_identifier()?;
@@ -106,6 +113,7 @@ impl Parser {
         self.predict_and_consume(vec![TkType::CloseBrace])?;
         Ok(Class::new(
             kw_class.location().clone(),
+            tag,
             parents,
             class_name,
             type_parameters,
@@ -141,10 +149,11 @@ impl Parser {
                 let v = self.parse_class_field()?;
                 members.push(ClassMember::Field(v));
             } else {
+                let tag = self.parse_tag()?;
                 if self.predict_and_consume(vec![TkType::Accessor]).is_ok() {
-                    members.push(ClassMember::StaticMethod(self.parse_function()?));
+                    members.push(ClassMember::StaticMethod(self.parse_function(tag)?));
                 } else {
-                    let method = self.parse_function()?;
+                    let method = self.parse_function(tag)?;
                     members.push(ClassMember::Method(method));
                 }
             }
@@ -182,7 +191,7 @@ impl Parser {
     /// handle:
     /// basic: `trait Foo { name: string; get_name(): string; }`
     /// with others trait: `trait A <: B {}`
-    pub fn parse_trait(&mut self) -> Result<Trait> {
+    pub fn parse_trait(&mut self, tag: Option<Tag>) -> Result<Trait> {
         let location = self.peek(0)?.location();
         self.predict_and_consume(vec![TkType::Trait])?;
         let trait_name = self.parse_identifier()?;
@@ -197,6 +206,7 @@ impl Parser {
         self.predict_and_consume(vec![TkType::CloseBrace])?;
         Ok(Trait::new(
             location,
+            tag,
             vec![],
             trait_name,
             type_parameters,
@@ -213,7 +223,8 @@ impl Parser {
                 let v = self.parse_class_field()?;
                 members.push(TraitMember::Field(v));
             } else {
-                let mut method = self.parse_function()?;
+                let tag = self.parse_tag()?;
+                let mut method = self.parse_function(tag)?;
                 method.parameters.insert(
                     0,
                     Parameter::new("self", ParsedType::TypeName(class_name.clone())),
@@ -226,7 +237,7 @@ impl Parser {
     /// parse_variable:
     ///
     /// handle `x: int = 1;`
-    pub fn parse_variable(&mut self) -> Result<Variable> {
+    pub fn parse_variable(&mut self, tag: Option<Tag>) -> Result<Variable> {
         let loc = self.peek(0)?.location();
         // x: int = 1;
         let var_name = self.parse_identifier()?;
@@ -237,7 +248,7 @@ impl Parser {
         // = 1;
         self.predict_and_consume(vec![TkType::Equal])?;
         let expr = self.parse_expression(None, None)?;
-        Ok(Variable::new(loc, var_name, typ, expr))
+        Ok(Variable::new(loc, tag, var_name, typ, expr))
     }
     /// parse_function:
     ///
@@ -247,7 +258,7 @@ impl Parser {
     /// `add(x: int, y: int): int = x + y;`
     /// or declaration
     /// `foo(): void;`
-    pub fn parse_function(&mut self) -> Result<Function> {
+    pub fn parse_function(&mut self, tag: Option<Tag>) -> Result<Function> {
         let loc = self.peek(0)?.location();
         // main(): void
         let fn_name = self.parse_identifier()?;
@@ -262,14 +273,16 @@ impl Parser {
             if self.predict(vec![TkType::Semicolon]).is_ok() {
                 // ;
                 self.consume()?;
-                Ok(Function::new_declaration(loc, fn_name, params, ret_typ))
+                Ok(Function::new_declaration(
+                    loc, tag, fn_name, params, ret_typ,
+                ))
             } else if self
                 .predict_one_of(vec![TkType::OpenBrace, TkType::Equal])
                 .is_ok()
             {
                 // {}
                 let body = self.parse_body()?;
-                Ok(Function::new(loc, fn_name, params, ret_typ, body))
+                Ok(Function::new(loc, tag, fn_name, params, ret_typ, body))
             } else {
                 Err(ParseError::not_expected_token(
                     vec![TkType::OpenBrace, TkType::Semicolon, TkType::Equal],
@@ -388,7 +401,7 @@ impl Parser {
         match tok.tk_type() {
             TkType::Identifier => {
                 if self.peek(1)?.tk_type() == &TkType::Colon {
-                    let var = self.parse_variable()?;
+                    let var = self.parse_variable(None)?;
                     self.predict_and_consume(vec![TkType::Semicolon])?;
                     Ok(Statement::variable(tok.location(), var))
                 } else if vec![TkType::OpenParen, TkType::Dot].contains(self.peek(1)?.tk_type()) {
@@ -765,5 +778,22 @@ impl Parser {
         }
         self.predict_and_consume(vec![close_token])?;
         Ok(result)
+    }
+
+    fn parse_many_if_has_open_token<F, T>(
+        &mut self,
+        open_token: TkType,
+        close_token: TkType,
+        separator: TkType,
+        step_fn: F,
+    ) -> Result<Vec<T>>
+    where
+        F: Fn(&mut Parser) -> Result<T>,
+    {
+        if self.peek(0)?.tk_type() == &open_token {
+            self.parse_many(open_token, close_token, separator, step_fn)
+        } else {
+            Ok(vec![])
+        }
     }
 }

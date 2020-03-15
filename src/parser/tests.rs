@@ -10,11 +10,12 @@ fn parse_function_with_block_body() {
 
     let mut parser = Parser::new("", code);
 
-    let func = parser.parse_function().unwrap();
+    let func = parser.parse_function(None).unwrap();
     assert_eq!(
         func,
         Function::new(
             Location::from(1, 0),
+            None,
             "main",
             vec![],
             ParsedType::type_name("void"),
@@ -31,11 +32,12 @@ fn parse_function_with_expression_body() {
 
     let mut parser = Parser::new("", code);
 
-    let func = parser.parse_function().unwrap();
+    let func = parser.parse_function(None).unwrap();
     assert_eq!(
         func,
         Function::new(
             Location::from(1, 0),
+            None,
             "add",
             vec![
                 Parameter::new("x", ParsedType::type_name("int")),
@@ -60,11 +62,12 @@ fn parse_function_declaration() {
 
     let mut parser = Parser::new("", code);
 
-    let func = parser.parse_function().unwrap();
+    let func = parser.parse_function(None).unwrap();
     assert_eq!(
         func,
         Function::new_declaration(
             Location::from(1, 0),
+            None,
             "foo",
             vec![],
             ParsedType::type_name("void"),
@@ -80,11 +83,12 @@ fn parse_variable_define() {
 
     let mut parser = Parser::new("", code);
 
-    let var = parser.parse_variable().unwrap();
+    let var = parser.parse_variable(None).unwrap();
     assert_eq!(
         var,
         Variable::new(
             Location::from(1, 0),
+            None,
             "x",
             ParsedType::type_name("int"),
             Expr::int(Location::from(1, 9), 1)
@@ -100,11 +104,12 @@ fn parse_variable_define_with_list_value() {
 
     let mut parser = Parser::new("", code);
 
-    let var = parser.parse_variable().unwrap();
+    let var = parser.parse_variable(None).unwrap();
     assert_eq!(
         var,
         Variable::new(
             Location::from(1, 0),
+            None,
             "x",
             ParsedType::generic_type("List", vec![ParsedType::type_name("int")]),
             Expr::list(
@@ -194,11 +199,12 @@ fn parse_class() {
                 }";
 
     let mut parser = Parser::new("", code);
-    let class = parser.parse_class().unwrap();
+    let class = parser.parse_class(None).unwrap();
     assert_eq!(
         class,
         Class::new(
             Location::from(1, 0),
+            None,
             vec![],
             "Car",
             vec![],
@@ -211,12 +217,14 @@ fn parse_class() {
                 )),
                 ClassMember::StaticMethod(Function::new_declaration(
                     Location::from(3, 2),
+                    None,
                     "new",
                     vec![Parameter::new("name", ParsedType::type_name("string"))],
                     ParsedType::type_name("Car"),
                 )),
                 ClassMember::Method(Function::new_declaration(
                     Location::from(4, 0),
+                    None,
                     "bar",
                     vec![Parameter::new("i", ParsedType::type_name("int"))],
                     ParsedType::type_name("void"),
@@ -231,11 +239,12 @@ fn parse_class_inherit() {
     let code = "class Foo <: Bar {}";
 
     let mut parser = Parser::new("", code);
-    let class = parser.parse_class().unwrap();
+    let class = parser.parse_class(None).unwrap();
     assert_eq!(
         class,
         Class::new(
             Location::from(1, 0),
+            None,
             vec!["Bar".to_string()],
             "Foo",
             vec![],
@@ -249,11 +258,12 @@ fn parse_class_with_type_parameters() {
     let code = "class Foo[T] {}";
 
     let mut parser = Parser::new("", code);
-    let class = parser.parse_class().unwrap();
+    let class = parser.parse_class(None).unwrap();
     assert_eq!(
         class,
         Class::new(
             Location::from(1, 0),
+            None,
             vec![],
             "Foo",
             vec![TypeParameter::new("T", vec![])],
@@ -268,5 +278,5 @@ fn parse_tag() {
 
     let mut parser = Parser::new("", code);
     let tag = parser.parse_tag().unwrap().unwrap();
-    assert_eq!(tag, Tag::new("builtin"))
+    assert_eq!(tag, Tag::new("builtin", vec![]))
 }

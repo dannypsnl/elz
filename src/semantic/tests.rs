@@ -213,7 +213,7 @@ fn method() -> Result<()> {
 
     class Foo {
       ::new(): Foo = Foo {};
-      bar(): void;
+      bar(): void {}
     }
     ";
     check_code(code)
@@ -228,10 +228,19 @@ fn test_method_should_be_able_to_call_with_instance() -> Result<()> {
         f.bar();
         return f;
       }
-      bar(): void;
+      bar(): void {}
     }
     ";
     check_code(code)
+}
+
+#[test]
+fn non_extern_function_cannot_without_body() {
+    let code = "
+    foo(): void;
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
 }
 
 #[test]
