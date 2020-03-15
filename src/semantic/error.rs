@@ -44,6 +44,8 @@ enum SemanticErrorVariant {
         class_name: String,
         member_name: String,
     },
+    #[error("function `{}` is not an extern function, must have a body", .function_name)]
+    NonExternFunctionMustHaveBody { function_name: String },
 }
 
 impl SemanticError {
@@ -71,10 +73,22 @@ impl SemanticError {
             DeadCodeAfterReturnStatement => "dead code after return statement",
             RedefinedMember { .. } => "redefined member",
             NoMemberNamed { .. } => "no member",
+            NonExternFunctionMustHaveBody { .. } => "non extern function must have a body",
         }
         .to_string()
     }
 
+    pub fn non_extern_function_must_have_body<T: ToString>(
+        location: &Location,
+        function_name: T,
+    ) -> SemanticError {
+        SemanticError::new(
+            location,
+            SemanticErrorVariant::NonExternFunctionMustHaveBody {
+                function_name: function_name.to_string(),
+            },
+        )
+    }
     pub fn name_redefined<T: ToString>(location: &Location, name: T) -> SemanticError {
         SemanticError::new(
             location,

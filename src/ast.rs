@@ -5,26 +5,21 @@ use std::collections::HashMap;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Tag {
     pub name: String,
+    pub properties: Vec<String>,
 }
 
 impl Tag {
-    pub fn new<T: ToString>(name: T) -> Tag {
+    pub fn new<T: ToString>(name: T, properties: Vec<String>) -> Tag {
         Tag {
             name: name.to_string(),
+            properties,
         }
     }
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TopAst {
-    pub tag: Option<Tag>,
     pub ast: TopAstVariant,
-}
-
-impl TopAst {
-    pub fn new(tag: Option<Tag>, ast: TopAstVariant) -> TopAst {
-        TopAst { tag, ast }
-    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -53,6 +48,7 @@ impl TypeParameter {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Trait {
     pub location: Location,
+    pub tag: Option<Tag>,
     pub with_traits: Vec<String>,
     pub name: String,
     pub type_parameters: Vec<TypeParameter>,
@@ -68,6 +64,7 @@ pub enum TraitMember {
 impl Trait {
     pub fn new<T: ToString>(
         location: Location,
+        tag: Option<Tag>,
         with_traits: Vec<String>,
         name: T,
         type_parameters: Vec<TypeParameter>,
@@ -75,6 +72,7 @@ impl Trait {
     ) -> Trait {
         Trait {
             location,
+            tag,
             with_traits,
             name: name.to_string(),
             type_parameters,
@@ -86,6 +84,7 @@ impl Trait {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
     pub location: Location,
+    pub tag: Option<Tag>,
     pub parents: Vec<String>,
     pub name: String,
     pub type_parameters: Vec<TypeParameter>,
@@ -102,6 +101,7 @@ pub enum ClassMember {
 impl Class {
     pub fn new<T: ToString>(
         location: Location,
+        tag: Option<Tag>,
         parents: Vec<String>,
         name: T,
         type_parameters: Vec<TypeParameter>,
@@ -109,6 +109,7 @@ impl Class {
     ) -> Class {
         Class {
             location,
+            tag,
             parents,
             name: name.to_string(),
             type_parameters,
@@ -180,15 +181,23 @@ impl ParsedType {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Variable {
     pub location: Location,
+    pub tag: Option<Tag>,
     pub name: String,
     pub typ: ParsedType,
     pub expr: Expr,
 }
 
 impl Variable {
-    pub fn new<T: ToString>(location: Location, name: T, typ: ParsedType, expr: Expr) -> Variable {
+    pub fn new<T: ToString>(
+        location: Location,
+        tag: Option<Tag>,
+        name: T,
+        typ: ParsedType,
+        expr: Expr,
+    ) -> Variable {
         Variable {
             location,
+            tag,
             name: name.to_string(),
             typ,
             expr,
@@ -199,6 +208,7 @@ impl Variable {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Function {
     pub location: Location,
+    pub tag: Option<Tag>,
     pub name: String,
     pub parameters: Vec<Parameter>,
     pub ret_typ: ParsedType,
@@ -208,6 +218,7 @@ pub struct Function {
 impl Function {
     pub fn new<T: ToString>(
         location: Location,
+        tag: Option<Tag>,
         name: T,
         parameters: Vec<Parameter>,
         ret_typ: ParsedType,
@@ -215,6 +226,7 @@ impl Function {
     ) -> Function {
         Function {
             location,
+            tag,
             name: name.to_string(),
             parameters,
             ret_typ,
@@ -223,12 +235,14 @@ impl Function {
     }
     pub fn new_declaration<T: ToString>(
         location: Location,
+        tag: Option<Tag>,
         name: T,
         parameters: Vec<Parameter>,
         ret_typ: ParsedType,
     ) -> Function {
         Function {
             location,
+            tag,
             name: name.to_string(),
             parameters,
             ret_typ,

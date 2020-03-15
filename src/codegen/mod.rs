@@ -32,7 +32,7 @@ impl CodeGenerator {
             use TopAstVariant::*;
             match &top.ast {
                 Function(f) => {
-                    if top.tag.is_builtin() {
+                    if f.tag.is_builtin() {
                         continue;
                     }
                     let func = ir::Function::from_ast(f, None, &mut module);

@@ -20,5 +20,7 @@ class List[T] {}
 println(content: string): void {
   _: int = puts(content.value);
 }
+@extern(c)
 puts(str: _c_string): int;
+@extern(c)
 malloc(size: int): _c_string;
