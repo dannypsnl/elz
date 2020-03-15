@@ -32,7 +32,7 @@ impl TypeEnv {
             F64(_) => Ok(Type::F64),
             Int(_) => Ok(Type::Int),
             Bool(_) => Ok(Type::Bool),
-            String(_) => Ok(self.get_type(location, "string")?.typ),
+            String(_) => Ok(self.lookup_type(location, "string")?.typ),
             List(es) => {
                 let expr_type: Type = if es.len() < 1 {
                     self.free_var()
@@ -48,7 +48,7 @@ impl TypeEnv {
                         ));
                     }
                 }
-                Ok(self.get_type(location, "List")?.typ)
+                Ok(self.lookup_type(location, "List")?.typ)
             }
             FuncCall(f, args) => {
                 let f_type = self.type_of_expr(f)?;
@@ -77,7 +77,7 @@ impl TypeEnv {
                 }
             }
             Identifier(id) => {
-                let type_info = self.get_variable(location, id.as_str())?;
+                let type_info = self.lookup_variable(location, id.as_str())?;
                 Ok(type_info.typ)
             }
             ClassConstruction(name, field_inits) => {
@@ -86,7 +86,7 @@ impl TypeEnv {
                         location,
                     ));
                 }
-                let type_info = self.get_type(location, name)?;
+                let type_info = self.lookup_type(location, name)?;
                 match &type_info.typ {
                     Type::ClassType {
                         uninitialized_fields,
@@ -211,7 +211,9 @@ impl TypeEnv {
         type_env
     }
     pub fn from(&self, typ: &ParsedType) -> Result<Type> {
-        Ok(self.get_type(&Location::none(), typ.name().as_str())?.typ)
+        Ok(self
+            .lookup_type(&Location::none(), typ.name().as_str())?
+            .typ)
     }
     pub fn new_function_type(&self, f: &Function) -> Result<Type> {
         let mut param_types = vec![];
@@ -279,7 +281,7 @@ impl TypeEnv {
         }
         let mut parents = vec![];
         for p_name in &c.parents {
-            let parent_typ = self.get_type(&c.location, p_name.as_str())?;
+            let parent_typ = self.lookup_type(&c.location, p_name.as_str())?;
             match &parent_typ.typ {
                 Type::TraitType => parents.push(parent_typ.typ),
                 t => return Err(SemanticError::only_trait_can_be_super_type(&c.location, t)),
@@ -305,12 +307,14 @@ impl TypeEnv {
             Ok(())
         }
     }
-    pub(crate) fn get_variable(&self, location: &Location, k: &str) -> Result<TypeInfo> {
+    pub(crate) fn lookup_variable(&self, location: &Location, k: &str) -> Result<TypeInfo> {
         let result = self.variables.get(k);
         match result {
             Some(t) => Ok(t.clone()),
             None => match self.parent {
-                Some(env) => unsafe { env.as_ref() }.unwrap().get_variable(location, k),
+                Some(env) => unsafe { env.as_ref() }
+                    .unwrap()
+                    .lookup_variable(location, k),
                 None => Err(SemanticError::no_variable(location, k)),
             },
         }
@@ -325,12 +329,12 @@ impl TypeEnv {
             Ok(())
         }
     }
-    pub(crate) fn get_type(&self, location: &Location, k: &str) -> Result<TypeInfo> {
+    pub(crate) fn lookup_type(&self, location: &Location, k: &str) -> Result<TypeInfo> {
         let result = self.types.get(k);
         match result {
             Some(t) => Ok(t.clone()),
             None => match self.parent {
-                Some(env) => unsafe { env.as_ref() }.unwrap().get_type(location, k),
+                Some(env) => unsafe { env.as_ref() }.unwrap().lookup_type(location, k),
                 None => Err(SemanticError::no_type(location, k)),
             },
         }
