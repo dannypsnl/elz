@@ -328,6 +328,28 @@ fn redefine_field_is_invalid() {
     assert_eq!(result.is_err(), true);
 }
 
+#[test]
+fn no_type_name() {
+    let code = "x: Foo = Foo {};";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
+#[test]
+fn no_member_name() {
+    let code = "
+    class Foo {
+      ::new(): Foo = Foo {};
+    }
+    main(): void {
+      foo: Foo = Foo::new();
+      foo.a();
+    }
+    ";
+    let result = check_code(code);
+    assert_eq!(result.is_err(), true);
+}
+
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let mut program = Parser::parse_program("", code)

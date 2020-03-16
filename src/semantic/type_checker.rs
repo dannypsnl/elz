@@ -4,7 +4,6 @@ use crate::ast;
 use crate::ast::*;
 use crate::ast::{Function, ParsedType};
 use crate::lexer::Location;
-use crate::semantic::tag::SemanticTag;
 use std::collections::HashMap;
 
 pub struct TypeEnv {
@@ -25,14 +24,24 @@ impl TypeEnv {
                 let left_type = self.type_of_expr(l)?;
                 let right_type = self.type_of_expr(r)?;
                 match (left_type, right_type, op) {
-                    (Type::Int, Type::Int, Operator::Plus) => Ok(Type::Int),
+                    (
+                        Type::ClassType { name: n1, .. },
+                        Type::ClassType { name: n2, .. },
+                        Operator::Plus,
+                    ) => {
+                        if n1.as_str() == "int" && n1 == n2 {
+                            Ok(self.lookup_type(location, "int")?.typ)
+                        } else {
+                            panic!("sadasdasda")
+                        }
+                    }
                     (l, r, op) => panic!("unsupported operator, {} {:?} {}", l, op, r),
                 }
             }
-            F64(_) => Ok(Type::F64),
-            Int(_) => Ok(Type::Int),
-            Bool(_) => Ok(Type::Bool),
-            String(_) => Ok(self.get_type(location, "string")?.typ),
+            F64(_) => Ok(self.lookup_type(location, "f64")?.typ),
+            Int(_) => Ok(self.lookup_type(location, "int")?.typ),
+            Bool(_) => Ok(self.lookup_type(location, "bool")?.typ),
+            String(_) => Ok(self.lookup_type(location, "string")?.typ),
             List(es) => {
                 let expr_type: Type = if es.len() < 1 {
                     self.free_var()
@@ -48,7 +57,7 @@ impl TypeEnv {
                         ));
                     }
                 }
-                Ok(self.get_type(location, "List")?.typ)
+                Ok(self.lookup_type(location, "List")?.typ)
             }
             FuncCall(f, args) => {
                 let f_type = self.type_of_expr(f)?;
@@ -77,7 +86,7 @@ impl TypeEnv {
                 }
             }
             Identifier(id) => {
-                let type_info = self.get_variable(location, id.as_str())?;
+                let type_info = self.lookup_variable(location, id.as_str())?;
                 Ok(type_info.typ)
             }
             ClassConstruction(name, field_inits) => {
@@ -86,7 +95,7 @@ impl TypeEnv {
                         location,
                     ));
                 }
-                let type_info = self.get_type(location, name)?;
+                let type_info = self.lookup_type(location, name)?;
                 match &type_info.typ {
                     Type::ClassType {
                         uninitialized_fields,
@@ -121,13 +130,6 @@ impl TypeEnv {
     pub(crate) fn unify(&self, location: &Location, expected: &Type, actual: &Type) -> Result<()> {
         use Type::*;
         match (expected, actual) {
-            (Void, Void) | (Int, Int) | (Bool, Bool) | (F64, F64) | (String, String) => {
-                if expected == actual {
-                    Ok(())
-                } else {
-                    Err(SemanticError::type_mismatched(location, expected, actual))
-                }
-            }
             (
                 ClassType {
                     name,
@@ -211,7 +213,9 @@ impl TypeEnv {
         type_env
     }
     pub fn from(&self, typ: &ParsedType) -> Result<Type> {
-        Ok(self.get_type(&Location::none(), typ.name().as_str())?.typ)
+        Ok(self
+            .lookup_type(&Location::none(), typ.name().as_str())?
+            .typ)
     }
     pub fn new_function_type(&self, f: &Function) -> Result<Type> {
         let mut param_types = vec![];
@@ -223,24 +227,7 @@ impl TypeEnv {
             self.from(&f.ret_typ)?.into(),
         ))
     }
-    pub fn new_class(&mut self, tag: &Option<Tag>, c: &Class) -> Result<Type> {
-        if tag.is_builtin() {
-            match c.name.as_str() {
-                "void" => Ok(Type::Void),
-                "int" => Ok(Type::Int),
-                "f64" => Ok(Type::F64),
-                "bool" => Ok(Type::Bool),
-                "string" => self.new_normal_class(c),
-                "_c_string" => Ok(Type::String),
-                "List" => self.new_normal_class(c),
-                typ_name => unreachable!("unknown builtin type: {}", typ_name),
-            }
-        } else {
-            self.new_normal_class(c)
-        }
-    }
-
-    fn new_normal_class(&mut self, c: &Class) -> Result<Type> {
+    pub fn new_class(&mut self, c: &Class) -> Result<Type> {
         let mut uninitialized_fields = vec![];
         let mut members = ClassMembers::new();
         for member in &c.members {
@@ -279,7 +266,7 @@ impl TypeEnv {
         }
         let mut parents = vec![];
         for p_name in &c.parents {
-            let parent_typ = self.get_type(&c.location, p_name.as_str())?;
+            let parent_typ = self.lookup_type(&c.location, p_name.as_str())?;
             match &parent_typ.typ {
                 Type::TraitType => parents.push(parent_typ.typ),
                 t => return Err(SemanticError::only_trait_can_be_super_type(&c.location, t)),
@@ -305,12 +292,14 @@ impl TypeEnv {
             Ok(())
         }
     }
-    pub(crate) fn get_variable(&self, location: &Location, k: &str) -> Result<TypeInfo> {
+    pub(crate) fn lookup_variable(&self, location: &Location, k: &str) -> Result<TypeInfo> {
         let result = self.variables.get(k);
         match result {
             Some(t) => Ok(t.clone()),
             None => match self.parent {
-                Some(env) => unsafe { env.as_ref() }.unwrap().get_variable(location, k),
+                Some(env) => unsafe { env.as_ref() }
+                    .unwrap()
+                    .lookup_variable(location, k),
                 None => Err(SemanticError::no_variable(location, k)),
             },
         }
@@ -325,12 +314,12 @@ impl TypeEnv {
             Ok(())
         }
     }
-    pub(crate) fn get_type(&self, location: &Location, k: &str) -> Result<TypeInfo> {
+    pub(crate) fn lookup_type(&self, location: &Location, k: &str) -> Result<TypeInfo> {
         let result = self.types.get(k);
         match result {
             Some(t) => Ok(t.clone()),
             None => match self.parent {
-                Some(env) => unsafe { env.as_ref() }.unwrap().get_type(location, k),
+                Some(env) => unsafe { env.as_ref() }.unwrap().lookup_type(location, k),
                 None => Err(SemanticError::no_type(location, k)),
             },
         }
@@ -398,11 +387,6 @@ impl ClassMembers {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
-    Void,
-    Int,
-    Bool,
-    F64,
-    String,
     // TODO: complete definition
     TraitType,
     ClassType {
@@ -420,7 +404,6 @@ impl Type {
     fn occurs(&self, t: Type) -> bool {
         use Type::*;
         match t {
-            Void | Int | Bool | F64 | String => false,
             FunctionType(t1, t2) => {
                 for t in t1 {
                     if self.occurs(t) {
@@ -430,15 +413,20 @@ impl Type {
                 self.occurs(*t2)
             }
             ClassType {
-                type_parameters, ..
-            } => {
-                for t in type_parameters {
-                    if self.occurs(t) {
-                        return true;
+                name,
+                type_parameters,
+                ..
+            } => match name.as_str() {
+                "void" | "int" | "bool" | "f64" | "string" => false,
+                _ => {
+                    for t in type_parameters {
+                        if self.occurs(t) {
+                            return true;
+                        }
                     }
+                    false
                 }
-                false
-            }
+            },
             TraitType => unimplemented!("trait type"),
             FreeVar(_) => self.clone() == t,
         }
@@ -449,11 +437,6 @@ impl std::fmt::Display for Type {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         use Type::*;
         match self {
-            Void => write!(f, "void"),
-            Int => write!(f, "int"),
-            F64 => write!(f, "f64"),
-            Bool => write!(f, "bool"),
-            String => write!(f, "string"),
             ClassType {
                 name,
                 type_parameters,

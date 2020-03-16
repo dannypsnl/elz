@@ -1,4 +1,4 @@
-use super::types::Type;
+use super::type_checker::Type;
 use crate::lexer::Location;
 use thiserror::Error;
 
