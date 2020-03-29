@@ -1,4 +1,3 @@
-#[cfg(test)]
 mod tests;
 
 fn formatted_elz(code: String) -> String {
@@ -15,7 +14,7 @@ fn formatted_elz(code: String) -> String {
         if comment_line {
             if code_to_char[i] == "\\" && code_to_char[i + 1] == "n" {
                 s.push_str("\n");
-                s.push_str(add_tab(indent).as_str());
+                s.push_str(add_indent(indent).as_str());
                 comment_line = false;
                 i += 1;
             } else{                
@@ -38,7 +37,7 @@ fn formatted_elz(code: String) -> String {
                     } else {
                         s.push_str("{");
                         s.push_str("\n");
-                        s.push_str(add_tab(indent).as_str());
+                        s.push_str(add_indent(indent).as_str());
                     }
                 }
                 //delete double blank
@@ -51,7 +50,7 @@ fn formatted_elz(code: String) -> String {
                         s.push_str("\n");
                     }
                     else {
-                        s.push_str(add_tab(indent).as_str());
+                        s.push_str(add_indent(indent).as_str());
                         s.push_str("}");
                         s.push_str("\n");
                     }
@@ -62,7 +61,7 @@ fn formatted_elz(code: String) -> String {
                     if code_to_char[i + 1] == "\\" && code_to_char[i + 2] == "n" && code_to_char[i + 3] == "}" {
                     } else if code_to_char[i + 1] == "}" {
                     } else {
-                        s.push_str(add_tab(indent).as_str());
+                        s.push_str(add_indent(indent).as_str());
                     }
                     semicolon_symbol = true;
                     past_symbol = false;
@@ -97,6 +96,7 @@ fn formatted_elz(code: String) -> String {
                 "/" => {
                     if code_to_char[i + 1] == "/" {
                         s.push_str("//");
+                        s.push_str(" ");
                         comment_line = true;
                         i += 1;
                     } else {
@@ -140,11 +140,10 @@ fn formatted_elz(code: String) -> String {
         }
         i += 1;
     }
-    println!("{}", s);
     s
 }
 
-fn add_tab(tab: i32) -> String {
+fn add_indent(tab: i32) -> String {
     let mut count = 0i32;
     let mut s = String::from("");
     loop {
@@ -170,15 +169,15 @@ fn add_blank(c: &str, pre: &str, next: &str) -> String {
 }
 
 fn check_symbol_behind_space(symbol: &str) -> bool {
-    let mut b = false;
     if symbol == ";" {
-        b = true;
+        return true;
     } else if symbol == ":" {
-        b = true;
+        return true;
     } else if symbol == "(" {
-        b = true;
+        return true;
     } else if symbol == "[" {
-        b = true;
+        return true
+    } else {
+        return false;
     }
-    b
 }

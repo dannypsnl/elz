@@ -2,21 +2,21 @@ use super::formatted_elz;
 
 #[test]
 fn simple_variable() {
-    let program = parse_code("x:int=1;");
-    assert_eq!(program, "x: int = 1;\n");
+    let formatted_code = format_code("x:int=1;");
+    assert_eq!(formatted_code, "x: int = 1;\n");
 }
 
 #[test]
 fn simple_function() {
-    let program = parse_code("add(x:int,y:int):int=x+y;");
-    assert_eq!(program, "add(x: int, y: int): int = x + y;\n");
+    let formatted_code = format_code("add(x:int,y:int):int=x+y;");
+    assert_eq!(formatted_code, "add(x: int, y: int): int = x + y;\n");
 }
 
 #[test]
 fn simple_function_block() {
-    let program = parse_code("add(x:int,y:int):int{return x+y;}");
+    let formatted_code = format_code("add(x:int,y:int):int{return x+y;}");
     assert_eq!(
-        program,
+        formatted_code,
         "add(x: int, y: int): int {
   return x + y;
 }
@@ -26,9 +26,9 @@ fn simple_function_block() {
 
 #[test]
 fn local_variable_in_function() {
-    let program = parse_code("foo():void{x:int=1;}");
+    let formatted_code = format_code("foo():void{x:int=1;}");
     assert_eq!(
-        program,
+        formatted_code,
         "foo(): void {
   x: int = 1;
 }
@@ -38,9 +38,9 @@ fn local_variable_in_function() {
 
 #[test]
 fn function_call_in_function() {
-    let program = parse_code("foo():void{x(a:1,2);}");
+    let formatted_code = format_code("foo():void{x(a:1,2);}");
     assert_eq!(
-        program,
+        formatted_code,
         "foo(): void {
   x(a: 1, 2);
 }
@@ -50,9 +50,9 @@ fn function_call_in_function() {
 
 #[test]
 fn simple_class() {
-    let program = parse_code("class Foo{}");
+    let formatted_code = format_code("class Foo{}");
     assert_eq!(
-        program,
+        formatted_code,
         "class Foo {}
 "
     );
@@ -60,9 +60,9 @@ fn simple_class() {
 
 #[test]
 fn class_super_type() {
-    let program = parse_code("class Foo<:Bar{}");
+    let formatted_code = format_code("class Foo<:Bar{}");
     assert_eq!(
-        program,
+        formatted_code,
         "class Foo <: Bar {}
 "
     );
@@ -70,9 +70,9 @@ fn class_super_type() {
 
 #[test]
 fn class_multiple_super_types() {
-    let program = parse_code("class Foo<:Bar,Tool{}");
+    let formatted_code = format_code("class Foo<:Bar,Tool{}");
     assert_eq!(
-        program,
+        formatted_code,
         "class Foo <: Bar, Tool {}
 "
     );
@@ -80,7 +80,7 @@ fn class_multiple_super_types() {
 
 #[test]
 fn class_members() {
-    let program = parse_code(
+    let formatted_code = format_code(
         "class Foo{
 x:int;
 ::new() :Foo =Foo{x:1};
@@ -88,7 +88,7 @@ bar(): void{}
 }",
     );
     assert_eq!(
-        program,
+        formatted_code,
         "class Foo {
   x: int;
   ::new(): Foo = Foo{x: 1};
@@ -100,13 +100,13 @@ bar(): void{}
 
 #[test]
 fn nested_block() {
-    let program = parse_code(
+    let formatted_code = format_code(
         "class Foo{
 ::bar(): void{return;}
 }",
     );
     assert_eq!(
-        program,
+        formatted_code,
         "class Foo {
   ::bar(): void {
     return;
@@ -118,9 +118,9 @@ fn nested_block() {
 
 #[test]
 fn simple_trait() {
-    let program = parse_code("trait Foo{}");
+    let formatted_code = format_code("trait Foo{}");
     assert_eq!(
-        program,
+        formatted_code,
         "trait Foo {}
 "
     );
@@ -128,14 +128,14 @@ fn simple_trait() {
 
 #[test]
 fn simple_comment() {
-    let program = parse_code(
+    let formatted_code = format_code(
         "//this is comment line
 trait Foo {}
 ",
     );
     assert_eq!(
-        program,
-        "//this is comment line
+        formatted_code,
+        "// this is comment line
 trait Foo {}
 "
     )
@@ -143,11 +143,11 @@ trait Foo {}
 
 #[test]
 fn multi_blank() {
-    let program = parse_code("
+    let formatted_code = format_code("
     class                 Car                               {name               :   string          ;new(name:string):Car;}
     ");
     assert_eq!(
-        program,
+        formatted_code,
         "class Car {
   name: string;
   new(name: string): Car;
@@ -158,7 +158,7 @@ fn multi_blank() {
 
 #[test]
 fn multi_newline() {
-    let program = parse_code(
+    let formatted_code = format_code(
         "
     class Car
 
@@ -176,7 +176,7 @@ new(name:string):Car
 ",
     );
     assert_eq!(
-        program,
+        formatted_code,
         "class Car {
   name: string;
   new(name: string): Car;
@@ -187,23 +187,23 @@ new(name:string):Car
 
 #[test]
 fn test() {
-    let program = parse_code(
+    let formatted_code = format_code(
         "//this is comment line
 trait Foo {}
-    class Car{name:string       ;//comment
-//this is comment line;zxcupqwyeirotyhrg
+    class Car{name:string       ;//comment line one
+//comment line two;
 
 
     :  :     new(name:string):Car;   bar(i: int):void  ;  fn foo()   {b=555*10 ; a=1+b;}}class CarFoo{::bar(): void {return;}}",
     );
     assert_eq!(
-        program,
-        "//this is comment line
+        formatted_code,
+        "// this is comment line
 trait Foo {}
 class Car {
   name: string;
-  //comment
-  //this is comment line;zxcupqwyeirotyhrg
+  // comment line one
+  // comment line two;
   ::new(name: string): Car;
   bar(i: int): void;
   fn foo() {
@@ -221,7 +221,7 @@ class CarFoo {
 }
 
 // helpers, must put tests before this line
-fn parse_code(code: &str) -> String {
+fn format_code(code: &str) -> String {
     let s = formatted_elz(code.to_string());
     s
 }
