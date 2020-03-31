@@ -289,6 +289,36 @@ fn module() {
 }
 
 #[test]
+fn import_all() {
+    let code = "import foo.bar";
+
+    let mut parser = Parser::new("", code);
+    let i = parser.parse_import().unwrap();
+    assert_eq!(
+        i,
+        Import {
+            import_path: "foo.bar".to_string(),
+            imported_component: vec![]
+        }
+    )
+}
+
+#[test]
+fn import() {
+    let code = "import foo ( bar )";
+
+    let mut parser = Parser::new("", code);
+    let i = parser.parse_import().unwrap();
+    assert_eq!(
+        i,
+        Import {
+            import_path: "foo".to_string(),
+            imported_component: vec!["bar".to_string()]
+        }
+    )
+}
+
+#[test]
 fn parse_tag() {
     let code = "@builtin";
 

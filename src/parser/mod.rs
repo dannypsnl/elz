@@ -70,6 +70,10 @@ impl Parser {
         let tok = self.peek(0)?;
         use TopAst::*;
         match tok.tk_type() {
+            TkType::Import => {
+                let i = self.parse_import()?;
+                Ok(Import(i))
+            }
             TkType::Identifier => {
                 // found `<identifier> :`
                 if self
@@ -98,6 +102,20 @@ impl Parser {
                 unreachable!();
             }
         }
+    }
+    pub fn parse_import(&mut self) -> Result<Import> {
+        self.predict_and_consume(vec![TkType::Import])?;
+        let import_path = self.parse_module_path()?;
+        let imported_component = self.parse_many_if_has_open_token(
+            TkType::OpenParen,
+            TkType::CloseParen,
+            TkType::Comma,
+            |parser| Ok(parser.parse_identifier()?),
+        )?;
+        Ok(Import {
+            import_path,
+            imported_component,
+        })
     }
     /// parse_class:
     ///
