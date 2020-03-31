@@ -23,6 +23,11 @@ impl SemanticChecker {
 
 impl SemanticChecker {
     pub fn check_program(&mut self, ast: &Vec<TopAst>) -> Result<()> {
+        self.prepare_program(ast)?;
+        self.check_top_list(ast)
+    }
+
+    fn prepare_program(&mut self, ast: &Vec<TopAst>) -> Result<()> {
         for top in ast {
             use TopAstVariant::*;
             match &top.ast {
@@ -70,6 +75,10 @@ impl SemanticChecker {
                 _ => (),
             }
         }
+        Ok(())
+    }
+
+    fn check_top_list(&mut self, ast: &Vec<TopAst>) -> Result<()> {
         for top in ast {
             use TopAstVariant::*;
             match &top.ast {
