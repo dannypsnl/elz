@@ -26,11 +26,13 @@ impl CodeGenerator {
                 }
                 Class(_) => {}
                 Trait(_) => unimplemented!(),
+                Import(_) => unimplemented!(),
             }
         }
         for top in asts {
             use TopAst::*;
             match &top {
+                Import(_) => unimplemented!(),
                 Function(f) => {
                     if f.tag.is_builtin() {
                         continue;

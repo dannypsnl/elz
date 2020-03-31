@@ -14,6 +14,7 @@ impl FormattedElz for FormatTopAstList {
         for ast in &self.0 {
             use TopAst::*;
             match &ast {
+                Import(_) => unimplemented!(),
                 Variable(v) => s.push_str(v.formatted_elz(level).as_str()),
                 Function(f) => s.push_str(f.formatted_elz(level).as_str()),
                 Class(c) => s.push_str(c.formatted_elz(level).as_str()),

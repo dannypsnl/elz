@@ -17,12 +17,47 @@ impl Tag {
     }
 }
 
+/// Module
+///
+/// ```elz
+/// module io
+/// ```
+///
+/// or more
+///
+/// ```elz
+/// module io.utils
+/// ```
+#[derive(Clone, Debug, PartialEq)]
+pub struct Module {
+    pub name: String,
+    pub top_list: Vec<TopAst>,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum TopAst {
+    Import(Import),
     Function(Function),
     Variable(Variable),
     Class(Class),
     Trait(Trait),
+}
+
+/// Import
+///
+/// ```elz
+/// import io ( read, println )
+///
+/// main(): void {
+///   println("your name:");
+///   user_name: string = read();
+///   println("Hello, {user_name}");
+/// }
+/// ```
+#[derive(Clone, Debug, PartialEq)]
+pub struct Import {
+    pub import_path: String,
+    pub imported_component: Vec<String>,
 }
 
 #[derive(Clone, Debug, PartialEq)]

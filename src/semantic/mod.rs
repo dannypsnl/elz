@@ -124,6 +124,7 @@ impl SemanticChecker {
                     }
                 }
                 Trait(_) => unimplemented!(),
+                Import(_) => unimplemented!(),
             }
         }
         Ok(())
