@@ -297,6 +297,7 @@ fn import_all() {
     assert_eq!(
         i,
         Import {
+            location: Location::from(1, 0),
             import_path: "foo.bar".to_string(),
             imported_component: vec![]
         }
@@ -312,6 +313,7 @@ fn import() {
     assert_eq!(
         i,
         Import {
+            location: Location::from(1, 0),
             import_path: "foo".to_string(),
             imported_component: vec!["bar".to_string()]
         }

@@ -56,6 +56,7 @@ pub enum TopAst {
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct Import {
+    pub location: Location,
     pub import_path: String,
     pub imported_component: Vec<String>,
 }

@@ -354,20 +354,27 @@ fn no_member_name() {
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
     let mut parser = Parser::new("", code);
-    let program = parser
+    let mut code = parser
         .parse_top_list(TkType::EOF)
         .map_err(|err| {
             println!("{}", err);
             err
         })
         .unwrap();
+
+    code.push(TopAst::Import(Import {
+        location: Location::none(),
+        import_path: "prelude".to_string(),
+        imported_component: vec![],
+    }));
+
     let prelude = parse_prelude();
     let mut checker = SemanticChecker::new();
     checker
         .check_program(&vec![
             Module {
                 name: "".to_string(),
-                top_list: program,
+                top_list: code,
             },
             prelude,
         ])

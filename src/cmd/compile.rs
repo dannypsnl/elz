@@ -1,5 +1,6 @@
-use crate::ast::Module;
+use crate::ast::{Import, Module, TopAst};
 use crate::diagnostic::Reporter;
+use crate::lexer::Location;
 use crate::parser::{parse_prelude, Parser};
 use crate::semantic::SemanticChecker;
 
@@ -23,7 +24,7 @@ fn check(
     // FIXME: for now to make code simple we only handle the first input file.
     let code = std::fs::read_to_string(files[0])?;
     let mut file_reporter = reporter.for_file(files[0], &code);
-    let module = match Parser::parse_program(files[0], &code) {
+    let mut module = match Parser::parse_program(files[0], &code) {
         Ok(p) => p,
         Err(err) => {
             file_reporter.add_diagnostic(err.location(), format!("{}", err), err.message());
@@ -31,6 +32,13 @@ fn check(
             return Err(err.into());
         }
     };
+    // insert import prelude
+    module.top_list.push(TopAst::Import(Import {
+        location: Location::none(),
+        import_path: "prelude".to_string(),
+        imported_component: vec![],
+    }));
+
     let prelude = parse_prelude();
     let program = vec![module, prelude];
     // check program

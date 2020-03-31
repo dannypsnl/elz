@@ -104,6 +104,7 @@ impl Parser {
         }
     }
     pub fn parse_import(&mut self) -> Result<Import> {
+        let location = self.peek(0)?.location();
         self.predict_and_consume(vec![TkType::Import])?;
         let import_path = self.parse_module_path()?;
         let imported_component = self.parse_many_if_has_open_token(
@@ -113,6 +114,7 @@ impl Parser {
             |parser| Ok(parser.parse_identifier()?),
         )?;
         Ok(Import {
+            location,
             import_path,
             imported_component,
         })
