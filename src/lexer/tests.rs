@@ -36,14 +36,14 @@ fn test_symbols() {
 
 #[test]
 fn test_keywords() {
-    let code = "return class trait true false if else";
+    let code = "module import return class trait true false if else";
 
     let tokens = lex("", code);
     let tk_types: Vec<_> = tokens.iter().map(|tok| tok.tk_type()).collect();
     use TkType::*;
     assert_eq!(
         tk_types,
-        vec![&Return, &Class, &Trait, &True, &False, &If, &Else, &EOF,]
+        vec![&Module, &Import, &Return, &Class, &Trait, &True, &False, &If, &Else, &EOF]
     )
 }
 
