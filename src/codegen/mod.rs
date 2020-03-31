@@ -1,7 +1,6 @@
 use crate::ast::*;
 use crate::codegen::tag::CodegenTag;
 
-pub mod formatted_elz;
 pub mod ir;
 pub mod llvm;
 mod tag;

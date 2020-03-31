@@ -22,9 +22,16 @@ impl SemanticChecker {
 }
 
 impl SemanticChecker {
-    pub fn check_program(&mut self, ast: &Vec<TopAst>) -> Result<()> {
-        self.prepare_program(ast)?;
-        self.check_top_list(ast)
+    pub fn check_program(&mut self, modules: &Vec<Module>) -> Result<()> {
+        for m in modules {
+            self.check_module(m)?;
+        }
+        Ok(())
+    }
+
+    fn check_module(&mut self, module: &Module) -> Result<()> {
+        self.prepare_program(&module.top_list)?;
+        self.check_top_list(&module.top_list)
     }
 
     fn prepare_program(&mut self, ast: &Vec<TopAst>) -> Result<()> {

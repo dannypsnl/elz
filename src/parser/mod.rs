@@ -12,7 +12,7 @@ use error::ParseError;
 use error::Result;
 use std::collections::HashMap;
 
-pub(crate) fn parse_prelude() -> Vec<TopAst> {
+pub(crate) fn parse_prelude() -> Module {
     let prelude_file = Asset::get("prelude.elz").unwrap();
     let content = std::str::from_utf8(prelude_file.as_ref()).unwrap();
     let prelude_program = Parser::parse_program("prelude.elz", content).unwrap();
@@ -27,12 +27,29 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<TopAst>> {
-        let mut program = vec![];
-        while self.peek(0)?.tk_type() != &end_token_type {
-            program.push(self.parse_top_ast()?);
+    pub fn parse_module(&mut self, end_token_type: TkType) -> Result<Module> {
+        self.predict_and_consume(vec![TkType::Module])?;
+        let name = self.parse_module_path()?;
+        Ok(Module {
+            name,
+            top_list: self.parse_top_list(end_token_type)?,
+        })
+    }
+    fn parse_module_path(&mut self) -> Result<String> {
+        let mut chain = vec![];
+        chain.push(self.parse_identifier()?);
+        while self.peek(0)?.tk_type() == &TkType::Dot {
+            self.predict_and_consume(vec![TkType::Dot])?;
+            chain.push(self.parse_identifier()?);
         }
-        Ok(program)
+        Ok(chain.join("."))
+    }
+    pub fn parse_top_list(&mut self, end_token_type: TkType) -> Result<Vec<TopAst>> {
+        let mut top_list = vec![];
+        while self.peek(0)?.tk_type() != &end_token_type {
+            top_list.push(self.parse_top_ast()?);
+        }
+        Ok(top_list)
     }
     pub fn parse_tag(&mut self) -> Result<Option<Tag>> {
         if self.predict_and_consume(vec![TkType::AtSign]).is_ok() {
@@ -500,7 +517,7 @@ impl Parser {
             TkType::OpenParen => self.parse_function_call(unary),
             TkType::Dot => {
                 self.predict_and_consume(vec![TkType::Dot])?;
-                let field_name = self.parse_access_identifier()?;
+                let field_name = self.parse_identifier()?;
                 self.parse_primary(Expr::member_access(tok.location(), unary, field_name))
             }
             _ => Ok(unary),
@@ -683,9 +700,9 @@ fn precedence(op: Token) -> u64 {
 
 /// This block puts fundamental helpers
 impl Parser {
-    pub fn parse_program<T: Into<String> + Clone>(file_name: T, code: T) -> Result<Vec<TopAst>> {
+    pub fn parse_program<T: Into<String> + Clone>(file_name: T, code: T) -> Result<Module> {
         let mut parser = Parser::new(file_name, code);
-        parser.parse_all(TkType::EOF)
+        parser.parse_module(TkType::EOF)
     }
     /// new create Parser from code
     pub fn new<T: Into<String> + Clone>(f_name: T, code: T) -> Parser {

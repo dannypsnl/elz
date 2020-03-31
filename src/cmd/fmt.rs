@@ -1,7 +1,4 @@
-use crate::codegen::formatted_elz::{FormatTopAstList, FormattedElz, DEFAULT_LEVEL};
-use crate::parser::Parser;
 use std::ffi::OsStr;
-use std::io::Write;
 use std::path::Path;
 use walkdir::WalkDir;
 
@@ -33,12 +30,8 @@ fn handle_dir(dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
 
 fn handle_entry(file_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
     if file_path.extension() == Some(OsStr::new("elz")) {
-        let code = std::fs::read_to_string(file_path)?;
-        let program = Parser::parse_program(file_path.to_string_lossy().to_string(), code)?;
-        let result = FormatTopAstList(program).formatted_elz(DEFAULT_LEVEL);
-        let mut origin_file = std::fs::File::create(file_path)?;
-        origin_file.write_all(result.as_bytes())?;
-        origin_file.write_all("\n".as_bytes())?;
+        // FIXME:
+        //   wait #247
     }
     Ok(())
 }

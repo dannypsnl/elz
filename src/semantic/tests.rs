@@ -1,4 +1,5 @@
 use super::*;
+use crate::lexer::TkType;
 use crate::parser::{parse_prelude, Parser};
 
 #[test]
@@ -352,18 +353,27 @@ fn no_member_name() {
 
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
-    let mut program = Parser::parse_program("", code)
+    let mut parser = Parser::new("", code);
+    let program = parser
+        .parse_top_list(TkType::EOF)
         .map_err(|err| {
             println!("{}", err);
             err
         })
         .unwrap();
-    let mut prelude = parse_prelude();
-    prelude.append(&mut program);
+    let prelude = parse_prelude();
     let mut checker = SemanticChecker::new();
-    checker.check_program(&prelude).map_err(|err| {
-        // map origin error and report at here
-        println!("{}", err);
-        err
-    })
+    checker
+        .check_program(&vec![
+            Module {
+                name: "".to_string(),
+                top_list: program,
+            },
+            prelude,
+        ])
+        .map_err(|err| {
+            // map origin error and report at here
+            println!("{}", err);
+            err
+        })
 }
