@@ -30,9 +30,7 @@ impl Parser {
     pub fn parse_all(&mut self, end_token_type: TkType) -> Result<Vec<TopAst>> {
         let mut program = vec![];
         while self.peek(0)?.tk_type() != &end_token_type {
-            program.push(TopAst {
-                ast: self.parse_top_ast()?,
-            });
+            program.push(self.parse_top_ast()?);
         }
         Ok(program)
     }
@@ -50,10 +48,10 @@ impl Parser {
             Ok(None)
         }
     }
-    pub fn parse_top_ast(&mut self) -> Result<TopAstVariant> {
+    pub fn parse_top_ast(&mut self) -> Result<TopAst> {
         let tag = self.parse_tag()?;
         let tok = self.peek(0)?;
-        use TopAstVariant::*;
+        use TopAst::*;
         match tok.tk_type() {
             TkType::Identifier => {
                 // found `<identifier> :`

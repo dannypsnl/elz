@@ -18,12 +18,7 @@ impl Tag {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct TopAst {
-    pub ast: TopAstVariant,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum TopAstVariant {
+pub enum TopAst {
     Function(Function),
     Variable(Variable),
     Class(Class),
