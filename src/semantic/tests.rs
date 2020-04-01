@@ -126,7 +126,7 @@ fn test_check_local_variable_define() -> Result<()> {
 }
 
 #[test]
-fn test_static_method_check() -> Result<()> {
+fn static_method_check() -> Result<()> {
     let code = "
     class Foo {
       ::new(): Foo = Foo {};
@@ -136,7 +136,7 @@ fn test_static_method_check() -> Result<()> {
 }
 
 #[test]
-fn test_method_check() -> Result<()> {
+fn method_check() -> Result<()> {
     let code = "
     class Foo {
       bar(): int = 1;
@@ -221,7 +221,7 @@ fn method() -> Result<()> {
 }
 
 #[test]
-fn test_method_should_be_able_to_call_with_instance() -> Result<()> {
+fn method_should_be_able_to_call_with_instance() -> Result<()> {
     let code = "
     class Foo {
       ::new(): Foo {

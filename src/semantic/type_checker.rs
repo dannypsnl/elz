@@ -326,17 +326,9 @@ impl TypeEnv {
     pub(crate) fn lookup_type(&self, location: &Location, k: &str) -> Result<TypeInfo> {
         let result = self.types.get(k);
         match result {
-            Some(t) => {
-                if k == "string" {
-                    println!("lookup")
-                }
-                Ok(t.clone())
-            }
+            Some(t) => Ok(t.clone()),
             None => match self.parent {
                 Some(env) => {
-                    if k == "string" {
-                        println!("lookup parent")
-                    }
                     let k = match self.imports.get(k) {
                         None => k,
                         Some(v) => v,
