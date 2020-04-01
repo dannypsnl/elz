@@ -26,18 +26,21 @@ impl SemanticChecker {
     pub fn check_program(&mut self, modules: &Vec<Module>) -> Result<()> {
         let mut module_envs = HashMap::new();
         for m in modules {
-            let module_env = self.prepare_program(&m.top_list)?;
+            let module_env = self.prepare_types(m)?;
             module_envs.insert(m.name.clone(), module_env);
         }
         for m in modules {
-            self.check_module(&m, &mut module_envs)?;
+            self.prepare_terms(m, &mut module_envs)?;
+        }
+        for m in modules {
+            self.check_module(m, &mut module_envs)?;
         }
         Ok(())
     }
 
-    fn prepare_program(&mut self, ast: &Vec<TopAst>) -> Result<TypeEnv> {
+    fn prepare_types(&mut self, module: &Module) -> Result<TypeEnv> {
         let mut type_env = TypeEnv::with_parent(&self.type_env);
-        for top in ast {
+        for top in &module.top_list {
             use TopAst::*;
             match &top {
                 Import(i) => {
@@ -50,22 +53,44 @@ impl SemanticChecker {
                 }
                 Class(c) => {
                     let typ = type_env.new_class(c)?;
+                    self.type_env.add_type(
+                        &c.location,
+                        &with_module_name(module.name.clone(), &c.name),
+                        typ.clone(),
+                    )?;
                     type_env.add_type(&c.location, &c.name, typ)?;
                 }
                 _ => (),
             }
         }
-        for top in ast {
+        Ok(type_env)
+    }
+    fn prepare_terms(
+        &mut self,
+        module: &Module,
+        module_envs: &mut HashMap<String, TypeEnv>,
+    ) -> Result<()> {
+        let type_env = module_envs.get_mut(&module.name).unwrap();
+        for top in &module.top_list {
             use TopAst::*;
             match &top {
                 Class(c) => {
                     for member in &c.members {
                         match member {
                             ClassMember::StaticMethod(static_method) => {
+                                let typ = type_env.new_function_type(static_method)?;
+                                self.type_env.add_variable(
+                                    &static_method.location,
+                                    &with_module_name(
+                                        module.name.clone(),
+                                        &format!("{}::{}", c.name, static_method.name),
+                                    ),
+                                    typ.clone(),
+                                )?;
                                 type_env.add_variable(
                                     &static_method.location,
                                     &format!("{}::{}", c.name, static_method.name),
-                                    type_env.new_function_type(static_method)?,
+                                    typ,
                                 )?;
                             }
                             _ => (),
@@ -75,7 +100,31 @@ impl SemanticChecker {
                 _ => (),
             }
         }
-        Ok(type_env)
+        for top in &module.top_list {
+            use TopAst::*;
+            match &top {
+                Variable(v) => {
+                    let typ = type_env.from(&v.typ)?;
+                    self.type_env.add_variable(
+                        &v.location,
+                        &with_module_name(module.name.clone(), &v.name),
+                        typ.clone(),
+                    )?;
+                    type_env.add_variable(&v.location, &v.name, typ)?;
+                }
+                Function(f) => {
+                    let typ = type_env.new_function_type(f)?;
+                    self.type_env.add_variable(
+                        &f.location,
+                        &with_module_name(module.name.clone(), &f.name),
+                        typ.clone(),
+                    )?;
+                    type_env.add_variable(&f.location, &f.name, typ)?;
+                }
+                _ => (),
+            }
+        }
+        Ok(())
     }
 
     fn check_module(
@@ -84,22 +133,6 @@ impl SemanticChecker {
         module_envs: &mut HashMap<String, TypeEnv>,
     ) -> Result<()> {
         let type_env = module_envs.get_mut(&module.name).unwrap();
-        for top in &module.top_list {
-            use TopAst::*;
-            match &top {
-                Variable(v) => {
-                    type_env.add_variable(&v.location, &v.name, type_env.from(&v.typ)?)?
-                }
-                Function(f) => {
-                    type_env.add_variable(
-                        &f.location,
-                        &f.name,
-                        self.type_env.new_function_type(f)?,
-                    )?;
-                }
-                _ => (),
-            }
-        }
         for top in &module.top_list {
             use TopAst::*;
             match &top {
@@ -151,7 +184,7 @@ impl SemanticChecker {
     }
 
     fn check_function_body(&self, location: &Location, f: &Function, env: &TypeEnv) -> Result<()> {
-        let return_type = self.type_env.from(&f.ret_typ)?;
+        let return_type = env.from(&f.ret_typ)?;
         let mut type_env = TypeEnv::with_parent(env);
         for Parameter { name, typ } in &f.parameters {
             type_env.add_variable(location, name, type_env.from(typ)?)?;

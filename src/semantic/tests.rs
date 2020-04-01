@@ -365,7 +365,15 @@ fn check_code(code: &'static str) -> Result<()> {
     code.push(TopAst::Import(Import {
         location: Location::none(),
         import_path: "prelude".to_string(),
-        imported_component: vec!["List".to_string()],
+        imported_component: vec![
+            "int".to_string(),
+            "void".to_string(),
+            "f64".to_string(),
+            "bool".to_string(),
+            "string".to_string(),
+            "List".to_string(),
+            "println".to_string(),
+        ],
     }));
 
     let prelude = parse_prelude();
