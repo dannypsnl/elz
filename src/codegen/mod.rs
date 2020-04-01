@@ -17,6 +17,7 @@ impl CodeGenerator {
         for top in asts {
             use TopAst::*;
             match &top {
+                Import(_) => {}
                 Function(f) => {
                     module.remember_function(f);
                 }
@@ -25,13 +26,12 @@ impl CodeGenerator {
                 }
                 Class(_) => {}
                 Trait(_) => unimplemented!(),
-                Import(_) => unimplemented!(),
             }
         }
         for top in asts {
             use TopAst::*;
             match &top {
-                Import(_) => unimplemented!(),
+                Import(_) => {}
                 Function(f) => {
                     if f.tag.is_builtin() {
                         continue;
