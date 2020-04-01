@@ -6,6 +6,7 @@ mod tag;
 mod type_checker;
 
 use error::{Result, SemanticError};
+use std::collections::HashMap;
 use tag::SemanticTag;
 use type_checker::{Type, TypeEnv};
 
@@ -23,24 +24,33 @@ impl SemanticChecker {
 
 impl SemanticChecker {
     pub fn check_program(&mut self, modules: &Vec<Module>) -> Result<()> {
+        let mut module_envs = HashMap::new();
         for m in modules {
-            self.check_module(m)?;
+            let module_env = self.prepare_program(&m.top_list)?;
+            module_envs.insert(m.name.clone(), module_env);
+        }
+        for m in modules {
+            self.check_module(&m, &mut module_envs)?;
         }
         Ok(())
     }
 
-    fn check_module(&mut self, module: &Module) -> Result<()> {
-        self.prepare_program(&module.top_list)?;
-        self.check_top_list(&module.top_list)
-    }
-
-    fn prepare_program(&mut self, ast: &Vec<TopAst>) -> Result<()> {
+    fn prepare_program(&mut self, ast: &Vec<TopAst>) -> Result<TypeEnv> {
+        let mut type_env = TypeEnv::with_parent(&self.type_env);
         for top in ast {
             use TopAst::*;
             match &top {
+                Import(i) => {
+                    for component in &i.imported_component {
+                        type_env.imports.insert(
+                            component.clone(),
+                            with_module_name(i.import_path.clone(), component),
+                        );
+                    }
+                }
                 Class(c) => {
-                    let typ = self.type_env.new_class(c)?;
-                    self.type_env.add_type(&c.location, &c.name, typ)?;
+                    let typ = type_env.new_class(c)?;
+                    type_env.add_type(&c.location, &c.name, typ)?;
                 }
                 _ => (),
             }
@@ -52,10 +62,10 @@ impl SemanticChecker {
                     for member in &c.members {
                         match member {
                             ClassMember::StaticMethod(static_method) => {
-                                self.type_env.add_variable(
+                                type_env.add_variable(
                                     &static_method.location,
                                     &format!("{}::{}", c.name, static_method.name),
-                                    self.type_env.new_function_type(static_method)?,
+                                    type_env.new_function_type(static_method)?,
                                 )?;
                             }
                             _ => (),
@@ -65,15 +75,23 @@ impl SemanticChecker {
                 _ => (),
             }
         }
-        for top in ast {
+        Ok(type_env)
+    }
+
+    fn check_module(
+        &mut self,
+        module: &Module,
+        module_envs: &mut HashMap<String, TypeEnv>,
+    ) -> Result<()> {
+        let type_env = module_envs.get_mut(&module.name).unwrap();
+        for top in &module.top_list {
             use TopAst::*;
             match &top {
                 Variable(v) => {
-                    self.type_env
-                        .add_variable(&v.location, &v.name, self.type_env.from(&v.typ)?)?
+                    type_env.add_variable(&v.location, &v.name, type_env.from(&v.typ)?)?
                 }
                 Function(f) => {
-                    self.type_env.add_variable(
+                    type_env.add_variable(
                         &f.location,
                         &f.name,
                         self.type_env.new_function_type(f)?,
@@ -82,24 +100,20 @@ impl SemanticChecker {
                 _ => (),
             }
         }
-        Ok(())
-    }
-
-    fn check_top_list(&mut self, ast: &Vec<TopAst>) -> Result<()> {
-        for top in ast {
+        for top in &module.top_list {
             use TopAst::*;
             match &top {
+                Import(_) => (),
                 Variable(v) => {
-                    let typ = self.type_env.type_of_expr(&v.expr)?;
+                    let typ = type_env.type_of_expr(&v.expr)?;
                     // show where error happened
                     // we are unifying <expr> and <type>, so <expr> location is better than
                     // variable define statement location
-                    self.type_env
-                        .unify(&v.expr.location, &self.type_env.from(&v.typ)?, &typ)?
+                    type_env.unify(&v.expr.location, &type_env.from(&v.typ)?, &typ)?
                 }
-                Function(f) => self.check_function_body(&f.location, &f, &self.type_env)?,
+                Function(f) => self.check_function_body(&f.location, &f, &type_env)?,
                 Class(c) => {
-                    let mut class_type_env = TypeEnv::with_parent(&self.type_env);
+                    let mut class_type_env = TypeEnv::with_parent(&type_env);
                     for member in &c.members {
                         match member {
                             ClassMember::Field(f) => {
@@ -131,7 +145,6 @@ impl SemanticChecker {
                     }
                 }
                 Trait(_) => unimplemented!(),
-                Import(_) => unimplemented!(),
             }
         }
         Ok(())
@@ -244,6 +257,12 @@ impl SemanticChecker {
         }
         Ok(())
     }
+}
+
+fn with_module_name(mut module_name: String, name: &String) -> String {
+    module_name.push('.');
+    module_name.push_str(name);
+    module_name
 }
 
 // Must put code before tests module

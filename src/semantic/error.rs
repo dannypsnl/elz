@@ -46,6 +46,8 @@ enum SemanticErrorVariant {
     },
     #[error("function `{}` is not an extern function, must have a body", .function_name)]
     NonExternFunctionMustHaveBody { function_name: String },
+    #[error("no module named: `{}`", .module_name)]
+    NoModuleNamed { module_name: String },
 }
 
 impl SemanticError {
@@ -59,25 +61,17 @@ impl SemanticError {
         self.location.clone()
     }
     pub(crate) fn message(&self) -> String {
-        use SemanticErrorVariant::*;
-        match &self.err {
-            NameRedefined(..) => "name redefined",
-            TypeMismatched(..) => "type mismatched",
-            NoVariableNamed(..) => "no variable named",
-            NoTypeNamed(..) => "no type named",
-            CallOnNonFunctionType(..) => "call on non function type",
-            FieldsMissingInit(..) => "field missing init",
-            CannotConstructNonClassType(..) => "cannot construct non class type",
-            CannotUseClassConstructionOutOfClass() => "cannot use class construction out of class",
-            OnlyTraitCanBeSuperType { .. } => "only trait can be super type",
-            DeadCodeAfterReturnStatement => "dead code after return statement",
-            RedefinedMember { .. } => "redefined member",
-            NoMemberNamed { .. } => "no member",
-            NonExternFunctionMustHaveBody { .. } => "non extern function must have a body",
-        }
-        .to_string()
+        format!("{}", self)
     }
 
+    pub fn no_module_named(location: &Location, module_name: impl ToString) -> SemanticError {
+        SemanticError::new(
+            location,
+            SemanticErrorVariant::NoModuleNamed {
+                module_name: module_name.to_string(),
+            },
+        )
+    }
     pub fn non_extern_function_must_have_body<T: ToString>(
         location: &Location,
         function_name: T,

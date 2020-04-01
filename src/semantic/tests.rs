@@ -365,7 +365,7 @@ fn check_code(code: &'static str) -> Result<()> {
     code.push(TopAst::Import(Import {
         location: Location::none(),
         import_path: "prelude".to_string(),
-        imported_component: vec![],
+        imported_component: vec!["List".to_string()],
     }));
 
     let prelude = parse_prelude();
@@ -373,7 +373,7 @@ fn check_code(code: &'static str) -> Result<()> {
     checker
         .check_program(&vec![
             Module {
-                name: "".to_string(),
+                name: "test".to_string(),
                 top_list: code,
             },
             prelude,
