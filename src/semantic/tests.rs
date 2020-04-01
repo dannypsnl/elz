@@ -380,11 +380,11 @@ fn check_code(code: &'static str) -> Result<()> {
     let mut checker = SemanticChecker::new();
     checker
         .check_program(&vec![
+            prelude,
             Module {
                 name: "test".to_string(),
                 top_list: code,
             },
-            prelude,
         ])
         .map_err(|err| {
             // map origin error and report at here

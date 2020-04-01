@@ -40,7 +40,7 @@ fn check(
     }));
 
     let prelude = parse_prelude();
-    let program = vec![module, prelude];
+    let program = vec![prelude, module];
     // check program
     let mut semantic_checker = SemanticChecker::new();
     match semantic_checker.check_program(&program) {
