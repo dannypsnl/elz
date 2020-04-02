@@ -1,4 +1,4 @@
-pub fn formatter(code: String) -> String {
+pub fn format_elz(code: String) -> String {
     let mut indent = 0i32;
     let mut comment_line = false;
     let mut semicolon_symbol = false;
@@ -147,12 +147,12 @@ pub fn formatter(code: String) -> String {
     s
 }
 
-fn add_indent(tab: i32) -> String {
+fn add_indent(level: i32) -> String {
     let mut count = 0i32;
     let mut s = String::from("");
     loop {
         count += 1;
-        if count > tab {
+        if count > level {
             break;
         }
         s.push_str("  ");

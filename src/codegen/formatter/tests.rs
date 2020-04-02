@@ -2,19 +2,19 @@ use super::*;
 
 #[test]
 fn simple_variable() {
-    let formatted_code = formatter("x:int=1;".to_string());
+    let formatted_code = format_elz("x:int=1;".to_string());
     assert_eq!(formatted_code, "x: int = 1;\n");
 }
 
 #[test]
 fn simple_function() {
-    let formatted_code = formatter("add(x:int,y:int):int=x+y;".to_string());
+    let formatted_code = format_elz("add(x:int,y:int):int=x+y;".to_string());
     assert_eq!(formatted_code, "add(x: int, y: int): int = x + y;\n");
 }
 
 #[test]
 fn simple_function_block() {
-    let formatted_code = formatter("add(x:int,y:int):int{return x+y;}".to_string());
+    let formatted_code = format_elz("add(x:int,y:int):int{return x+y;}".to_string());
     assert_eq!(
         formatted_code,
         "add(x: int, y: int): int {
@@ -26,7 +26,7 @@ fn simple_function_block() {
 
 #[test]
 fn local_variable_in_function() {
-    let formatted_code = formatter("foo():void{x:int=1;}".to_string());
+    let formatted_code = format_elz("foo():void{x:int=1;}".to_string());
     assert_eq!(
         formatted_code,
         "foo(): void {
@@ -38,7 +38,7 @@ fn local_variable_in_function() {
 
 #[test]
 fn comment_in_function() {
-    let formatted_code = formatter(
+    let formatted_code = format_elz(
         "foo():void{//comment
   x(a:1,2);}
 ".to_string(),
@@ -55,7 +55,7 @@ fn comment_in_function() {
 
 #[test]
 fn simple_class() {
-    let formatted_code = formatter("class Foo{}".to_string());
+    let formatted_code = format_elz("class Foo{}".to_string());
     assert_eq!(
         formatted_code,
         "class Foo {}
@@ -65,7 +65,7 @@ fn simple_class() {
 
 #[test]
 fn class_super_type() {
-    let formatted_code = formatter("class Foo<:Bar{}".to_string());
+    let formatted_code = format_elz("class Foo<:Bar{}".to_string());
     assert_eq!(
         formatted_code,
         "class Foo <: Bar {}
@@ -75,7 +75,7 @@ fn class_super_type() {
 
 #[test]
 fn class_multiple_super_types() {
-    let formatted_code = formatter("class Foo<:Bar,Tool{}".to_string());
+    let formatted_code = format_elz("class Foo<:Bar,Tool{}".to_string());
     assert_eq!(
         formatted_code,
         "class Foo <: Bar, Tool {}
@@ -85,7 +85,7 @@ fn class_multiple_super_types() {
 
 #[test]
 fn class_members() {
-    let formatted_code = formatter(
+    let formatted_code = format_elz(
         "class Foo{
 x:int;
 ::new() :Foo =Foo{x:1};
@@ -105,7 +105,7 @@ bar(): void{}
 
 #[test]
 fn nested_block() {
-    let formatted_code = formatter(
+    let formatted_code = format_elz(
         "class Foo{
 ::bar(): void{return;}
 }".to_string(),
@@ -123,7 +123,7 @@ fn nested_block() {
 
 #[test]
 fn simple_trait() {
-    let formatted_code = formatter("trait Foo{}".to_string());
+    let formatted_code = format_elz("trait Foo{}".to_string());
     assert_eq!(
         formatted_code,
         "trait Foo {}
@@ -133,7 +133,7 @@ fn simple_trait() {
 
 #[test]
 fn simple_comment() {
-    let formatted_code = formatter(
+    let formatted_code = format_elz(
         "//this is comment line
 trait Foo {}
 ".to_string(),
@@ -148,7 +148,7 @@ trait Foo {}
 
 #[test]
 fn multi_blank() {
-    let formatted_code = formatter("
+    let formatted_code = format_elz("
     class                 Car                               {name               :   string          ;new(name:string):Car;}
     ".to_string());
     assert_eq!(
@@ -163,7 +163,7 @@ fn multi_blank() {
 
 #[test]
 fn multi_newline() {
-    let formatted_code = formatter(
+    let formatted_code = format_elz(
         "
     class Car
     {
@@ -186,7 +186,7 @@ new(name:string):Car
 
 #[test]
 fn test() {
-    let formatted_code = formatter(
+    let formatted_code = format_elz(
         "//this is comment line
 trait Foo {}
     class Car{name:string       ;//comment line one
