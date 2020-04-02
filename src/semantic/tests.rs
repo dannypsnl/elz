@@ -1,4 +1,5 @@
 use super::*;
+use crate::lexer::TkType;
 use crate::parser::{parse_prelude, Parser};
 
 #[test]
@@ -125,7 +126,7 @@ fn test_check_local_variable_define() -> Result<()> {
 }
 
 #[test]
-fn test_static_method_check() -> Result<()> {
+fn static_method_check() -> Result<()> {
     let code = "
     class Foo {
       ::new(): Foo = Foo {};
@@ -135,7 +136,7 @@ fn test_static_method_check() -> Result<()> {
 }
 
 #[test]
-fn test_method_check() -> Result<()> {
+fn method_check() -> Result<()> {
     let code = "
     class Foo {
       bar(): int = 1;
@@ -220,7 +221,7 @@ fn method() -> Result<()> {
 }
 
 #[test]
-fn test_method_should_be_able_to_call_with_instance() -> Result<()> {
+fn method_should_be_able_to_call_with_instance() -> Result<()> {
     let code = "
     class Foo {
       ::new(): Foo {
@@ -352,18 +353,42 @@ fn no_member_name() {
 
 // helpers, must put tests before this line
 fn check_code(code: &'static str) -> Result<()> {
-    let mut program = Parser::parse_program("", code)
+    let mut parser = Parser::new("", code);
+    let mut code = parser
+        .parse_top_list(TkType::EOF)
         .map_err(|err| {
             println!("{}", err);
             err
         })
         .unwrap();
-    let mut prelude = parse_prelude();
-    prelude.append(&mut program);
+
+    code.push(TopAst::Import(Import {
+        location: Location::none(),
+        import_path: "prelude".to_string(),
+        imported_component: vec![
+            "int".to_string(),
+            "void".to_string(),
+            "f64".to_string(),
+            "bool".to_string(),
+            "string".to_string(),
+            "List".to_string(),
+            "println".to_string(),
+        ],
+    }));
+
+    let prelude = parse_prelude();
     let mut checker = SemanticChecker::new();
-    checker.check_program(&prelude).map_err(|err| {
-        // map origin error and report at here
-        println!("{}", err);
-        err
-    })
+    checker
+        .check_program(&vec![
+            prelude,
+            Module {
+                name: "test".to_string(),
+                top_list: code,
+            },
+        ])
+        .map_err(|err| {
+            // map origin error and report at here
+            println!("{}", err);
+            err
+        })
 }

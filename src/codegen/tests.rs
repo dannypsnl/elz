@@ -1,4 +1,5 @@
 use super::*;
+use crate::lexer::TkType::EOF;
 use llvm::LLVMValue;
 
 #[test]
@@ -151,13 +152,15 @@ fn llvm_if_else() {
 
 // helpers, must put tests before this line
 fn gen_code(code: &'static str) -> ir::Module {
-    let mut program = crate::parser::Parser::parse_program("", code)
+    let mut parser = crate::parser::Parser::new("", code);
+    let mut program = parser
+        .parse_top_list(EOF)
         .map_err(|err| {
             panic!("{}", err);
         })
         .unwrap();
     let mut prelude = crate::parser::parse_prelude();
-    prelude.append(&mut program);
+    prelude.top_list.append(&mut program);
     let code_generator = CodeGenerator::new();
-    code_generator.generate_module(&prelude)
+    code_generator.generate_module(&prelude.top_list)
 }

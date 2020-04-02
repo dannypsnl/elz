@@ -16,8 +16,9 @@ impl CodeGenerator {
     pub fn generate_module(&self, asts: &Vec<TopAst>) -> ir::Module {
         let mut module = ir::Module::new();
         for top in asts {
-            use TopAstVariant::*;
-            match &top.ast {
+            use TopAst::*;
+            match &top {
+                Import(_) => {}
                 Function(f) => {
                     module.remember_function(f);
                 }
@@ -29,8 +30,9 @@ impl CodeGenerator {
             }
         }
         for top in asts {
-            use TopAstVariant::*;
-            match &top.ast {
+            use TopAst::*;
+            match &top {
+                Import(_) => {}
                 Function(f) => {
                     if f.tag.is_builtin() {
                         continue;

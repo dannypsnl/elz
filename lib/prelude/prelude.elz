@@ -1,3 +1,5 @@
+module prelude
+
 // builtin types
 class void {}
 class int {}

@@ -6,44 +6,108 @@ mod tag;
 mod type_checker;
 
 use error::{Result, SemanticError};
+use std::collections::HashMap;
 use tag::SemanticTag;
 use type_checker::{Type, TypeEnv};
 
 pub struct SemanticChecker {
-    type_env: TypeEnv,
+    top_env: TypeEnv,
 }
 
 impl SemanticChecker {
     pub fn new() -> SemanticChecker {
         SemanticChecker {
-            type_env: TypeEnv::new(),
+            top_env: TypeEnv::new(),
         }
     }
 }
 
 impl SemanticChecker {
-    pub fn check_program(&mut self, ast: &Vec<TopAst>) -> Result<()> {
-        for top in ast {
-            use TopAstVariant::*;
-            match &top.ast {
-                Class(c) => {
-                    let typ = self.type_env.new_class(c)?;
-                    self.type_env.add_type(&c.location, &c.name, typ)?;
+    pub fn check_program(&mut self, modules: &Vec<Module>) -> Result<()> {
+        let mut module_envs = HashMap::new();
+        for m in modules {
+            let module_env = self.prepare_imports(m)?;
+            module_envs.insert(m.name.clone(), module_env);
+        }
+        for m in modules {
+            self.prepare_types(m, &mut module_envs)?;
+        }
+        for m in modules {
+            self.prepare_terms(m, &mut module_envs)?;
+        }
+        for m in modules {
+            self.check_module(m, &mut module_envs)?;
+        }
+        Ok(())
+    }
+
+    fn prepare_imports(&mut self, module: &Module) -> Result<TypeEnv> {
+        let mut module_env = TypeEnv::with_parent(&self.top_env);
+        for top in &module.top_list {
+            use TopAst::*;
+            match &top {
+                Import(i) => {
+                    for component in &i.imported_component {
+                        module_env.imports.insert(
+                            component.clone(),
+                            with_module_name(i.import_path.clone(), component),
+                        );
+                    }
                 }
                 _ => (),
             }
         }
-        for top in ast {
-            use TopAstVariant::*;
-            match &top.ast {
+        Ok(module_env)
+    }
+    fn prepare_types(
+        &mut self,
+        module: &Module,
+        module_envs: &mut HashMap<String, TypeEnv>,
+    ) -> Result<()> {
+        let module_env = module_envs.get_mut(&module.name).unwrap();
+        for top in &module.top_list {
+            use TopAst::*;
+            match &top {
+                Class(c) => {
+                    let typ = module_env.new_class(c)?;
+                    self.top_env.add_type(
+                        &c.location,
+                        &with_module_name(module.name.clone(), &c.name),
+                        typ.clone(),
+                    )?;
+                    module_env.add_type(&c.location, &c.name, typ)?;
+                }
+                _ => (),
+            }
+        }
+        Ok(())
+    }
+    fn prepare_terms(
+        &mut self,
+        module: &Module,
+        module_envs: &mut HashMap<String, TypeEnv>,
+    ) -> Result<()> {
+        let module_env = module_envs.get_mut(&module.name).unwrap();
+        for top in &module.top_list {
+            use TopAst::*;
+            match &top {
                 Class(c) => {
                     for member in &c.members {
                         match member {
                             ClassMember::StaticMethod(static_method) => {
-                                self.type_env.add_variable(
+                                let typ = module_env.new_function_type(static_method)?;
+                                self.top_env.add_variable(
+                                    &static_method.location,
+                                    &with_module_name(
+                                        module.name.clone(),
+                                        &format!("{}::{}", c.name, static_method.name),
+                                    ),
+                                    typ.clone(),
+                                )?;
+                                module_env.add_variable(
                                     &static_method.location,
                                     &format!("{}::{}", c.name, static_method.name),
-                                    self.type_env.new_function_type(static_method)?,
+                                    typ,
                                 )?;
                             }
                             _ => (),
@@ -53,37 +117,53 @@ impl SemanticChecker {
                 _ => (),
             }
         }
-        for top in ast {
-            use TopAstVariant::*;
-            match &top.ast {
+        for top in &module.top_list {
+            use TopAst::*;
+            match &top {
                 Variable(v) => {
-                    self.type_env
-                        .add_variable(&v.location, &v.name, self.type_env.from(&v.typ)?)?
+                    let typ = module_env.from(&v.typ)?;
+                    self.top_env.add_variable(
+                        &v.location,
+                        &with_module_name(module.name.clone(), &v.name),
+                        typ.clone(),
+                    )?;
+                    module_env.add_variable(&v.location, &v.name, typ)?;
                 }
                 Function(f) => {
-                    self.type_env.add_variable(
+                    let typ = module_env.new_function_type(f)?;
+                    self.top_env.add_variable(
                         &f.location,
-                        &f.name,
-                        self.type_env.new_function_type(f)?,
+                        &with_module_name(module.name.clone(), &f.name),
+                        typ.clone(),
                     )?;
+                    module_env.add_variable(&f.location, &f.name, typ)?;
                 }
                 _ => (),
             }
         }
-        for top in ast {
-            use TopAstVariant::*;
-            match &top.ast {
+        Ok(())
+    }
+
+    fn check_module(
+        &mut self,
+        module: &Module,
+        module_envs: &mut HashMap<String, TypeEnv>,
+    ) -> Result<()> {
+        let module_env = module_envs.get_mut(&module.name).unwrap();
+        for top in &module.top_list {
+            use TopAst::*;
+            match &top {
+                Import(_) => (),
                 Variable(v) => {
-                    let typ = self.type_env.type_of_expr(&v.expr)?;
+                    let typ = module_env.type_of_expr(&v.expr)?;
                     // show where error happened
                     // we are unifying <expr> and <type>, so <expr> location is better than
                     // variable define statement location
-                    self.type_env
-                        .unify(&v.expr.location, &self.type_env.from(&v.typ)?, &typ)?
+                    module_env.unify(&v.expr.location, &module_env.from(&v.typ)?, &typ)?
                 }
-                Function(f) => self.check_function_body(&f.location, &f, &self.type_env)?,
+                Function(f) => self.check_function_body(&f.location, &f, &module_env)?,
                 Class(c) => {
-                    let mut class_type_env = TypeEnv::with_parent(&self.type_env);
+                    let mut class_type_env = TypeEnv::with_parent(&module_env);
                     for member in &c.members {
                         match member {
                             ClassMember::Field(f) => {
@@ -121,7 +201,7 @@ impl SemanticChecker {
     }
 
     fn check_function_body(&self, location: &Location, f: &Function, env: &TypeEnv) -> Result<()> {
-        let return_type = self.type_env.from(&f.ret_typ)?;
+        let return_type = env.from(&f.ret_typ)?;
         let mut type_env = TypeEnv::with_parent(env);
         for Parameter { name, typ } in &f.parameters {
             type_env.add_variable(location, name, type_env.from(typ)?)?;
@@ -227,6 +307,12 @@ impl SemanticChecker {
         }
         Ok(())
     }
+}
+
+fn with_module_name(mut module_name: String, name: &String) -> String {
+    module_name.push('.');
+    module_name.push_str(name);
+    module_name
 }
 
 // Must put code before tests module

@@ -1,6 +1,5 @@
 use crate::codegen::formatter::format_elz;
 use std::ffi::OsStr;
-use std::io::Write;
 use std::path::Path;
 use walkdir::WalkDir;
 

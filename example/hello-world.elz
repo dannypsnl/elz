@@ -1,3 +1,5 @@
+module main
+
 main(): void {
   println("Hello, World!");
 }
