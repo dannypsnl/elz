@@ -1,4 +1,4 @@
-pub fn formatted_elz(code: String) -> String {
+pub fn formatter(code: String) -> String {
     let mut indent = 0i32;
     let mut comment_line = false;
     let mut semicolon_symbol = false;
@@ -20,8 +20,8 @@ pub fn formatted_elz(code: String) -> String {
             }
         } else {
             match code_to_char[i] {
-                //{ } ; need to add newline
-                //add double blank
+                // { } ; need to add newline
+                // add double blank
                 "{" => {
                     indent += 1;
                     if code_to_char[i - 1] != " " && !past_symbol {
@@ -37,7 +37,7 @@ pub fn formatted_elz(code: String) -> String {
                         s.push_str(add_indent(indent).as_str());
                     }
                 }
-                //delete double blank
+                // delete double blank
                 "}" => {
                     indent -= 1;
                     if code_to_char[i + 1] == ";" {
@@ -66,7 +66,7 @@ pub fn formatted_elz(code: String) -> String {
                     past_symbol = false;
                 }
 
-                //add blank in the next position and check double symbol
+                // add blank in the next position and check double symbol
                 ":" => {
                     if code_to_char[i + 1] == ":" {
                         s.push_str(":");
@@ -77,12 +77,12 @@ pub fn formatted_elz(code: String) -> String {
                     }
                 }
 
-                //add blank in the next position
+                // add blank in the next position
                 "," => {
                     s.push_str(add_blank(",", " ", code_to_char[i + 1]).as_str());
                 }
 
-                //add blank in the pre and next position
+                // add blank in the pre and next position
                 "+" => {
                     s.push_str(add_blank("+", code_to_char[i - 1], code_to_char[i + 1]).as_str());
                 }
@@ -173,17 +173,11 @@ fn add_blank(c: &str, pre: &str, next: &str) -> String {
 }
 
 fn check_symbol_behind_space(symbol: &str) -> bool {
-    if symbol == ";" {
-        return true;
-    } else if symbol == ":" {
-        return true;
-    } else if symbol == "(" {
-        return true;
-    } else if symbol == "[" {
-        return true;
-    } else {
-        return false;
-    }
+    if symbol == ";" {true}
+    else if symbol == ":" {true}
+    else if symbol == "(" {true}
+    else if symbol == "[" {true}
+    else {false}
 }
 
 #[cfg(test)]

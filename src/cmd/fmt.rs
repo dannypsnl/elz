@@ -1,4 +1,4 @@
-use crate::codegen::formatted_elz::formatted_elz;
+use crate::codegen::formatted_elz::formatter;
 use std::ffi::OsStr;
 use std::io::Write;
 use std::path::Path;
@@ -33,7 +33,7 @@ fn handle_dir(dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
 fn handle_entry(file_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
     if file_path.extension() == Some(OsStr::new("elz")) {
         let code = std::fs::read_to_string(file_path)?;
-        let result = formatted_elz(code.to_string());
+        let result = formatter(code.to_string());
         let mut origin_file = std::fs::File::create(file_path)?;
         origin_file.write_all(result.as_bytes())?;
         origin_file.write_all("\n".as_bytes())?;
