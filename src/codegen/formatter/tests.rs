@@ -41,7 +41,8 @@ fn comment_in_function() {
     let formatted_code = format_elz(
         "foo():void{//comment
   x(a:1,2);}
-".to_string(),
+"
+        .to_string(),
     );
     assert_eq!(
         formatted_code,
@@ -90,7 +91,8 @@ fn class_members() {
 x:int;
 ::new() :Foo =Foo{x:1};
 bar(): void{}
-}".to_string(),
+}"
+        .to_string(),
     );
     assert_eq!(
         formatted_code,
@@ -108,7 +110,8 @@ fn nested_block() {
     let formatted_code = format_elz(
         "class Foo{
 ::bar(): void{return;}
-}".to_string(),
+}"
+        .to_string(),
     );
     assert_eq!(
         formatted_code,
@@ -136,7 +139,8 @@ fn simple_comment() {
     let formatted_code = format_elz(
         "//this is comment line
 trait Foo {}
-".to_string(),
+"
+        .to_string(),
     );
     assert_eq!(
         formatted_code,
@@ -172,7 +176,8 @@ fn multi_newline() {
 new(name:string):Car
 ;
 }
-".to_string(),
+"
+        .to_string(),
     );
     assert_eq!(
         formatted_code,

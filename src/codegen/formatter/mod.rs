@@ -173,11 +173,17 @@ fn add_blank(c: &str, pre: &str, next: &str) -> String {
 }
 
 fn check_symbol_behind_space(symbol: &str) -> bool {
-    if symbol == ";" {true}
-    else if symbol == ":" {true}
-    else if symbol == "(" {true}
-    else if symbol == "[" {true}
-    else {false}
+    if symbol == ";" {
+        true
+    } else if symbol == ":" {
+        true
+    } else if symbol == "(" {
+        true
+    } else if symbol == "[" {
+        true
+    } else {
+        false
+    }
 }
 
 #[cfg(test)]
