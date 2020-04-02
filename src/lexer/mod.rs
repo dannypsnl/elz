@@ -12,6 +12,10 @@ pub enum TkType {
     #[strum(serialize = "<string>")]
     String,
     // keyword
+    #[strum(serialize = "module")]
+    Module,
+    #[strum(serialize = "import")]
+    Import,
     #[strum(serialize = "return")]
     Return,
     #[strum(serialize = "class")]
@@ -201,6 +205,8 @@ impl Lexer {
     fn emit(&mut self, token_type: TkType) {
         let s: String = self.code[self.start..self.offset].into_iter().collect();
         let tok = match s.as_str() {
+            "module" => self.new_token(TkType::Module, s),
+            "import" => self.new_token(TkType::Import, s),
             "return" => self.new_token(TkType::Return, s),
             "true" => self.new_token(TkType::True, s),
             "false" => self.new_token(TkType::False, s),

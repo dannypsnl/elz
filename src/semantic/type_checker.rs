@@ -8,6 +8,8 @@ use std::collections::HashMap;
 
 pub struct TypeEnv {
     parent: Option<*const TypeEnv>,
+    /// imports store information about how to lookup imported name
+    pub(crate) imports: HashMap<String, String>,
     variables: HashMap<String, TypeInfo>,
     types: HashMap<String, TypeInfo>,
     free_var_count: usize,
@@ -198,6 +200,7 @@ impl TypeEnv {
     pub fn new() -> TypeEnv {
         TypeEnv {
             parent: None,
+            imports: HashMap::new(),
             variables: HashMap::new(),
             types: HashMap::new(),
             free_var_count: 1,
@@ -297,9 +300,15 @@ impl TypeEnv {
         match result {
             Some(t) => Ok(t.clone()),
             None => match self.parent {
-                Some(env) => unsafe { env.as_ref() }
-                    .unwrap()
-                    .lookup_variable(location, k),
+                Some(env) => {
+                    let k = match self.imports.get(k) {
+                        None => k,
+                        Some(v) => v,
+                    };
+                    unsafe { env.as_ref() }
+                        .unwrap()
+                        .lookup_variable(location, k)
+                }
                 None => Err(SemanticError::no_variable(location, k)),
             },
         }
@@ -319,7 +328,13 @@ impl TypeEnv {
         match result {
             Some(t) => Ok(t.clone()),
             None => match self.parent {
-                Some(env) => unsafe { env.as_ref() }.unwrap().lookup_type(location, k),
+                Some(env) => {
+                    let k = match self.imports.get(k) {
+                        None => k,
+                        Some(v) => v,
+                    };
+                    unsafe { env.as_ref() }.unwrap().lookup_type(location, k)
+                }
                 None => Err(SemanticError::no_type(location, k)),
             },
         }

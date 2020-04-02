@@ -1,5 +1,6 @@
 use super::*;
 use crate::lexer::Location;
+use crate::lexer::TkType::EOF;
 use std::collections::HashMap;
 
 #[test]
@@ -269,6 +270,53 @@ fn parse_class_with_type_parameters() {
             vec![TypeParameter::new("T", vec![])],
             vec![],
         )
+    )
+}
+
+#[test]
+fn module() {
+    let code = "module foo.bar";
+
+    let mut parser = Parser::new("", code);
+    let module = parser.parse_module(EOF).unwrap();
+    assert_eq!(
+        module,
+        Module {
+            name: "foo.bar".to_string(),
+            top_list: vec![]
+        }
+    )
+}
+
+#[test]
+fn import_all() {
+    let code = "import foo.bar";
+
+    let mut parser = Parser::new("", code);
+    let i = parser.parse_import().unwrap();
+    assert_eq!(
+        i,
+        Import {
+            location: Location::from(1, 0),
+            import_path: "foo.bar".to_string(),
+            imported_component: vec![]
+        }
+    )
+}
+
+#[test]
+fn import() {
+    let code = "import foo ( bar )";
+
+    let mut parser = Parser::new("", code);
+    let i = parser.parse_import().unwrap();
+    assert_eq!(
+        i,
+        Import {
+            location: Location::from(1, 0),
+            import_path: "foo".to_string(),
+            imported_component: vec!["bar".to_string()]
+        }
     )
 }
 
