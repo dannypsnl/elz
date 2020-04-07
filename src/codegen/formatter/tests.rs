@@ -147,7 +147,7 @@ trait Foo {}
         "// this is comment line
 trait Foo {}
 "
-    )
+    );
 }
 
 #[test]
@@ -192,7 +192,9 @@ new(name:string):Car
 #[test]
 fn test() {
     let formatted_code = format_elz(
-        "//this is comment line
+        "module str
+module main
+//this is comment line
 trait Foo {}
     class Car{name:string       ;//comment line one
 //comment line two;
@@ -200,7 +202,9 @@ trait Foo {}
     );
     assert_eq!(
         formatted_code,
-        "// this is comment line
+        "module str
+module main
+// this is comment line
 trait Foo {}
 class Car {
   name: string;
@@ -218,6 +222,21 @@ class CarFoo {
     return;
   }
 }
+"
+    );
+}
+
+#[test]
+fn simple_module() {
+    let formatted_code = "module main
+
+main(): void {}
+";
+    assert_eq!(
+        formatted_code,
+        "module main
+
+main(): void {}
 "
     );
 }
