@@ -192,8 +192,7 @@ new(name:string):Car
 #[test]
 fn test() {
     let formatted_code = format_elz(
-        "module str
-module main
+        "module main
 //this is comment line
 trait Foo {}
     class Car{name:string       ;//comment line one
@@ -202,8 +201,7 @@ trait Foo {}
     );
     assert_eq!(
         formatted_code,
-        "module str
-module main
+        "module main
 // this is comment line
 trait Foo {}
 class Car {
