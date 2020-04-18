@@ -1,6 +1,7 @@
 pub fn format_elz(code: String) -> String {
     let mut indent = 0i32;
     let mut comment_line = false;
+    let mut module_line = false;
     let mut semicolon_symbol = false;
     let mut past_symbol = false;
     let mut s = String::from("");
@@ -14,6 +15,14 @@ pub fn format_elz(code: String) -> String {
                 s.push_str("\n");
                 s.push_str(add_indent(indent).as_str());
                 comment_line = false;
+                i += 1;
+            } else {
+                s.push_str(code_to_char[i]);
+            }
+        } else if module_line {
+            if code_to_char[i] == "\\" && code_to_char[i + 1] == "n" {
+                s.push_str("\n");
+                module_line = false;
                 i += 1;
             } else {
                 s.push_str(code_to_char[i]);
@@ -127,6 +136,19 @@ pub fn format_elz(code: String) -> String {
                 }
 
                 _ => {
+                    if indent == 0 {
+                        if code_to_char[i] == "m"
+                            && code_to_char[i + 1] == "o"
+                            && code_to_char[i + 2] == "d"
+                            && code_to_char[i + 3] == "u"
+                            && code_to_char[i + 4] == "l"
+                            && code_to_char[i + 5] == "e"
+                        {
+                            module_line = true;
+                            s.push_str("m");
+                            i += 1;
+                        }
+                    }
                     if semicolon_symbol {
                         if code_to_char[i] != " " {
                             s.push_str(code_to_char[i]);
