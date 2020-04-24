@@ -5,7 +5,10 @@ pub fn format_elz(code: String) -> String {
     let mut semicolon_symbol = false;
     let mut past_symbol = false;
     let mut s = String::from("");
-    let clear_multiple_blank = code.replace("  ", "").replace("\n", "\\n");
+    let clear_multiple_blank = code
+        .replace("  ", "")
+        .replace("\r", "")
+        .replace("\n", "\\n");
     let code_to_char: Vec<&str> = clear_multiple_blank.split("").collect();
 
     let mut i = 0;
