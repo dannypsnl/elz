@@ -307,7 +307,7 @@ impl Parser {
             let ret_typ = self.parse_type()?;
             if self.predict(vec![TkType::Semicolon]).is_ok() {
                 // ;
-                self.consume()?;
+                self.take()?;
                 Ok(Function::new_declaration(
                     loc, tag, fn_name, params, ret_typ,
                 ))
@@ -338,12 +338,15 @@ impl Parser {
         while self.peek(0)?.tk_type() != &TkType::CloseParen {
             self.predict(vec![TkType::Identifier, TkType::Colon])?;
             let param_name = self.take()?.value();
-            self.consume()?;
+            self.take()?;
             let typ = self.parse_type()?;
             params.push(Parameter::new(param_name, typ));
             let tok = self.peek(0)?;
             match tok.tk_type() {
-                TkType::Comma => self.consume()?,
+                TkType::Comma => {
+                    self.take()?;
+                    ()
+                }
                 TkType::CloseParen => (),
                 _ => {
                     return Err(ParseError::not_expected_token(
@@ -453,7 +456,7 @@ impl Parser {
             }
             // `return 1;`
             TkType::Return => {
-                self.consume()?;
+                self.take()?;
                 let expr = if self.peek(0)?.tk_type() == &TkType::Semicolon {
                     None
                 } else {
@@ -463,7 +466,7 @@ impl Parser {
                 Ok(Statement::return_stmt(tok.location(), expr))
             }
             TkType::If => {
-                self.consume()?;
+                self.take()?;
                 let mut clauses = vec![];
                 clauses.push((self.parse_expression(None, None)?, self.parse_block()?));
                 while self.predict_and_consume(vec![TkType::Else]).is_ok() {
@@ -507,7 +510,7 @@ impl Parser {
         let mut lookahead = self.peek(0)?;
         while precedence(lookahead.clone()) >= previous_primary.unwrap_or(1) {
             let operator = lookahead.clone();
-            self.consume()?;
+            self.take()?;
             let unary = self.parse_unary()?;
             let mut rhs = self.parse_primary(unary)?;
             lookahead = self.peek(0)?;
@@ -738,11 +741,6 @@ impl Parser {
     pub fn peek(&self, n: usize) -> Result<Token> {
         self.get_token(self.offset + n)
     }
-    /// consume take the token but don't use it
-    pub fn consume(&mut self) -> Result<()> {
-        self.take()?;
-        Ok(())
-    }
     /// take increment current token position
     pub fn take(&mut self) -> Result<Token> {
         self.offset += 1;
@@ -766,7 +764,7 @@ impl Parser {
         let len = wants.len();
         self.predict(wants)?;
         for _ in 1..=len {
-            self.consume()?;
+            self.take()?;
         }
         Ok(())
     }
