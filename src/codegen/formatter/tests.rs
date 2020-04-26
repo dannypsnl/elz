@@ -202,6 +202,7 @@ trait Foo {}
     assert_eq!(
         formatted_code,
         "module main
+
 // this is comment line
 trait Foo {}
 class Car {
@@ -226,15 +227,72 @@ class CarFoo {
 
 #[test]
 fn simple_module() {
-    let formatted_code = "module main
+    let formatted_code = format_elz("module main
 
-main(): void {}
-";
+main(): void {
+  println(\"Hello, World!\");
+}
+".to_string()
+    );
     assert_eq!(
         formatted_code,
         "module main
 
-main(): void {}
+main(): void {
+  println(\"Hello, World!\");
+}
+"
+    );
+}
+
+#[test]
+fn multi_class() {
+    let formatted_code = format_elz("module prelude
+
+// builtin types
+class void {}
+class int {}
+class f64 {}
+class bool {}
+class _c_string {}
+class string {
+  value: _c_string;
+  ::new(v: _c_string): string = string {value: v};
+}
+class List[T] {}
+
+println(content: string): void {
+  _: int = puts(content.value);
+}
+@extern(c)
+puts(str: _c_string): int;
+@extern(c)
+malloc(size: int): _c_string;
+".to_string()
+    );
+    assert_eq!(
+        formatted_code,
+        "module prelude
+
+// builtin types
+class void {}
+class int {}
+class f64 {}
+class bool {}
+class _c_string {}
+class string {
+  value: _c_string;
+  ::new(v: _c_string): string = string {value: v};
+}
+class List[T] {}
+
+println(content: string): void {
+  _: int = puts(content.value);
+}
+@extern(c)
+puts(str: _c_string): int;
+@extern(c)
+malloc(size: int): _c_string;
 "
     );
 }

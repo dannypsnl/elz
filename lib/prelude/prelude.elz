@@ -19,3 +19,4 @@ println(content: string): void {
 puts(str: _c_string): int;
 @extern(c)
 malloc(size: int): _c_string;
+
