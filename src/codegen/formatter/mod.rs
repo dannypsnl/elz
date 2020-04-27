@@ -38,9 +38,8 @@ pub fn format_elz(code: String) -> String {
                 i += 1;
             } else {
                 s.push_str(code_to_char[i]);
-            } 
-        }
-        else {
+            }
+        } else {
             match code_to_char[i] {
                 // { } ; need to add newline
                 // add double blank
@@ -148,8 +147,12 @@ pub fn format_elz(code: String) -> String {
                     if code_to_char[i + 1] == "n" {
                         i += 1;
                     }
-                    if indent == 0 && code_to_char.len() >= i+3 && code_to_char[i + 1] == "\\" && code_to_char[i + 2] == "n" {
-                       s.push_str("\n");
+                    if indent == 0
+                        && code_to_char.len() >= i + 3
+                        && code_to_char[i + 1] == "\\"
+                        && code_to_char[i + 2] == "n"
+                    {
+                        s.push_str("\n");
                     }
                 }
                 "@" => {

@@ -227,12 +227,14 @@ class CarFoo {
 
 #[test]
 fn simple_module() {
-    let formatted_code = format_elz("module main
+    let formatted_code = format_elz(
+        "module main
 
 main(): void {
   println(\"Hello, World!\");
 }
-".to_string()
+"
+        .to_string(),
     );
     assert_eq!(
         formatted_code,
@@ -247,7 +249,8 @@ main(): void {
 
 #[test]
 fn multi_class() {
-    let formatted_code = format_elz("module prelude
+    let formatted_code = format_elz(
+        "module prelude
 
 // builtin types
 class void {}
@@ -268,7 +271,8 @@ println(content: string): void {
 puts(str: _c_string): int;
 @extern(c)
 malloc(size: int): _c_string;
-".to_string()
+"
+        .to_string(),
     );
     assert_eq!(
         formatted_code,
