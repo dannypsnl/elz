@@ -202,6 +202,7 @@ trait Foo {}
     assert_eq!(
         formatted_code,
         "module main
+
 // this is comment line
 trait Foo {}
 class Car {
@@ -226,15 +227,22 @@ class CarFoo {
 
 #[test]
 fn simple_module() {
-    let formatted_code = "module main
+    let formatted_code = format_elz(
+        "module main
 
-main(): void {}
-";
+main(): void {
+  println(\"Hello, World!\");
+}
+"
+        .to_string(),
+    );
     assert_eq!(
         formatted_code,
         "module main
 
-main(): void {}
+main(): void {
+  println(\"Hello, World!\");
+}
 "
     );
 }

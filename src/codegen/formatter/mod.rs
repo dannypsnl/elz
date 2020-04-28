@@ -2,6 +2,7 @@ pub fn format_elz(code: String) -> String {
     let mut indent = 0i32;
     let mut comment_line = false;
     let mut module_line = false;
+    let mut extern_line = false;
     let mut semicolon_symbol = false;
     let mut past_symbol = false;
     let mut s = String::from("");
@@ -24,8 +25,16 @@ pub fn format_elz(code: String) -> String {
             }
         } else if module_line {
             if code_to_char[i] == "\\" && code_to_char[i + 1] == "n" {
-                s.push_str("\n");
+                s.push_str("\n\n");
                 module_line = false;
+                i += 1;
+            } else {
+                s.push_str(code_to_char[i]);
+            }
+        } else if extern_line {
+            if code_to_char[i] == "\\" && code_to_char[i + 1] == "n" {
+                s.push_str("\n");
+                extern_line = false;
                 i += 1;
             } else {
                 s.push_str(code_to_char[i]);
@@ -107,7 +116,9 @@ pub fn format_elz(code: String) -> String {
                 "/" => {
                     if code_to_char[i + 1] == "/" {
                         s.push_str("//");
-                        s.push_str(" ");
+                        if code_to_char[i + 2] != " " {
+                            s.push_str(" ");
+                        }
                         comment_line = true;
                         i += 1;
                     } else {
@@ -136,6 +147,17 @@ pub fn format_elz(code: String) -> String {
                     if code_to_char[i + 1] == "n" {
                         i += 1;
                     }
+                    if indent == 0
+                        && code_to_char.len() >= i + 3
+                        && code_to_char[i + 1] == "\\"
+                        && code_to_char[i + 2] == "n"
+                    {
+                        s.push_str("\n");
+                    }
+                }
+                "@" => {
+                    s.push_str("@");
+                    extern_line = true;
                 }
 
                 _ => {
